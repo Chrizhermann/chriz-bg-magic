@@ -3,3 +3,11 @@
 @9000 = ~Chriz BG Magic is for Baldur's Gate II: Enhanced Edition and the Enhanced Edition Trilogy (EET).~
 @9001 = ~Spell Revisions is installed. Chriz BG Magic replaces it and does not install on top of it yet.~
 @9002 = ~Spell Revisions is installed. Chriz BG Magic installs anyway; its changes were made for the base game's spells.~
+
+// Description updates: regular expressions over the game's English texts.
+// Save vs. Breath (and Web): "Saving Throw vs. Spell", "Save vs. Spell" -> "... vs. Breath".
+@9101 = ~\(Sav[A-Za-z ]+\) vs\. Spells?~
+@9102 = ~\1 vs. Breath~
+// Minor Spell Deflection: "This spell will only affect up to 7th-level spells".
+@9111 = ~up to 7th-level spells~
+@9112 = ~up to 4th-level spells~

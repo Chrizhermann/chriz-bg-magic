@@ -1,0 +1,108 @@
+{
+ "about": "English specs and build status of the decided changes that are built, by decision-page row. tools/build_list.py merges this into docs/build-list.json. A part is todo until built, done when built, lab-checked once a disposable lab install checked it (docs/evidence).",
+ "rows": {
+  "arcane.level4.spirit_armor": {
+   "resrefs": ["SPWI414"],
+   "parts": [
+    {"spec": "Stays vanilla, with one fix: casting Spirit Armor again on a creature that has it replaces the earlier casting, so its +3 to saves vs. spell and its expiry damage no longer stack. Mage Armor and Ghost Armor need nothing: all three set the base AC and the best one counts.", "status": "lab-checked"}
+   ]
+  },
+  "arcane.spell_deflection_progression": {
+   "resrefs": ["SPWI318"],
+   "parts": [
+    {"spec": "Minor Spell Deflection stops only spells of levels 1-4 (vanilla: 1-7, so a level-3 spell also absorbed Breach and priest spells up to level 7). Its description says so. The rest of the Spell Deflection and Spell Turning line stays vanilla.", "status": "lab-checked"},
+    {"spec": "Later: look at Spell Turning's reflection, and whether Minor Spell Deflection stays fully vanilla after all.", "status": "todo"}
+   ]
+  },
+  "arcane.level3.fireball": {
+   "resrefs": ["SPWI304"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half damage, no penalty.", "status": "lab-checked"}]
+  },
+  "arcane.level7.delayed_blast_fireball": {
+   "resrefs": ["SPWI712"],
+   "parts": [{"spec": "Vanilla damage, save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"}]
+  },
+  "arcane.level5.cone_of_cold": {
+   "resrefs": ["SPWI503"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
+  },
+  "divine.flame_strike": {
+   "resrefs": ["SPPR503"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
+  },
+  "arcane.level3.skull_trap": {
+   "resrefs": ["SPWI313"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"},
+    {"spec": "Damage capped at 12d6 (SCS-like, built ourselves).", "status": "todo"}
+   ]
+  },
+  "divine.glyph_of_warding": {
+   "resrefs": ["SPPR304"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell; as in vanilla, a successful save avoids the damage.", "status": "lab-checked"},
+    {"spec": "The rest of the SCS-like decision.", "status": "todo"}
+   ]
+  },
+  "arcane.level8.incendiary_cloud": {
+   "resrefs": ["SPWI810"],
+   "parts": [
+    {"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"},
+    {"spec": "School Conjuration, like all clouds.", "status": "todo"}
+   ]
+  },
+  "arcane.level3.lightning_bolt": {
+   "resrefs": ["SPWI308"],
+   "parts": [{"spec": "Classic bouncing bolt as in vanilla, with save vs. breath instead of vs. spell for half.", "status": "lab-checked"}]
+  },
+  "arcane.level9.meteor_swarm": {
+   "resrefs": ["SPWI911"],
+   "parts": [{"spec": "Save vs. breath per the save rule. Vanilla Meteor Swarm has no save at all, so this would add one: waits for Christopher's answer.", "status": "todo"}]
+  },
+  "divine.fire_storm": {
+   "resrefs": ["SPPR705"],
+   "parts": [{"spec": "Save vs. breath per the save rule. Vanilla Fire Storm has no save at all, so this would add one: waits for Christopher's answer.", "status": "todo"}]
+  },
+  "arcane.level1.sleep": {
+   "resrefs": ["SPWI116"],
+   "parts": [{"spec": "Vanilla, but damage wakes the sleepers.", "status": "lab-checked"}]
+  },
+  "arcane.level1.color_spray": {
+   "resrefs": ["SPWI105"],
+   "parts": [{"spec": "Vanilla, but damage wakes the unconscious.", "status": "lab-checked"}]
+  },
+  "arcane.level2.stinking_cloud": {
+   "resrefs": ["SPWI213"],
+   "parts": [
+    {"spec": "Damage wakes the creatures it knocked out.", "status": "lab-checked"},
+    {"spec": "Creatures without breath (undead, golems, elementals, slimes) immune; school Conjuration.", "status": "todo"}
+   ]
+  },
+  "arcane.level2.power_word_sleep": {
+   "resrefs": ["SPWI220"],
+   "parts": [
+    {"spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, to be confirmed in play.", "status": "lab-checked"},
+    {"spec": "School Enchantment; elf resistance; undead, dragons and elementals immune (SCS-like).", "status": "todo"}
+   ]
+  },
+  "arcane.level2.web": {
+   "resrefs": ["SPWI215"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell (the vanilla -2 stays). Its description says so.", "status": "lab-checked"},
+    {"spec": "Spiders (race SPIDER) and amorphous creatures (race SLIME: slimes, jellies, oozes, puddings) are immune.", "status": "lab-checked"},
+    {"spec": "Flying, incorporeal and very large creatures immune: which creatures count waits for Christopher's answer.", "status": "todo"},
+    {"spec": "Smaller radius (maybe, like SR); school Conjuration.", "status": "todo"}
+   ]
+  }
+ },
+ "chat": [
+  {"id": "chat.save_type_by_logic",
+   "title": "Save vs. breath for dodgeable explosions and area damage",
+   "rows": ["arcane.level3.fireball", "arcane.level7.delayed_blast_fireball", "arcane.level5.cone_of_cold", "divine.flame_strike", "arcane.level3.skull_trap", "divine.glyph_of_warding", "arcane.level8.incendiary_cloud", "arcane.level3.lightning_bolt", "arcane.level9.meteor_swarm", "divine.fire_storm"],
+   "resrefs": ["SPWI304", "SPWI712", "SPWI523", "SPWI523D", "SPWI503", "SPPR503", "SPWI313", "SPPR304", "SPWI810", "SPWI308"],
+   "parts": [
+    {"spec": "Fireball, Delayed Blast Fireball, Sunfire, Cone of Cold, Flame Strike, Skull Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt: the damage allows a save vs. breath instead of vs. spell, without extra penalties; the damage stays. Descriptions that named the save say so. Chain Lightning, mind and transmutation spells keep save vs. spell.", "status": "lab-checked"},
+    {"spec": "Meteor Swarm and Fire Storm: vanilla has no save at all; waits for Christopher's answer.", "status": "todo"}
+   ]}
+ ]
+}
