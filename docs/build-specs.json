@@ -81,7 +81,7 @@
   "arcane.level2.power_word_sleep": {
    "resrefs": ["SPWI220"],
    "parts": [
-    {"spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, to be confirmed in play.", "status": "lab-checked"},
+    {"spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, confirmed in play.", "status": "lab-checked"},
     {"spec": "School Enchantment; elf resistance; undead, dragons and elementals immune (SCS-like).", "status": "todo"}
    ]
   },

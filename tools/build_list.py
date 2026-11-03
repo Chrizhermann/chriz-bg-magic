@@ -86,8 +86,8 @@ def main():
         "decisions": MEANINGS,
         "iwd_decisions": IWD_MEANINGS,
         "status": {"open": "still undecided, not to be built", "todo": "decided, not built yet",
-                   "done": "built", "lab-checked": "built, installed in a disposable lab and its data checked "
-                                                   "there (docs/evidence); not yet tried in play"},
+                   "done": "built", "lab-checked": "built, installed in a disposable lab and checked there "
+                                                   "(docs/evidence names what was checked in play)"},
         "rows": rows,
         "chat_decisions": chat,
     }

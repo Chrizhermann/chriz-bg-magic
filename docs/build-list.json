@@ -18,7 +18,7 @@
   "open": "still undecided, not to be built",
   "todo": "decided, not built yet",
   "done": "built",
-  "lab-checked": "built, installed in a disposable lab and its data checked there (docs/evidence); not yet tried in play"
+  "lab-checked": "built, installed in a disposable lab and checked there (docs/evidence names what was checked in play)"
  },
  "rows": [
   {
@@ -631,7 +631,7 @@
    "decided_at": "2026-11-03T02:00:00Z",
    "parts": [
     {
-     "spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, to be confirmed in play.",
+     "spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, confirmed in play.",
      "status": "lab-checked"
     },
     {

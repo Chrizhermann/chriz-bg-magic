@@ -1,8 +1,8 @@
-# Install checks, 2026-11-04
+# Install and in-game checks, 2026-11-04
 
 The five fixes of branch `claude/first-five-fixes`, installed in two disposable labs built
-from clean game copies. These are install-time checks of the data; nothing was tried in
-play (no game was launched).
+from clean game copies and checked there: first the installed data (both labs), then in
+play in lab A, with Christopher's OK for the launches ("Ja, starte sie").
 
 ## Labs
 
@@ -185,12 +185,47 @@ Example, Spirit Armor (lab A):
 +    op321 remove effects by resource   t=2 pw=4 p1=0 p2=0 tm=1 dur=0 res=SPWI414 disp=3
 ```
 
+## In-game checks (lab A)
+
+`tests/lab/run_probe.py` drove a hidden, muted lab game through the lab slot launcher and
+EEex Remote Console v0.2.0; `tests/lab/probe.lua` ran inside the game. The party: three
+level-18 casters from the BuffBot lab's test save, in its QA arena (both staged for the
+run and removed afterwards, together with the console and the QA menu). The test creatures
+were spawned, kept from dying and held in place. Nothing was saved. Two game runs: all
+groups but Fireball, then Fireball alone; the guards stayed clean (no sound, no pointer
+capture, nothing left running).
+
+| Check | Result |
+|---|---|
+| Spirit Armor cast twice on the cleric | save vs. spell 9 → 6 → 6; after the second casting one save bonus and one waiting expiry cast (vanilla: two of each) |
+| Minor Spell Deflection, then Flame Strike (level 5) at the mage | gets through: hit points 112 → 55, deflection pool unchanged (4) |
+| Minor Spell Deflection, then Melf's Acid Arrow (level 2) | absorbed: hit points 112 → 112, pool 4 → 2 |
+| Sleep cast at a huge spider, then a 1-point hit | asleep (state 0x21: sleeping + held), awake after the hit (0x20); its sleep effect has wake-on-damage on |
+| Color Spray, Power Word: Sleep, Stinking Cloud | the same: asleep, awake after one hit |
+| Web at a giant spider, a green slime and a tasloi (spell save 1, breath save 20) | spider and slime not caught; the tasloi caught, so its breath save decided (vanilla's spell save could not fail) |
+| Fireball by the level-18 mage at a party member | breath save 1, spell save 20: 14 and 12 damage; breath save 20, spell save 1: 26 and 24 (full); the damage arrived with save type 0x1000002 (Breath, bypass Mirror Image) |
+
+Lessons from the harness (not about the mod):
+
+- Loading the save first crashed in `CWeather::Update`, also with Chriz BG Magic
+  uninstalled: the QA arena was not in `MASTAREA.2DA`. With its row added, it loaded.
+- Sleep's and Color Spray's area projectiles skipped the test creature while it was made
+  neutral; Color Spray's cone takes "1d6 creatures in order of increasing distance" and
+  never reached the creature here. Color Spray and Stinking Cloud were therefore applied
+  to it directly (`ApplySpellRES`): their delivery is the base game's, the sleep effect is
+  what the fix changed.
+- A creature asleep without a portrait icon (Power Word: Sleep) moves to the area's back
+  list, which a lookup has to walk as well.
+- Twice the console stopped answering in the Fireball step after saves had been set to
+  30 (the game shows at most 20); with 20 the step ran through. Not proven as the cause.
+
 ## Not covered
 
-- Play: whether the engine does what the data says (a second Spirit Armor really clears
-  the first one's expiry damage, sleepers wake on a hit, spiders walk through Web, the
-  rolled save is vs. breath). That needs a game launch: Christopher's checklist
-  `docs/checklists/2026-11-04-first-five-fixes.md`, or a quiet lab run with his OK.
+- In play: Delayed Blast Fireball, Sunfire, Cone of Cold, Flame Strike's breath save, Skull
+  Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt (the same data change as
+  Fireball, install-checked); Spirit Armor's expiry damage when the time runs out (the
+  check counts the waiting expiry casts); how the updated descriptions look in the game;
+  EET in play (lab B was install-checked only).
 - Spell Revisions installs: the installer refuses for now (his decision pending).
 - Other mods than EE Fixpack (SCS, Tweaks Anthology, ...), and BG2:EE 2.6.6.0.
 - Description updates in other languages than English.
