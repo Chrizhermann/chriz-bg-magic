@@ -1,0 +1,8 @@
+* text=auto
+*.baf text eol=crlf
+*.tpa text eol=crlf
+*.tp2 text eol=crlf
+*.tra text eol=crlf
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf

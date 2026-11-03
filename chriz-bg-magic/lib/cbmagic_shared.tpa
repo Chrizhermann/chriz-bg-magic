@@ -1,0 +1,65 @@
+// Shared helpers for chriz-bg-magic. Every decided change is one action function in its
+// own library file; the components in setup-chriz-bg-magic.tp2 only call them, so the
+// component layout can change without touching the changes themselves.
+
+// What the installer does when Spell Revisions is installed. Christopher decides this;
+// until he has, it refuses, so nothing gets mixed into a state nobody has looked at.
+//   refuse  - stop the install with a message
+//   warn    - install, with a warning in the WeiDU log
+//   coexist - install without a word
+OUTER_SPRINT cbmagic_sr_policy ~refuse~
+
+// True when Spell Revisions (the original or our frozen fork, both use the same tp2 name)
+// is installed: its main component in WeiDU.log, or its marker file in the override
+// folder (SR copies dvimhere.mrk there; other mods detect SR by it as well).
+DEFINE_ACTION_FUNCTION cbmagic_spell_revisions_installed
+  RET installed
+BEGIN
+  OUTER_SET installed = 0
+  ACTION_IF (MOD_IS_INSTALLED ~spell_rev/setup-spell_rev.tp2~ ~0~) OR (FILE_EXISTS_IN_GAME ~dvimhere.mrk~) BEGIN
+    OUTER_SET installed = 1
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_check_spell_revisions
+BEGIN
+  LAF cbmagic_spell_revisions_installed RET sr_installed = installed END
+  ACTION_IF sr_installed BEGIN
+    ACTION_IF (~%cbmagic_sr_policy%~ STR_EQ ~refuse~) BEGIN
+      FAIL @9001
+    END ELSE ACTION_IF (~%cbmagic_sr_policy%~ STR_EQ ~warn~) BEGIN
+      WARN @9002
+    END ELSE ACTION_IF !(~%cbmagic_sr_policy%~ STR_EQ ~coexist~) BEGIN
+      FAIL ~chriz-bg-magic: unknown Spell Revisions policy "%cbmagic_sr_policy%".~
+    END
+  END
+END
+
+// The resref of a spell from its SPELL.IDS symbol, e.g. WIZARD_SPIRIT_ARMOR -> SPWI414.
+// found is 0 when the symbol is missing or the game has no such spell file.
+DEFINE_ACTION_FUNCTION cbmagic_spell_resref
+  STR_VAR symbol = ~~
+  RET resref found
+BEGIN
+  OUTER_SPRINT resref ~~
+  OUTER_SET found = 0
+  OUTER_SET id = IDS_OF_SYMBOL (~spell~ ~%symbol%~)
+  ACTION_IF (id >= 1000) AND (id < 5000) BEGIN
+    OUTER_SET kind = id / 1000
+    OUTER_SET slot = id - (kind * 1000)
+    OUTER_SPRINT prefix ~SPPR~
+    ACTION_IF (kind = 2) BEGIN OUTER_SPRINT prefix ~SPWI~ END
+    ACTION_IF (kind = 3) BEGIN OUTER_SPRINT prefix ~SPIN~ END
+    ACTION_IF (kind = 4) BEGIN OUTER_SPRINT prefix ~SPCL~ END
+    ACTION_IF (slot < 10) BEGIN
+      OUTER_SPRINT resref ~%prefix%00%slot%~
+    END ELSE ACTION_IF (slot < 100) BEGIN
+      OUTER_SPRINT resref ~%prefix%0%slot%~
+    END ELSE BEGIN
+      OUTER_SPRINT resref ~%prefix%%slot%~
+    END
+    ACTION_IF (FILE_EXISTS_IN_GAME ~%resref%.spl~) BEGIN
+      OUTER_SET found = 1
+    END
+  END
+END

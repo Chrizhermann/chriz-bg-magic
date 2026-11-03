@@ -1,0 +1,3846 @@
+{
+ "arcane.detect_alignment_relocation": {
+  "name": "Detect Alignment relocation",
+  "group": "arcane",
+  "level": "Wizard 1 (vanilla: 2)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.dimension_jump_relocation": {
+  "name": "Dimension Jump relocation",
+  "group": "arcane",
+  "level": "Wizard 1 (vanilla: 4)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.elemental_protection_progression": {
+  "name": "Elemental protection progression",
+  "group": "arcane",
+  "level": "Wizard (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.haste_slow": {
+  "name": "Haste, Slow, and Improved Haste",
+  "group": "arcane",
+  "level": "Wizard (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.imprisonment_freedom": {
+  "name": "Imprisonment and Freedom",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level1.armor": {
+  "name": "Mage Armor",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level1.burning_hands": {
+  "name": "Burning Hands",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI103"
+  ]
+ },
+ "arcane.level1.charm_person": {
+  "name": "Charm Person",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI104"
+  ]
+ },
+ "arcane.level1.chill_touch": {
+  "name": "Chill Touch",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI117"
+  ]
+ },
+ "arcane.level1.chromatic_orb": {
+  "name": "Chromatic Orb",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI118"
+  ]
+ },
+ "arcane.level1.color_spray": {
+  "name": "Color Spray",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI105"
+  ]
+ },
+ "arcane.level1.expeditious_retreat": {
+  "name": "Expeditious Retreat",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level1.find_familiar": {
+  "name": "Find Familiar",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI123"
+  ]
+ },
+ "arcane.level1.grease": {
+  "name": "Grease",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI101"
+  ]
+ },
+ "arcane.level1.identify": {
+  "name": "Identify",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI110"
+  ]
+ },
+ "arcane.level1.larlochs_minor_drain": {
+  "name": "Larloch's Minor Drain",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI119"
+  ]
+ },
+ "arcane.level1.magic_missile": {
+  "name": "Magic Missile",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI112"
+  ]
+ },
+ "arcane.level1.monster_summoning_i": {
+  "name": "Monster Summoning I",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level1.nahals_reckless_dweomer": {
+  "name": "Nahal's Reckless Dweomer",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI124"
+  ]
+ },
+ "arcane.level1.obscuring_mist": {
+  "name": "Obscuring Mist",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level1.protection_from_evil": {
+  "name": "Protection from Evil",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI113"
+  ]
+ },
+ "arcane.level1.reflected_image": {
+  "name": "Reflected Image",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI120"
+  ]
+ },
+ "arcane.level1.shield": {
+  "name": "Shield",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI114"
+  ]
+ },
+ "arcane.level1.shocking_grasp": {
+  "name": "Shocking Grasp",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI115"
+  ]
+ },
+ "arcane.level1.sleep": {
+  "name": "Sleep",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI116"
+  ]
+ },
+ "arcane.level1.spook": {
+  "name": "Spook",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI125"
+  ]
+ },
+ "arcane.level1.true_strike": {
+  "name": "True Strike",
+  "group": "arcane.level1",
+  "level": "Wizard 1",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level10.comet": {
+  "name": "Comet",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI925"
+  ]
+ },
+ "arcane.level10.dragons_breath": {
+  "name": "Dragon's Breath",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI922"
+  ]
+ },
+ "arcane.level10.energy_blades": {
+  "name": "Energy Blades",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI920"
+  ]
+ },
+ "arcane.level10.improved_alacrity": {
+  "name": "Improved Alacrity",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI921"
+  ]
+ },
+ "arcane.level10.summon_dark_planetar": {
+  "name": "Summon Dark Planetar",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI924"
+  ]
+ },
+ "arcane.level10.summon_planetar": {
+  "name": "Summon Planetar",
+  "group": "arcane.level10",
+  "level": "Wizard HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI923"
+  ]
+ },
+ "arcane.level2.agannazars_scorcher": {
+  "name": "Agannazar's Scorcher",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI217"
+  ]
+ },
+ "arcane.level2.battering_ram": {
+  "name": "Battering Ram",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level2.blur": {
+  "name": "Blur",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI201"
+  ]
+ },
+ "arcane.level2.chaos_shield": {
+  "name": "Chaos Shield",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI222"
+  ]
+ },
+ "arcane.level2.detect_invisibility": {
+  "name": "Detect Invisibility",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI203"
+  ]
+ },
+ "arcane.level2.ghoul_touch": {
+  "name": "Ghoul Touch",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI218"
+  ]
+ },
+ "arcane.level2.glitterdust": {
+  "name": "Glitterdust",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI224"
+  ]
+ },
+ "arcane.level2.horror": {
+  "name": "Horror",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI205"
+  ]
+ },
+ "arcane.level2.invisibility": {
+  "name": "Invisibility",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI206"
+  ]
+ },
+ "arcane.level2.know_opponent": {
+  "name": "Know Opponent",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level2.luck": {
+  "name": "Luck",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI209"
+  ]
+ },
+ "arcane.level2.melfs_acid_arrow": {
+  "name": "Melf's Acid Arrow",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI211"
+  ]
+ },
+ "arcane.level2.mirror_image": {
+  "name": "Mirror Image",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI212"
+  ]
+ },
+ "arcane.level2.monster_summoning_ii": {
+  "name": "Monster Summoning II",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level2.power_word_sleep": {
+  "name": "Power Word Sleep",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI220"
+  ]
+ },
+ "arcane.level2.ray_of_enfeeblement": {
+  "name": "Ray of Enfeeblement",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI221"
+  ]
+ },
+ "arcane.level2.resist_fear": {
+  "name": "Resist Fear",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI210"
+  ]
+ },
+ "arcane.level2.sound_burst": {
+  "name": "Sound Burst",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level2.stinking_cloud": {
+  "name": "Stinking Cloud",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI213"
+  ]
+ },
+ "arcane.level2.strength": {
+  "name": "Strength",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI214"
+  ]
+ },
+ "arcane.level2.vocalize": {
+  "name": "Vocalize",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI219"
+  ]
+ },
+ "arcane.level2.web": {
+  "name": "Web",
+  "group": "arcane.level2",
+  "level": "Wizard 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI215"
+  ]
+ },
+ "arcane.level3.clairvoyance": {
+  "name": "Clairvoyance",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI301"
+  ]
+ },
+ "arcane.level3.detect_illusion": {
+  "name": "Detect Illusion",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI322"
+  ]
+ },
+ "arcane.level3.dire_charm": {
+  "name": "Dire Charm",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI316"
+  ]
+ },
+ "arcane.level3.dispel_magic": {
+  "name": "Dispel Magic",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.fireball": {
+  "name": "Fireball",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI304"
+  ]
+ },
+ "arcane.level3.flame_arrow": {
+  "name": "Flame Arrow",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI303"
+  ]
+ },
+ "arcane.level3.ghost_armor": {
+  "name": "Ghost Armor",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI317"
+  ]
+ },
+ "arcane.level3.hold_person": {
+  "name": "Hold Person",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI306"
+  ]
+ },
+ "arcane.level3.hold_undead": {
+  "name": "Halt Undead",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.icelance": {
+  "name": "Icelance",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.invisibility_sphere": {
+  "name": "Invisibility Sphere",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.lightning_bolt": {
+  "name": "Lightning Bolt",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI308"
+  ]
+ },
+ "arcane.level3.melfs_minute_meteors": {
+  "name": "Melf's Minute Meteors",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI325"
+  ]
+ },
+ "arcane.level3.monster_summoning_iii": {
+  "name": "Monster Summoning III",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.non_detection": {
+  "name": "Non-Detection",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI310"
+  ]
+ },
+ "arcane.level3.protection_from_missiles": {
+  "name": "Protection from Missiles",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.remove_magic": {
+  "name": "Dispel Magic",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level3.skull_trap": {
+  "name": "Skull Trap",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI313"
+  ]
+ },
+ "arcane.level3.vampiric_touch": {
+  "name": "Vampiric Touch",
+  "group": "arcane.level3",
+  "level": "Wizard 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI314"
+  ]
+ },
+ "arcane.level4.break_enchantment": {
+  "name": "Break Enchantment",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.confusion": {
+  "name": "Confusion",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI401"
+  ]
+ },
+ "arcane.level4.contagion": {
+  "name": "Contagion",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI409"
+  ]
+ },
+ "arcane.level4.emotion_despair": {
+  "name": "Emotion: Despair",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.enchanted_weapon": {
+  "name": "Enchanted Weapon",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI417"
+  ]
+ },
+ "arcane.level4.farsight": {
+  "name": "Farsight",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI424"
+  ]
+ },
+ "arcane.level4.fire_shield_red": {
+  "name": "Fire Shield",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.greater_malison": {
+  "name": "Greater Malison",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI412"
+  ]
+ },
+ "arcane.level4.ice_storm": {
+  "name": "Ice Storm",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI404"
+  ]
+ },
+ "arcane.level4.improved_invisibility": {
+  "name": "Improved Invisibility",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI405"
+  ]
+ },
+ "arcane.level4.minor_globe_of_invulnerability": {
+  "name": "Minor Globe of Invulnerability",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI406"
+  ]
+ },
+ "arcane.level4.monster_summoning_iv_relocation": {
+  "name": "Monster Summoning IV relocation",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.otilukes_resilient_sphere": {
+  "name": "Otiluke's Resilient Sphere",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI413"
+  ]
+ },
+ "arcane.level4.polymorph_other": {
+  "name": "Polymorph Other",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI415"
+  ]
+ },
+ "arcane.level4.polymorph_self": {
+  "name": "Polymorph Self",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI416"
+  ]
+ },
+ "arcane.level4.simbuls_spell_matrix": {
+  "name": "Simbul's Spell Matrix",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.spirit_armor": {
+  "name": "Spirit Armor",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI414"
+  ]
+ },
+ "arcane.level4.stoneskin": {
+  "name": "Stoneskin",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI408"
+  ]
+ },
+ "arcane.level4.teleport_field": {
+  "name": "Teleport Field",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI421"
+  ]
+ },
+ "arcane.level4.vitriolic_sphere": {
+  "name": "Vitriolic Sphere",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level4.wizard_eye": {
+  "name": "Wizard Eye",
+  "group": "arcane.level4",
+  "level": "Wizard 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI425"
+  ]
+ },
+ "arcane.level5.cloudkill": {
+  "name": "Cloudkill",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI502"
+  ]
+ },
+ "arcane.level5.cone_of_cold": {
+  "name": "Cone of Cold",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI503"
+  ]
+ },
+ "arcane.level5.conjure_lesser_air_elemental": {
+  "name": "Conjure Lesser Air Elemental",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI520"
+  ]
+ },
+ "arcane.level5.conjure_lesser_earth_elemental": {
+  "name": "Conjure Lesser Earth Elemental",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI521"
+  ]
+ },
+ "arcane.level5.conjure_lesser_fire_elemental": {
+  "name": "Conjure Lesser Fire Elemental",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI516"
+  ]
+ },
+ "arcane.level5.domination": {
+  "name": "Domination",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI506"
+  ]
+ },
+ "arcane.level5.feeblemind": {
+  "name": "Feeblemind",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI509"
+  ]
+ },
+ "arcane.level5.fireburst": {
+  "name": "Fireburst",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level5.hold_monster": {
+  "name": "Hold Monster",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI507"
+  ]
+ },
+ "arcane.level5.lower_resistance": {
+  "name": "Lower Resistance",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI514"
+  ]
+ },
+ "arcane.level5.monster_summoning_v": {
+  "name": "Monster Summoning V",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level5.oracle": {
+  "name": "Oracle",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI515"
+  ]
+ },
+ "arcane.level5.phantom_blade": {
+  "name": "Phantom Blade",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI518"
+  ]
+ },
+ "arcane.level5.protection_from_normal_weapons": {
+  "name": "Protection from Normal Weapons",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI511"
+  ]
+ },
+ "arcane.level5.shadow_door": {
+  "name": "Shadow Door",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI505"
+  ]
+ },
+ "arcane.level5.summon_shadow": {
+  "name": "Summon Shadow",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level5.waves_of_fatigue": {
+  "name": "Waves of Fatigue",
+  "group": "arcane.level5",
+  "level": "Wizard 5",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.acid_fog": {
+  "name": "Acid Fog",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.animate_skeleton_warrior": {
+  "name": "Animate Skeleton Warrior",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.banishment": {
+  "name": "Banishment",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.chain_lightning": {
+  "name": "Chain Lightning",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI615"
+  ]
+ },
+ "arcane.level6.conjure_air_elemental": {
+  "name": "Conjure Air Elemental",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI621"
+  ]
+ },
+ "arcane.level6.conjure_earth_elemental": {
+  "name": "Conjure Earth Elemental",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI622"
+  ]
+ },
+ "arcane.level6.conjure_fire_elemental": {
+  "name": "Conjure Fire Elemental",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI620"
+  ]
+ },
+ "arcane.level6.contingency": {
+  "name": "Contingency",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI617"
+  ]
+ },
+ "arcane.level6.disintegrate": {
+  "name": "Disintegrate",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.globe_of_invulnerability": {
+  "name": "Globe of Invulnerability",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI602"
+  ]
+ },
+ "arcane.level6.invisible_stalker": {
+  "name": "Invisible Stalker",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI601"
+  ]
+ },
+ "arcane.level6.mislead": {
+  "name": "Mislead",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI607"
+  ]
+ },
+ "arcane.level6.monster_summoning_vi": {
+  "name": "Monster Summoning VI",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.power_word_silence": {
+  "name": "Power Word Silence",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level6.protection_from_magical_weapons": {
+  "name": "Protection from Magical Weapons",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI611"
+  ]
+ },
+ "arcane.level6.tensers_transformation": {
+  "name": "Tenser's Transformation",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI603"
+  ]
+ },
+ "arcane.level6.true_seeing": {
+  "name": "True Seeing",
+  "group": "arcane.level6",
+  "level": "Wizard 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.chaos": {
+  "name": "Chaos",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.control_undead": {
+  "name": "Control Undead",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI720"
+  ]
+ },
+ "arcane.level7.delayed_blast_fireball": {
+  "name": "Delayed Blast Fireball",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI712"
+  ]
+ },
+ "arcane.level7.finger_of_death": {
+  "name": "Finger of Death",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.improved_chaos_shield": {
+  "name": "Improved Chaos Shield",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI723"
+  ]
+ },
+ "arcane.level7.limited_wish": {
+  "name": "Limited Wish",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI722"
+  ]
+ },
+ "arcane.level7.mass_invisibility": {
+  "name": "Mass Invisibility",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI721"
+  ]
+ },
+ "arcane.level7.monster_summoning_vii": {
+  "name": "Monster Summoning VII",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.mordenkainens_sword": {
+  "name": "Mordenkainen's Sword",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI716"
+  ]
+ },
+ "arcane.level7.power_word_stun": {
+  "name": "Power Word Stun",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI715"
+  ]
+ },
+ "arcane.level7.prismatic_mantle": {
+  "name": "Prismatic Mantle",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.prismatic_spray": {
+  "name": "Prismatic Spray",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI714"
+  ]
+ },
+ "arcane.level7.project_image": {
+  "name": "Project Image",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI703"
+  ]
+ },
+ "arcane.level7.simbuls_spell_sequencer": {
+  "name": "Simbul's Spell Sequencer",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.summon_death_knight": {
+  "name": "Summon Death Knight",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level7.summon_djinni": {
+  "name": "Summon Djinni",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI718"
+  ]
+ },
+ "arcane.level7.summon_efreeti": {
+  "name": "Summon Efreeti",
+  "group": "arcane.level7",
+  "level": "Wizard 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI717"
+  ]
+ },
+ "arcane.level8.abi_dalzims_horrid_wilting": {
+  "name": "Abi-Dalzim's Horrid Wilting",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI812"
+  ]
+ },
+ "arcane.level8.bigbys_icy_grasp": {
+  "name": "Bigby's Icy Grasp",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.ghostform": {
+  "name": "Ghostform",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.incendiary_cloud": {
+  "name": "Incendiary Cloud",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI810"
+  ]
+ },
+ "arcane.level8.maze": {
+  "name": "Maze",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI813"
+  ]
+ },
+ "arcane.level8.mind_blank": {
+  "name": "Mind Blank",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.moment_of_prescience": {
+  "name": "Moment of Prescience",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.monster_summoning_viii": {
+  "name": "Monster Summoning VIII",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.power_word_blind": {
+  "name": "Power Word Blind",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI815"
+  ]
+ },
+ "arcane.level8.simbuls_spell_trigger": {
+  "name": "Simbul's Spell Trigger",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.simulacrum": {
+  "name": "Simulacrum",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI804"
+  ]
+ },
+ "arcane.level8.summon_fiend": {
+  "name": "Summon Fiend",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI807"
+  ]
+ },
+ "arcane.level8.symbol_of_death": {
+  "name": "Symbol of Death",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.symbol_of_stunning": {
+  "name": "Symbol of Stunning",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level8.symbol_of_weakness": {
+  "name": "Symbol of Weakness",
+  "group": "arcane.level8",
+  "level": "Wizard 8",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level9.absolute_immunity": {
+  "name": "Absolute Immunity",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI907"
+  ]
+ },
+ "arcane.level9.bigbys_crushing_hand": {
+  "name": "Bigby's Crushing Hand",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI918"
+  ]
+ },
+ "arcane.level9.black_blade_of_disaster": {
+  "name": "Black Blade of Disaster",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI915"
+  ]
+ },
+ "arcane.level9.chain_contingency": {
+  "name": "Chain Contingency",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI908"
+  ]
+ },
+ "arcane.level9.gate": {
+  "name": "Gate",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI905"
+  ]
+ },
+ "arcane.level9.larlochs_energy_drain": {
+  "name": "Larloch's Energy Drain",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.level9.meteor_swarm": {
+  "name": "Meteor Swarm",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI911"
+  ]
+ },
+ "arcane.level9.power_word_kill": {
+  "name": "Power Word Kill",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI912"
+  ]
+ },
+ "arcane.level9.shapechange": {
+  "name": "Shapechange",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI916"
+  ]
+ },
+ "arcane.level9.spell_trap": {
+  "name": "Spell Trap",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI902"
+  ]
+ },
+ "arcane.level9.time_stop": {
+  "name": "Time Stop",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI909"
+  ]
+ },
+ "arcane.level9.wail_of_the_banshee": {
+  "name": "Wail of the Banshee",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI913"
+  ]
+ },
+ "arcane.level9.wish": {
+  "name": "Wish",
+  "group": "arcane.level9",
+  "level": "Wizard 9",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPWI919"
+  ]
+ },
+ "arcane.mestils_acid_sheath_relocation": {
+  "name": "Mestil's Acid Sheath relocation",
+  "group": "arcane",
+  "level": "Wizard 5 (vanilla slot: 4)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.petrification": {
+  "name": "Petrification and reversal",
+  "group": "arcane",
+  "level": "Wizard (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.spell_deflection_progression": {
+  "name": "Spell Deflection progression",
+  "group": "arcane",
+  "level": "Wizard (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.spell_shield_anti_magic": {
+  "name": "Spell Shield and anti-magic progression",
+  "group": "arcane",
+  "level": "Wizard (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "arcane.summon_nishruu_relocation": {
+  "name": "Summon Nishruu/Hakeashar relocation",
+  "group": "arcane",
+  "level": "Wizard 7 (vanilla: 6)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.aerial_servant": {
+  "name": "Aerial Servant",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR601"
+  ]
+ },
+ "divine.aid": {
+  "name": "Aid",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR201"
+  ]
+ },
+ "divine.animal_growth": {
+  "name": "Animal Growth",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_i": {
+  "name": "Animal Summoning I",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_ii": {
+  "name": "Animal Summoning II",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_iii": {
+  "name": "Animal Summoning III",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_iv": {
+  "name": "Animal Summoning IV",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_v": {
+  "name": "Animal Summoning V",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_vi": {
+  "name": "Animal Summoning VI",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animal_summoning_vii": {
+  "name": "Animal Summoning VII",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.animate_dead": {
+  "name": "Animate Dead",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR301"
+  ]
+ },
+ "divine.animate_skeleton_warrior": {
+  "name": "Animate Skeleton Warrior",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.armor_of_faith": {
+  "name": "Armor of Faith",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR111"
+  ]
+ },
+ "divine.aura_of_flaming_death": {
+  "name": "Aura of Flaming Death",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.banishment": {
+  "name": "Banishment",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.barkskin": {
+  "name": "Barkskin",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR202"
+  ]
+ },
+ "divine.blade_barrier": {
+  "name": "Blade Barrier",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR603"
+  ]
+ },
+ "divine.bless": {
+  "name": "Bless",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR101"
+  ]
+ },
+ "divine.bolt_of_glory": {
+  "name": "Bolt of Glory",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR612"
+  ]
+ },
+ "divine.break_enchantment": {
+  "name": "Break Enchantment",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.call_lightning": {
+  "name": "Call Lightning",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR302"
+  ]
+ },
+ "divine.call_woodland_beings": {
+  "name": "Call Woodland Beings",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR410"
+  ]
+ },
+ "divine.cause_wounds_progression": {
+  "name": "Cause Wounds progression (levels 1-5)",
+  "group": "divine",
+  "level": "Priest (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.champions_strength": {
+  "name": "Champion's Strength",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR507"
+  ]
+ },
+ "divine.chant": {
+  "name": "Chant",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR203"
+  ]
+ },
+ "divine.chaos": {
+  "name": "Chaos",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.chaotic_commands": {
+  "name": "Chaotic Commands",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR508"
+  ]
+ },
+ "divine.charm_person_or_animal": {
+  "name": "Charm Person or Animal",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.cloak_of_fear": {
+  "name": "Cloak of Fear",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR416"
+  ]
+ },
+ "divine.command": {
+  "name": "Command",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR102"
+  ]
+ },
+ "divine.conjure_air_elemental": {
+  "name": "Conjure Air Elemental",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.conjure_animals_deprecated": {
+  "name": "Conjure Animals",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR604"
+  ]
+ },
+ "divine.conjure_earth_elemental": {
+  "name": "Conjure Earth Elemental",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.conjure_fire_elemental": {
+  "name": "Conjure Fire Elemental",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR605"
+  ]
+ },
+ "divine.contagion": {
+  "name": "Contagion",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.cure_disease": {
+  "name": "Cure Disease",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR317"
+  ]
+ },
+ "divine.cure_wounds_progression": {
+  "name": "Cure Wounds progression (levels 1-5)",
+  "group": "divine",
+  "level": "Priest (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.death_ward": {
+  "name": "Death Ward",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR409"
+  ]
+ },
+ "divine.defensive_harmony": {
+  "name": "Defensive Harmony",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR406"
+  ]
+ },
+ "divine.detect_alignment": {
+  "name": "Detect Alignment",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.dispel_magic": {
+  "name": "Dispel Magic",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR303"
+  ]
+ },
+ "divine.divine_power": {
+  "name": "Divine Power",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.dolorous_decay": {
+  "name": "Dolorous Decay",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR610"
+  ]
+ },
+ "divine.doom": {
+  "name": "Doom",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR113"
+  ]
+ },
+ "divine.draw_upon_divine_might": {
+  "name": "Draw upon Divine Might",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.earth_elemental_transformation": {
+  "name": "Earth Elemental Transformation",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.earthquake": {
+  "name": "Earthquake",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR720"
+  ]
+ },
+ "divine.elemental_prince_call": {
+  "name": "Elemental Prince Call",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.elemental_protections": {
+  "name": "Elemental protection relocations (levels 3-5)",
+  "group": "divine",
+  "level": "Priest 5",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.elemental_swarm": {
+  "name": "Elemental Swarm",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.energy_blades": {
+  "name": "Energy Blades",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.entangle": {
+  "name": "Entangle",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR105"
+  ]
+ },
+ "divine.faerie_fire": {
+  "name": "Faerie Fire",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.false_dawn": {
+  "name": "False Dawn",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR609"
+  ]
+ },
+ "divine.farsight": {
+  "name": "Farsight",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR415"
+  ]
+ },
+ "divine.find_traps": {
+  "name": "Find Traps",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR205"
+  ]
+ },
+ "divine.finger_of_death": {
+  "name": "Finger of Death",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR708"
+  ]
+ },
+ "divine.fire_elemental_transformation": {
+  "name": "Fire Elemental Transformation",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.fire_seeds": {
+  "name": "Fire Seeds",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR606"
+  ]
+ },
+ "divine.fire_storm": {
+  "name": "Fire Storm",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR705"
+  ]
+ },
+ "divine.fire_trap": {
+  "name": "Fire Trap",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.flame_blade": {
+  "name": "Flame Blade",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR206"
+  ]
+ },
+ "divine.flame_strike": {
+  "name": "Flame Strike",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR503"
+  ]
+ },
+ "divine.free_action": {
+  "name": "Free Action",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR403"
+  ]
+ },
+ "divine.globe_of_blades": {
+  "name": "Globe of Blades",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.glyph_of_warding": {
+  "name": "Glyph of Warding",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR304"
+  ]
+ },
+ "divine.goodberry": {
+  "name": "Goodberry",
+  "group": "divine",
+  "level": "Priest 1",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.greater_command": {
+  "name": "Greater Command",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR512"
+  ]
+ },
+ "divine.greater_restoration": {
+  "name": "Greater Restoration",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR713"
+  ]
+ },
+ "divine.harm": {
+  "name": "Harm",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR608"
+  ]
+ },
+ "divine.harpers_call": {
+  "name": "Harper's Call",
+  "group": "divine.level5",
+  "level": "Priest 5 (Harper ability)",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.heal": {
+  "name": "Heal",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR607"
+  ]
+ },
+ "divine.hold_person": {
+  "name": "Hold Person",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR208"
+  ]
+ },
+ "divine.hold_person_or_animal": {
+  "name": "Hold Person or Animal",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.holy_smite": {
+  "name": "Holy Smite",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR313"
+  ]
+ },
+ "divine.holy_word": {
+  "name": "Holy Word",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR710"
+  ]
+ },
+ "divine.ice_storm": {
+  "name": "Ice Storm",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.icelance": {
+  "name": "Icelance",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.implosion": {
+  "name": "Implosion",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.insects_and_gust_of_wind": {
+  "name": "Insects and Gust of Wind (levels 2, 3, 5, and 7)",
+  "group": "divine",
+  "level": "Priest (several levels)",
+  "kind": "bundle",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.invisibility_purge": {
+  "name": "Invisibility Purge",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR309"
+  ]
+ },
+ "divine.know_opponent": {
+  "name": "Know Opponent",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.lesser_restoration": {
+  "name": "Lesser Restoration",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR417"
+  ]
+ },
+ "divine.magic_circle_against_evil": {
+  "name": "Magic Circle against Evil",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.magic_fang": {
+  "name": "Magic Fang",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.magic_resistance": {
+  "name": "Magic Resistance",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR509"
+  ]
+ },
+ "divine.magical_stone": {
+  "name": "Magical Stone",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR106"
+  ]
+ },
+ "divine.mass_cure": {
+  "name": "Mass Cure",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR514"
+  ]
+ },
+ "divine.mass_raise_dead": {
+  "name": "Mass Raise Dead",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.mass_regenerate": {
+  "name": "Mass Regenerate",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.mental_domination": {
+  "name": "Mental Domination",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR405"
+  ]
+ },
+ "divine.miscast_magic": {
+  "name": "Miscast Magic",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR310"
+  ]
+ },
+ "divine.natures_beauty": {
+  "name": "Nature's Beauty",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR704"
+  ]
+ },
+ "divine.negative_plane_protection": {
+  "name": "Negative Plane Protection",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR413"
+  ]
+ },
+ "divine.neutralize_poison": {
+  "name": "Neutralize Poison",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR404"
+  ]
+ },
+ "divine.obscuring_mist": {
+  "name": "Obscuring Mist",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.physical_mirror": {
+  "name": "Physical Mirror",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR613"
+  ]
+ },
+ "divine.pixie_dust": {
+  "name": "Pixie Dust",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR516"
+  ]
+ },
+ "divine.poison": {
+  "name": "Poison",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR411"
+  ]
+ },
+ "divine.polymorph_other": {
+  "name": "Polymorph Other",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.protection_from_evil": {
+  "name": "Protection from Evil",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR107"
+  ]
+ },
+ "divine.raise_dead": {
+  "name": "Raise Dead",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR504"
+  ]
+ },
+ "divine.regenerate_critical_wounds": {
+  "name": "Regenerate Critical Wounds",
+  "group": "divine.level4",
+  "level": "Priest 4",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.regenerate_light_wounds": {
+  "name": "Regenerate Light Wounds",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.regenerate_moderate_wounds": {
+  "name": "Regenerate Moderate Wounds",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.regenerate_serious_wounds": {
+  "name": "Regenerate Serious Wounds",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.regeneration": {
+  "name": "Regeneration",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR711"
+  ]
+ },
+ "divine.regeneration_druid": {
+  "name": "Regeneration",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.remove_paralysis": {
+  "name": "Remove Paralysis",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR308"
+  ]
+ },
+ "divine.repulsion": {
+  "name": "Repulsion",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.resist_elements": {
+  "name": "Resist Elements",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.resist_fear": {
+  "name": "Resist Fear",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.resurrection": {
+  "name": "Resurrection",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR712"
+  ]
+ },
+ "divine.righteous_fury": {
+  "name": "Righteous Fury",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.rigid_thinking_description": {
+  "name": "Rigid Thinking",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR311"
+  ]
+ },
+ "divine.sanctuary": {
+  "name": "Sanctuary",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR109"
+  ]
+ },
+ "divine.shield_of_the_archons": {
+  "name": "Shield of the Archons",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR701"
+  ]
+ },
+ "divine.shillelagh": {
+  "name": "Shillelagh",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR110"
+  ]
+ },
+ "divine.silence": {
+  "name": "Silence",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.slay_living": {
+  "name": "Slay Living",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR511"
+  ]
+ },
+ "divine.slow_poison": {
+  "name": "Slow Poison",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR212"
+  ]
+ },
+ "divine.sols_searing_orb": {
+  "name": "Sol's Searing Orb",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR614"
+  ]
+ },
+ "divine.spike_growth": {
+  "name": "Spike Growth",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.spiritual_hammer": {
+  "name": "Spiritual Hammer",
+  "group": "divine.level2",
+  "level": "Priest 2",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR213"
+  ]
+ },
+ "divine.stoneskin": {
+  "name": "Stoneskin",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.storm_of_vengeance": {
+  "name": "Storm of Vengeance",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.storm_shield": {
+  "name": "Storm Shield",
+  "group": "divine.level3",
+  "level": "Priest 3 (also Talos ability)",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.strength_of_one": {
+  "name": "Strength of One",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR312"
+  ]
+ },
+ "divine.strength_of_stone": {
+  "name": "Strength of Stone",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.summon_death_knight": {
+  "name": "Summon Death Knight",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.summon_deva": {
+  "name": "Summon Deva",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.summon_fallen_deva": {
+  "name": "Summon Fallen Deva",
+  "group": "divine.level8",
+  "level": "Priest 8 / HLA",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.summon_shambling_mound": {
+  "name": "Summon Shambling Mound",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.sunray": {
+  "name": "Sunray",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR707"
+  ]
+ },
+ "divine.sunscorch": {
+  "name": "Sunscorch",
+  "group": "divine.level1",
+  "level": "Priest 1",
+  "kind": "new",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.symbol_of_death": {
+  "name": "Symbol of Death",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.symbol_of_stunning": {
+  "name": "Symbol of Stunning",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.symbol_of_weakness": {
+  "name": "Symbol of Weakness",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "replaced",
+  "source": "sr-catalog",
+  "resrefs": []
+ },
+ "divine.true_seeing": {
+  "name": "True Seeing",
+  "group": "divine.level5",
+  "level": "Priest 5",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR505"
+  ]
+ },
+ "divine.unholy_blight": {
+  "name": "Unholy Blight",
+  "group": "divine.level3",
+  "level": "Priest 3",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR314"
+  ]
+ },
+ "divine.unholy_word": {
+  "name": "Unholy Word",
+  "group": "divine.level7",
+  "level": "Priest 7",
+  "kind": "changed",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR715"
+  ]
+ },
+ "divine.wondrous_recall": {
+  "name": "Wondrous Recall",
+  "group": "divine.level6",
+  "level": "Priest 6",
+  "kind": "text_only",
+  "source": "sr-catalog",
+  "resrefs": [
+   "SPPR611"
+  ]
+ },
+ "iwd.cleric_alicorn_lance": {
+  "name": "Alicorn Lance",
+  "group": "iwd.priest.level2",
+  "level": "IWD Priest 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_animal_rage": {
+  "name": "Animal Rage",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_beast_claw": {
+  "name": "Beast Claw",
+  "group": "iwd.priest.level2",
+  "level": "IWD Priest 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_blood_rage": {
+  "name": "Blood Rage",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_critical_wounds_iwd": {
+  "name": "Cause Critical Wounds",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_disease": {
+  "name": "Cause Disease",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_light_wounds": {
+  "name": "Cause Light Wounds",
+  "group": "iwd.priest.level1",
+  "level": "IWD Priest 1",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_medium_wounds": {
+  "name": "Cause Medium Wounds",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_moderate_wounds": {
+  "name": "Cause Moderate Wounds",
+  "group": "iwd.priest.level2",
+  "level": "IWD Priest 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cause_serious_wounds_iwd": {
+  "name": "Cause Serious Wounds",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_chant": {
+  "name": "Chant",
+  "group": "iwd.priest.level2",
+  "level": "IWD Priest 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_circle_of_bones": {
+  "name": "Circle of Bones",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cloud_of_pestilence": {
+  "name": "Cloud of Pestilence",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cloudburst": {
+  "name": "Cloudburst",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_cure_moderate_wounds": {
+  "name": "Cure Moderate Wounds",
+  "group": "iwd.priest.level2",
+  "level": "IWD Priest 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_curse": {
+  "name": "Curse",
+  "group": "iwd.priest.level1",
+  "level": "IWD Priest 1",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_destruction": {
+  "name": "Destruction",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_energy_drain": {
+  "name": "Energy Drain",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_entropy_shield": {
+  "name": "Entropy Shield",
+  "group": "iwd.priest.level6",
+  "level": "IWD Priest 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_exaltation": {
+  "name": "Exaltation",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_favor_of_ilmater": {
+  "name": "Favor of Ilmater",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_giant_insect": {
+  "name": "Giant Insect",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_greater_shield_of_lathander": {
+  "name": "Greater Shield of Lathander",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_impervious_sanctity_of_mind": {
+  "name": "Impervious Sanctity of Mind",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_mass_cause_light_wounds": {
+  "name": "Mass Cause Light Wounds",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_mist_of_eldath": {
+  "name": "Mist of Eldath",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_mold_touch": {
+  "name": "Mold Touch",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_moonblade": {
+  "name": "Moonblade",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_prayer": {
+  "name": "Prayer",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_produce_fire": {
+  "name": "Produce Fire",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_recitation": {
+  "name": "Recitation",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_righteous_wrath_of_the_faithful": {
+  "name": "Righteous Wrath of the Faithful",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_shield_of_lathander": {
+  "name": "Shield of Lathander",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_smashing_wave": {
+  "name": "Smashing Wave",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_spike_growth": {
+  "name": "Spike Growth",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_spike_stones": {
+  "name": "Spike Stones",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_spiritual_wrath": {
+  "name": "Spiritual Wrath",
+  "group": "iwd.priest.level6",
+  "level": "IWD Priest 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_stalker": {
+  "name": "Stalker",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_star_metal_cudgel": {
+  "name": "Star Metal Cudgel",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_static_charge": {
+  "name": "Static Charge",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_storm_shell": {
+  "name": "Storm Shell",
+  "group": "iwd.priest.level3",
+  "level": "IWD Priest 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_sunscorch": {
+  "name": "Sunscorch",
+  "group": "iwd.priest.level1",
+  "level": "IWD Priest 1",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_symbol_hopelessness": {
+  "name": "Symbol, Hopelessness",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_symbol_pain": {
+  "name": "Symbol, Pain",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_thorn_spray": {
+  "name": "Thorn Spray",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_undead_ward": {
+  "name": "Undead Ward",
+  "group": "iwd.priest.level5",
+  "level": "IWD Priest 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_unfailing_endurance": {
+  "name": "Unfailing Endurance",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_wall_of_moonlight": {
+  "name": "Wall of Moonlight",
+  "group": "iwd.priest.level4",
+  "level": "IWD Priest 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_whirlwind": {
+  "name": "Whirlwind",
+  "group": "iwd.priest.level6",
+  "level": "IWD Priest 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.cleric_wither": {
+  "name": "Wither",
+  "group": "iwd.priest.level7",
+  "level": "IWD Priest 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_acid_storm": {
+  "name": "Acid Storm",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_antimagic_shell": {
+  "name": "Antimagic Shell",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_beltyns_burning_blood": {
+  "name": "Beltyn's Burning Blood",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_cats_grace": {
+  "name": "Cat's Grace",
+  "group": "iwd.wizard.level2",
+  "level": "IWD Wizard 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_conjure_lesser_air_elemental": {
+  "name": "Conjure Air Elemental",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_conjure_lesser_earth_elemental": {
+  "name": "Conjure Earth Elemental",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_conjure_lesser_fire_elemental": {
+  "name": "Conjure Fire Elemental",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_conjure_lesser_water_elemental": {
+  "name": "Conjure Water Elemental",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_conjure_water_elemental": {
+  "name": "Conjure Water Elemental",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_darts_of_bone": {
+  "name": "Darts of Bone",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_decastave": {
+  "name": "Decastave",
+  "group": "iwd.wizard.level2",
+  "level": "IWD Wizard 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_demi_shadow_monsters": {
+  "name": "Demi-Shadow Monsters",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_emotion_courage": {
+  "name": "Emotion, Courage",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_emotion_fear": {
+  "name": "Emotion, Fear",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_emotion_hope": {
+  "name": "Emotion, Hope",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_emotion_hopelessness": {
+  "name": "Emotion, Hopelessness",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_expeditious_retreat": {
+  "name": "Expeditious Retreat",
+  "group": "iwd.wizard.level1",
+  "level": "IWD Wizard 1",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_great_shout": {
+  "name": "Great Shout",
+  "group": "iwd.wizard.level8",
+  "level": "IWD Wizard 8",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_icelance": {
+  "name": "Icelance",
+  "group": "iwd.wizard.level3",
+  "level": "IWD Wizard 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_iron_body": {
+  "name": "Iron Body",
+  "group": "iwd.wizard.level8",
+  "level": "IWD Wizard 8",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_lance_of_disruption": {
+  "name": "Lance of Disruption",
+  "group": "iwd.wizard.level3",
+  "level": "IWD Wizard 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_lich_touch": {
+  "name": "Lich Touch",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_malavons_rage": {
+  "name": "Malavon's Rage",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_mind_blank": {
+  "name": "Mind Blank",
+  "group": "iwd.wizard.level8",
+  "level": "IWD Wizard 8",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_1": {
+  "name": "Monster Summoning I",
+  "group": "iwd.wizard.level3",
+  "level": "IWD Wizard 3",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_2": {
+  "name": "Monster Summoning II",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_3": {
+  "name": "Monster Summoning III",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_4": {
+  "name": "Monster Summoning IV",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_5": {
+  "name": "Monster Summoning V",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_6": {
+  "name": "Monster Summoning VI",
+  "group": "iwd.wizard.level8",
+  "level": "IWD Wizard 8",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_monster_summoning_7": {
+  "name": "Monster Summoning VII",
+  "group": "iwd.wizard.level9",
+  "level": "IWD Wizard 9",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_mordenkainens_force_missiles": {
+  "name": "Mordenkainen's Force Missiles",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_mordenkainens_sword_iwd": {
+  "name": "Mordenkainen's Force Blade",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_otilukes_freezing_sphere": {
+  "name": "Otiluke's Freezing Sphere",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_seven_eyes": {
+  "name": "Seven Eyes",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_shades": {
+  "name": "Shades",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_shadow_monsters": {
+  "name": "Shadow Monsters",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_shout": {
+  "name": "Shout",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_shroud_of_flame": {
+  "name": "Shroud of Flame",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_snillocs_snowball_swarm": {
+  "name": "Snilloc's Snowball Swarm",
+  "group": "iwd.wizard.level2",
+  "level": "IWD Wizard 2",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_soul_eater": {
+  "name": "Soul Eater",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_suffocate": {
+  "name": "Suffocate",
+  "group": "iwd.wizard.level7",
+  "level": "IWD Wizard 7",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_summon_shadow": {
+  "name": "Summon Shadow",
+  "group": "iwd.wizard.level5",
+  "level": "IWD Wizard 5",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_trollish_fortitude": {
+  "name": "Trollish Fortitude",
+  "group": "iwd.wizard.level6",
+  "level": "IWD Wizard 6",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "iwd.wizard_vitriolic_sphere": {
+  "name": "Vitriolic Sphere",
+  "group": "iwd.wizard.level4",
+  "level": "IWD Wizard 4",
+  "kind": "spell",
+  "source": "iwd",
+  "resrefs": []
+ },
+ "k.10": {
+  "name": "Deva and Planetar avatars (SR component 10)",
+  "group": "k",
+  "level": "HLA summons",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.20": {
+  "name": "Mirror Image fix (SR component 20)",
+  "group": "k",
+  "level": "wizard 2",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.30": {
+  "name": "Dispel Magic fix (SR component 30)",
+  "group": "k",
+  "level": "Dispel Magic, Remove Magic",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.55": {
+  "name": "Spell Deflection stops area spells (SR component 55)",
+  "group": "k",
+  "level": "Spell Deflection, Turning, Trap",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.60": {
+  "name": "Joinable NPCs' spellbooks (SR component 60)",
+  "group": "k",
+  "level": "joinable NPCs",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.65": {
+  "name": "Revised warrior HLAs (SR component 65)",
+  "group": "k",
+  "level": "warrior HLAs",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.70": {
+  "name": "Revised saving throws (SR component 70)",
+  "group": "k",
+  "level": "all classes",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.80": {
+  "name": "Lightning Bolt: classic or without bouncing (fork components 80/81)",
+  "group": "k",
+  "level": "wizard 3",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.refresh": {
+  "name": "Protection refresh on the right target (fork)",
+  "group": "k",
+  "level": "wizard 6-8",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "k.rr": {
+  "name": "Rogue Rebalancing with SR (fork tail)",
+  "group": "k",
+  "level": "enemy mages",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.beschreibungen": {
+  "name": "Accurate descriptions",
+  "group": "x",
+  "level": "all spells",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.buff-dauern": {
+  "name": "Longer buff durations (prebuff style)",
+  "group": "x",
+  "level": "several levels",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.buff-stacking": {
+  "name": "Limit buff stacking",
+  "group": "x",
+  "level": "priest and wizard",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.druiden-kleriker": {
+  "name": "Separate cleric and druid spell lists",
+  "group": "x",
+  "level": "priest",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.nur-feinde": {
+  "name": "Area spells that hit only enemies",
+  "group": "x",
+  "level": "several levels",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ },
+ "x.universal": {
+  "name": "Universal school for Contingency, Sequencer, Trigger, Wish",
+  "group": "x",
+  "level": "wizard",
+  "kind": "page",
+  "source": "page",
+  "resrefs": []
+ }
+}
