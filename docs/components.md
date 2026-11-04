@@ -83,7 +83,11 @@ the sleeper takes damage.
 - Spiders (race SPIDER) and amorphous creatures (race SLIME: slimes, jellies, oozes,
   puddings) are immune: every ability starts with "immune to this spell, with the
   game's message" for those races (opcode 324 with the SPLPROT.2DA row `RACE = value`;
-  the row is appended when a game lacks it).
+  the row is appended when a game lacks it). The base game's spiders already resist the
+  cast Web: they carry the item `ANTIWEB`, an immunity to the projectile that brings
+  Web's effects (all 38 spiders of BG2:EE, 58 of 62 in EET). The race immunity adds Web
+  without that projectile (applied directly, e.g. by script or another mod) and spiders
+  without the item; in EET those are Siege of Dragonspear's three driders and Centeol.
 - Not yet: flying, incorporeal and very large creatures. The game data has no flag for
   them, so which creatures count waits for Christopher's answer. Radius and school come
   later.

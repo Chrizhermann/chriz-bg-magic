@@ -176,8 +176,9 @@ def msd(c, check):
 
 def fireball(c, check):
     # 3. Fireball at portrait 0, twice each way: breath save 1 (always succeeds) with
-    #    spell save 20 (the worst; only a natural 20 can save), then the other way round. With save vs. breath the first
-    #    set takes half damage, the second full; the ratio does not depend on difficulty.
+    #    spell save 20 (the worst; only a natural 20 can save), then the other way round.
+    #    With save vs. breath the first set takes half damage, the second full; the ratio
+    #    does not depend on difficulty.
     #    The level-18 mage (portrait 1) casts, so the Fireball has its full 10d6.
     runs, flags = {}, []
     for setup, saves in (("breath-succeeds", "{breath = 1, spell = 20}"), ("breath-fails", "{breath = 20, spell = 1}")):
@@ -208,9 +209,10 @@ def fireball(c, check):
 def wake(c, check):
     # 4. Damage wakes sleepers: a huge spider (level 2, 18 HP, only the generic
     #    attack-on-sight script), held in place. Sleep and Power Word: Sleep are cast at
-    #    it. Color Spray's cone and Stinking Cloud's cloud did not reach a held creature
-    #    in this arena, so their effects are applied to it directly (ApplySpellRES): the
-    #    delivery is the base game's, the sleep effect is what the fix changed.
+    #    it. Color Spray never landed on it beside the party, and Stinking Cloud lacked a
+    #    target (a Dense Pudding takes no sleep, a spawned wolf was not found), so their
+    #    effects are applied to the spider directly (ApplySpellRES): the delivery is the
+    #    base game's, the sleep effect is what the fix changed.
     c.p("sp-spawn", 'spawn("SPIDHU01", 110, 0)')
     time.sleep(2)
     c.p("sp-pin", 'pin("spidhu01")')
@@ -233,8 +235,14 @@ def wake(c, check):
 
 
 def web(c, check, p0):
-    # 5. Web: a spider and a slime are immune; a tasloi (kobold) whose spell save always
-    #    succeeds and whose breath save always fails is caught.
+    # 5. Web, cast at a giant spider, a green slime and a tasloi (kobold). The slime is
+    #    immune through the fix (its RING95 stops hold and sleep, not Web). The tasloi,
+    #    with spell save 1 and breath save 20, is caught, and its Web effects carry the
+    #    breath save; Web keeps the base game's -2, so even a spell save of 1 can fail and
+    #    the catch alone proves nothing about the save type. Every base-game spider
+    #    carries ANTIWEB, an immunity to the projectile that brings Web's effects, so the
+    #    cast cannot show the fix's spider immunity: Web is then applied to the spider
+    #    directly (ApplySpellRES, no projectile), where only the fix can stop it.
     spots = {"SPIDGI01": (-280, -30), "JELGRE01": (-280, 30), "TASLOI01": (-240, 0)}
     for res, (dx, dy) in spots.items():
         c.p(f"web-spawn-{res}", f'spawn("{res}", {dx}, {dy})')
@@ -242,14 +250,28 @@ def web(c, check, p0):
     for key in ("spidgi01", "Green Slime", "Tasloi"):
         c.p(f"web-pin-{key}", f'pin("{key}")')
     c.p("web-saves", 'set_saves("Tasloi", {breath = 20, spell = 1}, 600)')
+    # The worst saves for the spider and the slime: only an immunity can spare them.
+    for key in ("spidgi01", "Green Slime"):
+        c.p(f"web-saves-{key}", f'set_saves("{key}", {{breath = 20, spell = 20}}, 600)')
     c.p("web-cast", f'cast_point(1, "SPWI215", {p0["x"] - 265}, {p0["y"]})')
     time.sleep(3)
     got = {key: c.p(f"web-read-{key}", f'creature("{key}", "SPWI215")') for key in ("spidgi01", "Green Slime", "Tasloi")}
     caught = {key: bool(effects_of(d, 157)) for key, d in got.items()}
-    check("Web: spider and slime immune, the tasloi caught through its breath save",
-          caught == {"spidgi01": False, "Green Slime": False, "Tasloi": True},
-          caught=caught, states={k: hex(d["state"]) for k, d in got.items()},
-          immunities={k: [(e["op"], e["p1"]) for e in effects_of(d) if e["op"] == 324] for k, d in got.items()})
+    saves = [e["save"] for e in effects_of(got["Tasloi"])]
+    check("Web: the slime immune, the tasloi caught through its breath save (the spider through ANTIWEB)",
+          caught == {"spidgi01": False, "Green Slime": False, "Tasloi": True}
+          and all(isinstance(s, int) and s & 2 and not s & 1 for s in saves),
+          caught=caught, tasloi_saves=saves, states={k: hex(d["state"]) for k, d in got.items()})
+    # The effect logger shows that the spell reached the spider (its opcode 324 first).
+    c.p("web-log-clear", "take_log()")
+    c.p("web-watch-spidgi01", 'watch("spidgi01", 8)')
+    c.p("web-apply-spidgi01", 'apply_spell(1, "SPWI215", \'"spidgi01"\')')
+    time.sleep(3)
+    direct = c.p("web-read-direct-spidgi01", 'creature("spidgi01", "SPWI215")')
+    arrived = [e["op"] for e in (c.p("web-log-spidgi01", "take_log()") or []) if str(e["src"]).upper() == "SPWI215"]
+    check("Web applied without its projectile: the spider immune",
+          not effects_of(direct, 157) and 324 in arrived,
+          state=hex(direct["state"]), effects=[(e["op"], e["save"]) for e in effects_of(direct)], arrived=arrived)
 
 
 def main():

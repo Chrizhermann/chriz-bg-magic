@@ -191,9 +191,9 @@ Example, Spirit Armor (lab A):
 EEex Remote Console v0.2.0; `tests/lab/probe.lua` ran inside the game. The party: three
 level-18 casters from the BuffBot lab's test save, in its QA arena (both staged for the
 run and removed afterwards, together with the console and the QA menu). The test creatures
-were spawned, kept from dying and held in place. Nothing was saved. Two game runs: all
-groups but Fireball, then Fireball alone; the guards stayed clean (no sound, no pointer
-capture, nothing left running).
+were spawned, kept from dying and held in place. Nothing was saved. Three game runs: all
+groups but Fireball, then Fireball alone, then Web alone with the stricter Web checks
+below; the guards stayed clean (no sound, no pointer capture, nothing left running).
 
 | Check | Result |
 |---|---|
@@ -202,22 +202,33 @@ capture, nothing left running).
 | Minor Spell Deflection, then Melf's Acid Arrow (level 2) | absorbed: hit points 112 → 112, pool 4 → 2 |
 | Sleep cast at a huge spider, then a 1-point hit | asleep (state 0x21: sleeping + held), awake after the hit (0x20); its sleep effect has wake-on-damage on |
 | Color Spray, Power Word: Sleep, Stinking Cloud | the same: asleep, awake after one hit |
-| Web at a giant spider, a green slime and a tasloi (spell save 1, breath save 20) | spider and slime not caught; the tasloi caught, so its breath save decided (vanilla's spell save could not fail) |
+| Web cast at a giant spider, a green slime (both with the worst saves, 20) and a tasloi (spell save 1, breath save 20) | the slime not caught (nothing in the base game spares it: its item `RING95` stops hold and sleep, not Web); the tasloi caught, all three Web effects on it with save type 2 (Breath); the spider not caught, but that is the base game's `ANTIWEB` (see below) |
+| Web applied to the giant spider without its projectile (`ApplySpellRES`) | not caught: the effect log shows the spell arriving, its two race immunities (opcode 324) first, and no Web effect stays |
 | Fireball by the level-18 mage at a party member | breath save 1, spell save 20: 14 and 12 damage; breath save 20, spell save 1: 26 and 24 (full); the damage arrived with save type 0x1000002 (Breath, bypass Mirror Image) |
 
 Lessons from the harness (not about the mod):
 
 - Loading the save first crashed in `CWeather::Update`, also with Chriz BG Magic
   uninstalled: the QA arena was not in `MASTAREA.2DA`. With its row added, it loaded.
-- Sleep's and Color Spray's area projectiles skipped the test creature while it was made
-  neutral; Color Spray's cone takes "1d6 creatures in order of increasing distance" and
-  never reached the creature here. Color Spray and Stinking Cloud were therefore applied
-  to it directly (`ApplySpellRES`): their delivery is the base game's, the sleep effect is
-  what the fix changed.
+- Sleep's area projectile skipped the test creature while it was made neutral and hit it
+  once it stayed hostile. Color Spray, cast four times at the held spider beside the
+  party, never landed (its description: up to 1d6 creatures, nearest first; not traced
+  further). Stinking Cloud's cloud reached a Dense Pudding, which took no sleep (nor the
+  hold), and a wolf spawned as the next target was not found. Both spells were therefore
+  applied to the spider directly (`ApplySpellRES`): their delivery is the base game's,
+  the sleep effect is what the fix changed.
 - A creature asleep without a portrait icon (Power Word: Sleep) moves to the area's back
   list, which a lookup has to walk as well.
 - Twice the console stopped answering in the Fireball step after saves had been set to
-  30 (the game shows at most 20); with 20 the step ran through. Not proven as the cause.
+  30 (they read back as 20). With 20, Fireball in a game run of its own and a lighter
+  effect logger, the step ran through; which change helped is not known.
+- The first Web check was too weak, so Web ran again on its own. Every base-game spider
+  carries the item `ANTIWEB`, an immunity to the projectile that brings Web's effects (all
+  38 spiders of BG2:EE, 58 of 62 in EET), so a cast cannot show the fix's spider
+  immunity; the spider's and the slime's own saves had not been fixed either; and Web's
+  -2 lets even a spell save of 1 fail. The Web run gives both the worst saves, applies Web
+  to the spider without its projectile, logs the arriving effects and requires the breath
+  save on the tasloi's Web effects.
 
 ## Not covered
 
@@ -225,7 +236,9 @@ Lessons from the harness (not about the mod):
   Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt (the same data change as
   Fireball, install-checked); Spirit Armor's expiry damage when the time runs out (the
   check counts the waiting expiry casts); how the updated descriptions look in the game;
-  EET in play (lab B was install-checked only).
+  EET in play (lab B was install-checked only), including the four EET spiders without
+  `ANTIWEB` (Siege of Dragonspear's three driders and Centeol), which the spider immunity
+  now spares from the cast Web too.
 - Spell Revisions installs: the installer refuses for now (his decision pending).
 - Other mods than EE Fixpack (SCS, Tweaks Anthology, ...), and BG2:EE 2.6.6.0.
 - Description updates in other languages than English.

@@ -44,10 +44,11 @@ C:CreateCreature("AEGNOLL")
 
 ## 3. Save vs. Breath bei Explosionen und Flächenschaden
 
-1. Dein Save vs. Breath gelingt immer, dein Save vs. Spell nie:
+1. Dein Save vs. Breath gelingt immer, dein Save vs. Spell fast nie (20 ist der
+   schlechteste Wert, nur eine gewürfelte 20 rettet):
    ```
    C:Eval('ChangeStat(Player1,SAVEVSBREATH,1,SET)')
-   C:Eval('ChangeStat(Player1,SAVEVSSPELL,30,SET)')
+   C:Eval('ChangeStat(Player1,SAVEVSSPELL,20,SET)')
    ```
 2. Den Gnoll auf Stufe 10 heben, damit der Schaden deutlich ist, und ihn einen Fireball
    auf dich werfen lassen (vorher mit Ctrl+R heilen, falls nötig):
@@ -83,6 +84,13 @@ C:CreateCreature("AEGNOLL")
    C:CreateItem("SCRL99",3)
    ```
 2. Web (SCRL99) auf die Gruppe lesen.
-   **Erwartet:** Spinne und Slime bleiben frei („Unaffected“ im Log), der Gnoll klebt
-   (wenn er seinen Save vs. Breath mit -2 nicht schafft).
-3. Text der Schriftrolle: **Erwartet:** „Saving Throw vs. Breath with a -2 penalty“.
+   **Erwartet:** Spinne und Slime bleiben frei, der Gnoll klebt (wenn er seinen Save
+   vs. Breath mit -2 nicht schafft). Beim Slime ist das der Fix. Die Spinne war schon im
+   Grundspiel frei: alle Spinnen tragen das Item `ANTIWEB`, das vor dem Web-Projektil
+   schützt.
+3. Unser Spinnen-Schutz, ohne Projektil: Web direkt auf die Spinne legen:
+   ```
+   C:Eval('ActionOverride(Player1,ApplySpellRES("SPWI215","spidgi01"))')
+   ```
+   **Erwartet:** Die Spinne bleibt frei (im Grundspiel klebt sie jetzt).
+4. Text der Schriftrolle: **Erwartet:** „Saving Throw vs. Breath with a -2 penalty“.
