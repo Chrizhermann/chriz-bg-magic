@@ -208,17 +208,19 @@ def fireball(c, check):
 
 def wake(c, check):
     # 4. Damage wakes sleepers: a huge spider (level 2, 18 HP, only the generic
-    #    attack-on-sight script), held in place. Sleep and Power Word: Sleep are cast at
-    #    it. Color Spray never landed on it beside the party, and Stinking Cloud lacked a
-    #    target (a Dense Pudding takes no sleep, a spawned wolf was not found), so their
-    #    effects are applied to the spider directly (ApplySpellRES): the delivery is the
-    #    base game's, the sleep effect is what the fix changed.
+    #    attack-on-sight script), held in place. Sleep, Power Word: Sleep, Command, Greater
+    #    Command and Emotion: Hopelessness are cast at it. Color Spray never landed on it
+    #    beside the party, and Stinking Cloud lacked a target (a Dense Pudding takes no
+    #    sleep, a spawned wolf was not found), so their effects are applied to the spider
+    #    directly (ApplySpellRES): the delivery is the base game's, the sleep effect is
+    #    what the fix changed.
     c.p("sp-spawn", 'spawn("SPIDHU01", 110, 0)')
     time.sleep(2)
     c.p("sp-pin", 'pin("spidhu01")')
     c.p("sp-saves", 'set_saves("spidhu01", {death = 20, spell = 20}, 600)')
     for spell, label in (("SPWI116", "Sleep"), ("SPWI105", "Color Spray"), ("SPWI220", "Power Word: Sleep"),
-                         ("SPWI213", "Stinking Cloud")):
+                         ("SPWI213", "Stinking Cloud"), ("SPPR102", "Command"), ("SPPR512", "Greater Command"),
+                         ("SPWI411", "Emotion: Hopelessness")):
         c.p(f"wk-cure-{spell}", 'cure_sleep("spidhu01")')
         time.sleep(1)
         how = "apply_spell" if spell in ("SPWI105", "SPWI213") else "cast"
@@ -235,36 +237,47 @@ def wake(c, check):
 
 
 def web(c, check, p0):
-    # 5. Web, cast at a giant spider, a green slime and a tasloi (kobold). The slime is
-    #    immune through the fix (its RING95 stops hold and sleep, not Web). The tasloi,
-    #    with spell save 1 and breath save 20, is caught, and its Web effects carry the
-    #    breath save; Web keeps the base game's -2, so even a spell save of 1 can fail and
-    #    the catch alone proves nothing about the save type. Every base-game spider
-    #    carries ANTIWEB, an immunity to the projectile that brings Web's effects, so the
-    #    cast cannot show the fix's spider immunity: Web is then applied to the spider
-    #    directly (ApplySpellRES, no projectile), where only the fix can stop it.
-    spots = {"SPIDGI01": (-280, -30), "JELGRE01": (-280, 30), "TASLOI01": (-240, 0)}
+    # 5. Web, cast at a giant spider, a tasloi (kobold) and one creature of each group the
+    #    fix spares that nothing in the base game protects: a green slime (its RING95
+    #    stops hold and sleep, not Web), a gauth (flying; real beholders have an item
+    #    against Web), a greater wraith (incorporeal) and a fire giant (very large). They
+    #    get the worst saves, and the effect logger shows that the spell reached them, so
+    #    only the immunity can have spared them. The tasloi, with spell save 1 and breath
+    #    save 20, is caught, and its Web effects carry the breath save; Web keeps the base
+    #    game's -2, so even a spell save of 1 can fail and the catch alone proves nothing
+    #    about the save type. Every base-game spider carries ANTIWEB, an immunity to the
+    #    projectile that brings Web's effects, so the cast cannot show the fix's spider
+    #    immunity: Web is then applied to the spider directly (ApplySpellRES, no
+    #    projectile), where only the fix can stop it.
+    spots = {"SPIDGI01": (-280, -30), "JELGRE01": (-280, 30), "TASLOI01": (-240, 0),
+             "BEHGAU01": (-320, 0), "FIRWRA01": (-240, -60), "GIANTF01": (-240, 60)}
     for res, (dx, dy) in spots.items():
         c.p(f"web-spawn-{res}", f'spawn("{res}", {dx}, {dy})')
-    time.sleep(2)
-    for key in ("spidgi01", "Green Slime", "Tasloi"):
+    time.sleep(3)
+    immune = ("Green Slime", "Gauth", "Greater Wraith", "Fire Giant")
+    keys = ("spidgi01", "Tasloi", *immune)
+    for key in keys:
         c.p(f"web-pin-{key}", f'pin("{key}")')
     c.p("web-saves", 'set_saves("Tasloi", {breath = 20, spell = 1}, 600)')
-    # The worst saves for the spider and the slime: only an immunity can spare them.
-    for key in ("spidgi01", "Green Slime"):
+    for key in ("spidgi01", *immune):
         c.p(f"web-saves-{key}", f'set_saves("{key}", {{breath = 20, spell = 20}}, 600)')
+    c.p("web-log-clear", "take_log()")
+    for key in keys:
+        c.p(f"web-watch-{key}", f'watch("{key}", 12)')
     c.p("web-cast", f'cast_point(1, "SPWI215", {p0["x"] - 265}, {p0["y"]})')
     time.sleep(3)
-    got = {key: c.p(f"web-read-{key}", f'creature("{key}", "SPWI215")') for key in ("spidgi01", "Green Slime", "Tasloi")}
+    got = {key: c.p(f"web-read-{key}", f'creature("{key}", "SPWI215")') for key in keys}
+    log = c.p("web-log-cast", "take_log()") or []
+    reached = {key: [e["op"] for e in log if e["who"] == key and str(e["src"]).upper() == "SPWI215"] for key in immune}
     caught = {key: bool(effects_of(d, 157)) for key, d in got.items()}
     saves = [e["save"] for e in effects_of(got["Tasloi"])]
-    check("Web: the slime immune, the tasloi caught through its breath save (the spider through ANTIWEB)",
-          caught == {"spidgi01": False, "Green Slime": False, "Tasloi": True}
+    check("Web: slime, gauth, wraith and giant immune, the tasloi caught through its breath save "
+          "(the spider through ANTIWEB)",
+          caught == {"spidgi01": False, "Tasloi": True, **dict.fromkeys(immune, False)}
+          and all(324 in ops for ops in reached.values())
           and all(isinstance(s, int) and s & 2 and not s & 1 for s in saves),
-          caught=caught, tasloi_saves=saves, states={k: hex(d["state"]) for k, d in got.items()})
-    # The effect logger shows that the spell reached the spider (its opcode 324 first).
-    c.p("web-log-clear", "take_log()")
-    c.p("web-watch-spidgi01", 'watch("spidgi01", 8)')
+          caught=caught, reached=reached, tasloi_saves=saves, states={k: hex(d["state"]) for k, d in got.items()})
+    # The spider's logger from above is still running: the spell reaches it now.
     c.p("web-apply-spidgi01", 'apply_spell(1, "SPWI215", \'"spidgi01"\')')
     time.sleep(3)
     direct = c.p("web-read-direct-spidgi01", 'creature("spidgi01", "SPWI215")')

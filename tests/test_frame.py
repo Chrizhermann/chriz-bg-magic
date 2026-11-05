@@ -28,16 +28,17 @@ def refuses_bgee(work, weidu):
 
 @test
 def spell_revisions_policy(work, weidu):
-    """With Spell Revisions' marker present the installer follows cbmagic_sr_policy:
-    refuse (the default until Christopher decides), warn and coexist."""
-    g = fg.FakeGame(work / "refuse", weidu, tlk=fx.tlk(), biff=fx.game(), override={"DVIMHERE.MRK": b"x"})
+    """With Spell Revisions' marker present the installer follows cbmagic_sr_policy: warn
+    (Christopher's decision), and refuse and coexist if that ever changes."""
+    g = fg.FakeGame(work / "warn", weidu, tlk=fx.tlk(), biff=fx.game(), override={"DVIMHERE.MRK": b"x"})
     out = g.install()
-    check(fg.failed(out) and "Spell Revisions is installed" in out, f"refuse:\n{out}")
+    check(fg.with_warnings(out) and "Do not use Chriz BG Magic together with Spell Revisions" in out, f"warn:\n{out}")
     lib = (fg.MOD / "lib/cbmagic_shared.tpa").read_text(encoding="utf-8")
-    for policy, expect in (("warn", fg.with_warnings), ("coexist", lambda o: "SUCCESSFULLY INSTALLED" in o)):
+    for policy, expect in (("refuse", lambda o: fg.failed(o) and "Spell Revisions is installed" in o),
+                           ("coexist", lambda o: "SUCCESSFULLY INSTALLED" in o)):
         g = fg.FakeGame(work / policy, weidu, tlk=fx.tlk(), biff=fx.game(), override={"DVIMHERE.MRK": b"x"})
         (g.root / "chriz-bg-magic/lib/cbmagic_shared.tpa").write_text(
-            lib.replace("OUTER_SPRINT cbmagic_sr_policy ~refuse~", f"OUTER_SPRINT cbmagic_sr_policy ~{policy}~"),
+            lib.replace("OUTER_SPRINT cbmagic_sr_policy ~warn~", f"OUTER_SPRINT cbmagic_sr_policy ~{policy}~"),
             encoding="utf-8")
         out = g.install()
         check(expect(out), f"{policy}:\n{out}")

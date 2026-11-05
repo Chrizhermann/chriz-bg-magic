@@ -63,7 +63,7 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
                     check({**e, "save": 0} == {**f, "save": 0}, f"{res}: damage effect changed beyond its save")
                 else:
                     check(e == f, f"{res}: other effect changed")
-    for untouched in ("SPWI523", "SPWI900", "SPWI615", "SPWI911", "SPPR705", "SPPR102", "SPWI220"):
+    for untouched in ("SPWI523", "SPWI900", "SPWI615", "SPWI911", "SPPR705", "SPWI220"):
         check(g.file(f"override/{untouched}.SPL") is None, f"{untouched} must stay untouched")
     check("vs. Breath for half" in g.tlk(g.spl("SPWI712")["desc"]), "DBF text")
     check(g.itm_descs("SCRL8N")[1] == g.spl("SPWI712")["desc"], "DBF scroll text")
@@ -74,7 +74,7 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
     check("[SPWI900]" in out and "not its own" in out, "Sunfire's foreign cast not reported")
 
     # Damage wakes sleepers.
-    for res in ("SPWI116", "SPWI105", "SPWI213"):
+    for res in ("SPWI116", "SPWI105", "SPWI213", "SPPR102", "SPPR512", "SPWI411"):
         s, o = g.spl(res), orig[res]
         for a, b in zip(s["abilities"], o["abilities"]):
             check([e["p2"] for e in a["effects"] if e["opcode"] == 39] == [0] * ops(b["effects"]).count(39),
@@ -87,11 +87,11 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
     # Web: immunities first, the web's roll vs. breath (the -2 stays), the own save kept.
     s, o = g.spl("SPWI215"), orig["SPWI215"]
     effects = s["abilities"][0]["effects"]
-    imm = effects[:2]
+    imm = effects[:len(fx.WEB_RACES)]
     check(sorted((e["opcode"], e["p1"], e["p2"], e["resource"], e["target"], e["power"], e["timing"], e["dispel"])
-                 for e in imm) == [(324, 116, 4, "SPWI215", 2, 2, 0, 2), (324, 119, 4, "SPWI215", 2, 2, 0, 2)],
+                 for e in imm) == [(324, race, 4, "SPWI215", 2, 2, 0, 2) for race, _ in fx.WEB_RACES],
           f"Web immunities: {imm}")
-    for e, f in zip(effects[2:], o["abilities"][0]["effects"]):
+    for e, f in zip(effects[len(fx.WEB_RACES):], o["abilities"][0]["effects"]):
         if f["opcode"] == 12:
             check(e == f, "Web: the effect with its own save must keep it")
         else:
@@ -131,7 +131,8 @@ def second_install_changes_nothing(work, weidu):
 def other_layouts_and_mod_variations(work, weidu):
     """Casting effects stored behind the abilities, extra and reordered effects, a
     self-cast Spirit Armor copy, MSD levels in reverse with the end-of-spell resource on a
-    removed level, and a Web that already has one of the immunities."""
+    removed level, a Web that already has one of the immunities, and a sleep that sits in
+    a spell of its own (EE Fixpack's Emotion: Hopelessness)."""
     sa = ie.make_spl(1, 4, [{"target": 5, "effects": [fx.fx(opcode=174, target=1, resource="EFF_E02"),
                                                     fx.fx(opcode=37, target=1, power=4, p1=3, duration=600)]},
                            {"target": 1, "effects": [fx.fx(opcode=321, power=4, timing=1, resource="spwi414"),
@@ -142,6 +143,11 @@ def other_layouts_and_mod_variations(work, weidu):
                                                                     fx.damage(fx.FIRE, lvl)]),
                            casting=[fx.fx(opcode=265, target=1, timing=1, resource="mgArea1")], extra_fx_first=True,
                            desc=fx.FIREBALL_DESC)
+    hopeless = ie.make_spl(1, 4, fx.by_level([1, 8], lambda lvl: [
+        fx.fx(opcode=142, power=4, p2=37, duration=54),
+        fx.fx(opcode=146, power=4, p2=2, timing=1, save=ie.SAVE_SPELL, resource="SPWI411B")]))
+    hopeless_sleep = ie.make_spl(1, 4, fx.by_level([1, 8], lambda lvl: [
+        fx.fx(opcode=39, power=4, p2=1, duration=54), fx.fx(opcode=174, power=4, timing=4, duration=54)]))
     pre = fresh(work / "pre", weidu, tp2=PROBE_TP2.replace("%BODY%", r"""
 COPY_EXISTING ~spwi215.spl~ ~override~
   LPF cbmagic_add_immunity INT_VAR row = 4 value = 119 RET added present END
@@ -149,7 +155,8 @@ COPY_EXISTING ~spwi215.spl~ ~override~
     check(fg.installed_ok(pre.install()), "pre-patch")
     web_pre = pre.file("override/SPWI215.SPL")
     g = fresh(work / "main", weidu, replace={"SPWI414_SPL": sa, "SPWI318_SPL": msd, "SPWI304_SPL": fireball,
-                                             "SPWI215_SPL": web_pre})
+                                             "SPWI215_SPL": web_pre, "SPWI411_SPL": hopeless,
+                                             "SPWI411B_SPL": hopeless_sleep})
     out = g.install()
     check("SUCCESSFULLY INSTALLED" in out, f"install:\n{out}")
     s = g.spl("SPWI414")
@@ -166,7 +173,11 @@ COPY_EXISTING ~spwi215.spl~ ~override~
     check(ops(s["casting"]) == [265] and all(ops(a["effects"]) == [215, 12] for a in s["abilities"]), "fireball layout")
     check(all(a["effects"][1]["save"] & 3 == 2 for a in s["abilities"]), "fireball save")
     imm = [e for e in g.spl("SPWI215")["abilities"][0]["effects"] if e["opcode"] == 324]
-    check(sorted(e["p1"] for e in imm) == [116, 119], f"Web immunities: {imm}")
+    check(sorted(e["p1"] for e in imm) == [race for race, _ in fx.WEB_RACES], f"Web immunities: {imm}")
+    check("WIZARD_EMOTION_HOPELESSNESS (SPWI411): 2 sleep effects now end on damage" in out, f"Hopelessness:\n{out}")
+    check(g.file("override/SPWI411.SPL") is None, "the spell that only casts the sleep must stay")
+    check([e["p2"] for a in g.spl("SPWI411B")["abilities"] for e in a["effects"] if e["opcode"] == 39] == [0, 0],
+          "the sleep in its own spell still does not wake")
 
 
 @test
@@ -189,6 +200,19 @@ def honest_outcomes_for_missing_odd_and_unclear_input(work, weidu):
         check(g.file(f"override/{res}.SPL") is None, f"{res} must stay untouched")
     check(g.file("override/SPWI304.SPL") is not None and g.file("override/SPWI116.SPL") is not None,
           "the other fixes must still install")
+
+
+@test
+def a_race_the_game_lacks_is_named(work, weidu):
+    """A RACE.IDS without one of the races: that immunity is named and left out, the others
+    install."""
+    ids = ie.make_ids([p for p in fx.RACES if p[1] != "ETTIN"])
+    g = fresh(work, weidu, replace={"RACE_IDS": ids})
+    out = g.install()
+    check(fg.with_warnings(out) and "RACE.IDS has no ETTIN; that immunity is left out" in out, f"warning:\n{out}")
+    imm = [e for e in g.spl("SPWI215")["abilities"][0]["effects"] if e["opcode"] == 324]
+    check(sorted(e["p1"] for e in imm) == [race for race, name in fx.WEB_RACES if name != "ETTIN"],
+          f"Web immunities: {imm}")
 
 
 @test

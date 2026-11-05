@@ -10,11 +10,14 @@ SPELL_SYMBOLS = [
     (2105, "WIZARD_COLOR_SPRAY"), (2116, "WIZARD_SLEEP"), (2213, "WIZARD_STINKING_CLOUD"),
     (2215, "WIZARD_WEB"), (2220, "WIZARD_POWER_WORD_SLEEP"), (2304, "WIZARD_FIREBALL"),
     (2308, "WIZARD_LIGHTNING_BOLT"), (2313, "WIZARD_SKULL_TRAP"), (2318, "WIZARD_MINOR_SPELL_DEFLECTION"),
-    (2414, "WIZARD_SPIRIT_ARMOR"), (2503, "WIZARD_CONE_OF_COLD"), (2523, "WIZARD_SUN_FIRE"),
+    (2411, "WIZARD_EMOTION_HOPELESSNESS"), (2414, "WIZARD_SPIRIT_ARMOR"), (2503, "WIZARD_CONE_OF_COLD"),
+    (2523, "WIZARD_SUN_FIRE"),
     (2615, "WIZARD_CHAIN_LIGHTNING"), (2618, "WIZARD_SPELL_DEFLECTION"), (2712, "WIZARD_DELAYED_BLAST_FIREBALL"),
     (2810, "WIZARD_INCENDIARY_CLOUD"), (2911, "WIZARD_METEOR_SWARM"),
 ]
-RACES = [(1, "HUMAN"), (2, "ELF"), (116, "SPIDER"), (119, "SLIME"), (146, "DRAGON")]
+WEB_RACES = [(116, "SPIDER"), (118, "WYVERN"), (119, "SLIME"), (123, "BEHOLDER"), (132, "SHADOW"), (133, "SPECTRE"),
+             (134, "WRAITH"), (136, "MIST"), (139, "MEPHIT"), (142, "GIANT"), (146, "DRAGON"), (199, "ETTIN")]
+RACES = [(1, "HUMAN"), (2, "ELF"), *WEB_RACES]
 
 FIRE, COLD, ELEC, MAGIC = 0x80000, 0x20000, 0x40000, 0x400000
 SPELL_SAVE = ie.SAVE_SPELL | ie.BYPASS_MIRROR
@@ -123,8 +126,23 @@ def sleep_spells():
         "SPWI220.SPL": ie.make_spl(1, 2, [{"target": 1, "effects": [
             fx(opcode=324, power=2, p1=20, p2=144, resource="SPWI220"),
             fx(opcode=217, power=2, timing=1)]}]),
-        # Not part of the batch: Command keeps its sleep as it is.
-        "SPPR102.SPL": ie.make_spl(2, 1, [{"target": 1, "effects": [fx(opcode=39, power=1, p2=1, duration=6)]}]),
+        # Command: one sleep without a save up to 5 Hit Dice, one with a save from 6 on.
+        "SPPR102.SPL": ie.make_spl(2, 1, [{"target": 1, "effects": [
+            fx(opcode=324, power=1, p2=19, prob1=30, resource="SPPR102"),
+            fx(opcode=39, power=1, p2=1, duration=6, dice=5),
+            fx(opcode=215, power=1, timing=1, resource="SPCOMSTT"),
+            fx(opcode=39, power=1, p2=1, duration=6, sides=6, save=ie.SAVE_SPELL),
+            fx(opcode=174, power=1, timing=4, duration=6, resource="EFF_E05")]}]),
+        "SPPR512.SPL": ie.make_spl(2, 5, [{"target": 1, "min_level": lvl, "effects": [
+            fx(opcode=324, power=5, p2=19, prob1=30, duration=1, resource="SPPR512"),
+            fx(opcode=39, power=5, p2=1, duration=6 * lvl, save=ie.SAVE_SPELL),
+            fx(opcode=174, power=5, timing=4, duration=6 * lvl, save=ie.SAVE_SPELL, resource="EFF_E07")]}
+            for lvl in (1, 10, 20)]),
+        "SPWI411.SPL": ie.make_spl(1, 4, by_level([1, 8, 20], lambda lvl: [
+            fx(opcode=321, power=4, timing=1, resource="SPWI205"),
+            fx(opcode=142, power=4, p2=37, duration=54),
+            fx(opcode=39, power=4, p2=1, duration=54, save=ie.SAVE_SPELL),
+            fx(opcode=101, power=4, p2=24, duration=54)])),
     }
 
 

@@ -14,9 +14,10 @@ None of the changes below needs EEex. They work on BG2:EE and EET (built and che
 
 ## Spell Revisions installed
 
-Chriz BG Magic replaces Spell Revisions. What the installer does when Spell Revisions is
-installed (refuse, warn, or install anyway) is Christopher's call; until he has decided,
-it refuses (`cbmagic_sr_policy` in `lib/cbmagic_shared.tpa`).
+Chriz BG Magic replaces Spell Revisions and the two do not go together (Christopher,
+2026-11-06). The installer says so plainly in a warning and carries on; no work goes into
+making them fit. The setting is `cbmagic_sr_policy` in `lib/cbmagic_shared.tpa`, so a hard
+refusal is one word away if the two get declared incompatible outright.
 
 ## Spirit Armor (`cbmagic_fix_spirit_armor`)
 
@@ -60,21 +61,26 @@ stay. Chain Lightning, mind and transmutation spells keep their save vs. spell.
   Descriptions that named the save ("Saving Throw vs. Spell", "Save vs. Spell") now say
   "vs. Breath", on the spells and their scrolls. Fireball, Sunfire and Cone of Cold texts
   name no save type and stay.
-- Not yet: Meteor Swarm and Fire Storm. The base game gives them no save at all, so the
-  rule would add one; that waits for Christopher's answer.
+- Not part of it: Meteor Swarm and Fire Storm. The base game gives them no save at all,
+  and they stay that way for now; a save is on the list of possible later changes.
+- Trap and monster copies of these spells keep their save vs. spell.
 
 ## Damage wakes sleepers (`cbmagic_fix_wake_on_damage`)
 
-The magical sleep of Sleep, Color Spray, Stinking Cloud and Power Word: Sleep ends when
-the sleeper takes damage.
+The magical sleep of Sleep, Color Spray, Stinking Cloud, Power Word: Sleep, Command,
+Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 
 - How: their sleep effects (opcode 39) get "wake on damage" (parameter 2 = 0; the base
   game uses 1, no waking). Power Word: Sleep (opcode 217) passes its setting on and has
   it on in the base game already, so nothing changes there.
 - A sleep effect with a permanent timing cannot wake whatever the setting says; such an
   effect is left as it is with a warning.
+- Emotion: Hopelessness: only its sleep ends, wherever it sits (EE Fixpack moves it into
+  a spell of its own). Its other effects, the portrait icon among them, run out as before
+  and its text stays; the IWD version replaces this spell later.
 - Only the waking. The other changes decided on these rows (immunities, schools) come
-  later. Command, Greater Command and the IWD spells wait for Christopher's answer.
+  later. The IWD spells that put creatures to sleep or knock them out get the same when
+  they are built. Trap and monster copies of these spells stay as they are.
 
 ## Web (`cbmagic_fix_web`)
 
@@ -88,9 +94,22 @@ the sleeper takes damage.
   Web's effects (all 38 spiders of BG2:EE, 58 of 62 in EET). The race immunity adds Web
   without that projectile (applied directly, e.g. by script or another mod) and spiders
   without the item; in EET those are Siege of Dragonspear's three driders and Centeol.
-- Not yet: flying, incorporeal and very large creatures. The game data has no flag for
-  them, so which creatures count waits for Christopher's answer. Radius and school come
-  later.
+- Flying, incorporeal and very large creatures: the game has no flag for these, so this
+  goes by race too, and for now only the very obvious ones (Christopher, 2026-11-06):
+  - flying: WYVERN (wyverns, fairy and pseudo dragons), BEHOLDER (the whole family, gauths
+    and spectators too), MEPHIT;
+  - incorporeal: SPECTRE (ghosts, apparitions, specters), WRAITH (wraiths, banshees),
+    SHADOW (shadows, shade wolves), MIST (gaseous forms, mists, nishruus);
+  - very large: DRAGON, GIANT (fire and hill giants, cyclopes), ETTIN.
+
+  Almost all dragons, true wyverns and true beholders were immune before through items of
+  their own; for giants, ettins, mephits, wraiths, spectres, shadows and most mists this
+  is new.
+- Left out for now, on the list of possible later changes: imps and quasits, genies, devas
+  and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big
+  elementals and other large creatures. Web's -2 stays for now, although Web may be too
+  strong in the base game; that is on the same list.
+- Radius and school come later.
 
 ## Descriptions
 

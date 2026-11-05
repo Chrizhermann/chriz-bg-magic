@@ -17,6 +17,10 @@ first fixes are in review. Nothing is released yet.
 There is no release yet. Once there is, extract the release zip into the game folder and
 run `setup-chriz-bg-magic` with WeiDU.
 
+**Do not install Chriz BG Magic together with Spell Revisions.** It replaces Spell
+Revisions, the two are not compatible, and the installer warns if it finds Spell
+Revisions.
+
 ## Tests
 
 `python tests/run_tests.py --weidu <path to weidu.exe>` runs the installer against small

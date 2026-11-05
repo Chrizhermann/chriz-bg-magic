@@ -73,6 +73,15 @@ C:CreateCreature("AEGNOLL")
 2. Sleep (SCRL81) auf die Gnolle lesen. Wenn einer schläft, mit der Waffe zuschlagen.
    **Erwartet:** Er wacht beim ersten Treffer auf (Vanilla: schläft weiter).
 3. Dasselbe mit Color Spray (SCRL70) und Stinking Cloud (SCRL97).
+4. Command, Greater Command und Emotion: Hopelessness, je einzeln auf einen Gnoll, danach
+   wieder zuschlagen:
+   ```
+   C:Eval('ActionOverride(Player1,ReallyForceSpellRES("SPPR102","aegnoll"))')
+   C:Eval('ActionOverride(Player1,ReallyForceSpellRES("SPPR512","aegnoll"))')
+   C:Eval('ActionOverride(Player1,ReallyForceSpellRES("SPWI411","aegnoll"))')
+   ```
+   **Erwartet:** Er wacht beim ersten Treffer auf (Vanilla: schläft weiter). Bei
+   Hopelessness endet nur der Schlaf; die übrigen Effekte laufen wie gehabt aus.
 
 ## 5. Web
 
@@ -93,4 +102,12 @@ C:CreateCreature("AEGNOLL")
    C:Eval('ActionOverride(Player1,ApplySpellRES("SPWI215","spidgi01"))')
    ```
    **Erwartet:** Die Spinne bleibt frei (im Grundspiel klebt sie jetzt).
-4. Text der Schriftrolle: **Erwartet:** „Saving Throw vs. Breath with a -2 penalty“.
+4. Je ein Wesen aus den neuen Gruppen (fliegend, körperlos, sehr groß), nah beieinander:
+   ```
+   C:CreateCreature("BEHGAU01")
+   C:CreateCreature("FIRWRA01")
+   C:CreateCreature("GIANTF01")
+   ```
+   Web (SCRL99) auf die Gruppe lesen. **Erwartet:** Gauth, Greater Wraith und Fire Giant
+   bleiben frei, auch wenn sie ihren Save nicht schaffen.
+5. Text der Schriftrolle: **Erwartet:** „Saving Throw vs. Breath with a -2 penalty“.

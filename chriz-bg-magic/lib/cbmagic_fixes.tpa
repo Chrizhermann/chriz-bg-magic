@@ -171,7 +171,7 @@ END
 // "Save-Art nach Logik", and the rows of these spells) -----------------------------------
 // Their damage now allows a save vs. breath instead of vs. spell, with the same bonus and
 // the same damage. Meteor Swarm and Fire Storm have no save at all in the base game and
-// are not part of this change yet (question to Christopher). Chain Lightning, mind and
+// stay that way for now (Christopher, 2026-11-06: maybe later). Chain Lightning, mind and
 // transmutation spells keep their save vs. spell.
 DEFINE_ACTION_FUNCTION cbmagic_fix_breath_saves
 BEGIN
@@ -202,13 +202,17 @@ BEGIN
 END
 
 // --- Damage wakes sleepers (rows arcane.level1.sleep, arcane.level1.color_spray,
-// arcane.level2.stinking_cloud, arcane.level2.power_word_sleep) -------------------------
+// arcane.level2.stinking_cloud, arcane.level2.power_word_sleep, divine.command,
+// divine.greater_command, arcane.level4.emotion_despair) --------------------------------
 // The magical sleep of these spells ends when the sleeper takes damage. Only the waking;
-// the other changes decided on these rows come later. Command, Greater Command and the
-// IWD spells wait for Christopher's answer.
+// the other changes decided on these rows come later. The IWD spells get the same when
+// they are built.
 DEFINE_ACTION_FUNCTION cbmagic_fix_wake_on_damage
 BEGIN
-  ACTION_FOR_EACH symbol IN WIZARD_SLEEP WIZARD_COLOR_SPRAY WIZARD_STINKING_CLOUD WIZARD_POWER_WORD_SLEEP BEGIN
+  ACTION_FOR_EACH symbol IN
+    WIZARD_SLEEP WIZARD_COLOR_SPRAY WIZARD_STINKING_CLOUD WIZARD_POWER_WORD_SLEEP
+    CLERIC_COMMAND CLERIC_GREATER_COMMAND WIZARD_EMOTION_HOPELESSNESS
+  BEGIN
     LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
     ACTION_IF !found BEGIN
       WARN ~chriz-bg-magic: Damage wakes sleepers: %symbol% is not in this game; left out.~
@@ -231,9 +235,10 @@ END
 
 // --- Web (row arcane.level2.web) -------------------------------------------------------
 // Save vs. breath instead of vs. spell (the vanilla -2 stays), and creatures the strands
-// cannot hold are immune: spiders and amorphous creatures (slimes, jellies, oozes) now.
-// Flying, incorporeal and very large creatures wait for Christopher's answer on which
-// creatures count. Radius and school come later.
+// cannot hold are immune, by race: spiders, amorphous creatures, and for now only the very
+// obvious flying, incorporeal and very large ones (Christopher, 2026-11-06; the game has
+// no flag for these, docs/components.md names what each race covers). Radius and school
+// come later.
 DEFINE_ACTION_FUNCTION cbmagic_fix_web
 BEGIN
   LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_WEB~ RET spell = resref found END
@@ -251,7 +256,9 @@ BEGIN
         END ELSE BEGIN
           PATCH_PRINT ~chriz-bg-magic: Web (%spell%): %changed% web effects now save vs. breath (%others% effects of the same roll with them); %already% did already.~
         END
-        PATCH_FOR_EACH race IN SPIDER SLIME BEGIN
+        PATCH_FOR_EACH race IN
+          SPIDER SLIME WYVERN BEHOLDER MEPHIT SPECTRE WRAITH SHADOW MIST DRAGON GIANT ETTIN
+        BEGIN
           SET value = IDS_OF_SYMBOL (~race~ ~%race%~)
           PATCH_IF (value < 0) BEGIN
             PATCH_WARN ~chriz-bg-magic: Web (%spell%): RACE.IDS has no %race%; that immunity is left out.~

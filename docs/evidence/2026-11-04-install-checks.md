@@ -1,5 +1,7 @@
 # Install and in-game checks, 2026-11-04
 
+The second round, after Christopher's answers, is in [2026-11-06-second-round.md](2026-11-06-second-round.md).
+
 The five fixes of branch `claude/first-five-fixes`, installed in two disposable labs built
 from clean game copies and checked there: first the installed data (both labs), then in
 play in lab A, with Christopher's OK for the launches ("Ja, starte sie").

@@ -18,7 +18,8 @@
   "open": "still undecided, not to be built",
   "todo": "decided, not built yet",
   "done": "built",
-  "lab-checked": "built, installed in a disposable lab and checked there (docs/evidence names what was checked in play)"
+  "lab-checked": "built, installed in a disposable lab and checked there (docs/evidence names what was checked in play)",
+  "later": "a possible later change on Christopher's list, nothing to build now"
  },
  "rows": [
   {
@@ -748,8 +749,16 @@
      "status": "lab-checked"
     },
     {
-     "spec": "Flying, incorporeal and very large creatures immune: which creatures count waits for Christopher's answer.",
-     "status": "todo"
+     "spec": "The very obvious flying, incorporeal and very large creatures are immune, by race: WYVERN, BEHOLDER, MEPHIT; SPECTRE, WRAITH, SHADOW, MIST; DRAGON, GIANT, ETTIN.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Maybe other creatures: imps and quasits, genies, devas and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big elementals and other large creatures.",
+     "status": "later"
+    },
+    {
+     "spec": "Web may be too strong in the base game; its -2 stays for now.",
+     "status": "later"
     },
     {
      "spec": "Smaller radius (maybe, like SR); school Conjuration.",
@@ -1056,10 +1065,18 @@
    "group": "arcane.level4",
    "level": "Wizard 4",
    "source": "sr-catalog",
-   "resrefs": [],
+   "resrefs": [
+    "SPWI411"
+   ],
    "decision": "vanilla",
    "decided_at": "2026-11-03T12:34:13.440Z",
-   "status": "todo"
+   "parts": [
+    {
+     "spec": "Damage ends the sleep of the base game's Emotion: Hopelessness; its other effects run out as before. The IWD version replaces this spell when the IWD spells are built.",
+     "status": "lab-checked"
+    }
+   ],
+   "status": "lab-checked"
   },
   {
    "id": "arcane.level4.enchanted_weapon",
@@ -2197,11 +2214,11 @@
    "decided_at": "2026-11-02T23:23:34.363Z",
    "parts": [
     {
-     "spec": "Save vs. breath per the save rule. Vanilla Meteor Swarm has no save at all, so this would add one: waits for Christopher's answer.",
-     "status": "todo"
+     "spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.",
+     "status": "later"
     }
    ],
-   "status": "todo"
+   "status": "later"
   },
   {
    "id": "arcane.level9.power_word_kill",
@@ -2706,6 +2723,16 @@
    ],
    "decision": "keep",
    "decided_at": "2026-11-02T23:06:00.352Z",
+   "parts": [
+    {
+     "spec": "Damage wakes the sleeper.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "The rest of the decision (Spell Revisions' version of the spell, built ourselves).",
+     "status": "todo"
+    }
+   ],
    "status": "todo"
   },
   {
@@ -3070,11 +3097,11 @@
    "decided_at": "2026-11-02T22:53:27.494Z",
    "parts": [
     {
-     "spec": "Save vs. breath per the save rule. Vanilla Fire Storm has no save at all, so this would add one: waits for Christopher's answer.",
-     "status": "todo"
+     "spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.",
+     "status": "later"
     }
    ],
-   "status": "todo"
+   "status": "later"
   },
   {
    "id": "divine.fire_trap",
@@ -3188,7 +3215,17 @@
    ],
    "decision": "vanilla",
    "decided_at": "2026-11-03T20:39:47.171Z",
-   "status": "todo"
+   "parts": [
+    {
+     "spec": "Vanilla, but damage wakes the sleepers.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Maybe a harder save.",
+     "status": "later"
+    }
+   ],
+   "status": "lab-checked"
   },
   {
    "id": "divine.greater_restoration",
@@ -5336,11 +5373,65 @@
      "status": "lab-checked"
     },
     {
-     "spec": "Meteor Swarm and Fire Storm: vanilla has no save at all; waits for Christopher's answer.",
+     "spec": "Meteor Swarm and Fire Storm have no save at all in the base game and stay that way for now; a save vs. breath is on the list of possible later changes.",
+     "status": "later"
+    }
+   ],
+   "status": "lab-checked"
+  },
+  {
+   "id": "chat.damage_wakes_sleepers",
+   "title": "Damage wakes sleepers",
+   "rows": [
+    "arcane.level1.sleep",
+    "arcane.level1.color_spray",
+    "arcane.level2.stinking_cloud",
+    "arcane.level2.power_word_sleep",
+    "divine.command",
+    "divine.greater_command",
+    "arcane.level4.emotion_despair"
+   ],
+   "resrefs": [
+    "SPWI116",
+    "SPWI105",
+    "SPWI213",
+    "SPWI220",
+    "SPPR102",
+    "SPPR512",
+    "SPWI411"
+   ],
+   "parts": [
+    {
+     "spec": "Sleep, Color Spray, Stinking Cloud, Power Word: Sleep, Command, Greater Command and Emotion: Hopelessness: damage ends the sleep.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "The IWD spells that put creatures to sleep or knock them out get the same when they are built.",
      "status": "todo"
     }
    ],
    "status": "todo"
+  },
+  {
+   "id": "chat.other_spell_mods",
+   "title": "Spell Revisions and SCS",
+   "rows": [],
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Not together with Spell Revisions: the README says so and the installer warns plainly and carries on. No work goes into making them fit.",
+     "status": "done"
+    },
+    {
+     "spec": "Declare the two incompatible outright at some later step.",
+     "status": "later"
+    },
+    {
+     "spec": "At some later step: when installed after SCS, Chriz BG Magic may overwrite SCS's changes.",
+     "status": "later"
+    }
+   ],
+   "status": "done"
   }
  ]
 }

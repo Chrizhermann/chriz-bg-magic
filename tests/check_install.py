@@ -20,8 +20,10 @@ SAVE_RULE = ["WIZARD_FIREBALL", "WIZARD_DELAYED_BLAST_FIREBALL", "WIZARD_SUN_FIR
              "CLERIC_FLAME_STRIKE", "WIZARD_SKULL_TRAP", "CLERIC_GLYPH_OF_WARDING", "WIZARD_INCENDIARY_CLOUD",
              "WIZARD_LIGHTNING_BOLT"]
 KEEP_SAVE = ["WIZARD_CHAIN_LIGHTNING", "WIZARD_METEOR_SWARM", "CLERIC_FIRE_STORM"]
-SLEEP = ["WIZARD_SLEEP", "WIZARD_COLOR_SPRAY", "WIZARD_STINKING_CLOUD", "WIZARD_POWER_WORD_SLEEP"]
-UNTOUCHED_SLEEP = ["CLERIC_COMMAND", "CLERIC_GREATER_COMMAND"]
+SLEEP = ["WIZARD_SLEEP", "WIZARD_COLOR_SPRAY", "WIZARD_STINKING_CLOUD", "WIZARD_POWER_WORD_SLEEP",
+         "CLERIC_COMMAND", "CLERIC_GREATER_COMMAND", "WIZARD_EMOTION_HOPELESSNESS"]
+WEB_RACES = ["SPIDER", "SLIME", "WYVERN", "BEHOLDER", "MEPHIT", "SPECTRE", "WRAITH", "SHADOW", "MIST", "DRAGON",
+             "GIANT", "ETTIN"]
 
 
 class Installed:
@@ -135,14 +137,18 @@ def main():
     # Damage wakes sleepers
     for sym in SLEEP:
         res = g.resref(sym)
-        now, old = spl(res)
-        p2 = [e["p2"] for a in now["abilities"] for e in a["effects"] if e["opcode"] in (39, 217)]
-        rest = all(same_but(e, f, {"p2"}) if f["opcode"] in (39, 217) else e == f
-                   for a, b in zip(now["abilities"], old["abilities"]) for e, f in zip(a["effects"], b["effects"]))
-        ok(p2 and set(p2) == {0} and rest, f"{sym} {res}: {len(p2)} sleep effects wake on damage, nothing else changed")
-    for sym in UNTOUCHED_SLEEP:
-        res = g.resref(sym)
-        ok(f"{res}.SPL" not in g.written, f"{sym} {res}: unchanged (waits for Christopher)")
+        now, _ = spl(res)
+        # EE Fixpack moves Emotion: Hopelessness' sleep into a spell of its own.
+        targets = [res] + sorted({e["resource"] for a in now["abilities"] for e in a["effects"]
+                                  if e["opcode"] in (146, 148) and e["resource"].startswith(res) and e["resource"] != res})
+        p2, rest = [], True
+        for r in targets:
+            now, old = spl(r)
+            p2 += [e["p2"] for a in now["abilities"] for e in a["effects"] if e["opcode"] in (39, 217)]
+            rest &= all(same_but(e, f, {"p2"}) if f["opcode"] in (39, 217) else e == f
+                        for a, b in zip(now["abilities"], old["abilities"]) for e, f in zip(a["effects"], b["effects"]))
+        ok(p2 and set(p2) == {0} and rest,
+           f"{sym} {', '.join(targets)}: {len(p2)} sleep effects wake on damage, nothing else changed")
 
     # Web
     res = g.resref("WIZARD_WEB")
@@ -155,13 +161,13 @@ def main():
     rows = [ln.split() for ln in g.game.get("SPLPROT", "2DA").decode("latin-1").splitlines()]
     rows = [r for r in rows[3:] if len(r) >= 4]
     for i, (a, b) in enumerate(zip(now["abilities"], old["abilities"])):
-        imm = a["effects"][:2]
+        imm = a["effects"][:len(WEB_RACES)]
         row_ok = all(int(rows[e["p2"]][1], 0) == 0x10c and rows[e["p2"]][2] == "-1" and rows[e["p2"]][3] == "1"
                      for e in imm if e["opcode"] == 324)
-        ok(sorted((e["opcode"], e["p1"]) for e in imm) == [(324, races["SPIDER"]), (324, races["SLIME"])]
+        ok(sorted((e["opcode"], e["p1"]) for e in imm) == sorted((324, races[r]) for r in WEB_RACES)
            and all(e["resource"] == res for e in imm) and row_ok,
-           f"Web {res} ability {i}: spiders and slimes immune (SPLPROT row {imm[0]['p2']})")
-        rest = a["effects"][2:]
+           f"Web {res} ability {i}: {len(WEB_RACES)} races immune (SPLPROT row {imm[0]['p2']})")
+        rest = a["effects"][len(WEB_RACES):]
         group = {f["bonus"] for f in b["effects"] if f["opcode"] == 157 and f["save"] & 1}
         good = len(rest) == len(b["effects"])
         for e, f in zip(rest, b["effects"]):
