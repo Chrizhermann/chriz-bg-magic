@@ -10,8 +10,8 @@
   without extra penalties.
 - Damage wakes creatures put to sleep by Sleep, Color Spray, Stinking Cloud, Command,
   Greater Command and Emotion: Hopelessness (Power Word: Sleep does so already).
-- Web: save vs. breath instead of vs. spell (the -2 stays); spiders, amorphous creatures
-  and the very obvious flying, incorporeal and very large creatures are immune.
+- Web: save vs. breath instead of vs. spell (the -2 stays); spiders, amorphous creatures,
+  dragons and the very obvious flying and incorporeal creatures are immune.
 - Descriptions that named the old behaviour are updated (English).
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the

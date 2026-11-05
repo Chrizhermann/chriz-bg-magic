@@ -102,12 +102,13 @@ C:CreateCreature("AEGNOLL")
    C:Eval('ActionOverride(Player1,ApplySpellRES("SPWI215","spidgi01"))')
    ```
    **Erwartet:** Die Spinne bleibt frei (im Grundspiel klebt sie jetzt).
-4. Je ein Wesen aus den neuen Gruppen (fliegend, körperlos, sehr groß), nah beieinander:
+4. Je ein Wesen aus den neuen Gruppen (fliegend, körperlos) und ein Riese, nah beieinander:
    ```
    C:CreateCreature("BEHGAU01")
    C:CreateCreature("FIRWRA01")
    C:CreateCreature("GIANTF01")
    ```
-   Web (SCRL99) auf die Gruppe lesen. **Erwartet:** Gauth, Greater Wraith und Fire Giant
-   bleiben frei, auch wenn sie ihren Save nicht schaffen.
+   Web (SCRL99) auf die Gruppe lesen. **Erwartet:** Gauth und Greater Wraith bleiben frei,
+   auch wenn sie ihren Save nicht schaffen. Der Fire Giant klebt, wenn er seinen Save nicht
+   schafft: Riesen sind nicht immun.
 5. Text der Schriftrolle: **Erwartet:** „Saving Throw vs. Breath with a -2 penalty“.

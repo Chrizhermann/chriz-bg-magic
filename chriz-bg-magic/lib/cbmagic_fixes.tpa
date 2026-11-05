@@ -235,10 +235,10 @@ END
 
 // --- Web (row arcane.level2.web) -------------------------------------------------------
 // Save vs. breath instead of vs. spell (the vanilla -2 stays), and creatures the strands
-// cannot hold are immune, by race: spiders, amorphous creatures, and for now only the very
-// obvious flying, incorporeal and very large ones (Christopher, 2026-11-06; the game has
-// no flag for these, docs/components.md names what each race covers). Radius and school
-// come later.
+// cannot hold are immune, by race: spiders, amorphous creatures, dragons, and for now only
+// the very obvious flying and incorporeal ones (Christopher, 2026-11-06; the game has no
+// flag for these, docs/components.md names what each race covers). Radius and school come
+// later.
 DEFINE_ACTION_FUNCTION cbmagic_fix_web
 BEGIN
   LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_WEB~ RET spell = resref found END
@@ -257,7 +257,7 @@ BEGIN
           PATCH_PRINT ~chriz-bg-magic: Web (%spell%): %changed% web effects now save vs. breath (%others% effects of the same roll with them); %already% did already.~
         END
         PATCH_FOR_EACH race IN
-          SPIDER SLIME WYVERN BEHOLDER MEPHIT SPECTRE WRAITH SHADOW MIST DRAGON GIANT ETTIN
+          SPIDER SLIME WYVERN BEHOLDER MEPHIT SPECTRE WRAITH SHADOW MIST DRAGON
         BEGIN
           SET value = IDS_OF_SYMBOL (~race~ ~%race%~)
           PATCH_IF (value < 0) BEGIN

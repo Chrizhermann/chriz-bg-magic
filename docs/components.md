@@ -94,21 +94,22 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   Web's effects (all 38 spiders of BG2:EE, 58 of 62 in EET). The race immunity adds Web
   without that projectile (applied directly, e.g. by script or another mod) and spiders
   without the item; in EET those are Siege of Dragonspear's three driders and Centeol.
-- Flying, incorporeal and very large creatures: the game has no flag for these, so this
-  goes by race too, and for now only the very obvious ones (Christopher, 2026-11-06):
+- Dragons and flying and incorporeal creatures: the game has no flag for the last two, so
+  this goes by race too, and for now only the very obvious ones (Christopher, 2026-11-06):
+  - DRAGON;
   - flying: WYVERN (wyverns, fairy and pseudo dragons), BEHOLDER (the whole family, gauths
     and spectators too), MEPHIT;
   - incorporeal: SPECTRE (ghosts, apparitions, specters), WRAITH (wraiths, banshees),
-    SHADOW (shadows, shade wolves), MIST (gaseous forms, mists, nishruus);
-  - very large: DRAGON, GIANT (fire and hill giants, cyclopes), ETTIN.
+    SHADOW (shadows, shade wolves), MIST (gaseous forms, mists, nishruus).
 
   Almost all dragons, true wyverns and true beholders were immune before through items of
-  their own; for giants, ettins, mephits, wraiths, spectres, shadows and most mists this
-  is new.
+  their own; for mephits, wraiths, spectres, shadows and most mists this is new. Giants and
+  ettins stay catchable.
 - Left out for now, on the list of possible later changes: imps and quasits, genies, devas
-  and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big
-  elementals and other large creatures. Web's -2 stays for now, although Web may be too
-  strong in the base game; that is on the same list.
+  and planetars, bats, birds and will-o'-wisps (no race of their own), golems and big
+  elementals. Fire elementals burn, so a web holding them makes little sense. Web's -2
+  stays for now, although Web may be too strong in the base game. An idea on the same list,
+  far off: webs that can catch fire.
 - Radius and school come later.
 
 ## Descriptions

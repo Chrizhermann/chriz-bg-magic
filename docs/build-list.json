@@ -749,15 +749,19 @@
      "status": "lab-checked"
     },
     {
-     "spec": "The very obvious flying, incorporeal and very large creatures are immune, by race: WYVERN, BEHOLDER, MEPHIT; SPECTRE, WRAITH, SHADOW, MIST; DRAGON, GIANT, ETTIN.",
+     "spec": "Dragons and the very obvious flying and incorporeal creatures are immune, by race: DRAGON; WYVERN, BEHOLDER, MEPHIT; SPECTRE, WRAITH, SHADOW, MIST. Giants and ettins are not.",
      "status": "lab-checked"
     },
     {
-     "spec": "Maybe other creatures: imps and quasits, genies, devas and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big elementals and other large creatures.",
+     "spec": "Maybe other creatures: imps and quasits, genies, devas and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big elementals. Fire elementals burn, so a web holding them makes little sense.",
      "status": "later"
     },
     {
      "spec": "Web may be too strong in the base game; its -2 stays for now.",
+     "status": "later"
+    },
+    {
+     "spec": "An idea, far off: webs that can catch fire, but not easily, say from someone standing in one with a fire shield for a round or two. It needs a mechanic of its own first.",
      "status": "later"
     },
     {

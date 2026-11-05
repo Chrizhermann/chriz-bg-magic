@@ -5,8 +5,8 @@ Christopher Hermann's own spell mod for **Baldur's Gate II: Enhanced Edition** a
 are made, everything else stays as in the base game, and real bugs and logic errors get
 fixed.
 
-**Status:** early work. The installer frame and the list of decided changes are here; the
-first fixes are in review. Nothing is released yet.
+**Status:** early work. The installer frame, the list of decided changes and the first
+fixes are here. Nothing is released yet.
 
 - Target: BG2:EE and EET 2.7.3.0. Where a change needs EEex, it asks for EEex v1.3.1.
 - What each change does, in plain terms: [docs/components.md](docs/components.md).

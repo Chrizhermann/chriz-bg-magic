@@ -237,29 +237,29 @@ def wake(c, check):
 
 
 def web(c, check, p0):
-    # 5. Web, cast at a giant spider, a tasloi (kobold) and one creature of each group the
-    #    fix spares that nothing in the base game protects: a green slime (its RING95
-    #    stops hold and sleep, not Web), a gauth (flying; real beholders have an item
-    #    against Web), a greater wraith (incorporeal) and a fire giant (very large). They
-    #    get the worst saves, and the effect logger shows that the spell reached them, so
-    #    only the immunity can have spared them. The tasloi, with spell save 1 and breath
-    #    save 20, is caught, and its Web effects carry the breath save; Web keeps the base
-    #    game's -2, so even a spell save of 1 can fail and the catch alone proves nothing
-    #    about the save type. Every base-game spider carries ANTIWEB, an immunity to the
-    #    projectile that brings Web's effects, so the cast cannot show the fix's spider
-    #    immunity: Web is then applied to the spider directly (ApplySpellRES, no
-    #    projectile), where only the fix can stop it.
+    # 5. Web, cast at a giant spider, a tasloi (kobold), a fire giant and one creature of
+    #    each group the fix spares that nothing in the base game protects: a green slime
+    #    (its RING95 stops hold and sleep, not Web), a gauth (flying; real beholders have an
+    #    item against Web) and a greater wraith (incorporeal). They get the worst saves, and
+    #    the effect logger shows that the spell reached them, so only the immunity can have
+    #    spared them. The fire giant, also with the worst saves, is caught: giants are not
+    #    on the list. The tasloi, with spell save 1 and breath save 20, is caught, and its
+    #    Web effects carry the breath save; Web keeps the base game's -2, so even a spell
+    #    save of 1 can fail and the catch alone proves nothing about the save type. Every
+    #    base-game spider carries ANTIWEB, an immunity to the projectile that brings Web's
+    #    effects, so the cast cannot show the fix's spider immunity: Web is then applied to
+    #    the spider directly (ApplySpellRES, no projectile), where only the fix can stop it.
     spots = {"SPIDGI01": (-280, -30), "JELGRE01": (-280, 30), "TASLOI01": (-240, 0),
              "BEHGAU01": (-320, 0), "FIRWRA01": (-240, -60), "GIANTF01": (-240, 60)}
     for res, (dx, dy) in spots.items():
         c.p(f"web-spawn-{res}", f'spawn("{res}", {dx}, {dy})')
     time.sleep(3)
-    immune = ("Green Slime", "Gauth", "Greater Wraith", "Fire Giant")
-    keys = ("spidgi01", "Tasloi", *immune)
+    immune = ("Green Slime", "Gauth", "Greater Wraith")
+    keys = ("spidgi01", "Tasloi", "Fire Giant", *immune)
     for key in keys:
         c.p(f"web-pin-{key}", f'pin("{key}")')
     c.p("web-saves", 'set_saves("Tasloi", {breath = 20, spell = 1}, 600)')
-    for key in ("spidgi01", *immune):
+    for key in ("spidgi01", "Fire Giant", *immune):
         c.p(f"web-saves-{key}", f'set_saves("{key}", {{breath = 20, spell = 20}}, 600)')
     c.p("web-log-clear", "take_log()")
     for key in keys:
@@ -271,9 +271,9 @@ def web(c, check, p0):
     reached = {key: [e["op"] for e in log if e["who"] == key and str(e["src"]).upper() == "SPWI215"] for key in immune}
     caught = {key: bool(effects_of(d, 157)) for key, d in got.items()}
     saves = [e["save"] for e in effects_of(got["Tasloi"])]
-    check("Web: slime, gauth, wraith and giant immune, the tasloi caught through its breath save "
+    check("Web: slime, gauth and wraith immune, tasloi and giant caught through their breath saves "
           "(the spider through ANTIWEB)",
-          caught == {"spidgi01": False, "Tasloi": True, **dict.fromkeys(immune, False)}
+          caught == {"spidgi01": False, "Tasloi": True, "Fire Giant": True, **dict.fromkeys(immune, False)}
           and all(324 in ops for ops in reached.values())
           and all(isinstance(s, int) and s & 2 and not s & 1 for s in saves),
           caught=caught, reached=reached, tasloi_saves=saves, states={k: hex(d["state"]) for k, d in got.items()})

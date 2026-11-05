@@ -206,12 +206,12 @@ def honest_outcomes_for_missing_odd_and_unclear_input(work, weidu):
 def a_race_the_game_lacks_is_named(work, weidu):
     """A RACE.IDS without one of the races: that immunity is named and left out, the others
     install."""
-    ids = ie.make_ids([p for p in fx.RACES if p[1] != "ETTIN"])
+    ids = ie.make_ids([p for p in fx.RACES if p[1] != "MEPHIT"])
     g = fresh(work, weidu, replace={"RACE_IDS": ids})
     out = g.install()
-    check(fg.with_warnings(out) and "RACE.IDS has no ETTIN; that immunity is left out" in out, f"warning:\n{out}")
+    check(fg.with_warnings(out) and "RACE.IDS has no MEPHIT; that immunity is left out" in out, f"warning:\n{out}")
     imm = [e for e in g.spl("SPWI215")["abilities"][0]["effects"] if e["opcode"] == 324]
-    check(sorted(e["p1"] for e in imm) == [race for race, name in fx.WEB_RACES if name != "ETTIN"],
+    check(sorted(e["p1"] for e in imm) == [race for race, name in fx.WEB_RACES if name != "MEPHIT"],
           f"Web immunities: {imm}")
 
 
