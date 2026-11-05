@@ -29,7 +29,7 @@ IWD_MEANINGS = {
     "rethink": "adjust the IWD spell (still open)",
     "drop": "leave the IWD spell out",
 }
-STATUS_ORDER = ["open", "todo", "done", "lab-checked"]
+STATUS_ORDER = ["open", "todo", "done", "lab-checked", "later"]
 
 
 def overall(parts):
@@ -86,7 +86,9 @@ def main():
         "decisions": MEANINGS,
         "iwd_decisions": IWD_MEANINGS,
         "status": {"open": "still undecided, not to be built", "todo": "decided, not built yet",
-                   "done": "built", "lab-checked": "built and checked in a disposable lab"},
+                   "done": "built", "lab-checked": "built, installed in a disposable lab and checked there "
+                                                   "(docs/evidence names what was checked in play)",
+                   "later": "a possible later change on Christopher's list, nothing to build now"},
         "rows": rows,
         "chat_decisions": chat,
     }

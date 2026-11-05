@@ -1,0 +1,281 @@
+// The decided changes of chriz-bg-magic, one action function each. docs/components.md
+// describes what each one does; docs/build-list.json names the decision behind it.
+// Every function finds its spells through SPELL.IDS, checks the file, changes only what
+// the decision names and prints one line per spell for the WeiDU log.
+
+// The game's text language (weidu.conf lang_dir), e.g. en_us. Description updates exist
+// only for English so far.
+DEFINE_ACTION_FUNCTION cbmagic_game_language
+  RET lang
+BEGIN
+  OUTER_SPRINT lang ~en_us~
+  ACTION_IF (FILE_EXISTS ~weidu.conf~) BEGIN
+    COPY - ~weidu.conf~ ~weidu.conf~
+      REPLACE_EVALUATE CASE_INSENSITIVE ~lang_dir[ %TAB%]*=[ %TAB%]*\([A-Za-z_]+\)~ BEGIN
+        SPRINT lang ~%MATCH1%~
+      END ~%MATCH0%~
+  END
+  ACTION_TO_LOWER lang
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_warn_text_language
+  STR_VAR label = ~~
+BEGIN
+  LAF cbmagic_game_language RET lang END
+  ACTION_IF !(~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+    WARN ~chriz-bg-magic: %label%: descriptions are updated only in English; in this game (%lang%) they still describe the old behaviour.~
+  END
+END
+
+// Patch one spell with a patch function and, if it casts private payloads of its own
+// (a spell whose resref begins with the spell's, e.g. SPWI523 -> SPWI523D), them too.
+// Other spells it casts are named in the log and left alone: they may belong to others.
+// mode: breath (save vs. breath, anchor_opcode), wake (damage wakes sleepers).
+DEFINE_ACTION_FUNCTION cbmagic_patch_spell_and_payloads
+  INT_VAR anchor_opcode = 12
+  STR_VAR spell = ~~ mode = ~~ label = ~~
+  RET changed already others
+BEGIN
+  OUTER_SET changed = 0
+  OUTER_SET already = 0
+  OUTER_SET others = 0
+  OUTER_SPRINT todo ~%spell%~
+  OUTER_SPRINT seen ~ ~
+  OUTER_SPRINT foreign ~~
+  OUTER_SET depth = 0
+  OUTER_WHILE !(~%todo%~ STRING_EQUAL ~~) AND (depth < 3) BEGIN
+    OUTER_SPRINT next ~~
+    OUTER_SPRINT list ~%todo%~
+    OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE res ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      ACTION_TO_UPPER res
+      ACTION_IF (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %res% ~ ~%seen%~) < 0) BEGIN
+        OUTER_SPRINT seen ~%seen%%res% ~
+        ACTION_IF !(FILE_EXISTS_IN_GAME ~%res%.spl~) BEGIN
+          WARN ~chriz-bg-magic: %label%: %res%.spl, which %spell% casts, does not exist; left out.~
+        END ELSE BEGIN
+          COPY_EXISTING ~%res%.spl~ ~override~
+            LPF cbmagic_spl_valid RET valid reason END
+            PATCH_IF !valid BEGIN
+              PATCH_WARN ~chriz-bg-magic: %label% (%res%) left as it is: %reason%.~
+            END ELSE BEGIN
+              PATCH_IF (~%mode%~ STRING_EQUAL ~breath~) BEGIN
+                LPF cbmagic_save_spell_to_breath INT_VAR anchor_opcode RET a = anchors b = already c = others END
+                SET changed += a
+                SET already += b
+                SET others += c
+              END ELSE BEGIN
+                LPF cbmagic_wake_on_damage RET a = woken b = already c = lasting END
+                SET changed += a
+                SET already += b
+                SET others += c
+              END
+              // Spells this one casts.
+              READ_LONG 0x64 ab_off
+              READ_SHORT 0x68 ab_cnt
+              READ_LONG 0x6a fx_off
+              FOR (x = 0; x < ab_cnt; ++x) BEGIN
+                READ_SHORT (ab_off + x * 0x28 + 0x1e) n
+                READ_SHORT (ab_off + x * 0x28 + 0x20) first
+                FOR (i = 0; i < n; ++i) BEGIN
+                  SET fx = fx_off + (first + i) * 0x30
+                  READ_SHORT fx op
+                  READ_ASCII (fx + 0x14) sub (8) NULL
+                  TO_UPPER sub
+                  PATCH_IF ((op = 146) OR (op = 148)) AND !(~%sub%~ STRING_EQUAL ~~) AND !(~%sub%~ STRING_EQUAL ~%res%~) BEGIN
+                    PATCH_IF (INDEX (CASE_INSENSITIVE EXACT_MATCH ~%spell%~ ~%sub%~) = 0) BEGIN
+                      PATCH_IF (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %sub% ~ ~ %next% ~) < 0) BEGIN
+                        SPRINT next ~%next% %sub%~
+                      END
+                    END ELSE PATCH_IF (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %sub% ~ ~ %foreign% ~) < 0) BEGIN
+                      SPRINT foreign ~%foreign% %sub%~
+                    END
+                  END
+                END
+              END
+            END
+          BUT_ONLY
+        END
+      END
+    END
+    OUTER_PATCH_SAVE todo ~%next%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    OUTER_SET depth += 1
+  END
+  ACTION_IF !(~%foreign%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE foreign ~%foreign%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    PRINT ~chriz-bg-magic: %label% (%spell%) also casts [%foreign%]; those spells are not its own and were left as they are.~
+  END
+END
+
+// --- Spirit Armor (row arcane.level4.spirit_armor) ------------------------------------
+// Vanilla stacks Spirit Armor with itself: every casting adds another +3 to saves vs.
+// spell and another expiry damage. A new casting now replaces the old one.
+DEFINE_ACTION_FUNCTION cbmagic_fix_spirit_armor
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SPIRIT_ARMOR~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    WARN ~chriz-bg-magic: Spirit Armor (WIZARD_SPIRIT_ARMOR) is not in this game; left out.~
+  END ELSE BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_add_self_refresh RET added present misplaced END
+        PATCH_PRINT ~chriz-bg-magic: Spirit Armor (%spell%): a new casting replaces the old one in %added% abilities; %present% did so already.~
+        PATCH_IF (misplaced > 0) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Spirit Armor (%spell%): %misplaced% abilities remove the spell's own effects after applying them (the removal is not their first effect), so they cancel themselves; left as they are.~
+        END
+      END ELSE BEGIN
+        PATCH_WARN ~chriz-bg-magic: Spirit Armor (%spell%) left as it is: %reason%.~
+      END
+    BUT_ONLY
+  END
+END
+
+// --- Minor Spell Deflection (row arcane.spell_deflection_progression) -----------------
+// Stops only spells up to level 4 (vanilla: up to 7, so a level-3 spell also absorbed
+// Breach and priest spells up to level 7). The rest of the Spell Deflection and Spell
+// Turning line stays vanilla.
+DEFINE_ACTION_FUNCTION cbmagic_fix_minor_spell_deflection
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_MINOR_SPELL_DEFLECTION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    WARN ~chriz-bg-magic: Minor Spell Deflection (WIZARD_MINOR_SPELL_DEFLECTION) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET removed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_cap_level_deflection INT_VAR max_level = 4 RET removed kept problem END
+        PATCH_IF !(~%problem%~ STRING_EQUAL ~~) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Minor Spell Deflection (%spell%) left as it is: %problem%.~
+        END ELSE PATCH_IF (removed = 0) AND (kept = 0) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Minor Spell Deflection (%spell%) left as it is: it has no level-based deflection (opcode 201) to limit.~
+        END ELSE BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Minor Spell Deflection (%spell%): stops spell levels 1-4 only; %removed% higher-level deflection effects removed, %kept% kept.~
+        END
+      END ELSE BEGIN
+        PATCH_WARN ~chriz-bg-magic: Minor Spell Deflection (%spell%) left as it is: %reason%.~
+      END
+    BUT_ONLY
+    ACTION_IF (removed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Minor Spell Deflection~ END
+      OUTER_SPRINT cbm_find @9111
+      OUTER_SPRINT cbm_replace @9112
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Minor Spell Deflection~ END
+    END
+  END
+END
+
+// --- Save vs. Breath for dodgeable explosions and area damage (decision page overview,
+// "Save-Art nach Logik", and the rows of these spells) -----------------------------------
+// Their damage now allows a save vs. breath instead of vs. spell, with the same bonus and
+// the same damage. Meteor Swarm and Fire Storm have no save at all in the base game and
+// stay that way for now (Christopher, 2026-11-06: maybe later). Chain Lightning, mind and
+// transmutation spells keep their save vs. spell.
+DEFINE_ACTION_FUNCTION cbmagic_fix_breath_saves
+BEGIN
+  LAF cbmagic_warn_text_language STR_VAR label = ~Save vs. Breath~ END
+  ACTION_FOR_EACH symbol IN
+    WIZARD_FIREBALL WIZARD_DELAYED_BLAST_FIREBALL WIZARD_SUN_FIRE WIZARD_CONE_OF_COLD
+    CLERIC_FLAME_STRIKE WIZARD_SKULL_TRAP CLERIC_GLYPH_OF_WARDING WIZARD_INCENDIARY_CLOUD
+    WIZARD_LIGHTNING_BOLT
+  BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+    ACTION_IF !found BEGIN
+      WARN ~chriz-bg-magic: Save vs. Breath: %symbol% is not in this game; left out.~
+    END ELSE BEGIN
+      LAF cbmagic_patch_spell_and_payloads INT_VAR anchor_opcode = 12 STR_VAR spell mode = ~breath~ label = EVAL ~%symbol%~
+        RET changed already others END
+      ACTION_IF (changed > 0) BEGIN
+        PRINT ~chriz-bg-magic: Save vs. Breath: %symbol% (%spell%): %changed% damage effects now save vs. breath (%others% effects of the same roll with them).~
+        OUTER_SPRINT cbm_find @9101
+        OUTER_SPRINT cbm_replace @9102
+        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = EVAL ~%symbol%~ END
+      END ELSE ACTION_IF (already > 0) BEGIN
+        PRINT ~chriz-bg-magic: Save vs. Breath: %symbol% (%spell%) saves vs. breath already.~
+      END ELSE BEGIN
+        WARN ~chriz-bg-magic: Save vs. Breath: %symbol% (%spell%) has no damage with a save vs. spell; left as it is.~
+      END
+    END
+  END
+END
+
+// --- Damage wakes sleepers (rows arcane.level1.sleep, arcane.level1.color_spray,
+// arcane.level2.stinking_cloud, arcane.level2.power_word_sleep, divine.command,
+// divine.greater_command, arcane.level4.emotion_despair) --------------------------------
+// The magical sleep of these spells ends when the sleeper takes damage. Only the waking;
+// the other changes decided on these rows come later. The IWD spells get the same when
+// they are built.
+DEFINE_ACTION_FUNCTION cbmagic_fix_wake_on_damage
+BEGIN
+  ACTION_FOR_EACH symbol IN
+    WIZARD_SLEEP WIZARD_COLOR_SPRAY WIZARD_STINKING_CLOUD WIZARD_POWER_WORD_SLEEP
+    CLERIC_COMMAND CLERIC_GREATER_COMMAND WIZARD_EMOTION_HOPELESSNESS
+  BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+    ACTION_IF !found BEGIN
+      WARN ~chriz-bg-magic: Damage wakes sleepers: %symbol% is not in this game; left out.~
+    END ELSE BEGIN
+      LAF cbmagic_patch_spell_and_payloads STR_VAR spell mode = ~wake~ label = EVAL ~%symbol%~
+        RET changed already others END
+      ACTION_IF (others > 0) BEGIN
+        WARN ~chriz-bg-magic: Damage wakes sleepers: %symbol% (%spell%) has %others% sleep effects with a permanent timing that never wake; left as they are.~
+      END
+      ACTION_IF (changed > 0) BEGIN
+        PRINT ~chriz-bg-magic: Damage wakes sleepers: %symbol% (%spell%): %changed% sleep effects now end on damage; %already% did already.~
+      END ELSE ACTION_IF (already > 0) BEGIN
+        PRINT ~chriz-bg-magic: Damage wakes sleepers: %symbol% (%spell%): its %already% sleep effects end on damage already.~
+      END ELSE ACTION_IF (others = 0) BEGIN
+        WARN ~chriz-bg-magic: Damage wakes sleepers: %symbol% (%spell%) has no sleep effect (opcode 39 or 217); left as it is.~
+      END
+    END
+  END
+END
+
+// --- Web (row arcane.level2.web) -------------------------------------------------------
+// Save vs. breath instead of vs. spell (the vanilla -2 stays), and creatures the strands
+// cannot hold are immune, by race: spiders, amorphous creatures, dragons, and for now only
+// the very obvious flying and incorporeal ones (Christopher, 2026-11-06; the game has no
+// flag for these, docs/components.md names what each race covers). Radius and school come
+// later.
+DEFINE_ACTION_FUNCTION cbmagic_fix_web
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_WEB~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    WARN ~chriz-bg-magic: Web (WIZARD_WEB) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10c value = (0 - 1) relation = 1 RET race_row = row END
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_save_spell_to_breath INT_VAR anchor_opcode = 157 RET changed = anchors already others END
+        PATCH_IF (changed = 0) AND (already = 0) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Web (%spell%): no web effect (opcode 157) with a save vs. spell; its save was left as it is.~
+        END ELSE BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Web (%spell%): %changed% web effects now save vs. breath (%others% effects of the same roll with them); %already% did already.~
+        END
+        PATCH_FOR_EACH race IN
+          SPIDER SLIME WYVERN BEHOLDER MEPHIT SPECTRE WRAITH SHADOW MIST DRAGON
+        BEGIN
+          SET value = IDS_OF_SYMBOL (~race~ ~%race%~)
+          PATCH_IF (value < 0) BEGIN
+            PATCH_WARN ~chriz-bg-magic: Web (%spell%): RACE.IDS has no %race%; that immunity is left out.~
+          END ELSE BEGIN
+            LPF cbmagic_add_immunity INT_VAR row = race_row value RET added present END
+            PATCH_PRINT ~chriz-bg-magic: Web (%spell%): race %race% (%value%) immune in %added% abilities; %present% were already.~
+          END
+        END
+      END ELSE BEGIN
+        PATCH_WARN ~chriz-bg-magic: Web (%spell%) left as it is: %reason%.~
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Web~ END
+      OUTER_SPRINT cbm_find @9101
+      OUTER_SPRINT cbm_replace @9102
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Web~ END
+    END
+  END
+END

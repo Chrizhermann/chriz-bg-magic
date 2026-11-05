@@ -4,6 +4,8 @@ VERSION ~v0.1.0-dev~
 
 ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_shared.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
 END
 
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
@@ -20,3 +22,9 @@ BEGIN @100 DESIGNATED 0
 LABEL ~chriz-bg-magic-main~
 REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @9000
 LAF cbmagic_check_spell_revisions END
+LAM cbmagic_index_scrolls
+LAF cbmagic_fix_spirit_armor END
+LAF cbmagic_fix_minor_spell_deflection END
+LAF cbmagic_fix_breath_saves END
+LAF cbmagic_fix_wake_on_damage END
+LAF cbmagic_fix_web END

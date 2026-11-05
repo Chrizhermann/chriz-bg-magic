@@ -21,12 +21,14 @@ class FakeGame:
     {"NAME.EXT": bytes}. tp2: text of the tp2 to run (default: the mod's real tp2)."""
 
     def __init__(self, root, weidu, tp2=None, tlk=None, biff=None, override=None, game="bg2ee",
-                 files=None):
-        self.root, self.weidu = Path(root), weidu
+                 files=None, lang="en_US"):
+        self.root, self.weidu, self.lang = Path(root), weidu, lang
         shutil.rmtree(self.root, ignore_errors=True)
         (self.root / "override").mkdir(parents=True)
-        (self.root / "lang/en_us").mkdir(parents=True)
-        (self.root / "lang/en_us/dialog.tlk").write_bytes(tlk or ie.make_tlk([""]))
+        # WeiDU finds the language folders only when en_US is there, as in every EE game.
+        for folder in {"en_US", lang}:
+            (self.root / "lang" / folder).mkdir(parents=True)
+            (self.root / "lang" / folder / "dialog.tlk").write_bytes(tlk or ie.make_tlk([""]))
         shutil.copytree(MOD, self.root / "chriz-bg-magic")
         tp2_text = tp2 if tp2 is not None else (REPO / "setup-chriz-bg-magic.tp2").read_text(encoding="utf-8")
         (self.root / "setup-chriz-bg-magic.tp2").write_text(tp2_text, encoding="utf-8")
@@ -45,7 +47,7 @@ class FakeGame:
 
     def run(self, action="--force-install-list", components=("0",)):
         out = subprocess.run([str(self.weidu), "setup-chriz-bg-magic.tp2", "--no-auto-tp2", "--noautoupdate",
-                              "--game", str(self.root), "--language", "0", "--use-lang", "en_US", action,
+                              "--game", str(self.root), "--language", "0", "--use-lang", self.lang, action,
                               *components, "--no-exit-pause", "--log", f"weidu{action}.debug"],
                              cwd=self.root, stdin=subprocess.DEVNULL, capture_output=True, timeout=300)
         text = (out.stdout + out.stderr).decode("utf-8", "replace")
@@ -66,7 +68,10 @@ class FakeGame:
         return p.read_bytes() if p.exists() else None
 
     def tlk(self, strref):
-        return ie.tlk_text((self.root / "lang/en_us/dialog.tlk").read_bytes(), strref)
+        return ie.tlk_text((self.root / "lang" / self.lang / "dialog.tlk").read_bytes(), strref)
+
+    def itm_descs(self, resref):
+        return ie.itm_descs((self.root / "override" / f"{resref}.ITM").read_bytes())
 
     def tree(self):
         """Hashes of the game's files apart from the mod folder, WeiDU's own files and

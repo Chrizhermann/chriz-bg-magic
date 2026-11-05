@@ -1,0 +1,148 @@
+{
+ "about": "English specs and build status of the decided changes that are built, by decision-page row. tools/build_list.py merges this into docs/build-list.json. A part is todo until built, done when built, lab-checked once a disposable lab install checked it (docs/evidence), later when it is only a possible later change on Christopher's list.",
+ "rows": {
+  "arcane.level4.spirit_armor": {
+   "resrefs": ["SPWI414"],
+   "parts": [
+    {"spec": "Stays vanilla, with one fix: casting Spirit Armor again on a creature that has it replaces the earlier casting, so its +3 to saves vs. spell and its expiry damage no longer stack. Mage Armor and Ghost Armor need nothing: all three set the base AC and the best one counts.", "status": "lab-checked"}
+   ]
+  },
+  "arcane.spell_deflection_progression": {
+   "resrefs": ["SPWI318"],
+   "parts": [
+    {"spec": "Minor Spell Deflection stops only spells of levels 1-4 (vanilla: 1-7, so a level-3 spell also absorbed Breach and priest spells up to level 7). Its description says so. The rest of the Spell Deflection and Spell Turning line stays vanilla.", "status": "lab-checked"},
+    {"spec": "Later: look at Spell Turning's reflection, and whether Minor Spell Deflection stays fully vanilla after all.", "status": "todo"}
+   ]
+  },
+  "arcane.level3.fireball": {
+   "resrefs": ["SPWI304"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half damage, no penalty.", "status": "lab-checked"}]
+  },
+  "arcane.level7.delayed_blast_fireball": {
+   "resrefs": ["SPWI712"],
+   "parts": [{"spec": "Vanilla damage, save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"}]
+  },
+  "arcane.level5.cone_of_cold": {
+   "resrefs": ["SPWI503"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
+  },
+  "divine.flame_strike": {
+   "resrefs": ["SPPR503"],
+   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
+  },
+  "arcane.level3.skull_trap": {
+   "resrefs": ["SPWI313"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"},
+    {"spec": "Damage capped at 12d6 (SCS-like, built ourselves).", "status": "todo"}
+   ]
+  },
+  "divine.glyph_of_warding": {
+   "resrefs": ["SPPR304"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell; as in vanilla, a successful save avoids the damage.", "status": "lab-checked"},
+    {"spec": "The rest of the SCS-like decision.", "status": "todo"}
+   ]
+  },
+  "arcane.level8.incendiary_cloud": {
+   "resrefs": ["SPWI810"],
+   "parts": [
+    {"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"},
+    {"spec": "School Conjuration, like all clouds.", "status": "todo"}
+   ]
+  },
+  "arcane.level3.lightning_bolt": {
+   "resrefs": ["SPWI308"],
+   "parts": [{"spec": "Classic bouncing bolt as in vanilla, with save vs. breath instead of vs. spell for half.", "status": "lab-checked"}]
+  },
+  "arcane.level9.meteor_swarm": {
+   "resrefs": ["SPWI911"],
+   "parts": [{"spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.", "status": "later"}]
+  },
+  "divine.fire_storm": {
+   "resrefs": ["SPPR705"],
+   "parts": [{"spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.", "status": "later"}]
+  },
+  "arcane.level1.sleep": {
+   "resrefs": ["SPWI116"],
+   "parts": [{"spec": "Vanilla, but damage wakes the sleepers.", "status": "lab-checked"}]
+  },
+  "arcane.level1.color_spray": {
+   "resrefs": ["SPWI105"],
+   "parts": [{"spec": "Vanilla, but damage wakes the unconscious.", "status": "lab-checked"}]
+  },
+  "arcane.level2.stinking_cloud": {
+   "resrefs": ["SPWI213"],
+   "parts": [
+    {"spec": "Damage wakes the creatures it knocked out.", "status": "lab-checked"},
+    {"spec": "Creatures without breath (undead, golems, elementals, slimes) immune; school Conjuration.", "status": "todo"}
+   ]
+  },
+  "arcane.level2.power_word_sleep": {
+   "resrefs": ["SPWI220"],
+   "parts": [
+    {"spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, confirmed in play.", "status": "lab-checked"},
+    {"spec": "School Enchantment; elf resistance; undead, dragons and elementals immune (SCS-like).", "status": "todo"}
+   ]
+  },
+  "divine.command": {
+   "resrefs": ["SPPR102"],
+   "parts": [
+    {"spec": "Damage wakes the sleeper.", "status": "lab-checked"},
+    {"spec": "The rest of the decision (Spell Revisions' version of the spell, built ourselves).", "status": "todo"}
+   ]
+  },
+  "divine.greater_command": {
+   "resrefs": ["SPPR512"],
+   "parts": [
+    {"spec": "Vanilla, but damage wakes the sleepers.", "status": "lab-checked"},
+    {"spec": "Maybe a harder save.", "status": "later"}
+   ]
+  },
+  "arcane.level4.emotion_despair": {
+   "resrefs": ["SPWI411"],
+   "parts": [
+    {"spec": "Damage ends the sleep of the base game's Emotion: Hopelessness; its other effects run out as before. The IWD version replaces this spell when the IWD spells are built.", "status": "lab-checked"}
+   ]
+  },
+  "arcane.level2.web": {
+   "resrefs": ["SPWI215"],
+   "parts": [
+    {"spec": "Save vs. breath instead of vs. spell (the vanilla -2 stays). Its description says so.", "status": "lab-checked"},
+    {"spec": "Spiders (race SPIDER) and amorphous creatures (race SLIME: slimes, jellies, oozes, puddings) are immune.", "status": "lab-checked"},
+    {"spec": "Dragons and the very obvious flying and incorporeal creatures are immune, by race: DRAGON; WYVERN, BEHOLDER, MEPHIT; SPECTRE, WRAITH, SHADOW, MIST. Giants and ettins are not.", "status": "lab-checked"},
+    {"spec": "Maybe other creatures: imps and quasits, genies, devas and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big elementals. Fire elementals burn, so a web holding them makes little sense.", "status": "later"},
+    {"spec": "Web may be too strong in the base game; its -2 stays for now.", "status": "later"},
+    {"spec": "An idea, far off: webs that can catch fire, but not easily, say from someone standing in one with a fire shield for a round or two. It needs a mechanic of its own first.", "status": "later"},
+    {"spec": "Smaller radius (maybe, like SR); school Conjuration.", "status": "todo"}
+   ]
+  }
+ },
+ "chat": [
+  {"id": "chat.save_type_by_logic",
+   "title": "Save vs. breath for dodgeable explosions and area damage",
+   "rows": ["arcane.level3.fireball", "arcane.level7.delayed_blast_fireball", "arcane.level5.cone_of_cold", "divine.flame_strike", "arcane.level3.skull_trap", "divine.glyph_of_warding", "arcane.level8.incendiary_cloud", "arcane.level3.lightning_bolt", "arcane.level9.meteor_swarm", "divine.fire_storm"],
+   "resrefs": ["SPWI304", "SPWI712", "SPWI523", "SPWI523D", "SPWI503", "SPPR503", "SPWI313", "SPPR304", "SPWI810", "SPWI308"],
+   "parts": [
+    {"spec": "Fireball, Delayed Blast Fireball, Sunfire, Cone of Cold, Flame Strike, Skull Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt: the damage allows a save vs. breath instead of vs. spell, without extra penalties; the damage stays. Descriptions that named the save say so. Chain Lightning, mind and transmutation spells keep save vs. spell.", "status": "lab-checked"},
+    {"spec": "Meteor Swarm and Fire Storm have no save at all in the base game and stay that way for now; a save vs. breath is on the list of possible later changes.", "status": "later"}
+   ]},
+  {"id": "chat.damage_wakes_sleepers",
+   "title": "Damage wakes sleepers",
+   "rows": ["arcane.level1.sleep", "arcane.level1.color_spray", "arcane.level2.stinking_cloud", "arcane.level2.power_word_sleep", "divine.command", "divine.greater_command", "arcane.level4.emotion_despair"],
+   "resrefs": ["SPWI116", "SPWI105", "SPWI213", "SPWI220", "SPPR102", "SPPR512", "SPWI411"],
+   "parts": [
+    {"spec": "Sleep, Color Spray, Stinking Cloud, Power Word: Sleep, Command, Greater Command and Emotion: Hopelessness: damage ends the sleep.", "status": "lab-checked"},
+    {"spec": "The IWD spells that put creatures to sleep or knock them out get the same when they are built.", "status": "todo"}
+   ]},
+  {"id": "chat.other_spell_mods",
+   "title": "Spell Revisions and SCS",
+   "rows": [],
+   "resrefs": [],
+   "parts": [
+    {"spec": "Not together with Spell Revisions: the README says so and the installer warns plainly and carries on. No work goes into making them fit.", "status": "done"},
+    {"spec": "Declare the two incompatible outright at some later step.", "status": "later"},
+    {"spec": "At some later step: when installed after SCS, Chriz BG Magic may overwrite SCS's changes.", "status": "later"}
+   ]}
+ ]
+}
