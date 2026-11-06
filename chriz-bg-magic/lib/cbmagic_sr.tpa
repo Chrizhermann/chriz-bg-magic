@@ -154,9 +154,12 @@ BEGIN
     FOR (i = 0; i < n; ++i) BEGIN
       SET fx = fx_off + (first + i) * 0x30
       READ_SHORT fx op
+      READ_ASCII (fx + 0x14) resource (8) NULL
       READ_BYTE (fx + 0x0c) timing
       READ_LONG (fx + 0x0e) dur
-      PATCH_IF (op = anchor_opcode) AND (timing = 0) AND (old_dur < 0) BEGIN
+      SET is_anchor = (op = anchor_opcode)
+      PATCH_IF (anchor_opcode = 133 && op = 22 && ~%resource%~ STRING_EQUAL ~CBTLUCK~) BEGIN SET is_anchor = 1 END
+      PATCH_IF is_anchor AND (timing = 0) AND (old_dur < 0) BEGIN
         SET old_dur = dur
       END
     END
@@ -165,10 +168,15 @@ BEGIN
       FOR (i = 0; i < n; ++i) BEGIN
         SET fx = fx_off + (first + i) * 0x30
         READ_SHORT fx op
+        READ_ASCII (fx + 0x14) resource (8) NULL
         READ_BYTE (fx + 0x0c) timing
         READ_LONG (fx + 0x0e) dur
         SET is_owned = 0
         PATCH_IF (op = anchor_opcode) AND (timing = 0) BEGIN
+          SET is_owned = 1
+        END ELSE PATCH_IF (anchor_opcode = 133 && timing = 0
+          && ((op = 22 && ~%resource%~ STRING_EQUAL ~CBTLUCK~)
+            || (op = 328 && ~%resource%~ STRING_EQUAL ~CBTSTATE~))) BEGIN
           SET is_owned = 1
         END ELSE PATCH_IF ((op = 142) AND (timing = 0))
                        OR ((op = 174) AND (timing = 4))
@@ -1246,7 +1254,9 @@ BEGIN
             FOR (i = 0; i < na; ++i) BEGIN
               SET fx = fx_off + (fa + i) * 0x30
               READ_SHORT fx op
-              PATCH_IF (op = 130) BEGIN SET has_130 = 1 END
+              READ_ASCII (fx + 0x14) resource (8) NULL
+              // The final bonus pass replaces op130 with our tagged plain rows.
+              PATCH_IF (op = 130 || ((op = 54 || op = 73) && ~%resource%~ STRING_EQUAL ~CBTFAVOR~)) BEGIN SET has_130 = 1 END
             END
           END
           PATCH_IF !has_130 BEGIN

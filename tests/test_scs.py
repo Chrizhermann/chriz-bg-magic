@@ -716,7 +716,7 @@ def scs_batch3_fiends_and_divine(work, weidu):
     dh_raw = fg.file("override/SPPR406.SPL")
     assert struct.unpack_from("<H", dh_raw, 0x20)[0] == 0x8000
     dh = fg.spl("SPPR406")
-    assert dh["abilities"][0]["effects"][0]["p1"] == 4
+    assert [(e["p1"], e["resource"]) for e in dh["abilities"][0]["effects"] if e["opcode"] == 0] == [(4, "CBTDODGE")]
     assert "+4 bonus" in fg.tlk(dh["desc"])
 
     # Glyph of Warding: casting time 5, save vs breath (from cbmagic_fix_breath_saves) + save for half (0x100)

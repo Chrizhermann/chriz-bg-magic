@@ -9,6 +9,7 @@ reads the sprites before and after, and decides in Python. Nothing is saved.
 """
 import importlib.util
 import json
+import struct
 import sys
 import time
 from pathlib import Path
@@ -19,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "smoke")
+GROUPS = ("curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -43,7 +44,10 @@ def run_checks(c, report, only):
         if name in only:
             rp.log(f"group {name}")
             try:
-                globals()[name](c, check)
+                if name == "bonus":
+                    bonus(c, check, report)
+                else:
+                    globals()[name](c, check)
             except Exception as problem:  # noqa: BLE001 - one group must not stop the others
                 check(f"{name}: group finished", False, error=f"{type(problem).__name__}: {problem}")
             c.p(f"tidy-{name}", "remove_all_others()")
@@ -61,6 +65,27 @@ def control(c, check):
           haste=haste, ea=ea, where=[(p["x"], p["y"]) for p in pos])
     for i in range(3):
         c.p(f"ct-clear{i}", f'clear({i}, {{"SPWI305"}})')
+
+
+def curse(c, check):
+    # Doom's penalties sit in the spell, Unholy Blight's arrive through EFF wrappers (opcode 177,
+    # good targets only): both are Curse, so only the worst counts, also through a wrapper.
+    c.p("cu-spawn", 'spawn("ACOLYTE2", 120, 0)')
+    time.sleep(2)
+    others = c.p("cu-who", "others()") or []
+    who = others[0]["name"] if others else "Dawnbringer Alvanna"
+    c.p("cu-pin", f'pin("{who}")')
+    c.p("cu-saves", f'set_saves("{who}", {{spell = 20, death = 20, breath = 20}}, 120)')
+    time.sleep(1)
+    base = c.p("cu-0", f'stats("{who}")')["thac0"]
+    c.p("cu-blight", f'self_apply("{who}", "SPPR314")')
+    time.sleep(3)
+    blight = c.p("cu-1", f'stats("{who}")')["thac0"]
+    check("Unholy Blight lands on someone good, through its wrappers", blight == base + 2, who=who, values=[base, blight])
+    c.p("cu-doom", f'self_apply("{who}", "SPPR113")')
+    time.sleep(3)
+    both = c.p("cu-2", f'stats("{who}")')["thac0"]
+    check("Doom on top of Unholy Blight: only the worst counts", both == blight, values=[base, blight, both])
 
 
 def strength(c, check):
@@ -293,6 +318,292 @@ def smoke(c, check):
     check("Every changed spell was cast once and the game kept answering", True, casts=len(done), skipped=skipped)
 
 
+BONUS_SYMBOLS = {
+    "bless": "CLERIC_BLESS", "prayer": "CLERIC_PRAYER", "recitation": "CLERIC_RECITATION",
+    "hope": "WIZARD_EMOTION_HOPE", "luck": "WIZARD_LUCK", "doom": "CLERIC_DOOM",
+    "curse": "CLERIC_CURSE", "pierce": "WIZARD_PIERCE_MAGIC",
+    "tenser": "WIZARD_TENSERS_TRANSFORMATION", "divine": "CLERIC_HOLY_POWER",
+    "righteous": "CLERIC_RIGHTEOUS_MAGIC", "champion": "CLERIC_CHAMPIONS_STRENGTH",
+    "blood": "CLERIC_BLOOD_RAGE", "animal": "CLERIC_ANIMAL_RAGE",
+    "regenerate": "CLERIC_REGENERATE", "mass": "CLERIC_CBMAGIC_MASS_REGENERATE",
+    "troll": "WIZARD_TROLLISH_FORTITUDE",
+}
+BONUS = {}
+# Mechanical payloads used to establish that a family member actually took effect.
+# Icons, spell states, exclusions, delayed expiry sounds and visuals are not evidence.
+BONUS_PAYLOAD_OPS = {
+    "tenser": {0, 1, 18, 33, 34, 35, 36, 37, 44, 54, 73, 97},
+    "divine": {18, 44, 54, 97}, "righteous": {18, 44, 285},
+    "champion": {44, 54, 132}, "blood": {3, 18, 54, 73}, "animal": {3, 18, 44, 73},
+    "regenerate": {98}, "mass": {98}, "troll": {98}, "pierce": {166, 402},
+}
+BONUS_TYPED_OPS = {0, 22, 33, 34, 35, 36, 37, 54, 73, 130, 131, 133, 137, 325}
+
+
+def bonus_resources(game):
+    """Read installed symbols and payload ownership; never assume IWD spell slots."""
+    spec = importlib.util.spec_from_file_location("bonus_ie", HERE.parent / "ie.py")
+    ie = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ie)
+    game = ie.Game(game)
+
+    def ids(resource):
+        result = {}
+        for line in (game.get(resource, "IDS") or b"").decode("latin-1").splitlines():
+            parts = line.split()
+            if len(parts) >= 2:
+                try:
+                    result[parts[1].upper()] = int(parts[0], 16 if parts[0].lower().startswith("0x") else 10)
+                except ValueError:
+                    pass
+        return result
+
+    def sources(root, key):
+        seen, payload, pending = set(), {root}, [(root, "SPL", ())]
+        meaningful = BONUS_PAYLOAD_OPS.get(key, BONUS_TYPED_OPS)
+        while pending:
+            res, kind, ancestors = pending.pop()
+            if (res, kind) in seen:
+                continue
+            if len(seen) >= 128:
+                raise ValueError(f"bonus probe: delivery chain exceeds 128 resources for {root}")
+            seen.add((res, kind))
+            path = (*ancestors, res)
+            data = game.get(res, kind)
+            if not data:
+                raise ValueError(f"bonus probe: missing delivery {res}.{kind}")
+            if kind == "SPL":
+                spl = ie.parse_spl(data)
+                effects = spl["casting"] + [e for a in spl["abilities"] for e in a["effects"]]
+            else:
+                if len(data) < 0x110 or data[:8] != b"EFF V2.0":
+                    raise ValueError(f"bonus probe: malformed {res}.EFF")
+                effects = [{"opcode": struct.unpack_from("<I", data, 0x10)[0],
+                            "resource": data[0x30:0x38].split(b"\0", 1)[0].decode("ascii").upper()}]
+            for e in effects:
+                if e["opcode"] in meaningful:
+                    payload.update(path)
+                child = e["resource"]
+                if child and e["opcode"] in (146, 148, 326):
+                    pending.append((child, "SPL", path))
+                elif child and e["opcode"] in (177, 183, 272):
+                    pending.append((child, "EFF", path))
+        return sorted({res for res, _ in seen}), sorted(payload)
+
+    spells, result = ids("SPELL"), {"typed_state": ids("SPLSTATE").get("CBM_BONUS_TYPED")}
+    for key, symbol in BONUS_SYMBOLS.items():
+        number = spells.get(symbol, 0)
+        prefix = {1: "SPPR", 2: "SPWI", 3: "SPIN", 4: "SPCL"}.get(number // 1000)
+        res = f"{prefix}{number % 1000:03d}" if prefix else None
+        data = game.get(res, "SPL") if res else None
+        if data:
+            chain, payload = sources(res, key)
+            result[key] = {"res": res, "symbol": symbol, "level": ie.parse_spl(data)["level"],
+                           "sources": chain, "payload_sources": payload}
+    return result
+
+
+def bonus(c, check, report):
+    """Installed spell probes plus isolated engine arithmetic, with manual gaps explicit."""
+    report["bonus_resources"] = BONUS
+    report.setdefault("manual_checks", []).extend([
+        {"group": "bonus", "check": "Save and reload a disposable save with overlapping typed effects; "
+         "rest and change areas, then compare fresh CBMP.bonus_snapshot(0) values for 60 seconds.", "status": "not_run"},
+        {"group": "bonus", "check": "Equip an actual item granting +1 to a tested value and confirm it adds "
+         "to the corrected spell total; the scripted untagged effect is only an arithmetic control.", "status": "not_run"},
+        {"group": "bonus", "check": "Capture the character sheet with the five-spell combination and after "
+         "Recitation expires, showing the corrected totals.", "status": "not_run"},
+        {"group": "bonus", "check": "In a separate disposable installation without EEex, verify ordinary "
+         "stacking and self-refresh and one Lua fallback message. This EEex-console runner cannot run there.", "status": "not_run"},
+        {"group": "bonus", "check": "Verify ordinary spellbook casting and projectile targeting; direct "
+         "ApplySpellRES below tests installed effects and nested delivery only.", "status": "not_run"},
+        {"group": "bonus", "check": "Apply Unholy Blight and Doom to the same eligible enemy in a disposable lab. "
+         "Confirm the active opcode-177 EFF penalty appears in bonus_snapshot external metadata, only the worst "
+         "Curse penalty affects THAC0 and saves, and the weaker penalty resumes when the stronger expires. "
+         "Also check an ineligible target and a delayed or expired wrapper contribute no external payload. "
+         "The external-EFF runtime path still needs live verification.", "status": "not_run"},
+    ])
+    available = c.lua("bo-runtime", "return type(CBMBonus) == 'table' and type(CBMBonus.Listener) == 'function' "
+                      "and type(CBMBPM) == 'function'")
+    check("Bonus: runtime and allocated typed state are present", available and BONUS.get("typed_state") is not None)
+    if not available or BONUS.get("typed_state") is None:
+        return
+
+    def need(*keys):
+        missing = [BONUS_SYMBOLS[k] for k in keys if k not in BONUS]
+        if missing:
+            report.setdefault("skipped", []).append({"group": "bonus", "missing": missing})
+            rp.log("  skip bonus case: absent " + ", ".join(missing))
+        return not missing
+
+    def sources(*keys):
+        # Keep unrelated maintenance deliveries out of cleanup and expiry edits.
+        return sorted({r for k in keys for r in BONUS[k]["payload_sources"]})
+
+    def clear(who, keys):
+        c.p("bo-clear", f"bonus_clear({json.dumps(who)}, {lua_strings(sources(*keys))})")
+        time.sleep(1.2)
+
+    def apply(who, key):
+        c.p("bo-apply-" + key, f"bonus_apply({json.dumps(who)}, {json.dumps(BONUS[key]['res'])})")
+        time.sleep(3)
+
+    def snap(who=0):
+        c.p("bo-rebuild", f"bonus_rebuild({json.dumps(who)})")
+        time.sleep(1.2)
+        return c.p("bo-snapshot", f"bonus_snapshot({json.dumps(who)})")
+
+    def expire(who, key):
+        changed = c.p("bo-expire-" + key,
+                      f"bonus_expire({json.dumps(who)}, {lua_strings(sources(key))}, 2)")
+        time.sleep(4)
+        return changed
+
+    def relevant(snapshot, key):
+        return bonus_payload_effects(snapshot, BONUS[key], BONUS_PAYLOAD_OPS.get(key, BONUS_TYPED_OPS))
+
+    all_keys = [k for k in BONUS_SYMBOLS if k in BONUS]
+    for who in range(3):
+        clear(who, all_keys)
+    combo = ("bless", "prayer", "recitation", "hope", "luck")
+    if need(*combo):
+        base = snap()
+        for key in combo:
+            apply(0, key)
+        full = snap()
+        actual = {"thac0": base["thac0"] - full["thac0"], "damage": full["dmg"] - base["dmg"],
+                  "saves": [a - b for a, b in zip(base["saves"], full["saves"])]}
+        check("Bonus: Bless, Prayer, Recitation, Hope and Luck totals", actual == {"thac0": 4, "damage": 3, "saves": [5] * 5},
+              delta=actual, effects=full["effects"])
+        apply(0, "bless")
+        again = snap()
+        check("Bonus: another Bless refreshes without adding a second bonus", bonus_values(again) == bonus_values(full),
+              first=bonus_values(full), second=bonus_values(again))
+        changed = expire(0, "recitation")
+        after = snap()
+        check("Bonus: Prayer resumes when Recitation expires without another cast",
+              changed > 0 and bool(relevant(after, "prayer")) and not relevant(after, "recitation")
+              and after["thac0"] == full["thac0"] + 1
+              and after["saves"] == [v + 1 for v in full["saves"]],
+              before=bonus_values(full), after=bonus_values(after))
+        clear(0, combo)
+
+    if need("doom", "curse"):
+        c.p("bo-spawn", 'spawn("TASLOI01", 90, 0)')
+        time.sleep(2)
+        c.p("bo-pin", 'pin("Tasloi", 600)')
+        c.p("bo-saves", 'set_saves("Tasloi", {death = 20, breath = 20, spell = 20}, 600)')
+        base = snap("Tasloi")
+        apply("Tasloi", "curse")
+        curse = snap("Tasloi")
+        apply("Tasloi", "doom")
+        both = snap("Tasloi")
+        check("Bonus: enemy has both Doom and Curse, with only the worst THAC0 penalty",
+              bool(relevant(both, "doom")) and bool(relevant(both, "curse")) and both["thac0"] == base["thac0"] + 2,
+              values=[base["thac0"], curse["thac0"], both["thac0"]], effects=both["effects"])
+        changed = expire("Tasloi", "doom")
+        after = snap("Tasloi")
+        check("Bonus: Curse resumes on an enemy when Doom expires", changed > 0
+              and not relevant(after, "doom") and bool(relevant(after, "curse")) and after["thac0"] == curse["thac0"],
+              values=[curse["thac0"], both["thac0"], after["thac0"]])
+
+    if need("prayer"):
+        if not need("doom", "curse"):
+            c.p("bo-prayer-spawn", 'spawn("TASLOI01", 90, 0)')
+            time.sleep(2)
+            c.p("bo-prayer-pin", 'pin("Tasloi", 600)')
+        clear(0, ("prayer",))
+        base = snap()
+        apply(0, "prayer")
+        friend = snap()
+        c.p("bo-prayer-enemy", f'bonus_enemy_prayer("Tasloi", 0, "{BONUS["prayer"]["res"]}")')
+        time.sleep(4)
+        mixed = snap()
+        signs = {1 if e["p1"] > 0 else -1 for e in mixed["effects"] if e["tag"] == "CBTFAVOR" and e["op"] == 54 and e["p1"]}
+        check("Bonus: friendly Prayer and hostile Prayer both apply", signs == {-1, 1}
+              and friend["thac0"] == base["thac0"] - 1 and mixed["thac0"] == base["thac0"],
+              values=[base["thac0"], friend["thac0"], mixed["thac0"]], effects=mixed["effects"])
+        clear(0, ("prayer",))
+    c.p("bo-enemies-done", "remove_all_others()")
+
+    # Controlled effects isolate the marker and untyped-source behavior from spell durations.
+    for who in range(3):
+        clear(who, all_keys)
+    base = snap()
+    state = BONUS["typed_state"]
+    for amount in (2, 1):
+        c.p("bo-tagged", f'bonus_fx(0, 54, {amount}, 0, "CBTFAVOR", {state}, 180)')
+    typed = snap()
+    c.p("bo-untagged", 'bonus_fx(0, 54, 1, 0, "", nil, 180)')
+    untyped = snap()
+    check("Bonus: untagged +1 stacks with highest Favor +2", typed["thac0"] == base["thac0"] - 2
+          and untyped["thac0"] == typed["thac0"] - 1,
+          values=[base["thac0"], typed["thac0"], untyped["thac0"]])
+    samples = [untyped]
+    for _ in range(6):
+        time.sleep(10)
+        samples.append(snap())
+    check("Bonus: corrected values do not drift over 60 seconds with repeated rebuilds",
+          all(bonus_values(s) == bonus_values(untyped) for s in samples)
+          and samples[-1]["time"] - samples[0]["time"] >= 60 * 15,
+          values=[bonus_values(s) for s in samples], ticks=samples[-1]["time"] - samples[0]["time"])
+    c.p("bo-fixture-clear", 'bonus_clear(0, {"CBMQLAB"})')
+    time.sleep(1.2)
+
+    if need("pierce"):
+        for mr in (10, 20, 50, 100):
+            clear(0, ("pierce",))
+            c.p("bo-mr-set", f'bonus_fx(0, 166, {mr}, 1, "", nil, 90)')
+            before = snap()
+            apply(0, "pierce")
+            after = snap()
+            reduction = max(10, min(40, mr // 2))
+            check(f"Pierce Magic: current MR {mr} loses {reduction} points for five rounds",
+                  before["mr"] == mr and after["mr"] == max(0, mr - reduction)
+                  and any(e["op"] == 166 and e["p1"] == -reduction and e["p2"] == 0
+                          and e["dt"] == 4096 and 23 * 15 <= e["dur"] - after["time"] <= 30 * 15
+                          for e in after["effects"]), before=before["mr"], after=after["mr"], effects=after["effects"])
+            c.p("bo-mr-clear", 'bonus_clear(0, {"CBMQLAB"})')
+        clear(0, ("pierce",))
+
+    for family, keys in (("Transformation", ("tenser", "divine", "righteous", "champion", "blood", "animal")),
+                         ("Regeneration", ("regenerate", "mass", "troll"))):
+        present = [k for k in keys if k in BONUS]
+        need(*keys)
+        for old in present:
+            for new in present:
+                if old == new:
+                    continue
+                clear(0, present)
+                apply(0, old)
+                before = snap()
+                apply(0, new)
+                after = snap()
+                winner = new if BONUS[new]["level"] >= BONUS[old]["level"] else old
+                loser = old if winner == new else new
+                check(f"{family}: {old} then {new} keeps {winner}", bool(relevant(before, old))
+                      and bool(relevant(after, winner)) and not relevant(after, loser),
+                      levels={old: BONUS[old]["level"], new: BONUS[new]["level"]}, effects=after["effects"])
+        clear(0, present)
+
+
+def lua_strings(values):
+    return "{" + ", ".join(json.dumps(v) for v in values) + "}"
+
+
+def bonus_values(snapshot):
+    return {key: snapshot[key] for key in ("thac0", "dmg", "ac", "luck", "saves")}
+
+
+def bonus_payload_effects(snapshot, spell, opcodes):
+    """Only active intended mechanics prove presence; pending or expired effects do not."""
+    candidates = list(snapshot["effects"])
+    candidates.extend(e["external"] for e in snapshot["effects"] if isinstance(e.get("external"), dict))
+    return [e for e in candidates
+            if e["src"] in spell["payload_sources"] and e["op"] in opcodes
+            and ((e["dt"] == 4096 and e["dur"] > snapshot["time"]) or e["dt"] in (1, 2, 9))]
+
+
 MASS_REGENERATE = "SPPR502"
 SKIP_SMOKE = {"SPWI420", "SPWI617", "SPWI710", "SPWI809", "SPWI908", "SPWI123", "SPWI703", "SPWI804", "SPWI919"}
 SMOKE = []
@@ -300,7 +611,7 @@ SMOKE = []
 
 def main():
     args = sys.argv[1:]
-    global MASS_REGENERATE
+    global MASS_REGENERATE, BONUS
     if "--mass-regenerate" in args:
         i = args.index("--mass-regenerate")
         MASS_REGENERATE = args[i + 1]
@@ -311,6 +622,9 @@ def main():
         del args[i:i + 2]
     if "--only" not in args:
         args += ["--only", ",".join(GROUPS)]
+    selected = args[args.index("--only") + 1].split(",")
+    if "bonus" in selected and "--game" in args:
+        BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
     sys.argv = [sys.argv[0], *args]
     rp.GROUPS = GROUPS
     rp.run_checks = run_checks

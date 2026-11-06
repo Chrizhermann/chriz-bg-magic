@@ -6,12 +6,103 @@ move to the Chriz script engine later. Values not named here stay as in the base
 ## Layout
 
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`); any of
+decided change (the modules in `chriz-bg-magic/lib/`); any of
 them can move to a component of its own without changes. The user-facing layout is
 Christopher's decision.
 
-None of the changes below needs EEex. They work on BG2:EE and EET (built and checked on
-2.7.3.0).
+The target is BG2:EE and EET 2.7.3.0. Comparing typed bonuses and the new Pierce Magic
+resistance rule need EEex v1.3.1. The remaining changes work without EEex. The bonus batch
+has offline coverage; its in-game acceptance checks are still pending.
+
+## Spell bonus types (`cbmagic_bonus`)
+
+This pass runs last in component 0, using each spell's final values after the other
+changes. For each statistic and type, the largest positive modifier and the most
+negative modifier contribute together. Different types combine. Suppressed modifiers
+remain on the creature, so they can contribute again when the stronger effect ends.
+The same rules apply to party members and enemies. Equipment and untyped effects keep
+their existing stacking behavior.
+
+| Type | Spells | Affected values |
+| --- | --- | --- |
+| Morale | Emotion: Courage, Emotion: Hope, Righteous Wrath of the Faithful, Blood Rage, Animal Rage | THAC0, damage and saving throws |
+| Favor | Bless, Prayer, Recitation; Chant's saving throws | THAC0, damage and saving throws where supplied by the spell; includes penalties |
+| Luck | Luck; Chant's Luck modifier | Luck and Luck's saving throws; includes penalties |
+| Dodge | Blur, Defensive Harmony | Positive AC modifiers and saving throws |
+| Deflection | Entropy Shield, Aura of Flaming Death; Spirit Armor and Barkskin | Positive AC modifiers and saving throws; Spirit Armor and Barkskin contribute only their saves |
+| Curse | Doom, Curse, Unholy Blight | Negative THAC0, damage, saving throw and Luck modifiers |
+
+Base AC still uses the game's existing best-value rule. AC penalties, attributes,
+resistances, spell failure, Greater Malison and Slow are outside this system. Temporary
+HP still accumulates between Courage and Righteous Wrath. Extra attacks, including
+Righteous Wrath's interaction with Haste, are deferred.
+
+Every typed spell refreshes its own effects on recast. Bless, Chant and Luck retain their
+existing amounts and durations when their built-in nonstacking effects are decomposed;
+Bless also retains its +5 morale modifier. Bad Chant retains its Luck penalty. Existing
+save and skill modifiers remain separate. The Champion's Strength effect is retained.
+
+Each typed value is listed with its type in the English spell and scroll descriptions.
+An appended list covers varying caster-level values and conditional payloads without
+replacing unrelated description text. New strings are allocated; shared old strings are
+preserved. Missing descriptions and unsupported languages are reported in the log.
+Optional IWD spells are located by their installed symbols; absence is informational.
+Changed linked payloads use private copies, preserving other users of the original data.
+
+The EEex listener verifies a per-rebuild marker before changing statistics and stops
+after ten errors. Without EEex, correction is inactive and different spells accumulate
+normally; self-refresh still works. This batch has synthetic installer and Lua runtime
+coverage, not completed live acceptance.
+
+External effects need an additional runtime step: the game keeps their delivery wrapper
+on the creature and executes the payload internally. The listener reads the payload only
+after the wrapper reports successful execution, retaining the game's eligibility checks.
+The wrapper also determines the payload's effective lifetime. This path was checked
+against the 2.7.3.0 executable and independent mocks; its live acceptance is pending.
+It reads the installed payload amounts: a separate EEex mutator that changes only the
+transient decoded child's amount is outside this path's verified compatibility.
+
+## Exclusive spell families (`cbmagic_family`)
+
+Within each family, a higher-level spell replaces and temporarily excludes lower-level
+members. At equal level, the new casting replaces the old one. Levels come from the
+installed spells, and recasting a member refreshes it. Removing an old family member
+removes its whole spell effect, including linked payloads.
+
+- **Transformation:** Tenser's Transformation, Divine Power, Righteous Magic,
+  Champion's Strength, Blood Rage and Animal Rage.
+- **Regeneration:** Regenerate, Mass Regenerate and Trollish Fortitude. Both this mod's
+  Mass Regenerate and an optional installed spell with that symbol participate.
+
+These exclusions last as long as the main buff and retain its dispellability. All
+removals run before the new protections and buff. These families work without EEex.
+
+## Pierce Magic (`cbmagic_bonus_pierce_magic`)
+
+The resistance reduction is half the target's current Magic Resistance, rounded down,
+with a minimum of 10 and maximum of 40 percentage points, lasting 5 rounds. For example,
+10, 20, 50 and 100 MR produce reductions of 10, 10, 25 and 40 points. The spell's other
+effects, targeting and protection interactions are preserved.
+
+The installer selects this behavior when the EEex bootstrap resource `M___EEex.lua`
+exists. Without it, Pierce Magic keeps its existing resistance effect and text, and the
+installer logs that choice. Adding or removing EEex requires reinstalling the component.
+The selected implementation uses EEex to read current resistance at impact and applies
+one timed reduction; it does not recalculate the reduction during its duration.
+
+## Bonus acceptance checks
+
+`tests/test_bonus.py` covers the installer with fabricated data shaped like the supported
+spells, including alternate symbol assignments, effect layouts and shared external
+payloads. `tests/bonus_runtime.lua` runs under both LuaJIT and Lua 5.3 through `lupa`.
+The disposable-lab runner `tests/lab/run_batches.py --only bonus` adds installed-spell
+checks using the runner's normal path arguments. It has not been run for this batch.
+
+The report keeps save/reload, rest, area transitions, an actual equipped item, normal
+spellbook casting/projectiles, a character-sheet screenshot and a separate installation
+without EEex as explicit manual checks. Direct spell application and an untyped synthetic
+modifier do not establish those cases. No game or reference installation is modified by
+the offline tests.
 
 ## Spell Revisions installed
 
