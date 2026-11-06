@@ -12,9 +12,10 @@ healing version, and for the display fixes on top, and what was not.
 ## In-game checks
 
 `tests/lab/run_batches.py` drove a hidden, muted lab game (same lab, test party and arena as the
-earlier rounds). One run of 117 checks: 115 passed, the guards stayed clean, nothing was saved.
-The two others tested Exaltation on an enemy, which the spell turns away, so they said nothing
-about the fix. The test now uses a party member; see Not checked.
+earlier rounds). 117 checks passed; the guards stayed clean; nothing was saved. Two of them first
+tested Exaltation on an enemy, which the spell turns away, so they said nothing about the fix.
+The test now uses a party member, the mod did not change, and that group ran again on its own,
+34 of 34.
 
 | Group | Checks | What it shows |
 |---|---|---|
@@ -49,7 +50,8 @@ Errors of the base game, fixed in the same round:
   Symbol: Pain, Selune's Blessing, Wish outcomes, confusion from Jester and False Dawn.
 - Lifetimes, offline only: Death Ward, Enhanced Bard Song, Conjure Fire Elemental, Salt Crystals,
   Dolorous Decay.
-- Cures, measured: Slow Poison, Neutralize Poison, Heal and Remove Paralysis clear what they cure.
+- Cures, measured: Exaltation, Slow Poison, Neutralize Poison, Heal and Remove Paralysis clear what
+  they cure.
 
 Entries that follow a state (`lua/M_CBMREC.lua`, a deferred EEex listener, no spell changes):
 
@@ -65,7 +67,6 @@ Entries that follow a state (`lua/M_CBMREC.lua`, a deferred EEex listener, no sp
 - Invisibility and Sanctuary broken by an attack: attacks do not land in the arena. The state ending
   was measured through removal and a reveal effect.
 - A deflection spell's own name beside the big spell at the same time: the big spell's row stays then.
-- Exaltation clearing Feebleminded and Confused: the check waits for the next lab run.
 - Touch delivery of Cause Wounds and Harm in the game.
 - Fiends in a fight, party-wide delivery of area buffs, Nahal's Reckless Dweomer's changed target.
 - The Contingency and Spell Sequencer screens after the fix: they share Spell Trigger's list, and
