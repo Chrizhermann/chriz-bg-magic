@@ -88,13 +88,13 @@
   "divine.aid": {
    "resrefs": ["SPPR201"],
    "parts": [
-    {"spec": "Blocked: opcode 129 (Aid) hardcodes +1 hit/damage/saves alongside 1d8 temporary HP, while opcode 18 (Max HP bonus) only takes a flat parameter without dice and STATDESC.2DA has no dedicated Aid portrait icon. Needs the EEex Gunst bonus-type system and a decision on the temporary HP formula and portrait icon.", "status": "todo"}
+    {"spec": "Replaces the opcode-129 Aid payload with a hit-point-only bonus (opcode 18, min(L,10) + 1d8 with L = max(ability level, 3)), lasting 1 turn per level (60*L seconds), refreshing on recast, and displaying its own portrait icon via STATDESC.2DA (BAM SPPR150D).", "status": "done"}
    ]
   },
   "divine.bless": {
    "resrefs": ["SPPR101"],
    "parts": [
-    {"spec": "Casting time is 5 (from 9). Its description says so.", "status": "done"},
+    {"spec": "Casting time is 5 (from 9), duration is 30 seconds + 1 round per caster level across 20 abilities (levels 1-20, 36-150 seconds), usable by clerics and druids as in vanilla. Its description says so.", "status": "done"},
     {"spec": "Gunst bonus-type stacking rule comes later in the EEex stacking module.", "status": "todo"}
    ]
   },
@@ -113,7 +113,7 @@
   "divine.divine_power": {
    "resrefs": ["SPPR412"],
    "parts": [
-    {"spec": "Holy Power has casting time 4 (from 6) and grants single/multi-class non-fighter clerics fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).", "status": "done"}
+    {"spec": "Renamed Divine Power in name and description, casting time 4 (from 6), and grants single/multi-class non-fighter clerics fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).", "status": "done"}
    ]
   },
   "divine.doom": {
@@ -137,7 +137,7 @@
   "divine.mass_regenerate": {
    "resrefs": [],
    "parts": [
-    {"spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE). 15-ft party-friendly area centered on the caster, casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), and replaces an earlier casting of itself.", "status": "done"}
+    {"spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE). Sight-range party-only area centered on the caster (projectile cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), and replaces an earlier casting of itself.", "status": "done"}
    ]
   },
   "divine.neutralize_poison": {
@@ -149,13 +149,13 @@
   "divine.summon_deva": {
    "resrefs": ["SPPR726"],
    "parts": [
-    {"spec": "Blocked: summons belong to a separate component, and building our own Deva creature and combat script requires a decision on its spellbook and equipment.", "status": "todo"}
+    {"spec": "Deferred to the summons component.", "status": "later"}
    ]
   },
   "divine.summon_fallen_deva": {
    "resrefs": ["SPPR727"],
    "parts": [
-    {"spec": "Blocked: summons belong to a separate component, and building our own Fallen Deva creature and combat script requires a decision on its spellbook and equipment.", "status": "todo"}
+    {"spec": "Deferred to the summons component.", "status": "later"}
    ]
   },
   "divine.silence": {
@@ -185,13 +185,13 @@
   "divine.greater_restoration": {
    "resrefs": ["SPPR713"],
    "parts": [
-    {"spec": "Blocked: row is marked rethink with an open question on its exact cure/heal scope, casting time, and caster fatigue.", "status": "todo"}
+    {"spec": "Keeps vanilla cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun, Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.", "status": "done"}
    ]
   },
   "divine.negative_plane_protection": {
    "resrefs": ["SPPR413"],
    "parts": [
-    {"spec": "Blocked: row is marked rethink with no decision note yet.", "status": "todo"}
+    {"spec": "Lasts 1 turn per level (420-1200 seconds across levels 7-20), usable by both clerics and druids, otherwise vanilla.", "status": "done"}
    ]
   }
  },

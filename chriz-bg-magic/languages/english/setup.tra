@@ -75,10 +75,10 @@ Sphere: Healing
 Range: 0
 Duration: 1 turn + 2 rounds/level
 Casting Time: 5
-Area of Effect: 15-ft. radius
+Area of Effect: Sight
 Saving Throw: None
 
-When cast, this spell grants the druid and all party members within 15 feet steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
+When cast, this spell grants the druid and all party members within sight steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
 @40040 = ~Duration: Instant~
 @40041 = ~eliminates all toxins, and also heals 10 Hit Points of damage\. Moreover, any diseases, blindness, or deafness that the creature may be suffering from will also be cured\.~
 @40042 = ~eliminates all toxins and makes the creature immune to poison for 1 turn per level of the caster.~
@@ -103,3 +103,14 @@ When cast, this spell grants the druid and all party members within 15 feet stea
 @40061 = ~1 round per level~
 @40062 = ~18 Hit Points per round for 7 rounds~
 @40063 = ~12 Hit Points per round for 14 rounds~
+@40064 = ~Aid~
+@40065 = ~Duration: 6 rounds~
+@40066 = ~Duration: 5 rounds + 1 round/level (maximum 25 rounds)~
+@40067 = ~Duration: 1 round \+ 1 round/level~
+@40068 = ~gains the benefits of a Bless spell ([^)]*) and a special bonus of 1d8 additional Hit Points~
+@40069 = ~gains a special bonus of 1d8 additional Hit Points +1 per level of the caster (up to a maximum of 1d8+10)~
+@40070 = ~Divine Power~
+@40071 = ~Holy Power~
+@40072 = ~It fully heals the target and cures any diseases or poisons\.~
+@40073 = ~It fully heals the target and cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep.~
+@40074 = ~Duration: 5 rounds~

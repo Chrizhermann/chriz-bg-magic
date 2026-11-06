@@ -47,7 +47,7 @@ SR_TEXTS = [
     # +12: Chain Contingency
     "Chain Contingency\n(Evocation)\nLevel: 9",
     # +13: Bless
-    "Bless\nCasting Time: 9\nThis spell grants a +1 bonus to attack rolls and morale.",
+    "Bless\nCasting Time: 9\nDuration: 6 rounds\nThis spell grants a +1 bonus to attack rolls and morale.",
     # +14: Doom
     "Doom\nCasting Time: 9\nSaving Throw: None\n"
     "By means of this spell, the target receives a -2 penalty to all rolls, including THAC0 and Saving Throws. "
@@ -81,6 +81,19 @@ SR_TEXTS = [
     "Any creature touched by the priest will regenerate 3 Hit Points per second. "
     "The effect lasts for 1 round per 2 levels of the caster; for example, a 14th-level priest will "
     "regenerate 18 Hit Points per round for 7 rounds.",
+    # +22: Aid
+    "Aid\nDuration: 1 round + 1 round/level\n"
+    "The recipient of this spell gains the benefits of a Bless spell (+1 to attack rolls and Saving Throws) "
+    "and a special bonus of 1d8 additional Hit Points for the duration of the spell.",
+    # +23: Holy Power name
+    "Holy Power",
+    # +24: Negative Plane Protection
+    "Negative Plane Protection\nDuration: 5 rounds\n"
+    "When this spell is cast, the recipient is protected from negative energy and level drain.",
+    # +25: Greater Restoration
+    "Greater Restoration\nCasting Time: 3\n"
+    "When this spell is cast, the life energy level of the recipient is raised. "
+    "It fully heals the target and cures any diseases or poisons.",
 ]
 
 INVIS_DESC = BASE_STRREF + 0
@@ -105,6 +118,10 @@ HPOWER_DESC = BASE_STRREF + 18
 IRONS_NAME = BASE_STRREF + 19
 IRONS_DESC = BASE_STRREF + 20
 REGEN_DESC = BASE_STRREF + 21
+AID_DESC = BASE_STRREF + 22
+HPOWER_NAME = BASE_STRREF + 23
+NPP_DESC = BASE_STRREF + 24
+GREST_DESC = BASE_STRREF + 25
 
 ARCANE_SYMBOLS = [
     (2206, "WIZARD_INVISIBILITY"),
@@ -126,12 +143,15 @@ DIVINE_SYMBOLS = [
     (1101, "CLERIC_BLESS"),
     (1110, "CLERIC_SHILLELAGH"),
     (1113, "CLERIC_DOOM"),
+    (1201, "CLERIC_AID"),
     (1211, "CLERIC_SILENCE_15_FOOT"),
     (1403, "CLERIC_FREE_ACTION"),
     (1404, "CLERIC_NEUTRALIZE_POISON"),
     (1412, "CLERIC_HOLY_POWER"),
+    (1413, "CLERIC_NEGATIVE_PLANE_PROTECTION"),
     (1506, "CLERIC_IRONSKIN"),
     (1711, "CLERIC_REGENERATE"),
+    (1713, "CLERIC_RESTORATION"),
 ]
 
 
@@ -172,6 +192,7 @@ def sr_biff(extra=None):
     base = fx.game()
     base["SPELL.IDS"] = ie.make_ids(fx.SPELL_SYMBOLS + ARCANE_SYMBOLS + DIVINE_SYMBOLS)
     base["PROJECTL.IDS"] = ie.make_ids([(159, "SPARBLPA"), (168, "SPARBLNP"), (189, "HOLD"), (337, "ohvrnp")])
+    base["STATDESC.2DA"] = ie.make_2da(["DESCRIPTION", "BAM_FILE"], [("206", ["10554", "SPPR313D"])])
     # SPWI206 Invisibility
     base["SPWI206.SPL"] = ie.make_spl(1, 2, [{"target": 1, "effects": [
         fx.fx(opcode=20, power=2, timing=0, dispel=3, duration=7200),
@@ -251,6 +272,8 @@ def sr_biff(extra=None):
     # SPPR101 Bless
     base["SPPR101.SPL"] = ie.make_spl(2, 1, [{"target": 4, "casting_time": 9, "effects": [
         fx.fx(opcode=130, power=1, p1=1, timing=0, dispel=3, duration=36),
+        fx.fx(opcode=174, power=1, timing=4, dispel=3, duration=36, resource="EFF_E04"),
+        fx.fx(opcode=215, power=1, p2=1, timing=0, dispel=3, duration=3, resource="ICBLESSI"),
     ]}], desc=BLESS_DESC)
     # SPPR110 Shillelagh
     base["SPPR110.SPL"] = make_spl_with_excl(
@@ -267,6 +290,17 @@ def sr_biff(extra=None):
         fx.fx(opcode=37, power=1, p1=-2, timing=0, dispel=1, duration=60, save=0, bonus=0),
         fx.fx(opcode=142, power=1, p2=114, timing=0, dispel=1, duration=60, save=0, bonus=0),
     ]}], desc=DOOM_DESC)
+    # SPPR201 Aid (20 abilities, min_level 1..20)
+    base["SPPR201.SPL"] = make_spl_with_excl(
+        priest_excl=0x8000, spell_type=2, level=2,
+        abilities=[{"target": 1, "min_level": ml, "casting_time": 5, "effects": [
+            fx.fx(opcode=129, power=2, p1=1, p2=0, timing=0, dispel=3, duration=6 + 6 * ml, dice=0 if ml == 1 else 1, sides=8),
+            fx.fx(opcode=8, power=2, p1=-1120908544, p2=255, timing=0, dispel=3, duration=6 + 6 * ml),
+            fx.fx(opcode=174, power=2, timing=4, dispel=3, duration=6 + 6 * ml, resource="EFF_E01"),
+            fx.fx(opcode=215, power=2, p2=1, timing=0, dispel=3, duration=6, resource="SPHLYBLS"),
+        ]} for ml in range(1, 21)],
+        desc=AID_DESC,
+    )
     # SPPR211 Silence 15' Radius
     base["SPPR211.SPL"] = ie.make_spl(2, 2, [{"target": 4, "casting_time": 5, "projectile": 149, "effects": [
         fx.fx(opcode=38, power=2, timing=0, dispel=1, duration=12, save=ie.SAVE_SPELL, bonus=-5),
@@ -309,7 +343,19 @@ def sr_biff(extra=None):
             fx.fx(opcode=18, target=1, power=4, p1=lvl, p2=3, timing=0, dispel=0, duration=6 * lvl),
             fx.fx(opcode=142, target=1, power=4, p2=84, timing=0, dispel=0, duration=6 * lvl),
         ]} for ml, lvl in ((1, 7), (12, 12), (13, 13), (20, 20))
-    ], desc=HPOWER_DESC)
+    ], name=HPOWER_NAME, desc=HPOWER_DESC)
+    # SPPR413 Negative Plane Protection
+    base["SPPR413.SPL"] = make_spl_with_excl(
+        priest_excl=0x0000, spell_type=2, level=4,
+        abilities=[{"target": 1, "min_level": 1, "casting_time": 7, "effects": [
+            fx.fx(opcode=101, power=4, p2=216, timing=0, dispel=3, duration=30),
+            fx.fx(opcode=142, power=4, p2=59, timing=0, dispel=3, duration=30),
+            fx.fx(opcode=267, power=4, p1=41495, timing=0, dispel=3, duration=30),
+            fx.fx(opcode=215, power=4, p2=1, timing=0, dispel=3, duration=3, resource="ICCSWOUI"),
+            fx.fx(opcode=174, power=4, timing=4, dispel=3, duration=30, resource="EFF_E02"),
+        ]}],
+        desc=NPP_DESC,
+    )
     # SPPR506 Iron Skins
     base["SPPR506.SPL"] = ie.make_spl(2, 5, [
         {"target": 5, "min_level": ml, "casting_time": 9, "effects": [
@@ -327,6 +373,14 @@ def sr_biff(extra=None):
         ]} for ml, lvl in ((1, 14), (16, 16), (20, 20))],
         desc=REGEN_DESC,
     )
+    # SPPR713 Greater Restoration
+    base["SPPR713.SPL"] = ie.make_spl(2, 7, [{"target": 1, "min_level": 1, "casting_time": 3, "effects": [
+        fx.fx(opcode=224, power=7, timing=1, dispel=2),
+        fx.fx(opcode=17, power=7, p1=100, p2=2, timing=1, dispel=2),
+        fx.fx(opcode=79, power=7, timing=1, dispel=2),
+        fx.fx(opcode=11, power=7, timing=1, dispel=2),
+        fx.fx(opcode=93, target=1, power=7, p1=7, timing=1, dispel=0),
+    ]}], desc=GREST_DESC)
     if extra:
         base.update(extra)
     return base
@@ -334,7 +388,7 @@ def sr_biff(extra=None):
 
 @test
 def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
-    """All 24 built arcane and divine spell changes patch the intended fields and effects,
+    """All 27 built arcane and divine spell changes patch the intended fields and effects,
     update spell and scroll descriptions, are idempotent on a second install, and restore
     cleanly on uninstall."""
     g = fg.FakeGame(work / "a", weidu, tlk=sr_tlk(), biff=sr_biff())
@@ -425,10 +479,16 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
           f"SPWI711 text: {g.tlk(s['desc'])}")
 
     # --- Divine checks ---
-    # 14. Bless: casting time 5.
+    # 14. Bless: casting time 5, 20 abilities (levels 1..20), duration 30 + 6*lvl (36..150s), usable by clerics & druids.
     s = parse_spl_full(g.file("override/SPPR101.SPL"))
-    check(s["abilities"][0]["casting_time"] == 5, f"SPPR101 ct: {s['abilities'][0]}")
-    check("Casting Time: 5" in g.tlk(s["desc"]), f"SPPR101 text: {g.tlk(s['desc'])}")
+    check((s["priest_excl"] & 0xC000) == 0, f"SPPR101 priest_excl: {s['priest_excl']:#x}")
+    check([a["min_level"] for a in s["abilities"]] == list(range(1, 21)), f"SPPR101 levels: {[a['min_level'] for a in s['abilities']]}")
+    for idx, ab in enumerate(s["abilities"]):
+        exp_dur = 30 + (idx + 1) * 6
+        check(ab["casting_time"] == 5, f"SPPR101 ct: {ab['casting_time']}")
+        check([e["duration"] for e in ab["effects"]] == [exp_dur, exp_dur, 3], f"SPPR101 ab {idx}: {ab['effects']}")
+    check("Casting Time: 5" in g.tlk(s["desc"]) and "Duration: 5 rounds + 1 round/level (maximum 25 rounds)" in g.tlk(s["desc"]),
+          f"SPPR101 text: {g.tlk(s['desc'])}")
 
     # 15. Shillelagh: druid-only (0x4000).
     s = parse_spl_full(g.file("override/SPPR110.SPL"))
@@ -460,12 +520,35 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
           f"Faerie Fire invisibility immunity: {ab['effects']}")
     check(g.tlk(s["name"]) == "Faerie Fire" and "pale violet glow" in g.tlk(s["desc"]), "Faerie Fire strings")
 
-    # 18. Silence 15' Radius: projectile 169 (SPARBLNP+1).
+    # 18. Aid: op 129 replaced by op 18 (min(L,10) + 1d8 with L=max(ml,3)), duration 60*L, self-refresh op 321, STATDESC row 207 with SPPR150D.
+    statdesc_text = g.file("override/STATDESC.2DA").decode("latin-1")
+    check("207" in statdesc_text and "SPPR150D" in statdesc_text, f"STATDESC.2DA:\n{statdesc_text}")
+    s = parse_spl_full(g.file("override/SPPR201.SPL"))
+    check(len(s["abilities"]) == 20, f"SPPR201 abilities: {len(s['abilities'])}")
+    for idx, ab in enumerate(s["abilities"]):
+        ml = idx + 1
+        eff_lvl = max(ml, 3)
+        exp_hp = min(eff_lvl, 10)
+        exp_dur = 60 * eff_lvl
+        check(ab["effects"][0]["opcode"] == 321 and ab["effects"][0]["resource"] == "SPPR201", f"SPPR201 ab {idx} 321: {ab['effects'][0]}")
+        check(not any(e["opcode"] == 129 for e in ab["effects"]), f"SPPR201 ab {idx} still has op129")
+        hp_fx = [e for e in ab["effects"] if e["opcode"] == 18]
+        check(len(hp_fx) == 1 and hp_fx[0]["p1"] == exp_hp and hp_fx[0]["p2"] == 0 and hp_fx[0]["duration"] == exp_dur
+              and hp_fx[0]["dice"] == 1 and hp_fx[0]["sides"] == 8, f"SPPR201 ab {idx} op18: {hp_fx}")
+        check(any(e["opcode"] == 142 and e["p2"] == 207 and e["duration"] == exp_dur for e in ab["effects"]),
+              f"SPPR201 ab {idx} icon: {ab['effects']}")
+        check(any(e["opcode"] == 215 and e["duration"] == 6 for e in ab["effects"]),
+              f"SPPR201 ab {idx} SPHLYBLS duration kept: {ab['effects']}")
+    check("Duration: 1 turn/level" in g.tlk(s["desc"])
+          and "1d8 additional Hit Points +1 per level of the caster (up to a maximum of 1d8+10)" in g.tlk(s["desc"]),
+          f"SPPR201 text: {g.tlk(s['desc'])}")
+
+    # 19. Silence 15' Radius: projectile 169 (SPARBLNP+1).
     s = parse_spl_full(g.file("override/SPPR211.SPL"))
     check(s["abilities"][0]["projectile"] == 169, f"SPPR211 proj: {s['abilities'][0]}")
     check("Each enemy creature in the area" in g.tlk(s["desc"]), f"SPPR211 text: {g.tlk(s['desc'])}")
 
-    # 19. Free Action: usable by druids & clerics (0x0000), 1 turn/level (420, 480, 1200), Stun immune, Haste allowed.
+    # 20. Free Action: usable by druids & clerics (0x0000), 1 turn/level (420, 480, 1200), Stun immune, Haste allowed.
     s = parse_spl_full(g.file("override/SPPR403.SPL"))
     check(s["priest_excl"] == 0x0000, f"SPPR403 priest_excl: {s['priest_excl']:#x}")
     for ab, exp_dur in zip(s["abilities"], (420, 480, 1200)):
@@ -476,7 +559,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         check(all(e["duration"] in (0, exp_dur) for e in ab["effects"]), f"SPPR403 durations: {ab['effects']}")
     check("Duration: 1 turn/level" in g.tlk(s["desc"]) and "Slow, and Stun." in g.tlk(s["desc"]), f"SPPR403 text: {g.tlk(s['desc'])}")
 
-    # 20. Neutralize Poison: 14 abilities (1, 8..20), cures poison (op 11) + poison immunity (op 101 p2=25) for 420..1200s, no heal/disease/blind/deaf.
+    # 21. Neutralize Poison: 14 abilities (1, 8..20), cures poison (op 11) + poison immunity (op 101 p2=25) for 420..1200s, no heal/disease/blind/deaf.
     s = parse_spl_full(g.file("override/SPPR404.SPL"))
     check([a["min_level"] for a in s["abilities"]] == [1] + list(range(8, 21)),
           f"SPPR404 min_levels: {[a['min_level'] for a in s['abilities']]}")
@@ -491,8 +574,9 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     check("Duration: 1 turn/level" in g.tlk(s["desc"]) and "immune to poison for 1 turn per level" in g.tlk(s["desc"]),
           f"SPPR404 text: {g.tlk(s['desc'])}")
 
-    # 21. Holy Power: casting time 4, CBM412A/CBM412B EFFs created, op 177 added for classes 3, 15, 14.
+    # 22. Divine Power: renamed Divine Power in name and description, casting time 4, CBM412A/CBM412B EFFs created, op 177 added for classes 3, 15, 14.
     s = parse_spl_full(g.file("override/SPPR412.SPL"))
+    check(g.tlk(s["name"]) == "Divine Power", f"SPPR412 name: {g.tlk(s['name'])}")
     for ab, exp_res in zip(s["abilities"], ("CBM412A", "CBM412A", "CBM412B", "CBM412B")):
         check(ab["casting_time"] == 4, f"SPPR412 ct: {ab['casting_time']}")
         c_fx = [(e["p1"], e["p2"], e["resource"]) for e in ab["effects"] if e["opcode"] == 177]
@@ -501,10 +585,22 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     eff_b = g.file("override/CBM412B.EFF")
     check(eff_a is not None and struct.unpack_from("<ii", eff_a, 0x1C) == (6, 0), "CBM412A.EFF")
     check(eff_b is not None and struct.unpack_from("<ii", eff_b, 0x1C) == (1, 0), "CBM412B.EFF")
-    check("Casting Time: 4" in g.tlk(s["desc"]) and "including base attacks per round at levels 7 and 13" in g.tlk(s["desc"]),
+    check(g.tlk(s["desc"]).startswith("Divine Power\n") and "Casting Time: 4" in g.tlk(s["desc"])
+          and "including base attacks per round at levels 7 and 13" in g.tlk(s["desc"]),
           f"SPPR412 text: {g.tlk(s['desc'])}")
 
-    # 22. Iron Skins -> Stoneskin: renamed Stoneskin, casting time 1, skins & duration kept.
+    # 23. Negative Plane Protection: 14 abilities (1, 8..20), duration 60*lvl (420..1200s), usable by both clerics & druids.
+    s = parse_spl_full(g.file("override/SPPR413.SPL"))
+    check((s["priest_excl"] & 0xC000) == 0, f"SPPR413 priest_excl: {s['priest_excl']:#x}")
+    check([a["min_level"] for a in s["abilities"]] == [1] + list(range(8, 21)),
+          f"SPPR413 min_levels: {[a['min_level'] for a in s['abilities']]}")
+    for idx, ab in enumerate(s["abilities"]):
+        exp_dur = 60 * (7 + idx)
+        check([e["duration"] for e in ab["effects"]] == [exp_dur, exp_dur, exp_dur, 3, exp_dur],
+              f"SPPR413 ab {idx}: {ab['effects']}")
+    check("Duration: 1 turn/level" in g.tlk(s["desc"]), f"SPPR413 text: {g.tlk(s['desc'])}")
+
+    # 24. Iron Skins -> Stoneskin: renamed Stoneskin, casting time 1, skins & duration kept.
     s = parse_spl_full(g.file("override/SPPR506.SPL"))
     check(g.tlk(s["name"]) == "Stoneskin", f"SPPR506 name: {g.tlk(s['name'])}")
     check(all(a["casting_time"] == 1 for a in s["abilities"]), "SPPR506 casting time")
@@ -512,22 +608,28 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     check("Stoneskin" in g.tlk(s["desc"]) and "Casting Time: 1" in g.tlk(s["desc"]) and "outer skin of stone" in g.tlk(s["desc"]),
           f"SPPR506 text: {g.tlk(s['desc'])}")
 
-    # 23. Mass Regenerate: added via ADD_SPELL with symbol CLERIC_CBMAGIC_MASS_REGENERATE, druid-only, 10 abilities (72..180s).
+    # 25. Mass Regenerate: added via ADD_SPELL with symbol CLERIC_CBMAGIC_MASS_REGENERATE, sight-range party-only projectile cbmmreg.pro, 10 abilities (72..180s).
     check("CLERIC_CBMAGIC_MASS_REGENERATE" in ids_text, f"SPELL.IDS missing Mass Regenerate:\n{ids_text}")
     mr_num = next(int(ln.split()[0]) for ln in ids_text.splitlines() if "CLERIC_CBMAGIC_MASS_REGENERATE" in ln)
     mr_res = f"SPPR{mr_num - 1000:03d}"
+    proj_ids_text = g.file("override/PROJECTL.IDS").decode("latin-1")
+    check("cbmmreg" in proj_ids_text.lower(), f"PROJECTL.IDS missing cbmmreg:\n{proj_ids_text}")
+    pro_raw = g.file("override/cbmmreg.pro")
+    check(pro_raw is not None and len(pro_raw) == 0x300 and struct.unpack_from("<HHH", pro_raw, 0x200) == (0xD0, 256, 452)
+          and struct.unpack_from("<H", pro_raw, 0x206) == (452,), "cbmmreg.pro sight radius and party-only flags")
     s = parse_spl_full(g.file(f"override/{mr_res}.SPL"))
     check(s["priest_excl"] == 0x4000 and s["level"] == 5 and s["school"] == 8, f"Mass Regenerate header: {s}")
     check([a["min_level"] for a in s["abilities"]] == list(range(1, 11)), "Mass Regenerate min_levels")
     for idx, ab in enumerate(s["abilities"]):
         exp_dur = 72 + idx * 12
-        check(ab["casting_time"] == 5 and ab["projectile"] == 160, f"Mass Regenerate ab: {ab}")
+        check(ab["casting_time"] == 5 and ab["projectile"] > 337, f"Mass Regenerate ab: {ab}")
         check(ab["effects"][0]["opcode"] == 321 and ab["effects"][0]["resource"] == mr_res, f"Mass Regenerate 321: {ab['effects'][0]}")
         check(ab["effects"][1]["opcode"] == 98 and ab["effects"][1]["p1"] == 3 and ab["effects"][1]["p2"] == 3
               and ab["effects"][1]["duration"] == exp_dur, f"Mass Regenerate 98: {ab['effects'][1]}")
-    check(g.tlk(s["name"]) == "Mass Regenerate" and "2 Hit Points per round" in g.tlk(s["desc"]), "Mass Regenerate strings")
+    check(g.tlk(s["name"]) == "Mass Regenerate" and "Area of Effect: Sight" in g.tlk(s["desc"])
+          and "party members within sight" in g.tlk(s["desc"]), "Mass Regenerate strings")
 
-    # 24. Regenerate: druid-only (0x4000), self-refresh first, 2 HP/s (p1=2), duration 6*lvl (84, 96, 120).
+    # 26. Regenerate: druid-only (0x4000), self-refresh first, 2 HP/s (p1=2), duration 6*lvl (84, 96, 120).
     s = parse_spl_full(g.file("override/SPPR711.SPL"))
     check(s["priest_excl"] == 0x4000, f"SPPR711 priest_excl: {s['priest_excl']:#x}")
     for ab, exp_dur in zip(s["abilities"], (84, 96, 120)):
@@ -538,14 +640,28 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     check("Duration: 1 round/level" in g.tlk(s["desc"]) and "2 Hit Points per second, and multiple castings do not stack." in g.tlk(s["desc"])
           and "12 Hit Points per round for 14 rounds" in g.tlk(s["desc"]), f"SPPR711 text: {g.tlk(s['desc'])}")
 
+    # 27. Greater Restoration: keeps casting time 3 and fatigue op 93, adds cures for Hold, Stun, Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.
+    s = parse_spl_full(g.file("override/SPPR713.SPL"))
+    ab = s["abilities"][0]
+    check(ab["casting_time"] == 3, f"SPPR713 ct: {ab['casting_time']}")
+    ops = {e["opcode"] for e in ab["effects"]}
+    check({224, 17, 79, 11, 93, 162, 46, 2, 43, 112, 321, 26, 75, 81, 240}.issubset(ops), f"SPPR713 ops: {ops}")
+    check(any(e["opcode"] == 112 and e["resource"] == "SQUIRP" for e in ab["effects"]), "SPPR713 SQUIRP removal")
+    check(any(e["opcode"] == 321 and e["resource"] == "SPWI415" for e in ab["effects"]), "SPPR713 SPWI415 removal")
+    check(any(e["opcode"] == 93 and e["target"] == 1 and e["p1"] == 7 for e in ab["effects"]), "SPPR713 fatigue kept")
+    icons_240 = {e["p2"] for e in ab["effects"] if e["opcode"] == 240}
+    check({13, 55, 14, 124, 35, 8, 112}.issubset(icons_240), f"SPPR713 op240 icons: {icons_240}")
+    check("cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep." in g.tlk(s["desc"]),
+          f"SPPR713 text: {g.tlk(s['desc'])}")
+
     # Second install writes nothing.
     done = {p.name.upper(): p.read_bytes() for p in (g.root / "override").iterdir()
-            if p.is_file() and p.suffix.upper() in (".SPL", ".ITM", ".EFF")}
+            if p.is_file() and p.suffix.upper() in (".SPL", ".ITM", ".EFF", ".2DA", ".IDS")}
     tlk = (g.root / "lang" / g.lang / "dialog.tlk").read_bytes()
     h = fg.FakeGame(work / "b", weidu, tlk=tlk, biff=sr_biff(done))
     out2 = h.install()
     check("SUCCESSFULLY INSTALLED" in out2, f"second install:\n{out2}")
-    written = sorted(p.name.upper() for p in (h.root / "override").iterdir() if p.suffix.upper() in (".SPL", ".ITM", ".EFF"))
+    written = sorted(p.name.upper() for p in (h.root / "override").iterdir() if p.suffix.upper() in (".SPL", ".ITM", ".EFF", ".2DA", ".IDS"))
     check(written == [], f"second install rewrote {written}")
 
     # Uninstall restores the first game.
@@ -574,12 +690,33 @@ def kept_spells_variations_and_broken_inputs(work, weidu):
         fx.fx(opcode=54, power=1, p1=-2, timing=0, duration=60),
         fx.fx(opcode=215, power=1, timing=1, duration=0, resource="MODDOOM"),
     ]}], desc=DOOM_DESC)
+    # SPPR101 Bless with priest_excl=0x8000 (druid excluded by another mod) and an extra mod visual op 215.
+    bless_var = make_spl_with_excl(
+        priest_excl=0x8000, spell_type=2, level=1,
+        abilities=[{"target": 4, "casting_time": 9, "effects": [
+            fx.fx(opcode=130, power=1, p1=1, timing=0, dispel=3, duration=36),
+            fx.fx(opcode=215, power=1, timing=1, duration=0, resource="MODBLES"),
+        ]}],
+        desc=BLESS_DESC,
+    )
+    # SPPR201 Aid with an extra mod visual op 215 and duplicate op 129.
+    aid_var = make_spl_with_excl(
+        priest_excl=0x8000, spell_type=2, level=2,
+        abilities=[{"target": 1, "min_level": 1, "casting_time": 5, "effects": [
+            fx.fx(opcode=129, power=2, p1=1, p2=0, timing=0, dispel=3, duration=12),
+            fx.fx(opcode=129, power=2, p1=1, p2=0, timing=0, dispel=3, duration=12),
+            fx.fx(opcode=215, power=2, timing=1, duration=0, resource="MODAID"),
+        ]}],
+        desc=AID_DESC,
+    )
     # Broken SPWI206 (too short) and unrecognizable SPWI421 (no op 222).
     unrec_tfield = ie.make_spl(1, 4, [{"target": 4, "effects": [fx.fx(opcode=139, p1=1, timing=1)]}], desc=TFIELD_DESC)
     biff = sr_biff({
         "PROJECTL.IDS": ie.make_ids([]),
         "SPWI401.SPL": conf_var,
+        "SPPR101.SPL": bless_var,
         "SPPR113.SPL": doom_var,
+        "SPPR201.SPL": aid_var,
         "SPWI206.SPL": b"SPL V1  " + bytes(20),
         "SPWI421.SPL": unrec_tfield,
     })
@@ -597,6 +734,17 @@ def kept_spells_variations_and_broken_inputs(work, weidu):
         check([(e["opcode"], e["duration"], e["resource"]) for e in ab["effects"]] ==
               [(128, exp_dur, ""), (215, 0, "MODVIS")], f"SPWI401 var ab: {ab['effects']}")
 
+    # Bless variation cleared priest_excl to 0 and preserved MODBLES across all 20 abilities.
+    s = parse_spl_full(g.file("override/SPPR101.SPL"))
+    check(s["priest_excl"] == 0 and len(s["abilities"]) == 20, f"SPPR101 var: {s['priest_excl']}, {len(s['abilities'])}")
+    check(any(e["resource"] == "MODBLES" for e in s["abilities"][19]["effects"]), "SPPR101 var MODBLES kept")
+
+    # Aid variation collapsed duplicate op 129 into single op 18 and kept MODAID.
+    s = parse_spl_full(g.file("override/SPPR201.SPL"))
+    ab0 = s["abilities"][0]
+    check([e["opcode"] for e in ab0["effects"]] == [321, 18, 215, 142], f"SPPR201 var ops: {ab0['effects']}")
+    check(ab0["effects"][2]["resource"] == "MODAID", f"SPPR201 var MODAID: {ab0['effects'][2]}")
+
     # Doom variation stripped AC penalty (op 0), added damage penalty (op 73), and kept MODDOOM visual.
     s = parse_spl_full(g.file("override/SPPR113.SPL"))
     for step, ab in enumerate(s["abilities"]):
@@ -604,6 +752,10 @@ def kept_spells_variations_and_broken_inputs(work, weidu):
               [(54, 1, -step, ""), (73, 1, -step, ""), (215, 1, -step, "MODDOOM")],
               f"SPPR113 var ab {step}: {ab['effects']}")
 
-    # Fallback projectile IDs when PROJECTL.IDS is empty: Oracle=338, Silence=169.
+    # Fallback projectile IDs when PROJECTL.IDS is empty: Oracle=338, Silence=169, Mass Regenerate=337.
     check(parse_spl_full(g.file("override/SPWI515.SPL"))["abilities"][0]["projectile"] == 338, "Oracle fallback proj")
     check(parse_spl_full(g.file("override/SPPR211.SPL"))["abilities"][0]["projectile"] == 169, "Silence fallback proj")
+    ids_text = g.file("override/SPELL.IDS").decode("latin-1")
+    mr_num = next(int(ln.split()[0]) for ln in ids_text.splitlines() if "CLERIC_CBMAGIC_MASS_REGENERATE" in ln)
+    mr_res = f"SPPR{mr_num - 1000:03d}"
+    check(parse_spl_full(g.file(f"override/{mr_res}.SPL"))["abilities"][0]["projectile"] == 337, "Mass Regenerate fallback proj")

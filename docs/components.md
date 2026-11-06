@@ -146,7 +146,9 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 
 ### Divine spells
 
-- **Bless (`cbmagic_kept_bless`)**: casting time 5 (from 9).
+- **Bless (`cbmagic_kept_bless`)**: casting time 5 (from 9) and duration 30 seconds + 1
+  round per caster level across 20 abilities (levels 1-20, 36-150 seconds), usable by
+  clerics and druids as in the base game.
 - **Shillelagh (`cbmagic_kept_shillelagh`)**: keeps the base game's mechanics and is
   restricted to druids.
 - **Doom (`cbmagic_kept_doom`)**: casting time 1 (from 9), imposes -2 to THAC0, damage
@@ -157,6 +159,10 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   `ADD_SPELL` (`CLERIC_CBMAGIC_FAERIE_FIRE`). In a 5-ft enemy-only area (range 20, casting
   time 1), targets that fail a Save vs. Spell suffer a -2 AC penalty, lose and cannot
   gain invisibility, and glow violet for 4 rounds.
+- **Aid (`cbmagic_kept_aid`)**: replaces the base game's combined Bless/HP effect (opcode
+  129) with a hit-point-only bonus of `1d8 + min(L, 10)` where `L = max(ability level, 3)`,
+  lasting 1 turn per level, refreshing on recast, and displaying its own portrait icon
+  (appended to `STATDESC.2DA` using `SPPR150D`).
 - **Silence 15' Radius (`cbmagic_kept_silence`)**: affects enemies only instead of all
   creatures in the area.
 - **Free Action (`cbmagic_kept_free_action`)**: usable by druids and rangers as well as
@@ -165,19 +171,26 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 - **Neutralize Poison (`cbmagic_kept_neutralize_poison`)**: cures poison and grants
   immunity to poison for 1 turn per level (levels 7-20); no longer heals 10 Hit Points or
   cures disease, blindness, or deafness.
-- **Holy Power (`cbmagic_kept_divine_power`)**: casting time 4 (from 6) and grants
-  non-fighter clerics (single-class Cleric, Cleric/Thief, Cleric/Mage) fighter bonus
-  attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).
+- **Divine Power (`cbmagic_kept_divine_power`)**: renames Holy Power to Divine Power in
+  name and description, sets casting time to 4 (from 6), and grants non-fighter clerics
+  (single-class Cleric, Cleric/Thief, Cleric/Mage) fighter bonus attacks per round (+1/2
+  APR at levels 7-12, +1 APR at level 13+).
+- **Negative Plane Protection (`cbmagic_kept_negative_plane_protection`)**: lasts 1 turn
+  per level (levels 7-20, 420-1200 seconds) for both clerics and druids; all other
+  properties stay as in the base game.
 - **Iron Skins / Stoneskin (`cbmagic_kept_iron_skins`)**: renamed Stoneskin, with casting
   time 1 (from 9); skin progression and duration stay as in the base game.
 - **Mass Regenerate (`cbmagic_kept_mass_regenerate`)**: new level-5 druid-only spell added
-  via `ADD_SPELL` (`CLERIC_CBMAGIC_MASS_REGENERATE`). In a 15-ft party-friendly area
-  around the caster (casting time 5), party members regenerate 2 Hit Points per round (1
-  HP every 3 seconds) for 1 turn + 2 rounds per level (up to 30 rounds at level 10); a new
-  casting replaces the previous one.
+  via `ADD_SPELL` (`CLERIC_CBMAGIC_MASS_REGENERATE`). In a sight-range party-only area
+  around the caster (`cbmmreg.pro` via `ADD_PROJECTILE`, radius 452, casting time 5), party
+  members within sight regenerate 2 Hit Points per round (1 HP every 3 seconds) for 1 turn +
+  2 rounds per level (up to 30 rounds at level 10); a new casting replaces the previous one.
 - **Regenerate (`cbmagic_kept_regeneration`)**: restricted to druids, stays level 7, heals
   2 Hit Points per second (from 3) for 1 round per level (from 1 round per 2 levels), and
   replaces an earlier casting on the same target.
+- **Greater Restoration (`cbmagic_kept_greater_restoration`)**: keeps the base game's
+  cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun,
+  Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.
 
 ## Descriptions
 
