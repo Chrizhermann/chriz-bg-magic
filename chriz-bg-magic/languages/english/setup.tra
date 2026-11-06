@@ -63,13 +63,13 @@
 @30032 = ~every 3 levels of the caster. Free Action protects against this effect.~
 
 @30033 = ~teleports in a powerful fiend~
-@30034 = ~teleports in a powerful fiend (a bone fiend for lawful casters, a nabassu for chaotic casters, or either for neutral casters)~
+@30034 = ~teleports in a powerful fiend (a bone fiend for lawful casters, or a nabassu for neutral and chaotic casters)~
 
 @30035 = ~summons a frenzied demon or devil~
-@30036 = ~summons a frenzied cornugon (for lawful casters), glabrezu (for chaotic casters), or either (for neutral casters)~
+@30036 = ~summons a frenzied cornugon (for lawful casters) or glabrezu (for neutral and chaotic casters)~
 
 @30037 = ~calls an outer-planar creature.+the pit fiend.+to attack~
-@30038 = ~calls an outer-planar creature (a pit fiend for lawful casters, a balor for chaotic casters, or either for neutral casters) to attack~
+@30038 = ~calls an outer-planar creature (a pit fiend for lawful casters, or a balor for neutral and chaotic casters) to attack~
 
 @30039 = ~Casting Time: 9~
 @30040 = ~Casting Time: 6~

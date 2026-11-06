@@ -644,20 +644,23 @@ def scs_batch3_fiends_and_divine(work, weidu):
     out = fg.install()
     assert installed_ok(out), out
 
-    # Summoned CREs and EFFs created and configured
+    # Summoned CREs, species BCS scripts, and EFFs created and configured
     for cre_name in ("CBMGBONF", "CBMGCORN", "CBMGBALR"):
         cre = fg.file(f"override/{cre_name}.CRE")
         assert cre is not None
         assert struct.unpack_from("<I", cre, 0x14)[0] == 0
         assert cre[0x270] == 28  # GOODBUTRED
         assert cre[0x275] == 9   # SUMMONED_DEMON
+        assert cre[0x248:0x250].rstrip(b"\x00").decode("ascii").upper() == cre_name
         assert cre[0x250:0x258] == b"\x00" * 8
+        bcs = fg.file(f"override/{cre_name}.BCS")
+        assert bcs is not None and bcs.startswith(b"SC")
     for eff_name, exp_cre in (("CBMGCACO", "cbmgbonf"), ("CBMGFIEN", "cbmgcorn"), ("CBMGGATE", "cbmgbalr")):
         eff = fg.file(f"override/{eff_name}.EFF")
         assert eff is not None
         assert eff[0x30:0x38].rstrip(b"\x00").decode("ascii").lower() == exp_cre
 
-    # Fiend spells: 4 op177 effects (Lawful=16, Chaotic=48, Neutral=32 50/50) and ability target=5
+    # Fiend spells: 3 op177 effects (Lawful=16 -> eff_l, Chaotic=48 -> eff_c, Neutral=32 -> eff_c) and ability target=5
     for res, eff_l, eff_c in (
         ("SPWI707", "cbmgcaco", "spcaco"),
         ("SPWI807", "cbmgfien", "spfiend"),
@@ -672,8 +675,7 @@ def scs_batch3_fiends_and_divine(work, weidu):
         assert [(e["opcode"], e["p1"], e["p2"], e["resource"].lower(), e["prob2"], e["prob1"]) for e in fxs] == [
             (177, 16, 8, eff_l, 0, 100),
             (177, 48, 8, eff_c, 0, 100),
-            (177, 32, 8, eff_l, 0, 49),
-            (177, 32, 8, eff_c, 50, 100),
+            (177, 32, 8, eff_c, 0, 100),
         ]
     # Gate scroll cast header target updated to 5
     scrl_raw = fg.file("override/SCRL9N.ITM")
@@ -715,11 +717,13 @@ def scs_batch3_fiends_and_divine(work, weidu):
         assert (ab["effects"][0]["special"] & 0x100) != 0
     assert "take half damage from the glyph" in fg.tlk(gw["desc"])
 
-    # Magical Stone: CBMGMST1.EFF (3d4) & CBMGMST2.EFF (6d4), 5 op177 effects on SPPR106
+    # Magical Stone: CBMGMST1.EFF (3d4) & CBMGMST2.EFF (6d4), dispel=0 at 0x5c, 5 op177 effects on SPPR106
     mst1 = fg.file("override/CBMGMST1.EFF")
     mst2 = fg.file("override/CBMGMST2.EFF")
     assert struct.unpack_from("<II", mst1, 0x38) == (3, 4)
     assert struct.unpack_from("<II", mst2, 0x38) == (6, 4)
+    assert struct.unpack_from("<I", mst1, 0x5C)[0] == 0
+    assert struct.unpack_from("<I", mst2, 0x5C)[0] == 0
     ms = fg.spl("SPPR106")
     ms_fx = ms["abilities"][0]["effects"]
     assert [(e["opcode"], e["p1"], e["p2"], e["resource"].lower()) for e in ms_fx] == [
@@ -854,27 +858,26 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
         "SPPR717A", "SPPR717B", "SPPR717C",
     }.issubset(removed_subs)
 
-    # Nature's Beauty: keeps op55 (save vs. spell +3) and caster op215; casts CBMGNB1 (save vs. spell +3)
-    # and CBMGNB2 (no save). Both subspells have school = 0; CBMGNB1 has permanent blindness (timing=1)
-    # and blocks CBMGNB2 via op318; CBMGNB2 has 3-round blindness (timing=0, duration=18).
+    # Nature's Beauty: keeps op55 (save vs. spell +3) and caster op215; casts schoolless area
+    # subspell CBMGNB1 (target=1 on op146; CBMGNB1 has school=0, target=5, projectile=159,
+    # failed-save permanent blindness with timing=0 duration=999999 + op318, and 3-round blindness
+    # with timing=0 duration=18 for targets that save).
     nb = fg.spl("SPPR704")
     nb_fx = nb["abilities"][0]["effects"]
-    assert [(e["opcode"], e["resource"].lower(), e["save"], e["bonus"]) for e in nb_fx] == [
-        (55, "", SAVE_SPELL, 3),
-        (215, "icclkfr2", 0, 0),
-        (146, "cbmgnb1", SAVE_SPELL, 3),
-        (146, "cbmgnb2", 0, 0),
+    assert [(e["opcode"], e["target"], e["resource"].lower(), e["save"], e["bonus"]) for e in nb_fx] == [
+        (55, 2, "", SAVE_SPELL, 3),
+        (215, 1, "icclkfr2", 0, 0),
+        (146, 1, "cbmgnb1", 0, 0),
     ]
     nb1_raw = fg.file("override/CBMGNB1.SPL")
-    nb2_raw = fg.file("override/CBMGNB2.SPL")
-    assert nb1_raw[0x25] == 0 and nb2_raw[0x25] == 0
+    assert nb1_raw[0x25] == 0
+    assert _ab_projectiles(nb1_raw) == [159]
     nb1 = fg.spl("CBMGNB1")
+    assert nb1["abilities"][0]["target"] == 5
     nb1_fx = nb1["abilities"][0]["effects"]
-    assert nb1_fx[0]["opcode"] == 318 and nb1_fx[0]["resource"].lower() == "cbmgnb2"
-    assert any(e["opcode"] == 74 and e["timing"] == 1 for e in nb1_fx)
-    nb2 = fg.spl("CBMGNB2")
-    nb2_fx = nb2["abilities"][0]["effects"]
-    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb2_fx)
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 999999 and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
+    assert any(e["opcode"] == 318 and e["resource"].lower() == "cbmgnb1" and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 and e["save"] == 0 for e in nb1_fx)
     assert "blinded for 3 rounds" in fg.tlk(nb["desc"])
 
     # Idempotence check
@@ -898,12 +901,13 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
             {"opcode": 142, "target": 1, "power": 7, "p2": 70, "duration": 24, "dispel": 3},
         ]}],
     )
-    # SCS-patched Nature's Beauty (op74 already moved to dw#nbsub.spl with duration=999999)
+    # SCS-patched Nature's Beauty (op74 already moved to dw#nbsub.spl with duration=999999) + foreign op146
     nb_scs = make_spl(
         spell_type=2, level=7, school=5,
         abilities=[{"min_level": 1, "target": 5, "projectile": 159, "effects": [
             {"opcode": 55, "power": 7, "p1": 1, "p2": 3, "timing": 1, "save": SAVE_SPELL, "bonus": 3, "dispel": 1},
             {"opcode": 146, "target": 1, "power": 7, "p2": 1, "timing": 1, "resource": "dw#nbsub"},
+            {"opcode": 146, "target": 1, "power": 7, "p2": 1, "timing": 1, "resource": "MODNBSPL"},
         ]}],
     )
     nb_scs_sub = make_spl(
@@ -1000,11 +1004,13 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
     m_ops = [(e["opcode"], e["p1"], e["p2"]) for e in m["abilities"][0]["effects"]]
     assert (120, 3, 0) in m_ops and (142, 0, 70) in m_ops
 
-    # SCS Nature's Beauty upgraded to CBMGNB1 (permanent timing=1) + CBMGNB2 (18s)
+    # SCS Nature's Beauty upgraded to CBMGNB1 (permanent timing=0 duration=999999 + 18s) and kept foreign op146
+    nb_patched = fg.spl("SPPR704")
+    nb_res = [e["resource"].upper() for e in nb_patched["abilities"][0]["effects"] if e["opcode"] == 146]
+    assert nb_res == ["MODNBSPL", "CBMGNB1"]
     nb1 = fg.spl("CBMGNB1")
-    assert any(e["opcode"] == 74 and e["timing"] == 1 and e["duration"] == 0 for e in nb1["abilities"][0]["effects"])
-    nb2 = fg.spl("CBMGNB2")
-    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb2["abilities"][0]["effects"])
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 999999 for e in nb1["abilities"][0]["effects"])
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb1["abilities"][0]["effects"])
 
     # Pre-patched Insect Plague recognized as already done
     assert "CLERIC_INSECT_PLAGUE (SPPR517): changed 0, already 1." in out
