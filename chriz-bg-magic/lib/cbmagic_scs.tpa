@@ -2613,7 +2613,6 @@ DEFINE_ACTION_FUNCTION cbmagic_patch_insect_spell
           fear = 0
           undead_row = 1
           fs_row = 0
-          pfnw_row = 0
           stoneskin_row = 0
           insect_stat = 120
   STR_VAR symbol = ~~
@@ -2636,11 +2635,24 @@ BEGIN
         READ_LONG 0x6a fx_off
         READ_SHORT (ab_off + 0x1e) fx_cnt
         READ_SHORT (ab_off + 0x20) fx_idx
-        PATCH_IF (fx_cnt = 1) BEGIN
-          READ_SHORT (fx_off + fx_idx * 0x30) op0
-          READ_ASCII (fx_off + fx_idx * 0x30 + 0x14) res0 (8) NULL
-          PATCH_IF (op0 = 146) AND (~%res0%~ STRING_EQUAL_CASE ~%spell%a~) BEGIN
-            SET already = 1
+        FOR (i = 0; i < fx_cnt; ++i) BEGIN
+          READ_SHORT (fx_off + (fx_idx + i) * 0x30) op0
+          READ_ASCII (fx_off + (fx_idx + i) * 0x30 + 0x14) res0 (8) NULL
+          PATCH_IF (op0 = 146) AND (~%res0%~ STRING_EQUAL_CASE ~%spell%a~) AND (FILE_EXISTS_IN_GAME ~%spell%a.spl~) BEGIN
+            INNER_ACTION BEGIN
+              COPY_EXISTING - ~%spell%a.spl~ ~override~
+                LPF cbmagic_spl_valid RET sub_valid = valid reason END
+                PATCH_IF sub_valid BEGIN
+                  READ_SHORT 0x68 sub_ab_cnt
+                  PATCH_IF (sub_ab_cnt > 0) BEGIN
+                    READ_LONG 0x64 sub_ab_off
+                    READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
+                    PATCH_IF (sub_fx_cnt >= 4) BEGIN
+                      SET already = 1
+                    END
+                  END
+                END
+            END
           END
         END
       END
@@ -2654,7 +2666,6 @@ BEGIN
       COPY_EXISTING ~%spell%a.spl~ ~override~
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = undead_row STR_VAR resource = EVAL ~%spell%a~ END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = fs_row STR_VAR resource = EVAL ~%spell%a~ END
-        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = pfnw_row STR_VAR resource = EVAL ~%spell%a~ END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 233 target = 2 timing = 0 duration = (duration * 6) parameter1 = 1 parameter2 = insect_stat resist_dispel = 2 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 215 target = 2 timing = 0 duration = (duration * 6) parameter2 = 1 resist_dispel = 2 STR_VAR resource = ~icinhit~ END
         FOR (r = 0; r < duration; ++r) BEGIN
@@ -2667,7 +2678,6 @@ BEGIN
       LAF cbmagic_create_blank_subspell STR_VAR res = EVAL ~%spell%b~ END
       COPY_EXISTING ~%spell%b.spl~ ~override~
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = fs_row STR_VAR resource = EVAL ~%spell%b~ END
-        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = pfnw_row STR_VAR resource = EVAL ~%spell%b~ END
         SET ticks = 6 / dmg_tick
         FOR (t = 0; t < ticks; ++t) BEGIN
           SET tm = (t = 0) ? 1 : 4
@@ -2692,12 +2702,15 @@ BEGIN
         END
       BUT_ONLY
 
-      // Replace main spell effects with op146 -> %spell%a
+      // Replace owned main spell effects with op146 -> %spell%a (preserving any foreign mod effects)
       COPY_EXISTING ~%spell%.spl~ ~override~
         LPF cbmagic_spl_valid RET valid reason END
         READ_SHORT 0x68 ab_cnt
         PATCH_IF valid AND (ab_cnt > 0) BEGIN
-          LPF DELETE_EFFECT INT_VAR check_globals = 0 END
+          PATCH_FOR_EACH del_op IN 60 12 54 0 24 142 215 174 233 BEGIN
+            LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = del_op END
+          END
+          LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 146 STR_VAR match_resource = EVAL ~%spell%a~ END
           SET st = overall_save ? 2 : 0
           LPF ADD_SPELL_EFFECT
             INT_VAR opcode = 146 target = 2 power = 0 parameter2 = 1 timing = 1 resist_dispel = 2
@@ -2708,6 +2721,14 @@ BEGIN
         END
       BUT_ONLY
       ACTION_IF (changed > 0) BEGIN
+        ACTION_IF (~%symbol%~ STRING_EQUAL ~CLERIC_INSECT_PLAGUE~) BEGIN
+          OUTER_SPRINT f_dmg @30071
+          OUTER_SPRINT r_dmg @30072
+          LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f_dmg%~ replace = EVAL ~%r_dmg%~ label = EVAL ~%symbol%~ END
+          OUTER_SPRINT f_fear @30073
+          OUTER_SPRINT r_fear @30074
+          LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f_fear%~ replace = EVAL ~%r_fear%~ label = EVAL ~%symbol%~ END
+        END
         LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
       END
     END
@@ -2715,8 +2736,9 @@ BEGIN
   END
 END
 
-// Helper: add op321 removals of insect plague subspells to a protection spell (Fire Shield).
+// Helper: add op321 removals and op206 blocks of insect plague subspells to a Fire Shield spell.
 DEFINE_ACTION_FUNCTION cbmagic_add_insect_removal_to_shield
+  INT_VAR fs_stat = 125
   STR_VAR shield_sym = ~~
           insects = ~~
 BEGIN
@@ -2730,6 +2752,26 @@ BEGIN
         WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
           INNER_PATCH_SAVE ins ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
           INNER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+          READ_LONG 0x64 ab_off
+          READ_LONG 0x6a fx_off
+          READ_SHORT (ab_off + 0x1e) fx_cnt
+          READ_SHORT (ab_off + 0x20) fx_idx
+          SET has_206 = 0
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            READ_ASCII (e + 0x14) res (8) NULL
+            PATCH_IF (op = 206) AND (~%res%~ STRING_EQUAL_CASE ~%ins%a~) BEGIN
+              SET has_206 = 1
+            END
+          END
+          PATCH_IF !has_206 BEGIN
+            LPF CLONE_EFFECT
+              INT_VAR silent = 1 check_globals = 0 match_opcode = 233 match_parameter2 = fs_stat
+                      opcode = 206 parameter1 = 0 parameter2 = 0
+              STR_VAR resource = EVAL ~%ins%a~
+            END
+          END
           PATCH_FOR_EACH suf IN a b c BEGIN
             SPRINT sub ~%ins%%suf%~
             READ_LONG 0x64 ab_off
@@ -2746,12 +2788,197 @@ BEGIN
               END
             END
             PATCH_IF !has_rem BEGIN
-              LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 opcode = 321 target = 1 timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%sub%~ END
+              LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 opcode = 321 target = 1 timing = 1 duration = 0 resist_dispel = 3 STR_VAR resource = EVAL ~%sub%~ END
             END
           END
         END
       END
     BUT_ONLY
+  END
+END
+
+// Helper: recognize all .itm and .spl resources granting immunity to normal weapons
+// (opcode 120, parameter2 = 2) and add op206 / op321 protection against insect swarms,
+// and patch WIZARD_DEATH_SPELL (SPWI605) to disperse active insect swarms in its area.
+DEFINE_ACTION_FUNCTION cbmagic_apply_insect_pfnw_and_death_spell
+  INT_VAR ins_stat = 120
+  STR_VAR insects = ~~
+BEGIN
+  OUTER_PATCH_SAVE first_ins ~%insects%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+  COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+    PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+      READ_ASCII 0 sig (8)
+      PATCH_IF (~%sig%~ STRING_EQUAL ~ITM V1  ~) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        READ_SHORT 0x6e eq_idx
+        READ_SHORT 0x70 eq_cnt
+        SET total_fx = eq_idx + eq_cnt
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          PATCH_IF (ab_off + (a + 1) * 0x38 <= BUFFER_LENGTH) BEGIN
+            READ_SHORT (ab_off + a * 0x38 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x38 + 0x20) first
+            PATCH_IF (first + n > total_fx) BEGIN SET total_fx = first + n END
+          END
+        END
+        SET has_pfnw = 0
+        SET already_pfnw = 0
+        PATCH_IF (fx_off + total_fx * 0x30 <= BUFFER_LENGTH) BEGIN
+          FOR (i = 0; i < total_fx; ++i) BEGIN
+            SET e = fx_off + i * 0x30
+            READ_SHORT e op
+            READ_LONG (e + 0x08) p2
+            READ_ASCII (e + 0x14) res (8) NULL
+            PATCH_IF (op = 120) AND (p2 = 2) BEGIN SET has_pfnw = 1 END
+            PATCH_IF (op = 206) AND ((~%res%~ STRING_EQUAL_CASE ~%first_ins%a~) OR (~%res%~ STRING_EQUAL_CASE ~%first_ins%b~)) BEGIN
+              SET already_pfnw = 1
+            END
+          END
+        END
+        PATCH_IF has_pfnw AND !already_pfnw BEGIN
+          SPRINT list ~%insects%~
+          WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+            INNER_PATCH_SAVE ins ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+            INNER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+            LPF CLONE_EFFECT
+              INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_duration = 0
+                      opcode = 206 parameter1 = 0 parameter2 = 0
+              STR_VAR resource = EVAL ~%ins%a~
+            END
+            LPF CLONE_EFFECT
+              INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_timing = 0
+                      opcode = 206 parameter1 = 0 parameter2 = 0
+              STR_VAR resource = EVAL ~%ins%b~
+            END
+            PATCH_FOR_EACH suf IN a b c BEGIN
+              LPF CLONE_EFFECT
+                INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_timing = 0
+                        opcode = 321 parameter1 = 0 parameter2 = 0 timing = 1 duration = 0
+                STR_VAR resource = EVAL ~%ins%%suf%~
+              END
+            END
+          END
+        END
+      END
+    END
+  BUT_ONLY
+
+  COPY_EXISTING_REGEXP GLOB ~^.+\.spl$~ ~override~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF valid BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      READ_SHORT 0x6e eq_idx
+      READ_SHORT 0x70 eq_cnt
+      SET total_fx = eq_idx + eq_cnt
+      FOR (a = 0; a < ab_cnt; ++a) BEGIN
+        READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        PATCH_IF (first + n > total_fx) BEGIN SET total_fx = first + n END
+      END
+      SET has_pfnw = 0
+      SET already_pfnw = 0
+      FOR (i = 0; i < total_fx; ++i) BEGIN
+        SET e = fx_off + i * 0x30
+        READ_SHORT e op
+        READ_LONG (e + 0x08) p2
+        READ_ASCII (e + 0x14) res (8) NULL
+        PATCH_IF (op = 120) AND (p2 = 2) BEGIN SET has_pfnw = 1 END
+        PATCH_IF (op = 206) AND ((~%res%~ STRING_EQUAL_CASE ~%first_ins%a~) OR (~%res%~ STRING_EQUAL_CASE ~%first_ins%b~)) BEGIN
+          SET already_pfnw = 1
+        END
+      END
+      PATCH_IF has_pfnw AND !already_pfnw BEGIN
+        SPRINT list ~%insects%~
+        WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+          INNER_PATCH_SAVE ins ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+          INNER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+          LPF CLONE_EFFECT
+            INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_duration = 0
+                    opcode = 206 parameter1 = 0 parameter2 = 0
+            STR_VAR resource = EVAL ~%ins%a~
+          END
+          LPF CLONE_EFFECT
+            INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_timing = 0
+                    opcode = 206 parameter1 = 0 parameter2 = 0
+            STR_VAR resource = EVAL ~%ins%b~
+          END
+          PATCH_FOR_EACH suf IN a b c BEGIN
+            LPF CLONE_EFFECT
+              INT_VAR silent = 1 match_opcode = 120 match_parameter2 = 2 match_timing = 0
+                      opcode = 321 parameter1 = 0 parameter2 = 0 timing = 1 duration = 0
+              STR_VAR insert = ~first~ resource = EVAL ~%ins%%suf%~
+            END
+          END
+        END
+      END
+    END
+  BUT_ONLY
+
+  // Death Spell (WIZARD_DEATH_SPELL, SPWI605) disperses active insect swarms in its area.
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_DEATH_SPELL~ RET death_spl = resref death_found = found END
+  ACTION_IF death_found BEGIN
+    OUTER_SET death_already = 0
+    COPY_EXISTING - ~%death_spl%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET e = fx_off + (first + i) * 0x30
+            READ_SHORT e op
+            READ_ASCII (e + 0x14) res (8) NULL
+            PATCH_IF ((op = 146) OR (op = 148)) AND (~%res%~ STRING_EQUAL_CASE ~cbmg605b~) BEGIN
+              SET death_already = 1
+            END
+          END
+        END
+      END
+    ACTION_IF !death_already BEGIN
+      LAF cbmagic_splprot_row INT_VAR stat = ins_stat value = 0 relation = 1 RET ins_zero_row = row END
+      OUTER_SET inareapa_id = IDS_OF_SYMBOL (~projectl~ ~INAREAPA~)
+      ACTION_IF (inareapa_id < 0) BEGIN OUTER_SET inareapa_id = 157 END
+      OUTER_SET inareapa_proj = inareapa_id + 1
+      COPY_EXISTING ~%death_spl%.spl~ ~override/cbmg605a.spl~
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x50 (0 - 1)
+      COPY_EXISTING ~%death_spl%.spl~ ~override/cbmg605b.spl~
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x50 (0 - 1)
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          WRITE_SHORT (ab_off + a * 0x28 + 0x26) inareapa_proj
+        END
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = ins_zero_row STR_VAR resource = ~cbmg605b~ END
+        SPRINT list ~%insects%~
+        WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+          INNER_PATCH_SAVE ins ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+          INNER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+          PATCH_FOR_EACH suf IN a b c BEGIN
+            LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 2 timing = 1 duration = 0 STR_VAR resource = EVAL ~%ins%%suf%~ END
+          END
+        END
+        SET disp_strref = RESOLVE_STR_REF (~Insect swarm dispersed~)
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 139 target = 2 timing = 1 duration = 0 parameter1 = disp_strref END
+      COPY_EXISTING ~%death_spl%.spl~ ~override~
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          WRITE_SHORT (ab_off + a * 0x28 + 0x26) 1
+        END
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 148 target = 1 power = 6 parameter2 = 1 timing = 1 duration = 0 STR_VAR resource = ~cbmg605a~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 148 target = 1 power = 6 parameter2 = 1 timing = 1 duration = 0 STR_VAR resource = ~cbmg605b~ END
+      BUT_ONLY
+    END
   END
 END
 
@@ -2769,15 +2996,12 @@ BEGIN
     LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 1 RET undead_row = row END
     OUTER_SET fs_stat = IDS_OF_SYMBOL (~stats~ ~WIZARD_FIRE_SHIELD~)
     ACTION_IF (fs_stat < 0) BEGIN OUTER_SET fs_stat = 125 END
-    OUTER_SET pfnw_stat = IDS_OF_SYMBOL (~stats~ ~WIZARD_PROTECTION_FROM_NORMAL_WEAPONS~)
-    ACTION_IF (pfnw_stat < 0) BEGIN OUTER_SET pfnw_stat = 181 END
     OUTER_SET ss_stat = IDS_OF_SYMBOL (~stats~ ~STONESKINS~)
     ACTION_IF (ss_stat < 0) BEGIN OUTER_SET ss_stat = 88 END
     OUTER_SET ins_stat = IDS_OF_SYMBOL (~stats~ ~CLERIC_INSECT_PLAGUE~)
     ACTION_IF (ins_stat < 0) BEGIN OUTER_SET ins_stat = 120 END
 
     LAF cbmagic_splprot_row INT_VAR stat = fs_stat value = 1 relation = 4 RET fs_row = row END
-    LAF cbmagic_splprot_row INT_VAR stat = pfnw_stat value = 1 relation = 4 RET pfnw_row = row END
     LAF cbmagic_splprot_row INT_VAR stat = ss_stat value = 1 relation = 4 RET stoneskin_row = row END
 
     OUTER_SPRINT patched_insects ~~
@@ -2786,7 +3010,7 @@ BEGIN
     OUTER_SPRINT replace @30064
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 7 overall_save = 1 overall_bonus = (0 - 4) dmg_tick = 2 sf_pct = 50 sf_bonus = 0 fear = 0
-              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat
       STR_VAR symbol = ~CLERIC_SUMMON_INSECTS~ dmg_eff = ~ipdam1~ find replace
       RET s1 = spell f1 = found
     END
@@ -2796,7 +3020,7 @@ BEGIN
     OUTER_SPRINT replace @30066
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 6 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
-              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat
       STR_VAR symbol = ~CLERIC_INSECT_PLAGUE~ dmg_eff = ~ipdam1~ find replace
       RET s2 = spell f2 = found
     END
@@ -2806,7 +3030,7 @@ BEGIN
     OUTER_SPRINT replace @30068
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 3 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
-              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat
       STR_VAR symbol = ~CLERIC_CREEPING_DOOM~ dmg_eff = ~ipdam2~ find replace
       RET s3 = spell f3 = found
     END
@@ -2815,8 +3039,9 @@ BEGIN
     OUTER_PATCH_SAVE patched_insects ~%patched_insects%~ BEGIN REPLACE_TEXTUALLY ~ +$~ ~~ END
     ACTION_IF !(~%patched_insects%~ STRING_EQUAL ~~) BEGIN
       ACTION_FOR_EACH sh IN WIZARD_FIRE_SHIELD_BLUE WIZARD_FIRE_SHIELD_RED CLERIC_AURA_OF_FLAMING_DEATH BEGIN
-        LAF cbmagic_add_insect_removal_to_shield STR_VAR shield_sym = EVAL ~%sh%~ insects = EVAL ~%patched_insects%~ END
+        LAF cbmagic_add_insect_removal_to_shield INT_VAR fs_stat STR_VAR shield_sym = EVAL ~%sh%~ insects = EVAL ~%patched_insects%~ END
       END
+      LAF cbmagic_apply_insect_pfnw_and_death_spell INT_VAR ins_stat STR_VAR insects = EVAL ~%patched_insects%~ END
     END
   END
 END
@@ -2899,6 +3124,253 @@ BEGIN
       LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_NATURE_BEAUTY~ END
     END
     PRINT ~chriz-bg-magic: CLERIC_NATURE_BEAUTY (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// Helper: delete effect at global 0-based `index` from a SPL (ab_size = 0x28) or ITM (ab_size = 0x38) buffer.
+DEFINE_PATCH_FUNCTION cbmagic_delete_effect_generic
+  INT_VAR index = 0
+          ab_size = 0x28
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  READ_SHORT 0x6e c_first
+  READ_SHORT 0x70 c_cnt
+  PATCH_IF (index >= c_first) AND (index < c_first + c_cnt) BEGIN
+    WRITE_SHORT 0x70 (c_cnt - 1)
+  END ELSE PATCH_IF (c_first > index) BEGIN
+    WRITE_SHORT 0x6e (c_first - 1)
+  END
+  FOR (x = 0; x < ab_cnt; ++x) BEGIN
+    SET o = ab_off + x * ab_size
+    READ_SHORT (o + 0x1e) n
+    READ_SHORT (o + 0x20) first
+    PATCH_IF (index >= first) AND (index < first + n) BEGIN
+      WRITE_SHORT (o + 0x1e) (n - 1)
+    END ELSE PATCH_IF (first > index) BEGIN
+      WRITE_SHORT (o + 0x20) (first - 1)
+    END
+  END
+  DELETE_BYTES (fx_off + index * 0x30) 0x30
+END
+
+// Helper: extract ability-score drain effects (op6/10/15/19/44/49 with negative modifier or
+// flat value < 12, plus drain portrait icons p2=22/91) from ability headers of the current
+// SPL (ab_size = 0x28) or ITM (ab_size = 0x38) buffer into `cbdrn<N>.spl` subspells tagged
+// with `sectype = drain_sectype`.
+DEFINE_PATCH_FUNCTION cbmagic_extract_ability_drain
+  INT_VAR ab_size = 0x28
+          drain_sectype = 0
+          drain_idx = 0
+  RET drain_idx extracted
+BEGIN
+  SET extracted = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    SET ab = ab_off + a * ab_size
+    PATCH_IF (ab + ab_size <= BUFFER_LENGTH) BEGIN
+      READ_SHORT (ab + 0x1e) fx_cnt
+      READ_SHORT (ab + 0x20) fx_idx
+      SET first_drain_i = 0 - 1
+      SET drain_cnt = 0
+      PATCH_IF (fx_off + (fx_idx + fx_cnt) * 0x30 <= BUFFER_LENGTH) BEGIN
+        FOR (i = 0; i < fx_cnt; ++i) BEGIN
+          SET e = fx_off + (fx_idx + i) * 0x30
+          READ_SHORT e op
+          READ_SLONG (e + 0x04) p1
+          READ_LONG (e + 0x08) p2
+          PATCH_IF ((op = 6) OR (op = 10) OR (op = 15) OR (op = 19) OR (op = 44) OR (op = 49))
+               AND (((p2 = 0) AND (p1 < 0)) OR ((p2 = 1) AND (p1 < 12))) BEGIN
+            PATCH_IF (first_drain_i < 0) BEGIN
+              SET first_drain_i = i
+            END
+            READ_ASCII e $"drain_fx"("%drain_cnt%") (0x30)
+            SET drain_cnt += 1
+          END
+        END
+      END
+      PATCH_IF (first_drain_i >= 0) AND (drain_idx < 999) BEGIN
+        // Also collect any ability-drain portrait icon (op142 p2=22 or p2=91) on this ability
+        FOR (i = 0; i < fx_cnt; ++i) BEGIN
+          SET e = fx_off + (fx_idx + i) * 0x30
+          READ_SHORT e op
+          READ_LONG (e + 0x08) p2
+          PATCH_IF (op = 142) AND ((p2 = 22) OR (p2 = 91)) BEGIN
+            READ_ASCII e $"drain_fx"("%drain_cnt%") (0x30)
+            SET drain_cnt += 1
+          END
+        END
+        SET drain_idx += 1
+        SPRINT sub_res ~cbdrn%drain_idx%~
+        // Create the drain subspell (`override/%sub_res%.spl`)
+        INNER_ACTION BEGIN
+          LAF cbmagic_create_blank_subspell STR_VAR res = EVAL ~%sub_res%~ END
+          COPY_EXISTING ~%sub_res%.spl~ ~override~
+            WRITE_BYTE 0x27 drain_sectype
+            WRITE_BYTE (0x72 + 0x0c) 2
+            WRITE_LONG 0x6a (0x72 + 0x28)
+            WRITE_SHORT (0x72 + 0x1e) drain_cnt
+            WRITE_SHORT (0x72 + 0x20) 0
+            INSERT_BYTES (0x72 + 0x28) (drain_cnt * 0x30)
+            FOR (di = 0; di < drain_cnt; ++di) BEGIN
+              SET dst_e = 0x72 + 0x28 + di * 0x30
+              SPRINT raw_e $"drain_fx"("%di%")
+              WRITE_ASCIIE dst_e ~%raw_e%~ (0x30)
+              WRITE_BYTE (dst_e + 0x02) 2
+              WRITE_BYTE (dst_e + 0x12) 100
+              WRITE_BYTE (dst_e + 0x13) 0
+              WRITE_LONG (dst_e + 0x24) 0
+              WRITE_LONG (dst_e + 0x28) 0
+            END
+          BUT_ONLY
+        END
+        // Replace first_drain_i in place with op146 -> %sub_res%, and delete any remaining drain effects
+        SET first_e = fx_off + (fx_idx + first_drain_i) * 0x30
+        WRITE_SHORT first_e 146
+        WRITE_LONG (first_e + 0x04) 0
+        WRITE_LONG (first_e + 0x08) 1
+        WRITE_BYTE (first_e + 0x0c) 1
+        WRITE_LONG (first_e + 0x0e) 0
+        WRITE_ASCIIE (first_e + 0x14) ~%sub_res%~ #8
+        WRITE_LONG (first_e + 0x1c) 0
+        WRITE_LONG (first_e + 0x20) 0
+        FOR (i = fx_cnt - 1; i > first_drain_i; --i) BEGIN
+          READ_LONG 0x64 ab_off
+          READ_LONG 0x6a fx_off
+          READ_SHORT (ab_off + a * ab_size + 0x20) cur_idx
+          SET e = fx_off + (cur_idx + i) * 0x30
+          READ_SHORT e op
+          READ_SLONG (e + 0x04) p1
+          READ_LONG (e + 0x08) p2
+          PATCH_IF (((op = 6) OR (op = 10) OR (op = 15) OR (op = 19) OR (op = 44) OR (op = 49))
+                AND (((p2 = 0) AND (p1 < 0)) OR ((p2 = 1) AND (p1 < 12))))
+                OR ((op = 142) AND ((p2 = 22) OR (p2 = 91))) BEGIN
+            LPF cbmagic_delete_effect_generic INT_VAR index = cur_idx + i ab_size END
+          END
+        END
+        SET extracted += 1
+      END
+    END
+  END
+END
+
+// 28. Lesser Restoration (CLERIC_LESSER_RESTORATION): removes ability score drain without
+// touching positive buffs (and keeps Restoration removing it too); stays cleric-only (0x20 = 0x8000).
+DEFINE_ACTION_FUNCTION cbmagic_scs_lesser_restoration
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_LESSER_RESTORATION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_LESSER_RESTORATION is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + 0x1e) fx_cnt
+        READ_SHORT (ab_off + 0x20) fx_idx
+        FOR (i = 0; i < fx_cnt; ++i) BEGIN
+          SET e = fx_off + (fx_idx + i) * 0x30
+          READ_SHORT e op
+          READ_LONG (e + 0x04) p1
+          PATCH_IF (op = 221) AND (p1 = 10) BEGIN
+            SET already = 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF !already BEGIN
+      ACTION_IF !(FILE_EXISTS_IN_GAME ~msectype.2da~) BEGIN
+        <<<<<<<< .../chriz-bg-magic-inlined/msectype.2da
+2DA V1.0
+4294967296
+            RES_REF
+None        4294967296
+SpellProtections        27980
+SpecificProtections     27981
+IllusionaryProtections  27982
+MagicAttack             27983
+DivinationAttack        27984
+Conjuration             27986
+CombatProtections       34558
+Contingency             34559
+Battleground            34560
+OffensiveDamage         34561
+Disabling               34562
+Combination             34564
+Non-combat              34565
+>>>>>>>>
+        COPY ~.../chriz-bg-magic-inlined/msectype.2da~ ~override/msectype.2da~
+      END
+      OUTER_SPRINT sec_str @30075
+      ADD_SECTYPE cbmagic_ability_drain ~%sec_str%~
+      OUTER_SET drain_sectype = cbmagic_ability_drain
+      OUTER_SET drain_idx = 0
+
+      // Extract ability-score drain from .spl and .itm ability headers into sectype-tagged subspells
+      COPY_EXISTING_REGEXP GLOB ~^.+\.spl$~ ~override~
+        PATCH_IF !(~%SOURCE_RES%~ STRING_EQUAL_CASE ~spin823~)
+             AND !(~%SOURCE_RES%~ STRING_EQUAL_CASE ~bhaal1b~)
+             AND !(~%SOURCE_RES%~ STRING_EQUAL_CASE ~bhaal2b~)
+             AND (INDEX (CASE_INSENSITIVE EXACT_MATCH ~cbdrn~ ~%SOURCE_RES%~) != 0) BEGIN
+          LPF cbmagic_spl_valid RET valid reason END
+          PATCH_IF valid BEGIN
+            READ_BYTE 0x27 cur_sec
+            PATCH_IF (cur_sec != drain_sectype) BEGIN
+              LPF cbmagic_extract_ability_drain INT_VAR ab_size = 0x28 drain_sectype drain_idx RET drain_idx extracted END
+            END
+          END
+        END
+      BUT_ONLY
+
+      COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+        PATCH_IF (BUFFER_LENGTH >= 0x72) AND !(~%SOURCE_RES%~ STRING_EQUAL_CASE ~abaz01~) BEGIN
+          READ_ASCII 0 sig (8)
+          PATCH_IF (~%sig%~ STRING_EQUAL ~ITM V1  ~) BEGIN
+            LPF cbmagic_extract_ability_drain INT_VAR ab_size = 0x38 drain_sectype drain_idx RET drain_idx extracted END
+          END
+        END
+      BUT_ONLY
+
+      // Patch Lesser Restoration (SPPR417) and Restoration (SPPR713) with op221 for drain_sectype
+      COPY_EXISTING ~%spell%.spl~ ~override~
+        LPF cbmagic_spl_valid RET valid reason END
+        READ_SHORT 0x68 ab_cnt
+        PATCH_IF valid AND (ab_cnt > 0) BEGIN
+          WRITE_SHORT 0x20 0x8000
+          LPF ADD_SPELL_EFFECT
+            INT_VAR opcode = 221 target = 2 power = 4 parameter1 = 10 parameter2 = drain_sectype
+                    timing = 1 duration = 0 resist_dispel = 0
+          END
+          SET changed = 1
+        END
+      BUT_ONLY
+      LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_RESTORATION~ RET rest_spl = resref rest_found = found END
+      ACTION_IF rest_found BEGIN
+        COPY_EXISTING ~%rest_spl%.spl~ ~override~
+          LPF cbmagic_spl_valid RET valid reason END
+          READ_SHORT 0x68 ab_cnt
+          PATCH_IF valid AND (ab_cnt > 0) BEGIN
+            LPF ADD_SPELL_EFFECT
+              INT_VAR opcode = 221 target = 2 power = 7 parameter1 = 10 parameter2 = drain_sectype
+                      timing = 1 duration = 0 resist_dispel = 0
+            END
+          END
+        BUT_ONLY
+      END
+      OUTER_SPRINT find @30076
+      OUTER_SPRINT replace @30077
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_LESSER_RESTORATION~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_LESSER_RESTORATION (%spell%): changed %changed%, already %already%.~
   END
 END
 

@@ -61,3 +61,4 @@ LAF cbmagic_scs_glyph_of_warding END
 LAF cbmagic_scs_magical_stone END
 LAF cbmagic_scs_insect_plague END
 LAF cbmagic_scs_natures_beauty END
+LAF cbmagic_scs_lesser_restoration END

@@ -102,13 +102,24 @@
 @30062 = ~3d4 points of crushing damage to whomever it hits (6d4 to undead)~
 
 @30063 = ~making it very difficult to cast spells (50% chance of spell failure)\.~
-@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.~
 
-@30065 = ~Spellcasting within the swarm is impossible (100% chance of spell failure)\.~
-@30066 = ~Each round, creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 or be unable to cast spells (100% chance of spell failure). Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30065 = ~Spellcasting within the swarm is impossible (100% chance of spell failure)~
+@30066 = ~Creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 100% chance of spell failure (each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune)~
 
 @30067 = ~suffer 2 points of damage each second and a spell failure rate of 100%\.~
-@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a spell failure rate of 100%. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a spell failure rate of 100%. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.~
 
 @30069 = ~die of longing for the denied illusion\. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled)\.~
 @30070 = ~be permanently blinded (and slain instantly if humanoid). If the Saving Throw is successful, viewers are blinded for 3 rounds.~
+
+@30071 = ~1 point of damage every 2 seconds~
+@30072 = ~1 point of damage each second~
+
+@30073 = ~Saving Throw vs\. Breath Weapon or run away in fear~
+@30074 = ~Saving Throw vs. Spell at -2 or run away in fear~
+
+@30075 = ~Ability Score Restored~
+
+@30076 = ~reverses any previous life energy level drain of the creature by a force or monster\.~
+@30077 = ~reverses any previous life energy level drain or ability score drain of the creature by a force or monster.~
