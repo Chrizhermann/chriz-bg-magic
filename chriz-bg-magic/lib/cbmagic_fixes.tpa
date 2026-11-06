@@ -71,6 +71,12 @@ BEGIN
                 SET changed += a
                 SET already += b
                 SET others += c
+              END ELSE PATCH_IF (~%mode%~ STRING_EQUAL ~stinking_icon~) BEGIN
+                LPF cbmagic_record_stinking_cloud_icon RET a = changed END
+                SET changed += a
+              END ELSE PATCH_IF (~%mode%~ STRING_EQUAL ~decay_icon~) BEGIN
+                LPF cbmagic_record_icon_lifetime INT_VAR row = 101 anchor1 = 25 copy_timing = 0 copy_duration = 0 copy_dispel = 1 RET a = changed END
+                SET changed += a
               END ELSE BEGIN
                 LPF cbmagic_emotion_hopelessness_icon RET a = changed b = already END
                 SET changed += a

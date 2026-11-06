@@ -85,8 +85,12 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
         for a, b in zip(s["abilities"], o["abilities"]):
             check([e["p2"] for e in a["effects"] if e["opcode"] == 39] == [0] * ops(b["effects"]).count(39),
                   f"{res}: sleep still does not wake")
-            check(without(a["effects"], 39) == without(b["effects"], 39), f"{res}: other effects changed")
-            expected_sleep = [{**e, "p2": 0, "special": 44 if res == "SPWI411" else e["special"]}
+            expected_other = without(b["effects"], 39)
+            if res == "SPWI213":
+                expected_other = [e for e in expected_other if not (e["opcode"] == 142 and e["p2"] == 126)]
+            check(without(a["effects"], 39) == expected_other, f"{res}: other effects changed")
+            expected_sleep = [{**e, "p2": 0,
+                               "special": 126 if res == "SPWI213" else (44 if res == "SPWI411" else e["special"])}
                               for e in b["effects"] if e["opcode"] == 39]
             check([{**e, "p2": 0} for e in a["effects"] if e["opcode"] == 39] == expected_sleep,
                   f"{res}: sleep changed beyond its owned fields")

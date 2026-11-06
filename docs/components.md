@@ -8,7 +8,7 @@ move to the Chriz script engine later. Values not named here stay as in the base
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
 decided change (the modules in `chriz-bg-magic/lib/`); any of
 decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`,
-`cbmagic_sr.tpa`, `cbmagic_scs.tpa`, `cbmagic_more.tpa`); any of
+`cbmagic_sr.tpa`, `cbmagic_scs.tpa`, `cbmagic_more.tpa`, `cbmagic_record.tpa`); any of
 them can move to a component of its own without changes. The user-facing layout is
 Christopher's decision.
 
@@ -253,6 +253,33 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 - School set to Conjuration (`2`, Diviner exclusion); description and scroll updated.
 - Creatures that do not breathe are immune: undead (`GENERAL = UNDEAD`, SPLPROT row 1) and
   races `GOLEM`, `ELEMENTAL` and `SLIME`.
+
+## Character Record entries (`cbmagic_record_base_game`)
+
+The Character Record reflects the conditions actually applied by base-game spells. This
+pass changes only portrait-icon entries and their `STATDESC` labels; it does not alter the
+underlying gameplay effect, target, saving throw, duration, or a condition's cure.
+
+- Mislabelled entries are corrected for Wraithform, Wild-surge Minor Globe, Protection
+  From Good, Shadow Form, Defensive Stance, Mimic Web, and Spell Deflection. Stinking
+  Cloud uses the sleep effect's native entry rather than a separately timed icon, including
+  private payloads belonging to the spell.
+- Missing entries are added beside the existing effects for Blur, Physical Mirror, Divine
+  Favor, lowered fire/electrical resistance, Symbol, Pain, Selune's Blessing, the listed
+  Wish outcomes, Jester/False Dawn confusion where it targets an enemy, and Nahal's
+  Wildmagic. New named entries use private copies of the matching state icon.
+- Death Ward, Enhanced Bard Song, Conjure Fire Elemental, and Dolorous Decay use the
+  lifetime or dispellability of their own status effect. Salt Crystals relies on its native
+  stun entry instead of a duplicate icon.
+- Exaltation, poison cures, Heal, Remove Paralysis, Greater Restoration and the named Wish
+  outcomes remove separately added Record rows when they cure the corresponding condition.
+  Cure markers follow self-only abilities but otherwise target the recipient.
+- The base Record labels for rows 55, 8 and 112 use new strings, `Stunned`, `Blinded`, and
+  `Deafened`; shared dialog strings are never changed. Missing spells are silently skipped.
+
+Every match is by opcode and parameter within an ability. Unrelated effects, additional
+abilities, and other users of a native icon stay intact. A second install recognizes
+matching entries and does not add another one.
 
 ## Power Word: Sleep (`cbmagic_vanilla_power_word_sleep`)
 

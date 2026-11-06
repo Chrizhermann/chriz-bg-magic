@@ -1227,8 +1227,13 @@ def vanilla_batch_alternate_layouts_and_preservation(work, weidu):
     check((struct.unpack_from("<I", fb_raw, 0x18)[0] & 0x40) == 0x40, "FBLADE magical flag")
     check(struct.unpack_from("<I", fb_raw, 0x60)[0] == 2, "FBLADE enchantment 2 preserved")
 
-    # Verify Heal kept faster casting time 3 (and was not copied to override)
-    check(g.file("override/SPPR607.SPL") is None, "SPPR607 with faster ct=3 should not be overwritten")
+    # Record cleanup adds only its stale-icon removers; the earlier mod's faster casting
+    # time and unrelated opcode remain intact.
+    s = _read_spl_ext(g, "SPPR607")
+    effects = s["abilities"][0]["effects"]
+    check(s["abilities"][0]["casting_time"] == 3, f"SPPR607 casting time: {s}")
+    check(any(f["opcode"] == 132 for f in effects), f"SPPR607 unrelated effect: {effects}")
+    check({f["p2"] for f in effects if f["opcode"] == 240} == {6, 101}, f"SPPR607 record cures: {effects}")
 
 
 @test

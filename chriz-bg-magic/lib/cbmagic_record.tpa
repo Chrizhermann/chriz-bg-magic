@@ -1,0 +1,633 @@
+// Character-record fixes for base-game spells.  The Record follows opcode 142 rows by
+// label; all matching below is therefore semantic (opcode, parameters, and ability), not
+// effect-table position.  Helpers in cbmagic_spells.tpa maintain indices when effects move.
+
+DEFINE_ACTION_FUNCTION cbmagic_record_any_exists
+  STR_VAR spells = ~~
+  RET found
+BEGIN
+  OUTER_SET found = 0
+  OUTER_SPRINT remaining ~%spells%~
+  OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE res ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    ACTION_TO_UPPER res
+    ACTION_IF FILE_EXISTS_IN_GAME ~%res%.spl~ BEGIN
+      OUTER_SET found = 1
+    END
+  END
+END
+
+// Repoint only portrait-icon effects with the stated old STATDESC row.  Other effects
+// (including a native icon for the same row) remain untouched.
+DEFINE_PATCH_FUNCTION cbmagic_record_repoint_icon
+  INT_VAR old_row = 0 new_row = 0
+  RET changed
+BEGIN
+  SET changed = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_LONG (fx + 0x08) p2
+      PATCH_IF (op = 142) AND (p2 = old_row) BEGIN
+        WRITE_LONG (fx + 0x08) new_row
+        SET changed += 1
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_repoint_icon_in_spell
+  INT_VAR old_row = 0 new_row = 0
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_record_repoint_icon INT_VAR old_row new_row RET changed END
+      END
+    BUT_ONLY
+  END
+END
+
+// Remove a redundant opcode-142 row only from an ability that has the native effect
+// rendering its Record entry.  Deletion runs backwards so every matching icon is safe.
+DEFINE_PATCH_FUNCTION cbmagic_record_delete_native_icon
+  INT_VAR row = 0 native_opcode = (0 - 1)
+  RET changed
+BEGIN
+  SET changed = 0
+  READ_SHORT 0x68 ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET native = (native_opcode < 0) ? 1 : 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      READ_SHORT (fx_off + (first + i) * 0x30) op
+      PATCH_IF (op = native_opcode) BEGIN SET native = 1 END
+    END
+    PATCH_IF native BEGIN
+      FOR (i = n - 1; i >= 0; --i) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 142) AND (p2 = row) BEGIN
+          LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+          SET changed += 1
+        END
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_delete_native_icon_in_spell
+  INT_VAR row = 0 native_opcode = (0 - 1)
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_record_delete_native_icon INT_VAR row native_opcode RET changed END
+      END
+    BUT_ONLY
+  END
+END
+
+// Add one icon per ability beside its first matching anchor.  The full applied lifetime
+// is compared before inserting, so a reinstall is stable and an unrelated same-row icon
+// is not mistaken for this spell's own marker.
+DEFINE_PATCH_FUNCTION cbmagic_record_add_icon
+  INT_VAR row = 0 anchor1 = (0 - 1) anchor2 = (0 - 1) anchor3 = (0 - 1) anchor4 = (0 - 1)
+          anchor5 = (0 - 1) anchor6 = (0 - 1)
+          require_target = 0 require_timed = 0 match_p1 = 0 wanted_p1 = 0 skip_if_row_present = 0
+  RET added present skipped
+BEGIN
+  SET added = 0
+  SET present = 0
+  SET skipped = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  SET row_anywhere = 0
+  PATCH_IF skip_if_row_present BEGIN
+    FOR (a = 0; a < ab_cnt; ++a) BEGIN
+      READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+      READ_SHORT (ab_off + a * 0x28 + 0x20) first
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 142) AND (p2 = row) BEGIN SET row_anywhere = 1 END
+      END
+    END
+  END
+  PATCH_IF row_anywhere BEGIN
+    SET skipped = 1
+  END ELSE BEGIN
+    FOR (a = 0; a < ab_cnt; ++a) BEGIN
+      READ_LONG 0x64 ab_off
+      READ_LONG 0x6a fx_off
+      READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+      READ_SHORT (ab_off + a * 0x28 + 0x20) first
+      SET anchor_i = (0 - 1)
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_BYTE (fx + 0x02) target
+        READ_BYTE (fx + 0x03) power
+        READ_LONG (fx + 0x04) p1
+        READ_BYTE (fx + 0x0c) timing
+        READ_BYTE (fx + 0x0d) dispel
+        READ_LONG (fx + 0x0e) duration
+        READ_BYTE (fx + 0x12) prob1
+        READ_BYTE (fx + 0x13) prob2
+        READ_LONG (fx + 0x24) save
+        READ_SLONG (fx + 0x28) bonus
+        SET opcode_matches = (op = anchor1) OR (op = anchor2) OR (op = anchor3) OR (op = anchor4) OR (op = anchor5) OR (op = anchor6)
+        PATCH_IF opcode_matches AND (anchor_i < 0) AND ((require_target = 0) OR (target = require_target)) AND
+          (!require_timed OR (duration > 0)) AND (!match_p1 OR (p1 = wanted_p1)) BEGIN
+          SET anchor_i = i
+          SET anchor_target = target
+          SET anchor_power = power
+          SET anchor_timing = timing
+          SET anchor_dispel = dispel
+          SET anchor_duration = duration
+          SET anchor_prob1 = prob1
+          SET anchor_prob2 = prob2
+          SET anchor_save = save
+          SET anchor_bonus = bonus
+        END
+      END
+      PATCH_IF (anchor_i >= 0) BEGIN
+        SET has_lifetime = 0
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_BYTE (fx + 0x02) target
+          READ_BYTE (fx + 0x03) power
+          READ_LONG (fx + 0x08) p2
+          READ_BYTE (fx + 0x0c) timing
+          READ_BYTE (fx + 0x0d) dispel
+          READ_LONG (fx + 0x0e) duration
+          READ_BYTE (fx + 0x12) prob1
+          READ_BYTE (fx + 0x13) prob2
+          READ_LONG (fx + 0x24) save
+          READ_SLONG (fx + 0x28) bonus
+          PATCH_IF (op = 142) AND (p2 = row) AND (target = anchor_target) AND (power = anchor_power) AND
+            (timing = anchor_timing) AND (dispel = anchor_dispel) AND (duration = anchor_duration) AND
+            (prob1 = anchor_prob1) AND (prob2 = anchor_prob2) AND (save = anchor_save) AND (bonus = anchor_bonus) BEGIN
+            SET has_lifetime = 1
+          END
+        END
+        PATCH_IF has_lifetime BEGIN
+          SET present += 1
+        END ELSE BEGIN
+          LPF cbmagic_insert_effect INT_VAR ability = a position = (anchor_i + 1) opcode = 142 target = anchor_target
+            power = anchor_power parameter2 = row timing = anchor_timing resist_dispel = anchor_dispel
+            duration = anchor_duration probability1 = anchor_prob1 probability2 = anchor_prob2
+            savingthrow = anchor_save savebonus = anchor_bonus END
+          SET added += 1
+        END
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_add_icon_in_spell
+  INT_VAR row = 0 anchor1 = (0 - 1) anchor2 = (0 - 1) anchor3 = (0 - 1) anchor4 = (0 - 1)
+          anchor5 = (0 - 1) anchor6 = (0 - 1)
+          require_target = 0 require_timed = 0 match_p1 = 0 wanted_p1 = 0 skip_if_row_present = 0
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_record_add_icon INT_VAR row anchor1 anchor2 anchor3 anchor4 anchor5 anchor6 require_target require_timed match_p1 wanted_p1 skip_if_row_present
+          RET added present skipped END
+      END
+    BUT_ONLY
+  END
+END
+
+// Copy selected lifetime fields from the longest matching anchor in each ability.  A row
+// can occur more than once; every occurrence in that ability is made consistent.
+DEFINE_PATCH_FUNCTION cbmagic_record_icon_lifetime
+  INT_VAR row = 0 anchor1 = (0 - 1) anchor2 = (0 - 1) longest = 0
+          copy_timing = 1 copy_duration = 1 copy_dispel = 0
+  RET changed
+BEGIN
+  SET changed = 0
+  READ_SHORT 0x68 ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET anchor_found = 0
+    SET best_duration = 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x0c) timing
+      READ_BYTE (fx + 0x0d) dispel
+      READ_LONG (fx + 0x0e) duration
+      PATCH_IF ((op = anchor1) OR (op = anchor2)) AND (!anchor_found OR !longest OR (duration > best_duration)) BEGIN
+        SET anchor_found = 1
+        SET best_duration = duration
+        SET best_timing = timing
+        SET best_dispel = dispel
+      END
+    END
+    PATCH_IF anchor_found BEGIN
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 142) AND (p2 = row) BEGIN
+          READ_BYTE (fx + 0x0c) timing
+          READ_BYTE (fx + 0x0d) dispel
+          READ_LONG (fx + 0x0e) duration
+          PATCH_IF copy_timing AND (timing != best_timing) BEGIN WRITE_BYTE (fx + 0x0c) best_timing SET changed += 1 END
+          PATCH_IF copy_duration AND (duration != best_duration) BEGIN WRITE_LONG (fx + 0x0e) best_duration SET changed += 1 END
+          PATCH_IF copy_dispel AND (dispel != best_dispel) BEGIN WRITE_BYTE (fx + 0x0d) best_dispel SET changed += 1 END
+        END
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_icon_lifetime_in_spell
+  INT_VAR row = 0 anchor1 = (0 - 1) anchor2 = (0 - 1) longest = 0 copy_timing = 1 copy_duration = 1 copy_dispel = 0
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_record_icon_lifetime INT_VAR row anchor1 anchor2 longest copy_timing copy_duration copy_dispel RET changed END
+      END
+    BUT_ONLY
+  END
+END
+
+// Stinking Cloud's sleep entry is native to opcode 39.  Moving row 126 to its special
+// field ties it to sleep removal/immunity; a separately timed 142 icon does not.
+DEFINE_PATCH_FUNCTION cbmagic_record_stinking_cloud_icon
+  RET changed
+BEGIN
+  SET changed = 0
+  READ_SHORT 0x68 ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET has_sleep = 0
+    SET has_icon = 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x02) target
+      READ_LONG (fx + 0x08) p2
+      PATCH_IF (op = 39) AND (target = 2) BEGIN SET has_sleep = 1 END
+      PATCH_IF (op = 142) AND (target = 2) AND (p2 = 126) BEGIN SET has_icon = 1 END
+    END
+    PATCH_IF has_sleep AND has_icon BEGIN
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_BYTE (fx + 0x02) target
+        READ_LONG (fx + 0x2c) special
+        PATCH_IF (op = 39) AND (target = 2) AND (special != 126) BEGIN
+          WRITE_LONG (fx + 0x2c) 126
+          SET changed += 1
+        END
+      END
+      FOR (i = n - 1; i >= 0; --i) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_BYTE (fx + 0x02) target
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 142) AND (target = 2) AND (p2 = 126) BEGIN
+          LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+          SET changed += 1
+        END
+      END
+    END
+  END
+END
+
+// Mimic Web reuses Webbed, but must end with its own opcode 109 duration rather than the
+// native Hold row 13 it formerly displayed.
+DEFINE_PATCH_FUNCTION cbmagic_record_mimic_web
+  RET changed
+BEGIN
+  SET changed = 0
+  READ_SHORT 0x68 ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET has_web = 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_LONG (fx + 0x0e) duration
+      PATCH_IF (op = 109) AND !has_web BEGIN SET has_web = 1 SET web_duration = duration END
+    END
+    PATCH_IF has_web BEGIN
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_LONG (fx + 0x08) p2
+        READ_LONG (fx + 0x0e) duration
+        PATCH_IF (op = 142) AND ((p2 = 13) OR (p2 = 129)) BEGIN
+          PATCH_IF (p2 != 129) BEGIN WRITE_LONG (fx + 0x08) 129 SET changed += 1 END
+          PATCH_IF (duration != web_duration) BEGIN WRITE_LONG (fx + 0x0e) web_duration SET changed += 1 END
+        END
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_mimic_web_in_spell
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_record_mimic_web RET changed END
+      END
+    BUT_ONLY
+  END
+END
+
+// Adds one cure marker per ability and row, matching Greater Restoration's stale-row
+// loop.  The marker defaults to the recipient (2), but follows an all-self ability's
+// own effects (1); a reordered unrelated self-side visual cannot redirect a party cure.
+DEFINE_ACTION_FUNCTION cbmagic_record_cure_row
+  INT_VAR row = 0 required_opcode = (0 - 1)
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        READ_SHORT 0x68 ab_cnt
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_LONG 0x64 ab_off
+          READ_LONG 0x6a fx_off
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          SET has_required = (required_opcode < 0) ? 1 : 0
+          SET has_row = 0
+          SET target_one = 0
+          SET target_two = 0
+          SET cure_power = 0
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            READ_BYTE (fx + 0x02) target
+            READ_BYTE (fx + 0x03) power
+            READ_LONG (fx + 0x08) p2
+            PATCH_IF (i = 0) BEGIN SET cure_power = power END
+            PATCH_IF (target = 1) BEGIN SET target_one += 1 END
+            PATCH_IF (target = 2) BEGIN SET target_two += 1 END
+            PATCH_IF (op = required_opcode) BEGIN SET has_required = 1 END
+            PATCH_IF (op = 240) AND (p2 = row) BEGIN SET has_row = 1 END
+          END
+          SET cure_target = (target_one > 0) AND (target_two = 0) ? 1 : 2
+          PATCH_IF has_required AND !has_row BEGIN
+            LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = cure_target power = cure_power
+              parameter2 = row timing = 1 resist_dispel = 2 duration = 0 END
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_spell_name_ref
+  STR_VAR spell = ~~
+  RET found name_ref
+BEGIN
+  OUTER_SET found = 0
+  OUTER_SET name_ref = (0 - 1)
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        READ_SLONG 0x08 name_ref
+        SET found = 1
+      END
+    BUT_ONLY
+  END
+END
+
+// STATDESC's labels are identity, while column 1 is a strref.  Repointing this column
+// preserves every shared TLK string and follows labels even when rows are reordered.
+DEFINE_ACTION_FUNCTION cbmagic_record_wording
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~statdesc.2da~ BEGIN
+    OUTER_SET stunned_ref = RESOLVE_STR_REF (@60059)
+    OUTER_SET blinded_ref = RESOLVE_STR_REF (@60060)
+    OUTER_SET deafened_ref = RESOLVE_STR_REF (@60061)
+    COPY_EXISTING ~statdesc.2da~ ~override~
+      COUNT_2DA_COLS cols
+      PATCH_IF (cols >= 3) BEGIN
+        COUNT_2DA_ROWS 3 rows
+        FOR (r = 0; r < rows; ++r) BEGIN
+          READ_2DA_ENTRY r 0 3 label
+          READ_2DA_ENTRY r 1 3 old_ref
+          PATCH_IF (~%label%~ STRING_EQUAL ~55~) AND (old_ref != stunned_ref) BEGIN SET_2DA_ENTRY r 1 3 ~%stunned_ref%~ END
+          PATCH_IF (~%label%~ STRING_EQUAL ~8~) AND (old_ref != blinded_ref) BEGIN SET_2DA_ENTRY r 1 3 ~%blinded_ref%~ END
+          PATCH_IF (~%label%~ STRING_EQUAL ~112~) AND (old_ref != deafened_ref) BEGIN SET_2DA_ENTRY r 1 3 ~%deafened_ref%~ END
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_base_game
+BEGIN
+  // A. Rows that name the wrong condition.
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPWI315~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60050)
+    LAF cbmagic_state_icon INT_VAR row = 23 STR_VAR resref = ~CBMIWRF~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWRF~ RET icon = icon_row END
+    LAF cbmagic_record_repoint_icon_in_spell INT_VAR old_row = 23 new_row = icon STR_VAR spell = ~SPWI315~ END
+  END
+  LAF cbmagic_record_repoint_icon_in_spell INT_VAR old_row = 23 new_row = 122 STR_VAR spell = ~SPWM126~ END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~OHBPROG OHBPROG1 OHPRGD10~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60051)
+    LAF cbmagic_state_icon INT_VAR row = 9 STR_VAR resref = ~CBMIPFG~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPFG~ RET icon = icon_row END
+    ACTION_FOR_EACH spell IN OHBPROG OHBPROG1 OHPRGD10 BEGIN
+      LAF cbmagic_record_repoint_icon_in_spell INT_VAR old_row = 9 new_row = icon STR_VAR spell END
+    END
+  END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPCL938~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60052)
+    LAF cbmagic_state_icon INT_VAR row = 147 STR_VAR resref = ~CBMISHF~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISHF~ RET icon = icon_row END
+    LAF cbmagic_record_repoint_icon_in_spell INT_VAR old_row = 147 new_row = icon STR_VAR spell = ~SPCL938~ END
+  END
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPDWD02~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60053)
+    LAF cbmagic_state_icon INT_VAR row = 147 STR_VAR resref = ~CBMIDFS~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDFS~ RET icon = icon_row END
+    LAF cbmagic_record_repoint_icon_in_spell INT_VAR old_row = 147 new_row = icon STR_VAR spell = ~SPDWD02~ END
+  END
+  ACTION_FOR_EACH spell IN SPWI802 SPWI618 SPIN710 BEGIN
+    LAF cbmagic_record_delete_native_icon_in_spell INT_VAR row = 28 native_opcode = 201 STR_VAR spell END
+  END
+
+  ACTION_FOR_EACH spell IN SPWI213 SPIN940 SPWI004 SPWM187 BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+      LAF cbmagic_patch_spell_and_payloads STR_VAR spell mode = ~stinking_icon~ label = ~Stinking Cloud~ RET changed already others END
+    END
+  END
+  LAF cbmagic_record_mimic_web_in_spell STR_VAR spell = ~SPIN566~ END
+
+  // B. Missing record entries.
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPWI201 SPDM102 SPIN943~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60054)
+    LAF cbmagic_state_icon INT_VAR row = 127 STR_VAR resref = ~CBMIBLR~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIBLR~ RET icon = icon_row END
+    ACTION_FOR_EACH spell IN SPWI201 SPDM102 SPIN943 BEGIN
+      LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 65 STR_VAR spell END
+    END
+  END
+  LAF cbmagic_record_add_icon_in_spell INT_VAR row = 132 anchor1 = 197 STR_VAR spell = ~SPPR613~ END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~OHTYR2~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60055)
+    LAF cbmagic_state_icon INT_VAR row = 17 STR_VAR resref = ~CBMIDVF~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVF~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 54 STR_VAR spell = ~OHTYR2~ END
+  END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPIN682~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60056)
+    LAF cbmagic_state_icon INT_VAR row = 106 STR_VAR resref = ~CBMILFR~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILFR~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 30 STR_VAR spell = ~SPIN682~ END
+  END
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPIN532~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60057)
+    LAF cbmagic_state_icon INT_VAR row = 106 STR_VAR resref = ~CBMILER~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILER~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 29 STR_VAR spell = ~SPIN532~ END
+  END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPWI955~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@30075)
+    LAF cbmagic_state_icon INT_VAR row = 91 STR_VAR resref = ~CBMIPAN~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPAN~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 54 STR_VAR spell = ~SPWI955~ END
+  END
+
+  LAF cbmagic_record_spell_name_ref STR_VAR spell = ~SPWI954~ RET selune_found = found selune_ref = name_ref END
+  ACTION_IF selune_found BEGIN
+    LAF cbmagic_state_icon INT_VAR row = 17 STR_VAR resref = ~CBMISEL~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = selune_ref STR_VAR bam = ~CBMISEL~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 102 anchor2 = 206 require_timed = 1 STR_VAR spell = ~SPWI954~ END
+  END
+
+  LAF cbmagic_record_any_exists STR_VAR spells = ~SPWISH08~ RET have = found END
+  ACTION_IF have BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@60058)
+    LAF cbmagic_state_icon INT_VAR row = 21 STR_VAR resref = ~CBMIWAT~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWAT~ RET icon = icon_row END
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 44 match_p1 = 1 wanted_p1 = 25 STR_VAR spell = ~SPWISH08~ END
+  END
+  LAF cbmagic_record_spell_name_ref STR_VAR spell = ~SPWISH20~ RET hp_found = found hp_ref = name_ref END
+  ACTION_IF !hp_found BEGIN
+    LAF cbmagic_record_spell_name_ref STR_VAR spell = ~SPWISH21~ RET hp_found = found hp_ref = name_ref END
+  END
+  ACTION_IF hp_found BEGIN
+    LAF cbmagic_state_icon INT_VAR row = 91 STR_VAR resref = ~CBMIHPL~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = hp_ref STR_VAR bam = ~CBMIHPL~ RET icon = icon_row END
+    ACTION_FOR_EACH spell IN SPWISH20 SPWISH21 BEGIN
+      LAF cbmagic_record_add_icon_in_spell INT_VAR row = icon anchor1 = 18 STR_VAR spell END
+    END
+  END
+  ACTION_FOR_EACH spell IN SPWISH41 SPWISH42 SPWISH43 SPWISH44 SPWISH45 BEGIN
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = 91 anchor1 = 6 anchor2 = 10 anchor3 = 15 anchor4 = 19 anchor5 = 44 anchor6 = 49 require_timed = 1 STR_VAR spell END
+  END
+
+  ACTION_FOR_EACH spell IN SPCL751A SPPR609 OHBJOKE1 BEGIN
+    LAF cbmagic_record_add_icon_in_spell INT_VAR row = 3 anchor1 = 128 require_target = 2 skip_if_row_present = 1 STR_VAR spell END
+  END
+  LAF cbmagic_record_add_icon_in_spell INT_VAR row = 83 anchor1 = 60 STR_VAR spell = ~OHNWILDX~ END
+
+  // C. An existing entry has the wrong lifetime.
+  LAF cbmagic_record_icon_lifetime_in_spell INT_VAR row = 99 anchor1 = 101 longest = 1 STR_VAR spell = ~SPPR409~ END
+  LAF cbmagic_record_icon_lifetime_in_spell INT_VAR row = 63 anchor1 = 166 STR_VAR spell = ~SPCL920A~ END
+  LAF cbmagic_record_icon_lifetime_in_spell INT_VAR row = 131 anchor1 = 165 copy_timing = 0 STR_VAR spell = ~SPWI620~ END
+  LAF cbmagic_record_delete_native_icon_in_spell INT_VAR row = 55 native_opcode = 45 STR_VAR spell = ~SPIN934~ END
+  ACTION_IF FILE_EXISTS_IN_GAME ~SPPR610.spl~ BEGIN
+    LAF cbmagic_patch_spell_and_payloads STR_VAR spell = ~SPPR610~ mode = ~decay_icon~ label = ~Dolorous Decay~ RET changed already others END
+  END
+
+  // D. Conditions cured mechanically still need their separately added row removed.
+  ACTION_FOR_EACH row IN 2 3 44 47 48 126 130 BEGIN
+    LAF cbmagic_record_cure_row INT_VAR row STR_VAR spell = ~OHTYR1~ END
+  END
+  ACTION_FOR_EACH spell IN SPPR212 SPIN102 BEGIN
+    ACTION_FOR_EACH row IN 6 101 BEGIN
+      LAF cbmagic_record_cure_row INT_VAR row STR_VAR spell END
+    END
+  END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_NEUTRALIZE_POISON~ RET neutralize = resref neutralize_found = found END
+  ACTION_IF neutralize_found BEGIN
+    ACTION_FOR_EACH row IN 6 101 BEGIN
+      LAF cbmagic_record_cure_row INT_VAR row STR_VAR spell = EVAL ~%neutralize%~ END
+    END
+  END
+  ACTION_FOR_EACH spell IN SPIN201 SPPR607 DEVAHEAL SENSPIHE SPIN679 SPIN711 SPWISH28 SPWM168 BEGIN
+    ACTION_FOR_EACH row IN 6 101 BEGIN
+      LAF cbmagic_record_cure_row INT_VAR row STR_VAR spell END
+    END
+  END
+  LAF cbmagic_record_cure_row INT_VAR row = 129 required_opcode = 162 STR_VAR spell = ~SPPR308~ END
+  LAF cbmagic_record_cure_row INT_VAR row = 129 required_opcode = 162 STR_VAR spell = ~SPIN862~ END
+  ACTION_FOR_EACH spell IN OHBRESTO SPWISH07 SPWISH46 BEGIN
+    ACTION_FOR_EACH row IN 2 3 6 7 44 47 48 101 126 BEGIN
+      LAF cbmagic_record_cure_row INT_VAR row STR_VAR spell END
+    END
+  END
+
+  // E. Record wording owns new strrefs, never the old shared TLK entries.
+  LAF cbmagic_record_wording END
+END

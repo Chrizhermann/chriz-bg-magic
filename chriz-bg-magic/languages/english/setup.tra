@@ -83,6 +83,21 @@
 @60042 = ~Undead are healed for 1d8 + 1/level Hit Points. This spell has no effect on constructs or extraplanar creatures.~
 @60043 = ~reduces the target to 1 Hit Point\.~
 @60044 = ~reduces the target to 1 Hit Point. Undead are healed completely instead.~
+
+// --- Character Record batch strings (@60050+) ------------------------------------------
+
+@60050 = ~Wraithform~
+@60051 = ~Protection From Good~
+@60052 = ~Shadow Form~
+@60053 = ~Defensive Stance~
+@60054 = ~Blur~
+@60055 = ~Divine Favor~
+@60056 = ~Fire Resistance Lowered~
+@60057 = ~Electrical Resistance Lowered~
+@60058 = ~Enhanced Attributes~
+@60059 = ~Stunned~
+@60060 = ~Blinded~
+@60061 = ~Deafened~
 @20030 = ~(Invocation/Evocation)~
 // Kept / decided SR batch strings (@40000+).
 @40000 = ~until 24 hours have passed~
