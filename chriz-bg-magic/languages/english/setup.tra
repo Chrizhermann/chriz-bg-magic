@@ -386,3 +386,13 @@ Improved Haste dispels any Slow effects on the recipients and renders them immun
 
 
 
+
+// --- Record entries that follow a state (@61000+) ---
+@61000 = ~Invisible~
+@61001 = ~Improved Invisibility~
+@61002 = ~Sanctuary~
+@61003 = ~Mirror Image~
+@61004 = ~Reflected Image~
+@61005 = ~Shield of the Archons~
+@61006 = ~Minor Spell Deflection~
+@61007 = ~Minor Spell Turning~

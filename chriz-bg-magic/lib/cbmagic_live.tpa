@@ -1,0 +1,47 @@
+// --- Record entries that follow a state (lua/M_CBMREC.lua) ------------------------------
+// Invisibility, Improved Invisibility, Sanctuary and the images get an entry while the state
+// lasts, from any source. Shield of the Archons, Minor Spell Deflection and Minor Spell
+// Turning show their own name in place of the big spell's row, until the last level is spent.
+// No spell changes: it all happens at runtime.
+
+// A row of its own, with a copy of the STATES.BAM icon of `like`.
+DEFINE_ACTION_FUNCTION cbmagic_live_row
+  INT_VAR desc_ref = 0
+          like = 0
+  STR_VAR bam = ~~
+  RET row
+BEGIN
+  LAF cbmagic_state_icon INT_VAR row = like STR_VAR resref = EVAL ~%bam%~ END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref STR_VAR bam = EVAL ~%bam%~ RET row = icon_row END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_record_live
+BEGIN
+  // Same install-time choice as the bonus listener: without EEex nothing here can follow a state.
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~M___EEex.lua~) BEGIN
+    PRINT ~chriz-bg-magic: record entries that follow a state left out: EEex bootstrap absent.~
+  END ELSE BEGIN
+    OUTER_SET ref = RESOLVE_STR_REF (@61000)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 31 STR_VAR bam = ~CBMIINV~ RET CBM_ROW_INVISIBLE = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61001)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 74 STR_VAR bam = ~CBMIIMP~ RET CBM_ROW_IMPROVED_INVISIBILITY = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61002)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 49 STR_VAR bam = ~CBMISAN~ RET CBM_ROW_SANCTUARY = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61003)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 77 STR_VAR bam = ~CBMIMIR~ RET CBM_ROW_MIRROR_IMAGE = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61004)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 77 STR_VAR bam = ~CBMIMIR~ RET CBM_ROW_REFLECTED_IMAGE = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61005)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 116 STR_VAR bam = ~CBMISOA~ RET CBM_ROW_ARCHONS = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61006)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 67 STR_VAR bam = ~CBMIMSD~ RET CBM_ROW_MINOR_DEFLECTION = row END
+    OUTER_SET ref = RESOLVE_STR_REF (@61007)
+    LAF cbmagic_live_row INT_VAR desc_ref = ref like = 65 STR_VAR bam = ~CBMIMST~ RET CBM_ROW_MINOR_TURNING = row END
+
+    COPY ~chriz-bg-magic/lua/M_CBMREC.lua~ ~override/M_CBMREC.lua~
+      EVALUATE_BUFFER
+      PATCH_IF INDEX_BUFFER (~row = %~) >= 0 BEGIN
+        PATCH_FAIL ~chriz-bg-magic: record row stamping failed.~
+      END
+  END
+END

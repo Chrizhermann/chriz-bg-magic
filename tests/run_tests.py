@@ -21,6 +21,7 @@ import test_scs  # noqa: E402,F401
 import test_bonus  # noqa: E402,F401
 import test_more  # noqa: E402,F401
 import test_record  # noqa: E402,F401
+import test_live  # noqa: E402,F401
 from harness import TESTS  # noqa: E402
 
 

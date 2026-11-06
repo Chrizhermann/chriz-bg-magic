@@ -265,4 +265,36 @@ function P.icons(who)
     return out
 end
 
+-- Leaves `amount` spell levels in every effect of this opcode, so that one spell spends them.
+function P.spend(who, opcode, amount)
+    local n = 0
+    EEex_Utility_IterateCPtrList(party(who).m_timedEffectList, function(e)
+        if e.m_effectId == opcode then e.m_effectAmount = amount n = n + 1 end
+    end)
+    return n
+end
+
+-- The Record of portrait 1: opened, read and closed. Its screen polls no console either.
+function P.record_open()
+    if not CBMP_NEXT_LEVEL then
+        CBMP_NEXT_LEVEL = getNextLevelString
+        getNextLevelString = function()
+            EEexRemote.Poll()
+            return CBMP_NEXT_LEVEL()
+        end
+    end
+    Infinity_OnPortraitLClick(1)
+    e:GetActiveEngine():OnLeftPanelButtonClick(4)
+    return true
+end
+
+function P.record_read()
+    local out = {}
+    for _, v in pairs(characters[currentID].statusEffects) do
+        out[#out + 1] = { text = Infinity_FetchString(v.strRef), bam = v.bam, current = v.current }
+    end
+    e:SelectEngine(worldScreen)
+    return out
+end
+
 return true
