@@ -256,3 +256,52 @@ When cast, this spell grants the druid and all party members within sight steady
 @30073 = ~Saving Throw vs\. Breath Weapon or run away in fear~
 @30074 = ~Saving Throw vs. Spell at -2 or run away in fear~
 
+// --- More batch strings (@50000+) -------------------------------------------------------
+
+@50000 = ~Protection From Cold~
+@50001 = ~Protection From Cold
+(Abjuration)
+
+Level: 3
+Sphere: Protection, Elemental (Water)
+Range: Touch
+Duration: 3 rounds + 1 round/level
+Casting Time: 6
+Area of Effect: 1 creature
+Saving Throw: None
+
+The effects of a Protection From Cold spell last no longer than 3 rounds plus 1 round per level of the caster. When the spell is cast, it confers complete invulnerability to normal cold and to exposure to magical cold (icy dragon breath, winter wolf breath, spells such as Chill Touch, Cone of Cold, Ice Storm, and so on), absorbing 80% of all the damage dealt by such magical sources.~
+
+@50002 = ~Protection From Acid~
+@50003 = ~Protection From Acid
+(Abjuration)
+
+Level: 4
+Sphere: Protection, Elemental (Earth)
+Range: Touch
+Duration: 5 rounds/level
+Casting Time: 7
+Area of Effect: 1 creature
+Saving Throw: None
+
+When the spell is cast, it confers complete invulnerability to all acid-based attacks, whether magical or non-magical, such as Melf's Acid Arrow, acid breath, or a creature's special attacks. The protection will last for the duration of the spell or until successfully dispelled.~
+
+@50004 = ~Dispelling Screen~
+@50005 = ~Dispelling Screen
+(Abjuration)
+
+Level: 5
+Range: 0
+Duration: 5 turns
+Casting Time: 5
+Area of Effect: 15-ft. radius
+Saving Throw: None
+
+This spell wards the caster and nearby allies with a protective screen against magic removal for 5 turns. For each protected creature, the screen absorbs and negates the next Dispel Magic, Remove Magic, or Breach effect that strikes them, then dissipates. Higher-level magic attacks such as Pierce Shield and Spellstrike strip Dispelling Screen along with other protections without being absorbed by it.~
+
+@50006 = ~Dispelling Screen Dissipates~
+
+@50007 = ~Spell Immunity, Globe Of Invulnerability~
+@50008 = ~Dispelling Screen, Globe Of Invulnerability~
+
+

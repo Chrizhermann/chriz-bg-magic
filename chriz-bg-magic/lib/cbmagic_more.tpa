@@ -1,0 +1,809 @@
+// ======================================================================================
+// chriz-bg-magic: additional decided spell changes (more batch).
+//
+// Strings in chriz-bg-magic/languages/english/setup.tra from @50000 onward.
+// ======================================================================================
+
+// Checks whether a priest spell added via ADD_SPELL with `symbol` in SPELL.IDS (or with
+// header icon `marker` and priest exclusion `p_excl_want` in SPPR<level>01..99) is already
+// in the game.
+DEFINE_ACTION_FUNCTION cbmagic_find_added_priest_spell_any
+  INT_VAR level = 1 p_excl_want = 0
+  STR_VAR symbol = ~~ marker = ~~
+  RET found_res
+BEGIN
+  OUTER_SPRINT found_res ~~
+  LAF cbmagic_spell_resref STR_VAR symbol RET resref found END
+  ACTION_IF found BEGIN
+    OUTER_SPRINT found_res ~%resref%~
+  END ELSE BEGIN
+    OUTER_FOR (num = 1; (num <= 99) AND (~%found_res%~ STRING_EQUAL ~~); ++num) BEGIN
+      ACTION_IF (num < 10) BEGIN
+        OUTER_SPRINT cand ~SPPR%level%0%num%~
+      END ELSE BEGIN
+        OUTER_SPRINT cand ~SPPR%level%%num%~
+      END
+      ACTION_IF (FILE_EXISTS_IN_GAME ~%cand%.spl~) BEGIN
+        COPY_EXISTING - ~%cand%.spl~ ~override~
+          PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+            READ_SHORT 0x20 p_excl
+            READ_ASCII 0x3a hdr_icon (8) NULL
+            PATCH_IF (p_excl = p_excl_want) AND (~%hdr_icon%~ STRING_EQUAL_CASE ~%marker%~) BEGIN
+              SPRINT found_res ~%cand%~
+            END
+          END
+      END
+    END
+  END
+END
+
+// --- Priest Protection From Cold (row divine.elemental_protections) -------------------
+// New level-3 priest spell for clerics and druids (0x20 = 0x0000) added via ADD_SPELL
+// (symbol CLERIC_CBMAGIC_PROTECTION_FROM_COLD). Built like Priest Level 3 Protection From
+// Fire (SPPR306): 20 abilities (levels 1-20), location 2 (spell slots), Touch range (1),
+// casting time 6, duration 3 rounds + 1 round/level (24s at level 1 up to 138s at level 20),
+// granting +100% normal cold resistance (opcode 28) and +80% magical cold resistance
+// (opcode 85), portrait icon 25 ('Protection From Cold'), string 7565 ('Protection From
+// Cold'), BUFF_PRO_EFFECTS splstate 65, ICrmpari visual, EFF_E04 expiry sound, RGB fade 61,
+// and opcode 321 self-refresh. Uses base-game icons SPWI320C / SPWI320B.
+DEFINE_ACTION_FUNCTION cbmagic_more_protection_from_cold
+BEGIN
+  LAF cbmagic_find_added_priest_spell_any INT_VAR level = 3 p_excl_want = 0
+    STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~ marker = ~SPWI320C~
+    RET found_res
+  END
+  ACTION_IF !(~%found_res%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: Protection From Cold (%found_res%) is in this game already.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Protection From Cold~ END
+    OUTER_SET name_ref = RESOLVE_STR_REF (@50000)
+    OUTER_SET desc_ref = RESOLVE_STR_REF (@50001)
+    COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmpcold.spl~
+      DELETE_BYTES 0 BUFFER_LENGTH
+      INSERT_BYTES 0 (0x72 + 0x28)
+      WRITE_ASCII 0 ~SPL V1  ~ (8)
+      WRITE_LONG 0x08 name_ref
+      WRITE_LONG 0x0c (0 - 1)
+      WRITE_ASCII 0x10 ~CAS_P02~ #8
+      WRITE_LONG 0x18 0
+      WRITE_SHORT 0x1c 2
+      WRITE_SHORT 0x1e 0
+      WRITE_SHORT 0x20 0
+      WRITE_SHORT 0x22 12
+      WRITE_BYTE 0x25 1
+      WRITE_BYTE 0x27 2
+      WRITE_LONG 0x34 3
+      WRITE_ASCII 0x3a ~SPWI320C~ #8
+      WRITE_LONG 0x50 desc_ref
+      WRITE_LONG 0x54 (0 - 1)
+      WRITE_LONG 0x64 0x72
+      WRITE_SHORT 0x68 1
+      WRITE_LONG 0x6a (0x72 + 0x28)
+      WRITE_SHORT 0x6e 0
+      WRITE_SHORT 0x70 0
+      WRITE_BYTE 0x72 1
+      WRITE_SHORT (0x72 + 0x02) 2
+      WRITE_ASCII (0x72 + 0x04) ~SPWI320B~ #8
+      WRITE_BYTE (0x72 + 0x0c) 1
+      WRITE_BYTE (0x72 + 0x0d) 0
+      WRITE_SHORT (0x72 + 0x0e) 1
+      WRITE_SHORT (0x72 + 0x10) 1
+      WRITE_SHORT (0x72 + 0x12) 6
+      WRITE_SHORT (0x72 + 0x14) 1
+      WRITE_SHORT (0x72 + 0x1e) 0
+      WRITE_SHORT (0x72 + 0x20) 0
+      WRITE_SHORT (0x72 + 0x22) 1
+      WRITE_SHORT (0x72 + 0x24) 1
+      WRITE_SHORT (0x72 + 0x26) 1
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+        opcode = 321 target = 2 power = 3 parameter1 = 0 parameter2 = 0
+        timing = 1 resist_dispel = 3 duration = 0 STR_VAR resource = ~CBMPCOLD~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1
+        opcode = 85 target = 2 power = 3 parameter1 = 80 parameter2 = 0
+        timing = 0 resist_dispel = 3 duration = 24 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2
+        opcode = 139 target = 2 power = 3 parameter1 = 7565 parameter2 = 0
+        timing = 1 resist_dispel = 3 duration = 0 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3
+        opcode = 142 target = 2 power = 3 parameter1 = 0 parameter2 = 25
+        timing = 0 resist_dispel = 3 duration = 24 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4
+        opcode = 328 target = 2 power = 3 parameter1 = 0 parameter2 = 65
+        timing = 0 resist_dispel = 3 duration = 24 special = 1 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5
+        opcode = 28 target = 2 power = 3 parameter1 = 100 parameter2 = 0
+        timing = 0 resist_dispel = 3 duration = 24 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 6
+        opcode = 174 target = 2 power = 3 parameter1 = 0 parameter2 = 0
+        timing = 4 resist_dispel = 3 duration = 24 STR_VAR resource = ~EFF_E04~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 7
+        opcode = 215 target = 2 power = 3 parameter1 = 0 parameter2 = 1
+        timing = 0 resist_dispel = 3 duration = 1 STR_VAR resource = ~ICrmpari~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 8
+        opcode = 61 target = 2 power = 3 parameter1 = 1014504960 parameter2 = 1638400
+        timing = 1 resist_dispel = 3 duration = 0 END
+      FOR (lvl = 2; lvl <= 20; ++lvl) BEGIN
+        SET dur = 18 + lvl * 6
+        LPF cbmagic_clone_first_ability INT_VAR min_level = lvl base_dur = 24 new_dur = dur RET new_ability END
+      END
+    COPY - ~weidu_external/cbmpcold.spl~ ~weidu_external/cbmpcold.spl~
+    ADD_SPELL ~weidu_external/cbmpcold.spl~ 1 3 ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~ RET added_res = resref found END
+    ACTION_IF found BEGIN
+      COPY_EXISTING ~%added_res%.spl~ ~override~
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+          READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+          FOR (i = 0; i < na; ++i) BEGIN
+            SET fx = fx_off + (fa + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 321) BEGIN
+              WRITE_ASCIIE (fx + 0x14) ~%added_res%~ #8
+            END
+          END
+        END
+      BUT_ONLY
+      PRINT ~chriz-bg-magic: Protection From Cold added as %added_res% (CLERIC_CBMAGIC_PROTECTION_FROM_COLD).~
+    END
+  END
+END
+
+// --- Priest Protection From Acid (row divine.elemental_protections) -------------------
+// New level-4 priest spell for clerics and druids (0x20 = 0x0000) added via ADD_SPELL
+// (symbol CLERIC_CBMAGIC_PROTECTION_FROM_ACID). Built like Priest Level 4 Protection From
+// Lightning (SPPR407): 12 abilities (min_level = 1, 8..18), location 2 (spell slots),
+// Touch range (1), casting time 7, duration 5 rounds/level (210s at levels 1-7 up to 540s
+// at level 18+), setting acid resistance to 100% (opcode 27, parameter1=100, parameter2=1),
+// portrait icon 24 ('Protection From Acid'), BUFF_PRO_EFFECTS splstate 65, ICrmpari visual,
+// EFF_E04 expiry sound, and RGB fade 61. Uses base-game icons SPWI517C / SPWI517B.
+DEFINE_ACTION_FUNCTION cbmagic_more_protection_from_acid
+BEGIN
+  LAF cbmagic_find_added_priest_spell_any INT_VAR level = 4 p_excl_want = 0
+    STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~ marker = ~SPWI517C~
+    RET found_res
+  END
+  ACTION_IF !(~%found_res%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: Protection From Acid (%found_res%) is in this game already.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Protection From Acid~ END
+    OUTER_SET name_ref = RESOLVE_STR_REF (@50002)
+    OUTER_SET desc_ref = RESOLVE_STR_REF (@50003)
+    COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmpacid.spl~
+      DELETE_BYTES 0 BUFFER_LENGTH
+      INSERT_BYTES 0 (0x72 + 0x28)
+      WRITE_ASCII 0 ~SPL V1  ~ (8)
+      WRITE_LONG 0x08 name_ref
+      WRITE_LONG 0x0c (0 - 1)
+      WRITE_ASCII 0x10 ~CAS_P02~ #8
+      WRITE_LONG 0x18 0
+      WRITE_SHORT 0x1c 2
+      WRITE_SHORT 0x1e 0
+      WRITE_SHORT 0x20 0
+      WRITE_SHORT 0x22 12
+      WRITE_BYTE 0x25 1
+      WRITE_BYTE 0x27 2
+      WRITE_LONG 0x34 4
+      WRITE_ASCII 0x3a ~SPWI517C~ #8
+      WRITE_LONG 0x50 desc_ref
+      WRITE_LONG 0x54 (0 - 1)
+      WRITE_LONG 0x64 0x72
+      WRITE_SHORT 0x68 1
+      WRITE_LONG 0x6a (0x72 + 0x28)
+      WRITE_SHORT 0x6e 0
+      WRITE_SHORT 0x70 0
+      WRITE_BYTE 0x72 1
+      WRITE_SHORT (0x72 + 0x02) 2
+      WRITE_ASCII (0x72 + 0x04) ~SPWI517B~ #8
+      WRITE_BYTE (0x72 + 0x0c) 1
+      WRITE_BYTE (0x72 + 0x0d) 0
+      WRITE_SHORT (0x72 + 0x0e) 1
+      WRITE_SHORT (0x72 + 0x10) 1
+      WRITE_SHORT (0x72 + 0x12) 7
+      WRITE_SHORT (0x72 + 0x14) 1
+      WRITE_SHORT (0x72 + 0x1e) 0
+      WRITE_SHORT (0x72 + 0x20) 0
+      WRITE_SHORT (0x72 + 0x22) 1
+      WRITE_SHORT (0x72 + 0x24) 1
+      WRITE_SHORT (0x72 + 0x26) 1
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+        opcode = 27 target = 2 power = 4 parameter1 = 100 parameter2 = 1
+        timing = 0 resist_dispel = 3 duration = 210 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1
+        opcode = 142 target = 2 power = 4 parameter1 = 0 parameter2 = 24
+        timing = 0 resist_dispel = 3 duration = 210 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2
+        opcode = 328 target = 2 power = 4 parameter1 = 0 parameter2 = 65
+        timing = 0 resist_dispel = 3 duration = 210 special = 1 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3
+        opcode = 174 target = 2 power = 4 parameter1 = 0 parameter2 = 0
+        timing = 4 resist_dispel = 3 duration = 210 STR_VAR resource = ~EFF_E04~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4
+        opcode = 215 target = 2 power = 4 parameter1 = 0 parameter2 = 1
+        timing = 0 resist_dispel = 3 duration = 1 STR_VAR resource = ~ICrmpari~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5
+        opcode = 61 target = 2 power = 4 parameter1 = 1014504960 parameter2 = 1638400
+        timing = 1 resist_dispel = 3 duration = 0 END
+      FOR (lvl = 8; lvl <= 18; ++lvl) BEGIN
+        SET dur = lvl * 30
+        LPF cbmagic_clone_first_ability INT_VAR min_level = lvl base_dur = 210 new_dur = dur RET new_ability END
+      END
+    COPY - ~weidu_external/cbmpacid.spl~ ~weidu_external/cbmpacid.spl~
+    ADD_SPELL ~weidu_external/cbmpacid.spl~ 1 4 ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~ RET added_res = resref found END
+    ACTION_IF found BEGIN
+      PRINT ~chriz-bg-magic: Protection From Acid added as %added_res% (CLERIC_CBMAGIC_PROTECTION_FROM_ACID).~
+    END
+  END
+END
+
+// --- Helper: append opcode 221 (remove sectype) to abilities with opcode 58 -----------
+// Used by Dispelling Screen so any non-self Dispel/Remove Magic effect (opcode 58) is
+// blocked once by opcode 101 (p2=58) and then removes the Dispelling Screen sectype.
+DEFINE_PATCH_FUNCTION cbmagic_add_dispel_screen_cleanup
+  INT_VAR sectype = 0 is_itm = 0
+  RET added_cnt
+BEGIN
+  SET added_cnt = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  SET ab_size = is_itm ? 0x38 : 0x28
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    SET ao = ab_off + a * ab_size
+    PATCH_IF (ao + ab_size <= BUFFER_LENGTH) BEGIN
+      READ_SHORT (ao + 0x1e) na
+      READ_SHORT (ao + 0x20) fa
+      SET has_58 = 0
+      SET has_cleanup = 0
+      SET tgt_58 = 2
+      SET pwr_58 = 0
+      FOR (i = 0; i < na; ++i) BEGIN
+        SET fx = fx_off + (fa + i) * 0x30
+        PATCH_IF (fx + 0x30 <= BUFFER_LENGTH) BEGIN
+          READ_SHORT fx op
+          READ_BYTE (fx + 0x02) tgt
+          READ_BYTE (fx + 0x03) pwr
+          READ_LONG (fx + 0x04) p1
+          READ_LONG (fx + 0x08) p2
+          PATCH_IF (op = 58) AND (tgt != 1) BEGIN
+            SET has_58 = 1
+            SET tgt_58 = tgt
+            SET pwr_58 = pwr
+          END
+          PATCH_IF (op = 221) AND (p2 = sectype) BEGIN
+            SET has_cleanup = 1
+          END
+        END
+      END
+      PATCH_IF has_58 AND !has_cleanup BEGIN
+        SET ins_off = fx_off + (fa + na) * 0x30
+        INSERT_BYTES ins_off 0x30
+        WRITE_SHORT ins_off 221
+        WRITE_BYTE (ins_off + 0x02) tgt_58
+        WRITE_BYTE (ins_off + 0x03) pwr_58
+        WRITE_LONG (ins_off + 0x04) 9
+        WRITE_LONG (ins_off + 0x08) sectype
+        WRITE_BYTE (ins_off + 0x0c) 1
+        WRITE_BYTE (ins_off + 0x0d) 0
+        WRITE_LONG (ins_off + 0x0e) 0
+        WRITE_BYTE (ins_off + 0x12) 100
+        WRITE_BYTE (ins_off + 0x13) 0
+        WRITE_SHORT (ao + 0x1e) (na + 1)
+        FOR (a2 = a + 1; a2 < ab_cnt; ++a2) BEGIN
+          SET ao2 = ab_off + a2 * ab_size
+          READ_SHORT (ao2 + 0x20) fa2
+          WRITE_SHORT (ao2 + 0x20) (fa2 + 1)
+        END
+        SET added_cnt += 1
+      END
+    END
+  END
+END
+
+// --- Dispelling Screen replaces Spell Immunity (row arcane.spell_shield_anti_magic) ---
+// Wizard level 5 (SPWI510, symbol WIZARD_DISPELLING_SCREEN alongside WIZARD_SPELL_IMMUNITY):
+// duration 5 turns (300s), casting time 5, party-friendly 15-ft area projectile (158,
+// INAREAPA). Protects caster and nearby allies against one Dispel/Remove Magic (opcode 58)
+// or one Breach (SPWI513 -> SPWI513B payload + SPWI513C cleanup); Pierce Shield (SPWI805)
+// and Spellstrike (SPWI903) remove it without being absorbed. Redirects the SPWI590..SPWI597
+// school menu subspells to cast SPWI510 so scripts and creatures casting them apply
+// Dispelling Screen. Updates scroll SCRL6S.ITM.
+DEFINE_ACTION_FUNCTION cbmagic_more_dispelling_screen
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SPELL_IMMUNITY~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_DISPELLING_SCREEN~ RET spell = resref found END
+  END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Dispelling Screen (WIZARD_SPELL_IMMUNITY) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Dispelling Screen~ END
+    OUTER_SET ds_name_ref = RESOLVE_STR_REF (@50004)
+    OUTER_SET ds_desc_ref = RESOLVE_STR_REF (@50005)
+
+    // 1. Register custom secondary type cbm_DispelScreen in MSECTYPE.2DA (idempotent).
+    OUTER_SET ds_sectype = 0 - 1
+    ACTION_IF (FILE_EXISTS_IN_GAME ~msectype.2da~) BEGIN
+      COPY_EXISTING - ~msectype.2da~ ~override~
+        COUNT_2DA_ROWS 2 rcnt
+        FOR (r = 0; r < rcnt; ++r) BEGIN
+          READ_2DA_ENTRY r 0 2 rname
+          PATCH_IF (~%rname%~ STRING_EQUAL_CASE ~cbm_DispelScreen~) BEGIN
+            SET ds_sectype = r
+          END
+        END
+    END
+    ACTION_IF (ds_sectype < 0) BEGIN
+      ADD_SECTYPE ~cbm_DispelScreen~ @50006
+      OUTER_SET ds_sectype = cbm_DispelScreen
+    END
+
+    // 2. Add WIZARD_DISPELLING_SCREEN to SPELL.IDS alongside WIZARD_SPELL_IMMUNITY.
+    ACTION_IF (FILE_EXISTS_IN_GAME ~spell.ids~) BEGIN
+      APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
+    END
+
+    // 3. Update portrait icon 107 in STATDESC.2DA to "Dispelling Screen".
+    ACTION_IF (FILE_EXISTS_IN_GAME ~statdesc.2da~) BEGIN
+      COPY_EXISTING ~statdesc.2da~ ~override~
+        COUNT_2DA_ROWS 3 rcnt
+        FOR (r = 0; r < rcnt; ++r) BEGIN
+          READ_2DA_ENTRY r 0 3 rnum
+          PATCH_IF (IS_AN_INT rnum) AND (rnum = 107) BEGIN
+            SET_2DA_ENTRY r 1 3 ~%ds_name_ref%~
+          END
+        END
+      BUT_ONLY
+    END
+
+    // 4. Split Breach (WIZARD_BREACH / SPWI513) into SPWI513B (payload) + SPWI513C (sectype cleanup).
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_BREACH~ RET breach_spl = resref breach_found = found END
+    OUTER_SPRINT breach_payload ~SPWI513B~
+    OUTER_SPRINT breach_cleanup ~SPWI513C~
+    ACTION_IF breach_found BEGIN
+      OUTER_SPRINT breach_payload ~%breach_spl%B~
+      OUTER_SPRINT breach_cleanup ~%breach_spl%C~
+      ACTION_IF !(FILE_EXISTS_IN_GAME ~%breach_payload%.spl~) BEGIN
+        COPY_EXISTING ~%breach_spl%.spl~ ~override/%breach_payload%.spl~
+          WRITE_LONG 0x08 (0 - 1)
+          WRITE_LONG 0x50 (0 - 1)
+          WRITE_BYTE 0x27 0
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            WRITE_BYTE (ab_off + a * 0x28 + 0x0c) 1
+            WRITE_SHORT (ab_off + a * 0x28 + 0x26) 1
+          END
+      END
+      ACTION_IF !(FILE_EXISTS_IN_GAME ~%breach_cleanup%.spl~) BEGIN
+        COPY_EXISTING ~%breach_spl%.spl~ ~override/%breach_cleanup%.spl~
+          DELETE_BYTES 0 BUFFER_LENGTH
+          INSERT_BYTES 0 (0x72 + 0x28)
+          WRITE_ASCII 0 ~SPL V1  ~ (8)
+          WRITE_LONG 0x08 (0 - 1)
+          WRITE_LONG 0x0c (0 - 1)
+          WRITE_SHORT 0x1c 1
+          WRITE_BYTE 0x25 1
+          WRITE_BYTE 0x27 0
+          WRITE_LONG 0x34 5
+          WRITE_LONG 0x50 (0 - 1)
+          WRITE_LONG 0x54 (0 - 1)
+          WRITE_LONG 0x64 0x72
+          WRITE_SHORT 0x68 1
+          WRITE_LONG 0x6a (0x72 + 0x28)
+          WRITE_BYTE 0x72 1
+          WRITE_SHORT (0x72 + 0x02) 2
+          WRITE_BYTE (0x72 + 0x0c) 1
+          WRITE_SHORT (0x72 + 0x0e) 40
+          WRITE_SHORT (0x72 + 0x10) 1
+          WRITE_SHORT (0x72 + 0x12) 0
+          WRITE_SHORT (0x72 + 0x14) 1
+          WRITE_SHORT (0x72 + 0x22) 1
+          WRITE_SHORT (0x72 + 0x24) 1
+          WRITE_SHORT (0x72 + 0x26) 1
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+            opcode = 221 target = 2 power = 5 parameter1 = 9 parameter2 = ds_sectype
+            timing = 1 resist_dispel = 0 duration = 0 END
+      END ELSE BEGIN
+        COPY_EXISTING ~%breach_cleanup%.spl~ ~override~
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          READ_LONG 0x6a fx_off
+          PATCH_IF (ab_cnt >= 1) BEGIN
+            READ_SHORT (ab_off + 0x1e) na
+            READ_SHORT (ab_off + 0x20) fa
+            SET has_ds = 0
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_LONG (fx + 0x08) p2
+              PATCH_IF (op = 221) AND (p2 = ds_sectype) BEGIN
+                SET has_ds = 1
+              END
+            END
+            PATCH_IF !has_ds BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = 0 position = na
+                opcode = 221 target = 2 power = 5 parameter1 = 9 parameter2 = ds_sectype
+                timing = 1 resist_dispel = 0 duration = 0 END
+            END
+          END
+        BUT_ONLY
+      END
+      COPY_EXISTING ~%breach_spl%.spl~ ~override~
+        LPF cbmagic_spl_valid RET valid reason END
+        PATCH_IF valid BEGIN
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          READ_LONG 0x6a fx_off
+          PATCH_IF (ab_cnt >= 1) BEGIN
+            READ_SHORT (ab_off + 0x1e) na
+            READ_SHORT (ab_off + 0x20) fa
+            SET already_split = 0
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_ASCII (fx + 0x14) res (8) NULL
+              PATCH_IF (op = 146) AND (~%res%~ STRING_EQUAL_CASE ~%breach_payload%~) BEGIN
+                SET already_split = 1
+              END
+            END
+            PATCH_IF !already_split BEGIN
+              FOR (a = 0; a < ab_cnt; ++a) BEGIN
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_na
+                READ_SHORT (ab_off + a * 0x28 + 0x20) cur_fa
+                FOR (k = cur_na - 1; k >= 0; --k) BEGIN
+                  LPF cbmagic_delete_effect INT_VAR index = (cur_fa + k) END
+                END
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 0
+                  opcode = 146 target = 2 power = 5 parameter1 = 0 parameter2 = 1
+                  timing = 1 resist_dispel = 0 duration = 0 STR_VAR resource = EVAL ~%breach_payload%~ END
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 1
+                  opcode = 146 target = 2 power = 5 parameter1 = 0 parameter2 = 1
+                  timing = 1 resist_dispel = 0 duration = 0 STR_VAR resource = EVAL ~%breach_cleanup%~ END
+              END
+            END
+          END
+        END
+      BUT_ONLY
+
+      // Also wire Wish Breach spells (SPWISH26, SPWISH38) through SPWI513B + SPWI513C if present.
+      ACTION_FOR_EACH wish_br IN ~SPWISH26~ ~SPWISH38~ BEGIN
+        ACTION_IF (FILE_EXISTS_IN_GAME ~%wish_br%.spl~) BEGIN
+          COPY_EXISTING ~%wish_br%.spl~ ~override~
+            LPF cbmagic_spl_valid RET valid reason END
+            PATCH_IF valid BEGIN
+              READ_LONG 0x64 ab_off
+              READ_SHORT 0x68 ab_cnt
+              READ_LONG 0x6a fx_off
+              PATCH_IF (ab_cnt >= 1) BEGIN
+                READ_SHORT (ab_off + 0x1e) na
+                READ_SHORT (ab_off + 0x20) fa
+                SET has_221_7 = 0
+                SET eff_tgt = 2
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_BYTE (fx + 0x02) tgt
+                  READ_LONG (fx + 0x08) p2
+                  PATCH_IF (op = 221) AND (p2 = 7) BEGIN
+                    SET has_221_7 = 1
+                    SET eff_tgt = tgt
+                  END
+                END
+                PATCH_IF has_221_7 BEGIN
+                  FOR (k = na - 1; k >= 0; --k) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (fa + k) END
+                  END
+                  LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+                    opcode = 146 target = eff_tgt power = 9 parameter1 = 0 parameter2 = 1
+                    timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = EVAL ~%breach_payload%~ END
+                  LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1
+                    opcode = 146 target = eff_tgt power = 9 parameter1 = 0 parameter2 = 1
+                    timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = EVAL ~%breach_cleanup%~ END
+                END
+              END
+            END
+          BUT_ONLY
+        END
+      END
+    END
+
+    // 5. Patch SPWI510.SPL in place into Dispelling Screen.
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Dispelling Screen (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        WRITE_LONG 0x08 ds_name_ref
+        WRITE_LONG 0x50 ds_desc_ref
+        WRITE_SHORT 0x22 12
+        WRITE_BYTE 0x25 1
+        WRITE_BYTE 0x27 ds_sectype
+        WRITE_LONG 0x34 5
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Dispelling Screen (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          FOR (a = ab_cnt - 1; a >= 1; --a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) cur_fa
+            FOR (k = cur_na - 1; k >= 0; --k) BEGIN
+              LPF cbmagic_delete_effect INT_VAR index = (cur_fa + k) END
+            END
+            READ_LONG 0x6a fx_off
+            DELETE_BYTES (ab_off + a * 0x28) 0x28
+            WRITE_SHORT 0x68 a
+            WRITE_LONG 0x6a (fx_off - 0x28)
+          END
+          READ_LONG 0x64 ab_off
+          READ_SHORT (ab_off + 0x1e) na0
+          READ_SHORT (ab_off + 0x20) fa0
+          FOR (k = na0 - 1; k >= 0; --k) BEGIN
+            LPF cbmagic_delete_effect INT_VAR index = (fa0 + k) END
+          END
+          WRITE_BYTE ab_off 1
+          WRITE_SHORT (ab_off + 0x02) 2
+          WRITE_ASCII (ab_off + 0x04) ~SPWI510B~ #8
+          WRITE_BYTE (ab_off + 0x0c) 5
+          WRITE_BYTE (ab_off + 0x0d) 0
+          WRITE_SHORT (ab_off + 0x0e) 30
+          WRITE_SHORT (ab_off + 0x10) 1
+          WRITE_SHORT (ab_off + 0x12) 5
+          WRITE_SHORT (ab_off + 0x14) 1
+          WRITE_SHORT (ab_off + 0x22) 1
+          WRITE_SHORT (ab_off + 0x24) 1
+          WRITE_SHORT (ab_off + 0x26) 158
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+            opcode = 321 target = 2 power = 5 parameter1 = 0 parameter2 = 0
+            timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1
+            opcode = 206 target = 2 power = 5 parameter1 = (0 - 1) parameter2 = 0
+            timing = 0 resist_dispel = 2 duration = 300 STR_VAR resource = EVAL ~%breach_payload%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2
+            opcode = 101 target = 2 power = 5 parameter1 = 0 parameter2 = 58
+            timing = 0 resist_dispel = 2 duration = 300 END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3
+            opcode = 267 target = 2 power = 5 parameter1 = 14056 parameter2 = 0
+            timing = 0 resist_dispel = 2 duration = 300 END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4
+            opcode = 142 target = 2 power = 5 parameter1 = 0 parameter2 = 107
+            timing = 0 resist_dispel = 2 duration = 300 END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5
+            opcode = 215 target = 2 power = 5 parameter1 = 0 parameter2 = 1
+            timing = 0 resist_dispel = 2 duration = 300 STR_VAR resource = ~SPTURNI2~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 6
+            opcode = 215 target = 2 power = 5 parameter1 = 0 parameter2 = 1
+            timing = 0 resist_dispel = 2 duration = 4 STR_VAR resource = ~SPROTECT~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 7
+            opcode = 174 target = 2 power = 5 parameter1 = 0 parameter2 = 0
+            timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = ~EFF_M02~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 8
+            opcode = 174 target = 2 power = 5 parameter1 = 0 parameter2 = 0
+            timing = 4 resist_dispel = 2 duration = 300 STR_VAR resource = ~EFF_E03~ END
+          SET changed = 1
+        END
+      END
+    BUT_ONLY
+
+    // 6. Update scrolls of SPWI510 (SCRL6S.ITM).
+    ACTION_IF changed BEGIN
+      LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+      OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE sc ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        COPY_EXISTING ~%sc%.itm~ ~override~
+          PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+            WRITE_LONG 0x0c ds_name_ref
+            WRITE_LONG 0x54 ds_desc_ref
+          END
+        BUT_ONLY
+      END
+
+      // 7. Redirect Spell Immunity's 8 school subspells (SPWI590..SPWI597) to cast SPWI510.
+      OUTER_SET sub_patched = 0
+      ACTION_FOR_EACH sub_sym IN
+        ~WIZARD_SPELL_IMMUNITY_ABJURATION~
+        ~WIZARD_SPELL_IMMUNITY_CONJURATION~
+        ~WIZARD_SPELL_IMMUNITY_DIVINATION~
+        ~WIZARD_SPELL_IMMUNITY_ENCHANTMENT~
+        ~WIZARD_SPELL_IMMUNITY_ILLUSIONIST~
+        ~WIZARD_SPELL_IMMUNITY_INVOCATION~
+        ~WIZARD_SPELL_IMMUNITY_NECROMANCY~
+        ~WIZARD_SPELL_IMMUNITY_ALTERATION~
+      BEGIN
+        LAF cbmagic_spell_resref STR_VAR symbol = EVAL ~%sub_sym%~ RET sub_res = resref sub_found = found END
+        ACTION_IF sub_found BEGIN
+          COPY_EXISTING ~%sub_res%.spl~ ~override~
+            LPF cbmagic_spl_valid RET valid reason END
+            PATCH_IF valid BEGIN
+              WRITE_LONG 0x08 ds_name_ref
+              WRITE_LONG 0x50 (0 - 1)
+              WRITE_BYTE 0x25 1
+              WRITE_BYTE 0x27 0
+              READ_LONG 0x64 ab_off
+              READ_SHORT 0x68 ab_cnt
+              READ_LONG 0x6a fx_off
+              PATCH_IF (ab_cnt >= 1) BEGIN
+                FOR (a = ab_cnt - 1; a >= 1; --a) BEGIN
+                  READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_na
+                  READ_SHORT (ab_off + a * 0x28 + 0x20) cur_fa
+                  FOR (k = cur_na - 1; k >= 0; --k) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (cur_fa + k) END
+                  END
+                  READ_LONG 0x6a fx_off
+                  DELETE_BYTES (ab_off + a * 0x28) 0x28
+                  WRITE_SHORT 0x68 a
+                  WRITE_LONG 0x6a (fx_off - 0x28)
+                END
+                READ_LONG 0x64 ab_off
+                READ_SHORT (ab_off + 0x1e) na0
+                READ_SHORT (ab_off + 0x20) fa0
+                FOR (k = na0 - 1; k >= 0; --k) BEGIN
+                  LPF cbmagic_delete_effect INT_VAR index = (fa0 + k) END
+                END
+                WRITE_BYTE ab_off 1
+                WRITE_SHORT (ab_off + 0x02) 2
+                WRITE_ASCII (ab_off + 0x04) ~SPWI510B~ #8
+                WRITE_BYTE (ab_off + 0x0c) 5
+                WRITE_BYTE (ab_off + 0x0d) 0
+                WRITE_SHORT (ab_off + 0x0e) 1
+                WRITE_SHORT (ab_off + 0x10) 1
+                WRITE_SHORT (ab_off + 0x12) 5
+                WRITE_SHORT (ab_off + 0x14) 1
+                WRITE_SHORT (ab_off + 0x22) 1
+                WRITE_SHORT (ab_off + 0x24) 1
+                WRITE_SHORT (ab_off + 0x26) 1
+                LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0
+                  opcode = 146 target = 1 power = 5 parameter1 = 0 parameter2 = 1
+                  timing = 1 resist_dispel = 0 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
+                SET sub_patched += 1
+              END
+            END
+          BUT_ONLY
+        END
+      END
+
+      // 8. Add sectype cleanup (opcode 221) to all SPL and ITM resources that apply opcode 58.
+      COPY_EXISTING_REGEXP GLOB ~^.+\.spl$~ ~override~
+        PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+          LPF cbmagic_spl_valid RET valid reason END
+          PATCH_IF valid BEGIN
+            LPF cbmagic_add_dispel_screen_cleanup INT_VAR sectype = ds_sectype is_itm = 0 RET added_cnt END
+          END
+        END
+      BUT_ONLY
+      COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+        PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+          READ_ASCII 0 sig (8)
+          PATCH_IF (~%sig%~ STRING_EQUAL ~ITM V1  ~) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            PATCH_IF (ab_off >= 0x72) AND (ab_off + ab_cnt * 0x38 <= fx_off) AND (fx_off <= BUFFER_LENGTH) BEGIN
+              LPF cbmagic_add_dispel_screen_cleanup INT_VAR sectype = ds_sectype is_itm = 1 RET added_cnt END
+            END
+          END
+        END
+      BUT_ONLY
+
+      // 9. Patch Pierce Shield (SPWI805) and Spellstrike (SPWI903) to strip Dispelling Screen.
+      OUTER_SPRINT cbm_find @50007
+      OUTER_SPRINT cbm_replace @50008
+      ACTION_FOR_EACH rem_sym IN ~WIZARD_PIERCE_SHIELD~ ~WIZARD_SPELL_STRIKE~ BEGIN
+        LAF cbmagic_spell_resref STR_VAR symbol = EVAL ~%rem_sym%~ RET rem_spl = resref rem_found = found END
+        ACTION_IF rem_found BEGIN
+          OUTER_SET rem_changed = 0
+          COPY_EXISTING ~%rem_spl%.spl~ ~override~
+            LPF cbmagic_spl_valid RET valid reason END
+            PATCH_IF valid BEGIN
+              READ_LONG 0x34 rem_lvl
+              READ_LONG 0x64 ab_off
+              READ_SHORT 0x68 ab_cnt
+              READ_LONG 0x6a fx_off
+              FOR (a = 0; a < ab_cnt; ++a) BEGIN
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+                READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+                SET has_ds = 0
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_LONG (fx + 0x08) p2
+                  PATCH_IF (op = 221) AND (p2 = ds_sectype) BEGIN
+                    SET has_ds = 1
+                  END
+                END
+                PATCH_IF !has_ds BEGIN
+                  LPF cbmagic_insert_effect INT_VAR ability = a position = na
+                    opcode = 221 target = 2 power = rem_lvl parameter1 = 9 parameter2 = ds_sectype
+                    timing = 1 resist_dispel = 0 duration = 0 END
+                  READ_LONG 0x64 ab_off
+                  READ_LONG 0x6a fx_off
+                  SET rem_changed = 1
+                END
+              END
+            END
+          BUT_ONLY
+          ACTION_IF rem_changed BEGIN
+            LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell = EVAL ~%rem_spl%~ find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = EVAL ~%rem_sym%~ END
+          END
+        END
+      END
+      PRINT ~chriz-bg-magic: Dispelling Screen (%spell%): replaced Spell Immunity (sectype %ds_sectype%, %sub_patched% school subspells redirected).~
+    END
+  END
+END
+
+// --- Nahal's Reckless Dweomer (row arcane.level1.nahals_reckless_dweomer) -------------
+// Stays a very strong spell as in vanilla, except it loses Aura Cleansing: in the base
+// game, SPWI124's ability header has target type 7 (Caster, instant, ignore aura & casting
+// time), which bypasses CGameSprite::Spell's round aura check and lets opcode 214 reset
+// m_nTimeFree so the spell can be spammed within a single round. Setting ability target
+// to 5 (Caster) makes it respect the normal round aura timer while keeping everything else
+// vanilla. Also strips any opcode 188 (Cleanse Aura) effect if present.
+DEFINE_ACTION_FUNCTION cbmagic_more_nahals_reckless_dweomer
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_NAHALS_RECKLESS_DWEOMER~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Nahal's Reckless Dweomer (WIZARD_NAHALS_RECKLESS_DWEOMER) is not in this game; left out.~
+  END ELSE BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Nahal's Reckless Dweomer (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_214 = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+          READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+          FOR (i = 0; i < na; ++i) BEGIN
+            SET fx = fx_off + (fa + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 214) BEGIN
+              SET has_214 = 1
+            END
+          END
+        END
+        PATCH_IF !has_214 BEGIN
+          PATCH_WARN ~chriz-bg-magic: Nahal's Reckless Dweomer (%spell%) left as it is: no spell-selection effect (opcode 214).~
+        END ELSE BEGIN
+          SET tgt_updated = 0
+          SET op188_removed = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_BYTE (ab_off + a * 0x28 + 0x0c) atgt
+            PATCH_IF (atgt = 7) BEGIN
+              WRITE_BYTE (ab_off + a * 0x28 + 0x0c) 5
+              SET tgt_updated += 1
+            END
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = na - 1; i >= 0; --i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              PATCH_IF (op = 188) BEGIN
+                LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                SET op188_removed += 1
+              END
+            END
+          END
+          PATCH_IF (tgt_updated > 0) OR (op188_removed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Nahal's Reckless Dweomer (%spell%): ability target 7 -> 5 on %tgt_updated% abilities (%op188_removed% opcode-188 effects removed).~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Nahal's Reckless Dweomer (%spell%): aura cleansing is removed already.~
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END

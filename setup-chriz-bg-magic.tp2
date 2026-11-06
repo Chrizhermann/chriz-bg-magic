@@ -9,6 +9,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_vanilla.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_scs.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_more.tpa~
 END
 
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
@@ -132,4 +133,8 @@ LAF cbmagic_scs_glyph_of_warding END
 LAF cbmagic_scs_magical_stone END
 LAF cbmagic_scs_insect_plague END
 LAF cbmagic_scs_natures_beauty END
+LAF cbmagic_more_protection_from_cold END
+LAF cbmagic_more_protection_from_acid END
+LAF cbmagic_more_dispelling_screen END
+LAF cbmagic_more_nahals_reckless_dweomer END
 
