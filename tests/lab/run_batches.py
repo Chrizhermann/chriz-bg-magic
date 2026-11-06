@@ -228,22 +228,38 @@ def insects(c, check):
 
 
 def nature(c, check):
-    # Nature's Beauty: failed save blinds for good, a successful one for 3 rounds.
+    # Nature's Beauty, on the target directly (this arena's area delivery: see the control):
+    # made save: alive, blind for 3 rounds. Failed save: humanoids die, everyone blind for good.
     c.p("nb-spawn", 'spawn("TASLOI01", 140, 0)')
     time.sleep(2)
     c.p("nb-pin", 'pin("Tasloi")')
-    c.p("nb-saves", 'set_saves("Tasloi", {death = 1, spell = 1, breath = 1}, 300)')
-    foe_at = c.p("nb-foe", 'creature("Tasloi")')
-    me = c.p("nb-me", "party()")[2]
-    c.p("nb-log0", "take_log()")
-    c.p("nb-watch", 'watch("Tasloi", 10)')
-    c.p("nb-cast", 'cast(2, "SPPR704", "Myself")')
-    time.sleep(8)
-    got = c.p("nb-1", 'ops("Tasloi", {74})') or []
-    rp.log(f"nature: foe at {foe_at['x']},{foe_at['y']} caster at {me['x']},{me['y']} log " + json.dumps(c.p("nb-log", "take_log()"))[:900])
-    check("Nature's Beauty: the enemy in range is blinded", bool(got), blind=got)
-    party = [c.p(f"nb-p{i}", f"ops({i}, {{74}})") or [] for i in range(3)]
-    check("Nature's Beauty: the party is spared", not any(party), party=party)
+    c.p("nb-saves", 'set_saves("Tasloi", {spell = 1}, 300)')
+    c.p("nb-a", 'self_apply("Tasloi", "CBMGNB1")')
+    time.sleep(3)
+    made = c.p("nb-1", 'ops("Tasloi", {74})') or []
+    alive = [o for o in (c.p("nb-2", "others()") or []) if o["name"] == "Tasloi" and o["hp"] > 0]
+    check("Nature's Beauty, made save: blind, not for good, alive", len(made) == 1 and alive, blind=made)
+    c.p("nb-tidy", "remove_all_others()")
+    time.sleep(1)
+    c.p("nb-spawn2", 'spawn("SPIDHU01", 140, 0)')
+    time.sleep(2)
+    c.p("nb-pin2", 'pin("spidhu01")')
+    c.p("nb-saves2", 'set_saves("spidhu01", {spell = 20}, 300)')
+    c.p("nb-b", 'self_apply("spidhu01", "CBMGNB1")')
+    time.sleep(3)
+    failed = c.p("nb-3", 'ops("spidhu01", {74})') or []
+    check("Nature's Beauty, failed save on a non-humanoid: blind once, longer than the made-save case",
+          len(failed) == 1 and made and failed[0]["dur"] > made[0]["dur"] + 1000, blind=failed)
+    c.p("nb-tidy2", "remove_all_others()")
+    time.sleep(1)
+    c.p("nb-spawn3", 'spawn("TASLOI01", 140, 0)')
+    time.sleep(2)
+    c.p("nb-saves3", 'set_saves("Tasloi", {spell = 20}, 300)')
+    c.p("nb-hold", 'fx("Tasloi", 109, 0, 2, 60)')
+    c.p("nb-c", 'self_apply("Tasloi", "CBMGNB1")')
+    time.sleep(3)
+    left = [o for o in (c.p("nb-4", "others()") or []) if o["name"] == "Tasloi" and o["hp"] > 0]
+    check("Nature's Beauty, failed save on a humanoid: dead", not left, left=left)
 
 
 def fiends(c, check):
@@ -255,6 +271,8 @@ def fiends(c, check):
         check(f"{res}: a fiend appears", bool(others), others=[(o["dv"], o["name"], o["ea"]) for o in others])
         c.p(f"fi-t-{res}", "remove_all_others()")
         time.sleep(2)
+    # No fight check: spawned creatures do not act in this arena, the base game's Pit Fiend
+    # (DEMPIT, whose script turns hostile on sight) stayed idle for 20 s just like ours.
 
 
 def smoke(c, check):
