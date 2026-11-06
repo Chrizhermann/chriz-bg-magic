@@ -20,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -334,6 +334,30 @@ def fiends(c, check):
         time.sleep(2)
     # No fight check: spawned creatures do not act in this arena, the base game's Pit Fiend
     # (DEMPIT, whose script turns hostile on sight) stayed idle for 20 s just like ours.
+
+
+def sequencer(c, check):
+    # The screen swaps a spell for the rows of the 2DA of the same name: one row, one entry.
+    c.p("sq-console", "book_console()")
+    c.p("sq-open", 'apply_spell(1, "SPWI809", "Player2")')
+    time.sleep(4)
+    book = c.p("sq-book", "book_list(5)")
+    screens = [r for r in book["rows"] if r["name"] == "Dispelling Screen"]
+    check("Spell Trigger lists Dispelling Screen once, with its own icon and description",
+          book["screen"] == "SPWI809" and len(screens) == 1 and screens[0]["res"] == "SPWI510"
+          and screens[0]["icon"] == "SPWI510C" and screens[0]["desc"] > 0, book=book)
+    check("No school choices are left", not [r for r in book["rows"] if r["res"].startswith("SPWI59")], rows=book["rows"])
+    picked = c.p("sq-pick", 'book_pick({{"SPWI510", "SPWI510"}, {"SPWI510", "SPWI510"}, {"SPWI511", ""}})')
+    check("It can be chosen", picked == 3, picked=picked)
+    c.p("sq-done", "book_done()")
+    time.sleep(2)
+    c.p("sq-fire", 'force(1, "SPWI809D")')
+    time.sleep(9)
+    landed = c.p("sq-landed", "ops(1, {101, 142, 206})")
+    from_screen = [e for e in landed if e["src"] == "SPWI510"]
+    check("The trigger releases it: Dispel protection and its own effect-list row", {101, 142, 206} <= {e["op"] for e in from_screen},
+          effects=from_screen)
+    c.p("sq-end", 'clear(1, {"SPWI510", "SPWI511"})')
 
 
 def smoke(c, check):

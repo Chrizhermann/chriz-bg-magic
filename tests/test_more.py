@@ -133,6 +133,8 @@ def make_more_biff():
         "SPELL.IDS": ie.make_ids(MORE_SYMBOLS),
         "MSECTYPE.2DA": MSECTYPE_2DA,
         "STATDESC.2DA": STATDESC_2DA,
+        "SPWI510.2DA": ("2DA V1.0\r\n****\r\n            \tResRef\tType    \r\n"
+                        + "".join(f"SCHOOL{i}\tSpWi59{i}\t3\r\n" for i in range(8))).encode("latin-1"),
         # Vanilla SPWI510 (Spell Immunity menu wrapper: target=7, ctime=0, op214 -> SpWi510)
         "SPWI510.SPL": make_spl_with_excl(
             1, 5,
@@ -415,6 +417,9 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
     check((267, 14056, 0, 300, 2, "") in ds_ops, ds_ops)
     check(any(o[0] == 142 and o[2] != 107 for o in ds_ops), f"Dispelling Screen needs its own effect-list row, not Spell Immunity: {ds_ops}")
     check((215, 0, 1, 300, 2, "SPTURNI2") in ds_ops, ds_ops)
+    choices = g.file("override/SPWI510.2DA").decode("latin-1").split()
+    check(choices[-3:] == ["DISPELLING", "SPWI510", "3"] and "SpWi590" not in choices, choices)
+    check(f"107 {SI_NAME}" in g.file("override/STATDESC.2DA").decode("latin-1"), "row 107 is not this mod's to change")
 
     # Scroll SCRL6S.ITM updated
     scrl6s_raw = g.file("override/SCRL6S.ITM")

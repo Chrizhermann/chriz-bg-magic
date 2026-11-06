@@ -313,7 +313,7 @@ END
 // Dispelling Screen. Updates scroll SCRL6S.ITM.
 DEFINE_ACTION_FUNCTION cbmagic_more_dispelling_screen
 BEGIN
-  // Its own line in the character's effect list: row 107 says Spell Immunity.
+  // Its own line in the character's effect list, with the spell's own symbol.
   OUTER_SET screen_desc = RESOLVE_STR_REF (@50004)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = screen_desc STR_VAR bam = ~SPWI510D~ RET screen_icon = icon_row END
   LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SPELL_IMMUNITY~ RET spell = resref found END
@@ -349,18 +349,17 @@ BEGIN
       APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
     END
 
-    // 3. Update portrait icon 107 in STATDESC.2DA to "Dispelling Screen".
-    ACTION_IF (FILE_EXISTS_IN_GAME ~statdesc.2da~) BEGIN
-      COPY_EXISTING ~statdesc.2da~ ~override~
-        COUNT_2DA_ROWS 3 rcnt
-        FOR (r = 0; r < rcnt; ++r) BEGIN
-          READ_2DA_ENTRY r 0 3 rnum
-          PATCH_IF (IS_AN_INT rnum) AND (rnum = 107) BEGIN
-            SET_2DA_ENTRY r 1 3 ~%ds_name_ref%~
-          END
-        END
-      BUT_ONLY
-    END
+    // 3. The Contingency, Spell Sequencer and Spell Trigger lists swap a spell for the rows of the
+    // 2DA of the same name, whatever the spell itself does: eight Dispelling Screens without a
+    // description, measured in the lab. With one row, the spell itself, the list shows it once,
+    // with its own icon and description.
+    <<<<<<<< .../chriz-bg-magic-inlined/screen-choices.2da
+2DA V1.0
+****
+            ResRef  Type
+DISPELLING  %spell% 3
+>>>>>>>>
+    COPY ~.../chriz-bg-magic-inlined/screen-choices.2da~ ~override/%spell%.2da~ EVALUATE_BUFFER
 
     // 4. Split Breach (WIZARD_BREACH / SPWI513) into SPWI513B (payload) + SPWI513C (sectype cleanup).
     LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_BREACH~ RET breach_spl = resref breach_found = found END

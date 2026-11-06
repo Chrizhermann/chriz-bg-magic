@@ -213,4 +213,47 @@ function P.bonus_rebuild(who)
     return P.bonus_fx(who, 0, 0, 0, "", nil, 1)
 end
 
+-- The spell book answers no console: only a few menus poll it. The book calls this function
+-- every frame, so polling from it keeps the console alive while the book is open.
+function P.book_console()
+    if not CBMP_MAGE_PAGE then
+        CBMP_MAGE_PAGE = magePageInfo
+        magePageInfo = function()
+            EEexRemote.Poll()
+            return CBMP_MAGE_PAGE()
+        end
+    end
+    return true
+end
+
+-- What the Contingency, Spell Sequencer and Spell Trigger screens list for this spell level.
+function P.book_list(level)
+    local rows, before = {}, currentSpellLevel
+    currentSpellLevel = level
+    for _, v in ipairs(filterContingencyMageSpells()) do
+        rows[#rows + 1] = { res = v.resref, master = v.masterResref, name = Infinity_FetchString(v.name),
+                            icon = v.icon, desc = v.description }
+    end
+    currentSpellLevel = before
+    return { mode = bookMode, screen = contingencyResRef, slots = contingencyMaxSpells, rows = rows }
+end
+
+-- Chooses spells as a click on the list does; each pick is { resref, master resref }.
+function P.book_pick(picks)
+    for _, pick in ipairs(picks) do mageScreen:SequenceSpell(pick[1], pick[2]) end
+    refreshMageBook()
+    return #bottomSpells
+end
+
+function P.book_done()
+    mageScreen:DoneSequencingSpells()
+    e:SelectEngine(worldScreen)
+    return true
+end
+
+function P.force(who, res)
+    EEex_Action_QueueResponseStringOnAIBase(string.format('ReallyForceSpellRES("%s",Myself)', res), party(who))
+    return true
+end
+
 return true
