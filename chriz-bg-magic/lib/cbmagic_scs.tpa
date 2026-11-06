@@ -700,3 +700,304 @@ BEGIN
     PRINT ~chriz-bg-magic: WIZARD_PROJECT_IMAGE (%spell% / PROJIMAG): changed %changed%, already %already%.~
   END
 END
+
+// Resolve the enemy-only symbol projectile from WIZARD_NPC_SYMBOL_DEATH (SPWI897)
+// or PROJECTL.IDS (ohsymbol = 325 -> SPL projectile 326).
+DEFINE_ACTION_FUNCTION cbmagic_symbol_enemy_projectile
+  RET target_proj
+BEGIN
+  OUTER_SET target_proj = 0
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_NPC_SYMBOL_DEATH~ RET npc_spl = resref npc_found = found END
+  ACTION_IF !npc_found AND (FILE_EXISTS_IN_GAME ~spwi897.spl~) BEGIN
+    OUTER_SPRINT npc_spl ~SPWI897~
+    OUTER_SET npc_found = 1
+  END
+  ACTION_IF npc_found BEGIN
+    COPY_EXISTING ~%npc_spl%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT (ab_off + 0x26) target_proj
+      END
+    BUT_ONLY
+  END
+  ACTION_IF (target_proj <= 1) BEGIN
+    OUTER_SET pid = IDS_OF_SYMBOL (~projectl~ ~ohsymbol~)
+    ACTION_IF (pid > 0) BEGIN
+      OUTER_SET target_proj = pid + 1
+    END ELSE BEGIN
+      OUTER_SET target_proj = 326
+    END
+  END
+END
+
+// Make a Symbol spell affect only enemies and optionally add Free Action immunity.
+DEFINE_ACTION_FUNCTION cbmagic_patch_symbol_spell
+  INT_VAR
+    free_action = 0
+  STR_VAR
+    symbol = ~~
+  BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %symbol% is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_symbol_enemy_projectile RET target_proj END
+    ACTION_IF free_action BEGIN
+      LAF cbmagic_free_action_splprot_rows RET splstate_row splstate_val stat_row END
+    END
+    OUTER_SET proj_changed = 0
+    OUTER_SET proj_already = 0
+    OUTER_SET fa_added = 0
+    OUTER_SET fa_present = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: %symbol% (%spell%) skipped: %reason%.~
+      END ELSE PATCH_IF (ab_cnt = 0) BEGIN
+        PATCH_WARN ~chriz-bg-magic: %symbol% (%spell%) has no abilities — skipping.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x26) proj
+          PATCH_IF (proj = target_proj) BEGIN
+            SET proj_already += 1
+          END ELSE BEGIN
+            WRITE_SHORT (ab_off + a * 0x28 + 0x26) target_proj
+            SET proj_changed += 1
+          END
+        END
+        PATCH_IF free_action BEGIN
+          LPF cbmagic_add_free_action_immunity INT_VAR splstate_row splstate_val stat_row RET fa_added = added fa_present = present END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (proj_changed > 0) BEGIN
+      OUTER_SPRINT find @30027
+      OUTER_SPRINT replace @30028
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
+      OUTER_SPRINT find @30029
+      OUTER_SPRINT replace @30030
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
+    END
+    ACTION_IF (fa_added > 0) BEGIN
+      OUTER_SPRINT find @30031
+      OUTER_SPRINT replace @30032
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
+    END
+    PRINT ~chriz-bg-magic: %symbol% (%spell%): projectile %proj_changed%/%proj_already%, free action %fa_added%/%fa_present%.~
+  END
+END
+
+// 11. Abi-Dalzim's Horrid Wilting (WIZARD_ABI_DALZIMS_HORRID_WILTING):
+// Undead, golems, animated swords, and air/earth/fire elementals are immune.
+DEFINE_ACTION_FUNCTION cbmagic_scs_abi_dalzim
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_ABI_DALZIMS_HORRID_WILTING~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_ABI_DALZIMS_HORRID_WILTING is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 1 RET undead_row = row END
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10c value = 0 - 1 relation = 1 RET race_row = row END
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10d value = 0 - 1 relation = 1 RET class_row = row END
+    OUTER_SET golem_id = IDS_OF_SYMBOL (~race~ ~GOLEM~)
+    ACTION_IF (golem_id < 0) BEGIN OUTER_SET golem_id = 144 END
+    OUTER_SET sword_id = IDS_OF_SYMBOL (~race~ ~SWORD~)
+    ACTION_IF (sword_id < 0) BEGIN OUTER_SET sword_id = 162 END
+    OUTER_SET elem_earth = IDS_OF_SYMBOL (~class~ ~ELEMENTAL_EARTH~)
+    ACTION_IF (elem_earth < 0) BEGIN OUTER_SET elem_earth = 145 END
+    OUTER_SET elem_fire = IDS_OF_SYMBOL (~class~ ~ELEMENTAL_FIRE~)
+    ACTION_IF (elem_fire < 0) BEGIN OUTER_SET elem_fire = 182 END
+    OUTER_SET elem_air = IDS_OF_SYMBOL (~class~ ~ELEMENTAL_AIR~)
+    ACTION_IF (elem_air < 0) BEGIN OUTER_SET elem_air = 183 END
+    OUTER_SET total_added = 0
+    OUTER_SET total_present = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: WIZARD_ABI_DALZIMS_HORRID_WILTING (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_add_immunity INT_VAR row = class_row value = elem_air RET a = added p = present END
+        SET total_added += a  SET total_present += p
+        LPF cbmagic_add_immunity INT_VAR row = class_row value = elem_fire RET a = added p = present END
+        SET total_added += a  SET total_present += p
+        LPF cbmagic_add_immunity INT_VAR row = class_row value = elem_earth RET a = added p = present END
+        SET total_added += a  SET total_present += p
+        LPF cbmagic_add_immunity INT_VAR row = race_row value = sword_id RET a = added p = present END
+        SET total_added += a  SET total_present += p
+        LPF cbmagic_add_immunity INT_VAR row = race_row value = golem_id RET a = added p = present END
+        SET total_added += a  SET total_present += p
+        LPF cbmagic_add_immunity INT_VAR row = undead_row value = 0 RET a = added p = present END
+        SET total_added += a  SET total_present += p
+      END
+    BUT_ONLY
+    PRINT ~chriz-bg-magic: WIZARD_ABI_DALZIMS_HORRID_WILTING (%spell%): immunities added %total_added%, present %total_present%.~
+  END
+END
+
+// 12. Improved Mantle (WIZARD_IMPROVED_MANTLE): protects against weapons up to +4.
+DEFINE_ACTION_FUNCTION cbmagic_scs_improved_mantle
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_IMPROVED_MANTLE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_IMPROVED_MANTLE is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET added = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: WIZARD_IMPROVED_MANTLE (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_add_weapon_immunity INT_VAR enchantment = 4 RET added already END
+      END
+    BUT_ONLY
+    ACTION_IF (added > 0) BEGIN
+      OUTER_SPRINT find @30017
+      OUTER_SPRINT replace @30018
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_IMPROVED_MANTLE~ END
+    END
+    PRINT ~chriz-bg-magic: WIZARD_IMPROVED_MANTLE (%spell%): added %added%, already %already%.~
+  END
+END
+
+// 13. Power Word, Blind (WIZARD_POWER_WORD_BLIND): Conjuration -> Enchantment, single-target (projectile 1).
+DEFINE_ACTION_FUNCTION cbmagic_scs_power_word_blind
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_POWER_WORD_BLIND~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_POWER_WORD_BLIND is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_conjuration_to_enchantment STR_VAR spell label = ~WIZARD_POWER_WORD_BLIND~ RET sch_changed = changed sch_already = already END
+    OUTER_SET proj_changed = 0
+    OUTER_SET proj_already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x26) proj
+          PATCH_IF (proj = 1) BEGIN
+            SET proj_already += 1
+          END ELSE BEGIN
+            WRITE_SHORT (ab_off + a * 0x28 + 0x26) 1
+            SET proj_changed += 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (proj_changed > 0) BEGIN
+      OUTER_SPRINT find @30021
+      OUTER_SPRINT replace @30022
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_POWER_WORD_BLIND~ END
+      OUTER_SPRINT find @30023
+      OUTER_SPRINT replace @30024
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_POWER_WORD_BLIND~ END
+      OUTER_SPRINT find @30025
+      OUTER_SPRINT replace @30026
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_POWER_WORD_BLIND~ END
+    END
+    PRINT ~chriz-bg-magic: WIZARD_POWER_WORD_BLIND (%spell%): school %sch_changed%/%sch_already%, projectile %proj_changed%/%proj_already%.~
+  END
+END
+
+// 14. Simulacrum (WIZARD_SIMULACRUM / SIMULACR.SPL): disable quick-slot items (9, 11, 12), keep innates enabled.
+DEFINE_ACTION_FUNCTION cbmagic_scs_simulacrum
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SIMULACRUM~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_SIMULACRUM is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE ACTION_IF !(FILE_EXISTS_IN_GAME ~simulacr.spl~) BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_SIMULACRUM (%spell%): SIMULACR.SPL not found — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~simulacr.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: SIMULACR.SPL skipped: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_patch_clone_buttons INT_VAR disable_innates = 0 RET changed already END
+      END
+    BUT_ONLY
+    PRINT ~chriz-bg-magic: WIZARD_SIMULACRUM (%spell% / SIMULACR): changed %changed%, already %already%.~
+  END
+END
+
+// 16. Symbol, Death (wizard, WIZARD_SYMBOL_DEATH): affects only enemies.
+DEFINE_ACTION_FUNCTION cbmagic_scs_wizard_symbol_death
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~WIZARD_SYMBOL_DEATH~ END
+END
+
+// 17. Symbol, Stun (wizard, WIZARD_SYMBOL_STUN): affects only enemies, Free Action protects.
+DEFINE_ACTION_FUNCTION cbmagic_scs_wizard_symbol_stun
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 1 STR_VAR symbol = ~WIZARD_SYMBOL_STUN~ END
+END
+
+// 18. Symbol, Fear (wizard, WIZARD_SYMBOL_FEAR): affects only enemies.
+DEFINE_ACTION_FUNCTION cbmagic_scs_wizard_symbol_fear
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~WIZARD_SYMBOL_FEAR~ END
+END
+
+// 19. Absolute Immunity (WIZARD_ABSOLUTE_IMMUNITY): protects against weapons up to +6.
+DEFINE_ACTION_FUNCTION cbmagic_scs_absolute_immunity
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_ABSOLUTE_IMMUNITY~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_ABSOLUTE_IMMUNITY is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET added = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: WIZARD_ABSOLUTE_IMMUNITY (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_add_weapon_immunity INT_VAR enchantment = 6 RET added already END
+      END
+    BUT_ONLY
+    ACTION_IF (added > 0) BEGIN
+      OUTER_SPRINT find @30019
+      OUTER_SPRINT replace @30020
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_ABSOLUTE_IMMUNITY~ END
+    END
+    PRINT ~chriz-bg-magic: WIZARD_ABSOLUTE_IMMUNITY (%spell%): added %added%, already %already%.~
+  END
+END
+
+// 21. Power Word, Kill (WIZARD_POWER_WORD_KILL): Conjuration -> Enchantment.
+DEFINE_ACTION_FUNCTION cbmagic_scs_power_word_kill
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_POWER_WORD_KILL~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: WIZARD_POWER_WORD_KILL is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_conjuration_to_enchantment STR_VAR spell label = ~WIZARD_POWER_WORD_KILL~ RET changed already END
+    PRINT ~chriz-bg-magic: WIZARD_POWER_WORD_KILL (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// 31. Symbol, Death (cleric, CLERIC_SYMBOL_DEATH): affects only enemies.
+DEFINE_ACTION_FUNCTION cbmagic_scs_cleric_symbol_death
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~CLERIC_SYMBOL_DEATH~ END
+END
+
+// 32. Symbol, Stun (cleric, CLERIC_SYMBOL_STUN): affects only enemies, Free Action protects.
+DEFINE_ACTION_FUNCTION cbmagic_scs_cleric_symbol_stun
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 1 STR_VAR symbol = ~CLERIC_SYMBOL_STUN~ END
+END
+
+// 33. Symbol, Fear (cleric, CLERIC_SYMBOL_FEAR): affects only enemies.
+DEFINE_ACTION_FUNCTION cbmagic_scs_cleric_symbol_fear
+BEGIN
+  LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~CLERIC_SYMBOL_FEAR~ END
+END
+

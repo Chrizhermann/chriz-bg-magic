@@ -221,3 +221,200 @@ def scs_batch1_arcane_spells(work, weidu):
     out2 = fg.install()
     assert installed_ok(out2), out2
     assert fg.tree() == snap
+
+
+def _ab_projectiles(spl_bytes):
+    ab_off, = struct.unpack_from("<I", spl_bytes, 0x64)
+    ab_cnt, = struct.unpack_from("<H", spl_bytes, 0x68)
+    return [struct.unpack_from("<H", spl_bytes, ab_off + a * 0x28 + 0x26)[0] for a in range(ab_cnt)]
+
+
+@test
+def scs_batch2_arcane_and_symbols(work, weidu):
+    """Abi-Dalzim's Horrid Wilting, Improved Mantle, Power Word Blind/Kill, Simulacrum,
+    Absolute Immunity, and all 6 Wizard/Priest Symbols."""
+    tlk = make_tlk([
+        "placeholder",
+        # 1: Improved Mantle
+        "Improved Mantle\nWhen the spell is cast, it confers complete invulnerability to all weapons of +3 or lower enchantment.",
+        # 2: Power Word, Blind
+        "Power Word, Blind\n(Conjuration/Summoning)\nArea of Effect: 4-ft. radius\nWhen a Power Word, Blind spell is cast, one or more creatures within the area of effect become sightless. The spellcaster selects one creature as the target center, and the effect spreads outward from the center, affecting all within a 4-ft. radius. This lasts for 6 rounds or until dispelled. All of the effects of blindness apply to the victims, such as a penalty to hit and to AC.",
+        # 3: Absolute Immunity
+        "Absolute Immunity\nWhen the spell is cast, it confers complete invulnerability to all weapons except for those of greater than +5 enchantment.",
+        # 4: Power Word, Kill
+        "Power Word, Kill\n(Conjuration/Summoning)\nLevel: 9",
+        # 5: Symbol, Death
+        "Symbol, Death\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Death or die.",
+        # 6: Symbol, Stun
+        "Symbol, Stun\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be stunned for 2 rounds + 1 round for every 3 levels of the caster.",
+        # 7: Symbol, Fear
+        "Symbol, Fear\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be affected by fear for 2 rounds + 1 round for every 3 levels of the caster.",
+    ])
+    abi_dalzim = make_spl(
+        level=8, school=7,
+        abilities=[{"min_level": 1, "target": 4, "projectile": 236, "effects": [
+            {"opcode": 12, "p2": 0x400000, "timing": 1, "dice": 16, "sides": 8, "save": SAVE_SPELL, "special": 0x100},
+        ]}],
+    )
+    imp_mantle = make_spl(
+        level=8, school=1, desc=1,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 120, "target": 1, "power": 8, "p1": 0, "p2": 2, "duration": 24, "dispel": 3},
+            {"opcode": 120, "target": 1, "power": 8, "p1": 3, "p2": 0, "duration": 24, "dispel": 3},
+        ]}],
+    )
+    pw_blind = _spl_with_excl(
+        make_spl(level=8, school=2, desc=2, abilities=[{"min_level": 1, "projectile": 218, "effects": [
+            {"opcode": 74, "power": 8, "duration": 36, "dispel": 1},
+        ]}]),
+        excl=0x0100, cast_gfx=14,
+    )
+    simul_spl = make_spl(
+        level=8, school=5,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 236, "target": 1, "power": 8, "p2": 3, "duration": 84, "dispel": 1},
+        ]}],
+    )
+    simul_payload = make_spl(
+        level=9, school=0,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 144, "target": 1, "p2": 14, "timing": 9},
+            {"opcode": 144, "target": 1, "p2": 0, "timing": 9},
+            {"opcode": 144, "target": 1, "p2": 13, "timing": 9},  # e.g. from SCS; should be removed for Simulacrum
+        ]}],
+    )
+    abs_imm = make_spl(
+        level=9, school=1, desc=3,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 120, "target": 1, "power": 9, "p1": 5, "p2": 0, "duration": 24, "dispel": 3},
+        ]}],
+    )
+    pw_kill = _spl_with_excl(
+        make_spl(level=9, school=2, desc=4, abilities=[{"min_level": 1, "effects": [
+            {"opcode": 209, "power": 9, "timing": 1, "dispel": 1},
+        ]}]),
+        excl=0x0100, cast_gfx=14,
+    )
+    npc_sym_death = make_spl(
+        level=8, school=2,
+        abilities=[{"min_level": 1, "target": 4, "projectile": 326, "effects": [
+            {"opcode": 13, "power": 8, "p2": 4, "timing": 1, "save": 4},
+        ]}],
+    )
+    sym_death = make_spl(
+        level=8, school=2, desc=5,
+        abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
+            {"opcode": 13, "power": 8, "p2": 4, "timing": 1, "save": 4},
+        ]}],
+    )
+    sym_stun = make_spl(
+        level=8, school=2, desc=6,
+        abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
+            {"opcode": 45, "power": 8, "duration": 18, "save": SAVE_SPELL, "bonus": -4},
+        ]}],
+    )
+    sym_fear = make_spl(
+        level=8, school=2, desc=7,
+        abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
+            {"opcode": 24, "power": 8, "duration": 18, "save": SAVE_SPELL, "bonus": -4},
+        ]}],
+    )
+    biff = {
+        "SPELL.IDS": make_ids([
+            (2812, "WIZARD_ABI_DALZIMS_HORRID_WILTING"),
+            (2808, "WIZARD_IMPROVED_MANTLE"),
+            (2815, "WIZARD_POWER_WORD_BLIND"),
+            (2804, "WIZARD_SIMULACRUM"),
+            (2817, "WIZARD_SYMBOL_DEATH"),
+            (2816, "WIZARD_SYMBOL_STUN"),
+            (2811, "WIZARD_SYMBOL_FEAR"),
+            (2897, "WIZARD_NPC_SYMBOL_DEATH"),
+            (2907, "WIZARD_ABSOLUTE_IMMUNITY"),
+            (2912, "WIZARD_POWER_WORD_KILL"),
+            (1719, "CLERIC_SYMBOL_DEATH"),
+            (1718, "CLERIC_SYMBOL_STUN"),
+            (1706, "CLERIC_SYMBOL_FEAR"),
+        ]),
+        "RACE.IDS": make_ids([(144, "GOLEM"), (162, "SWORD")]),
+        "CLASS.IDS": make_ids([(145, "ELEMENTAL_EARTH"), (182, "ELEMENTAL_FIRE"), (183, "ELEMENTAL_AIR")]),
+        "SPLSTATE.IDS": make_ids([(29, "FREE_ACTION")]),
+        "STATS.IDS": make_ids([(131, "CLERIC_FREE_ACTION")]),
+        "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
+        "SPWI812.SPL": abi_dalzim,
+        "SPWI808.SPL": imp_mantle,
+        "SPWI815.SPL": pw_blind,
+        "SPWI804.SPL": simul_spl,
+        "SIMULACR.SPL": simul_payload,
+        "SPWI897.SPL": npc_sym_death,
+        "SPWI817.SPL": sym_death,
+        "SPWI816.SPL": sym_stun,
+        "SPWI811.SPL": sym_fear,
+        "SPWI907.SPL": abs_imm,
+        "SPWI912.SPL": pw_kill,
+        "SPPR719.SPL": sym_death,
+        "SPPR718.SPL": sym_stun,
+        "SPPR706.SPL": sym_fear,
+        "SCRL9U.ITM": _itm_with_fields(
+            make_itm([[
+                {"opcode": 146, "resource": "SPWI912"},
+                {"opcode": 147, "resource": "SPWI912"},
+            ]], desc=4),
+            usab=0x0100,
+        ),
+    }
+    fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
+    out = fg.install()
+    assert installed_ok(out), out
+
+    # Abi-Dalzim: 6 leading op324 immunities (undead, golem, sword, earth/fire/air elementals)
+    ad = fg.spl("SPWI812")
+    lead = ad["abilities"][0]["effects"][:6]
+    assert all(e["opcode"] == 324 for e in lead)
+    assert {(e["p1"], e["p2"]) for e in lead} == {(0, 1), (144, 4), (162, 4), (145, 5), (182, 5), (183, 5)}
+
+    # Improved Mantle (+4) & Absolute Immunity (+6)
+    im = fg.spl("SPWI808")
+    assert any(e["opcode"] == 120 and e["p1"] == 4 and e["p2"] == 0 for e in im["abilities"][0]["effects"])
+    assert "+4 or lower" in fg.tlk(im["desc"])
+    ai = fg.spl("SPWI907")
+    assert any(e["opcode"] == 120 and e["p1"] == 6 and e["p2"] == 0 for e in ai["abilities"][0]["effects"])
+    assert "up to +6 enchantment" in fg.tlk(ai["desc"])
+
+    # Power Word, Blind: school 4, excl 0x0080, projectile 1
+    pwb_raw = fg.file("override/SPWI815.SPL")
+    assert pwb_raw[0x25] == 4
+    assert struct.unpack_from("<I", pwb_raw, 0x1E)[0] == 0x0080
+    assert _ab_projectiles(pwb_raw) == [1]
+    pwb = fg.spl("SPWI815")
+    assert "Area of Effect: 1 creature" in fg.tlk(pwb["desc"])
+    assert "(Enchantment/Charm)" in fg.tlk(pwb["desc"])
+
+    # Power Word, Kill: school 4, excl 0x0080
+    pwk_raw = fg.file("override/SPWI912.SPL")
+    assert pwk_raw[0x25] == 4
+    assert struct.unpack_from("<I", pwk_raw, 0x1E)[0] == 0x0080
+
+    # Simulacrum: buttons 9, 11, 12 disabled, button 13 NOT disabled
+    sim = fg.spl("SIMULACR")
+    sim_btns = {e["p2"] for e in sim["abilities"][0]["effects"] if e["opcode"] == 144}
+    assert {0, 9, 11, 12, 14}.issubset(sim_btns)
+    assert 13 not in sim_btns
+
+    # All 6 Symbols: projectile 326, enemy-only description, and Symbol Stun has Free Action immunity
+    for res in ("SPWI817", "SPWI816", "SPWI811", "SPPR719", "SPPR718", "SPPR706"):
+        raw = fg.file(f"override/{res}.SPL")
+        assert _ab_projectiles(raw) == [326], res
+        parsed = fg.spl(res)
+        assert "until an opponent comes too close" in fg.tlk(parsed["desc"])
+        assert "causing all enemies within" in fg.tlk(parsed["desc"])
+    for stun_res in ("SPWI816", "SPPR718"):
+        parsed = fg.spl(stun_res)
+        assert [e["opcode"] for e in parsed["abilities"][0]["effects"][:2]] == [324, 324]
+        assert "Free Action protects" in fg.tlk(parsed["desc"])
+
+    # Idempotence check
+    snap = fg.tree()
+    out2 = fg.install()
+    assert installed_ok(out2), out2
+    assert fg.tree() == snap
+

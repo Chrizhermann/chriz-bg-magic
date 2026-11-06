@@ -37,3 +37,15 @@ LAF cbmagic_scs_power_word_silence END
 LAF cbmagic_scs_power_word_stun END
 LAF cbmagic_scs_mantle END
 LAF cbmagic_scs_project_image END
+LAF cbmagic_scs_abi_dalzim END
+LAF cbmagic_scs_improved_mantle END
+LAF cbmagic_scs_power_word_blind END
+LAF cbmagic_scs_simulacrum END
+LAF cbmagic_scs_wizard_symbol_death END
+LAF cbmagic_scs_wizard_symbol_stun END
+LAF cbmagic_scs_wizard_symbol_fear END
+LAF cbmagic_scs_absolute_immunity END
+LAF cbmagic_scs_power_word_kill END
+LAF cbmagic_scs_cleric_symbol_death END
+LAF cbmagic_scs_cleric_symbol_stun END
+LAF cbmagic_scs_cleric_symbol_fear END
