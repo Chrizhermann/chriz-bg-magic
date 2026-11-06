@@ -176,7 +176,7 @@ END
 // "Save-Art nach Logik", and the rows of these spells) -----------------------------------
 // Their damage now allows a save vs. breath instead of vs. spell, with the same bonus and
 // the same damage. Meteor Swarm and Fire Storm have no save at all in the base game and
-// stay that way for now (Christopher, 2026-11-06: maybe later). Chain Lightning, mind and
+// stay that way for now. Chain Lightning, mind and
 // transmutation spells keep their save vs. spell.
 DEFINE_ACTION_FUNCTION cbmagic_fix_breath_saves
 BEGIN

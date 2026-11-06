@@ -411,17 +411,20 @@ def record(c, check):
         check(f"{res}: a failed save lists the swarm and the spell failure",
               "Insect Swarm" in rows and "Spell Failure" in rows, rows=rows)
         done()
-        # Well below 1: Panic carries a -2 penalty, and a save of 1 would still fail one roll in ten.
-        fresh(-5)
-        apply(res)
-        rows = shown()
-        if res == "SPPR319":
-            # Only this spell has a save against the whole swarm.
-            check(f"{res}: a made save keeps the swarm off", not rows, rows=rows)
-        else:
-            check(f"{res}: a made save still lists the swarm, nothing else of it",
-                  "Insect Swarm" in rows and "Spell Failure" not in rows and "Panic" not in rows, rows=rows)
-        done()
+        # The best save the stat holds is 0 (a negative value wraps to the worst one), and these
+        # saves carry -2, so one roll in twenty still fails: a few tries settle it.
+        for attempt in range(4):
+            fresh(0)
+            apply(res)
+            rows = shown()
+            done()
+            # Only Summon Insects has a save against the whole swarm.
+            made = not rows if res == "SPPR319" else (
+                "Insect Swarm" in rows and "Spell Failure" not in rows and "Panic" not in rows)
+            if made:
+                break
+        check(f"{res}: a made save lists the swarm only, or nothing for a save against all of it", made,
+              rows=rows, attempts=attempt + 1)
     fresh(20)
     apply("SPPR412")
     rows = shown()
