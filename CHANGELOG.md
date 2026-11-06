@@ -106,6 +106,15 @@
   blindness: permanent blindness and humanoid death on failed save, 3 rounds blind on
   successful save).
 - Descriptions that named the old behaviour are updated (English).
+- Additional decided spell changes (`cbmagic_more.tpa`): new priest spells Protection From
+  Cold (level 3, `CLERIC_CBMAGIC_PROTECTION_FROM_COLD`, built like Priest level 3
+  Protection From Fire) and Protection From Acid (level 4,
+  `CLERIC_CBMAGIC_PROTECTION_FROM_ACID`, built like Priest level 4 Protection From
+  Lightning) for clerics and druids via `ADD_SPELL`; Dispelling Screen replacing Spell
+  Immunity (`SPWI510`, `SCRL6S`, and redirecting `SPWI590`..`SPWI597`, lasting 5 turns in a
+  15-ft party area to absorb one Dispel Magic or one Breach, removed by Pierce Shield and
+  Spellstrike); and Nahal's Reckless Dweomer (`SPWI124`) without Aura Cleansing (ability
+  target 7 -> 5 so it respects the round aura timer).
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the
   installer warns that the two do not go together.
