@@ -20,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
+GROUPS = ("curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -65,6 +65,27 @@ def control(c, check):
           haste=haste, ea=ea, where=[(p["x"], p["y"]) for p in pos])
     for i in range(3):
         c.p(f"ct-clear{i}", f'clear({i}, {{"SPWI305"}})')
+
+
+def curse(c, check):
+    # Doom's penalties sit in the spell, Unholy Blight's arrive through EFF wrappers (opcode 177,
+    # good targets only): both are Curse, so only the worst counts, also through a wrapper.
+    c.p("cu-spawn", 'spawn("ACOLYTE2", 120, 0)')
+    time.sleep(2)
+    others = c.p("cu-who", "others()") or []
+    who = others[0]["name"] if others else "Dawnbringer Alvanna"
+    c.p("cu-pin", f'pin("{who}")')
+    c.p("cu-saves", f'set_saves("{who}", {{spell = 20, death = 20, breath = 20}}, 120)')
+    time.sleep(1)
+    base = c.p("cu-0", f'stats("{who}")')["thac0"]
+    c.p("cu-blight", f'self_apply("{who}", "SPPR314")')
+    time.sleep(3)
+    blight = c.p("cu-1", f'stats("{who}")')["thac0"]
+    check("Unholy Blight lands on someone good, through its wrappers", blight == base + 2, who=who, values=[base, blight])
+    c.p("cu-doom", f'self_apply("{who}", "SPPR113")')
+    time.sleep(3)
+    both = c.p("cu-2", f'stats("{who}")')["thac0"]
+    check("Doom on top of Unholy Blight: only the worst counts", both == blight, values=[base, blight, both])
 
 
 def strength(c, check):

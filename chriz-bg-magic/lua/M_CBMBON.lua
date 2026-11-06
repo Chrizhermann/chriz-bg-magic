@@ -182,6 +182,9 @@ end
 -- Opcode 402 requires an uppercase global name of at most eight characters.
 -- Errors must not escape into the engine's Invoke Lua panic handler.
 function CBMBPM(effect, targetSprite)
+    -- The effect stays on the list and is called again on every pass unless it is
+    -- marked done: measured in the lab, Magic Resistance fell to -128 within seconds.
+    effect.m_done = true
     local ok, err = pcall(pierceMagic, effect, targetSprite)
     if not ok then logError("Pierce Magic", err) end
 end
