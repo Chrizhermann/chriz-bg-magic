@@ -112,6 +112,73 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   far off: webs that can catch fire.
 - Radius and school come later.
 
+## Kept and adjusted Spell Revisions changes (`chriz-bg-magic/lib/cbmagic_sr.tpa`)
+
+### Arcane spells
+
+- **Invisibility (`cbmagic_kept_invisibility`)**: lasts 8 hours (2400 seconds) instead of
+  24 hours.
+- **Luck (`cbmagic_kept_luck`)**: keeps the base game's +1 bonus to luck and skill checks,
+  lasts 15 rounds (90 seconds) instead of 3 rounds, and replaces an earlier casting on the
+  same target.
+- **Clairvoyance (`cbmagic_kept_clairvoyance`)**: works indoors as well as outdoors and
+  grants the caster dispellable immunity to backstab for 3 rounds at level 5 plus 1 round
+  per 2 caster levels (up to 10 rounds at level 19) instead of revealing the outdoor map.
+- **Invisibility 10' Radius (`cbmagic_kept_invisibility_sphere`)**: casting time 1 (from
+  9) and duration 1 turn (60 seconds, from 24 hours).
+- **Confusion (`cbmagic_kept_confusion`)**: lasts 4 rounds at levels 1-14, 5 rounds at
+  levels 15-19, and 6 rounds at level 20+. Save vs. Spell at -2 and all other properties
+  stay as in the base game.
+- **Sequencers and Contingencies (`cbmagic_kept_minor_sequencer`,
+  `cbmagic_kept_contingency`, `cbmagic_kept_spell_sequencer`,
+  `cbmagic_kept_spell_trigger`, `cbmagic_kept_chain_contingency`)**: Minor Sequencer,
+  Contingency, Spell Sequencer, Spell Trigger, and Chain Contingency belong to the
+  Universal school and clear specialist exclusion flags on the spells and their scrolls, so
+  all specialist mages (including Diviners) can learn and cast them.
+- **Teleport Field (`cbmagic_kept_teleport_field`)**: enemies in the field get a Save vs.
+  Spell at -4 to avoid being teleported (base game: no save).
+- **Oracle (`cbmagic_kept_oracle`)**: dispels illusion spells up to 9th level (from 5th)
+  in a 30-ft enemy-only area around the caster (range 1).
+- **Sphere of Chaos (`cbmagic_kept_sphere_of_chaos`)**: keeps its name, level 7, and
+  10-round enemy-only aura around the caster. Each round, enemies in the area save vs.
+  Spell at -4 or suffer one of 5 random effects for 1 round (6 seconds): feeblemind
+  (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).
+
+### Divine spells
+
+- **Bless (`cbmagic_kept_bless`)**: casting time 5 (from 9).
+- **Shillelagh (`cbmagic_kept_shillelagh`)**: keeps the base game's mechanics and is
+  restricted to druids.
+- **Doom (`cbmagic_kept_doom`)**: casting time 1 (from 9), imposes -2 to THAC0, damage
+  rolls, and all saving throws (without an AC penalty), and allows a Save vs. Spell to
+  negate, scaling from no penalty at level 1 to -4 at level 9 (steps at levels 1, 3, 5, 7,
+  and 9).
+- **Faerie Fire (`cbmagic_kept_faerie_fire`)**: new level-1 druid-only spell added via
+  `ADD_SPELL` (`CLERIC_CBMAGIC_FAERIE_FIRE`). In a 5-ft enemy-only area (range 20, casting
+  time 1), targets that fail a Save vs. Spell suffer a -2 AC penalty, lose and cannot
+  gain invisibility, and glow violet for 4 rounds.
+- **Silence 15' Radius (`cbmagic_kept_silence`)**: affects enemies only instead of all
+  creatures in the area.
+- **Free Action (`cbmagic_kept_free_action`)**: usable by druids and rangers as well as
+  clerics, lasts 1 turn per level, protects against Stun, and no longer blocks Haste or
+  movement rate bonuses.
+- **Neutralize Poison (`cbmagic_kept_neutralize_poison`)**: cures poison and grants
+  immunity to poison for 1 turn per level (levels 7-20); no longer heals 10 Hit Points or
+  cures disease, blindness, or deafness.
+- **Holy Power (`cbmagic_kept_divine_power`)**: casting time 4 (from 6) and grants
+  non-fighter clerics (single-class Cleric, Cleric/Thief, Cleric/Mage) fighter bonus
+  attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).
+- **Iron Skins / Stoneskin (`cbmagic_kept_iron_skins`)**: renamed Stoneskin, with casting
+  time 1 (from 9); skin progression and duration stay as in the base game.
+- **Mass Regenerate (`cbmagic_kept_mass_regenerate`)**: new level-5 druid-only spell added
+  via `ADD_SPELL` (`CLERIC_CBMAGIC_MASS_REGENERATE`). In a 15-ft party-friendly area
+  around the caster (casting time 5), party members regenerate 2 Hit Points per round (1
+  HP every 3 seconds) for 1 turn + 2 rounds per level (up to 30 rounds at level 10); a new
+  casting replaces the previous one.
+- **Regenerate (`cbmagic_kept_regeneration`)**: restricted to druids, stays level 7, heals
+  2 Hit Points per second (from 3) for 1 round per level (from 1 round per 2 levels), and
+  replaces an earlier casting on the same target.
+
 ## Descriptions
 
 Changed texts are added as new strings and the spell (and its scrolls) point to them; the
