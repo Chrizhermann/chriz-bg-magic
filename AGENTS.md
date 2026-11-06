@@ -14,7 +14,7 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
   regenerate it with `python -I tools/build_list.py <snapshot folder>`. His raw notes stay
   out of this repo; specs here are English summaries of the decided text.
 - Spell Revisions, SCS and IWDification serve only as comparison. Build everything
-  ourselves; never copy their code or files. No game or IWD resources in the repo.
+  ourselves; never copy their code or files.
 
 ## Engineering rules
 
@@ -31,6 +31,5 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
 - Test in made-up game folders (`tests/run_tests.py`) and in disposable labs only, never in
   Christopher's game or a reference install. Game launches go through the quiet lab runner
   and need his OK. No Docker.
-- Scripts take paths as arguments. Before every push: no home paths, no private data, no
-  third-party files.
+- Scripts take paths as arguments. Before every push: no home paths, no private data.
 - Merges, tags, releases and any Chriz Easy BG pin need Christopher's OK.
