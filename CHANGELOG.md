@@ -12,23 +12,26 @@
   Greater Command and Emotion: Hopelessness (Power Word: Sleep does so already).
 - Web: save vs. breath instead of vs. spell (the -2 stays); spiders, amorphous creatures,
   dragons and the very obvious flying and incorporeal creatures are immune.
-- SCS-style arcane changes: Chromatic Orb (IWD progression without +6 save bonus), Melf's
-  Minute Meteors (+2 enchantment), Skull Trap (12d6 cap), Lower Resistance (30% + 1%/level,
-  power 5), Power Word Silence/Stun/Blind/Kill (school Enchantment; Stun blocked by Free
+- SCS-style arcane changes: Chromatic Orb (IWD progression without +6 save bonus, range 50,
+  Free Action immunity on level 5 stun), Melf's Minute Meteors (+2 enchantment), Skull Trap
+  (12d6 cap), Lower Resistance (30% + 1%/level, power 5), Power Word Silence/Stun/Blind/Kill
+  (school Enchantment with Invoker exclusion on spells and scrolls; Stun blocked by Free
   Action; Blind single-target), Mantle/Improved Mantle/Absolute Immunity (+3/+4/+6 weapon
   protection), Project Image and Simulacrum slot restrictions, Abi-Dalzim's Horrid Wilting
   immunities (undead, golems, animated swords, air/earth/fire elementals), party-friendly
-  Wizard Symbols (with Free Action immunity on Symbol, Stun), and alignment-based fiend
-  summoning for Cacofiend, Summon Fiend, and Gate.
+  Enchantment-school Wizard Symbols (with Free Action immunity on Symbol, Stun), and
+  alignment-based fiend summoning with species scripts for Cacofiend, Summon Fiend, and
+  Gate.
 - SCS-style divine changes: Blade Barrier (casting time 6, enemy-only, save for half),
   Globe of Blades (enemy-only, save for half), Call Lightning (1 round/level up to 11
   bolts), Defensive Harmony (cleric-only, +4 AC), Glyph of Warding (casting time 5, save
-  for half), Magical Stone (3d4 crushing, 6d4 vs. undead), Priest Gate (alignment-based
-  fiends), party-friendly Priest Symbols (with Free Action immunity on Symbol, Stun),
-  Summon Insects/Insect Plague/Creeping Doom (per-round breath save vs. spell failure,
-  countered by Fire Shields, Stoneskin, and normal-weapon immunity, undead immune), and
-  Nature's Beauty (schoolless blindness subspells: permanent on failed save, 3 rounds on
-  successful save).
+  for half), Lesser Restoration (cleric-only, removes negative ability-score drain without
+  stripping positive buffs), Magical Stone (3d4 crushing, 6d4 vs. undead), Priest Gate
+  (alignment-based fiends), party-friendly Enchantment-school Priest Symbols (with Free
+  Action immunity on Symbol, Stun), Summon Insects/Insect Plague/Creeping Doom (per-round
+  breath save vs. spell failure, countered by Fire Shields, Stoneskin, normal-weapon
+  immunity items/spells, and Death Spell, undead immune), and Nature's Beauty (schoolless
+  area blindness subspell: permanent on failed save, 3 rounds on successful save).
 - Descriptions that named the old behaviour are updated (English).
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the
