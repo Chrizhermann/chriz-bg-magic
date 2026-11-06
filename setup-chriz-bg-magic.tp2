@@ -42,3 +42,14 @@ LAF cbmagic_kept_sphere_of_chaos END
 LAF cbmagic_kept_spell_sequencer END
 LAF cbmagic_kept_spell_trigger END
 LAF cbmagic_kept_chain_contingency END
+LAF cbmagic_kept_bless END
+LAF cbmagic_kept_shillelagh END
+LAF cbmagic_kept_doom END
+LAF cbmagic_kept_faerie_fire END
+LAF cbmagic_kept_silence END
+LAF cbmagic_kept_free_action END
+LAF cbmagic_kept_neutralize_poison END
+LAF cbmagic_kept_divine_power END
+LAF cbmagic_kept_iron_skins END
+LAF cbmagic_kept_mass_regenerate END
+LAF cbmagic_kept_regeneration END
