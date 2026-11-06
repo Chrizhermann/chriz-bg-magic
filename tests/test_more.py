@@ -327,7 +327,7 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
     check((206, -1, 0, 300, 2, "SPWI513B") in ds_ops, ds_ops)
     check((101, 0, 58, 300, 2, "") in ds_ops, ds_ops)
     check((267, 14056, 0, 300, 2, "") in ds_ops, ds_ops)
-    check((142, 0, 107, 300, 2, "") in ds_ops, ds_ops)
+    check(any(o[0] == 142 and o[2] != 107 for o in ds_ops), f"Dispelling Screen needs its own effect-list row, not Spell Immunity: {ds_ops}")
     check((215, 0, 1, 300, 2, "SPTURNI2") in ds_ops, ds_ops)
 
     # Scroll SCRL6S.ITM updated

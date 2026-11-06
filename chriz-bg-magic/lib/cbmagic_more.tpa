@@ -313,6 +313,9 @@ END
 // Dispelling Screen. Updates scroll SCRL6S.ITM.
 DEFINE_ACTION_FUNCTION cbmagic_more_dispelling_screen
 BEGIN
+  // Its own line in the character's effect list: row 107 says Spell Immunity.
+  OUTER_SET screen_desc = RESOLVE_STR_REF (@50004)
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = screen_desc STR_VAR bam = ~SPWI510D~ RET screen_icon = icon_row END
   LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SPELL_IMMUNITY~ RET spell = resref found END
   ACTION_IF !found BEGIN
     LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_DISPELLING_SCREEN~ RET spell = resref found END
@@ -572,7 +575,7 @@ BEGIN
             opcode = 267 target = 2 power = 5 parameter1 = 14056 parameter2 = 0
             timing = 0 resist_dispel = 2 duration = 300 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4
-            opcode = 142 target = 2 power = 5 parameter1 = 0 parameter2 = 107
+            opcode = 142 target = 2 power = 5 parameter1 = 0 parameter2 = screen_icon
             timing = 0 resist_dispel = 2 duration = 300 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5
             opcode = 215 target = 2 power = 5 parameter1 = 0 parameter2 = 1
