@@ -191,10 +191,10 @@ def scs_batch1_arcane_spells(work, weidu):
     melf_raw = fg.file("override/MELFMET.ITM")
     assert struct.unpack_from("<I", melf_raw, 0x60)[0] == 2
 
-    # 3. Skull Trap: abilities > 12 removed, max 12d6, save vs breath
+    # 3. Skull Trap: all abilities kept, damage capped at 12d6, save vs breath
     st = fg.spl("SPWI313")
-    assert [a["min_level"] for a in st["abilities"]] == [1, 6, 10, 12]
-    assert max(e["dice"] for a in st["abilities"] for e in a["effects"] if e["opcode"] == 12) == 12
+    assert [a["min_level"] for a in st["abilities"]] == [1, 6, 10, 12, 13, 15, 20]
+    assert [e["dice"] for a in st["abilities"] for e in a["effects"] if e["opcode"] == 12] == [5, 6, 10, 12, 12, 12, 12]
     assert all(e["save"] == SAVE_BREATH for a in st["abilities"] for e in a["effects"] if e["opcode"] == 12)
     assert "maximum of 12d6" in fg.tlk(st["desc"])
 
@@ -644,7 +644,10 @@ def scs_batch3_fiends_and_divine(work, weidu):
     out = fg.install()
     assert installed_ok(out), out
 
-    # Summoned CREs, species BCS scripts, and EFFs created and configured
+    # Summoned CREs, species BCS scripts, Balor innate Domination (CBMGBDOM.SPL), and EFFs created and configured
+    bdom = fg.file("override/CBMGBDOM.SPL")
+    assert bdom is not None
+    assert struct.unpack_from("<H", bdom, 0x1C)[0] == 4
     for cre_name in ("CBMGBONF", "CBMGCORN", "CBMGBALR"):
         cre = fg.file(f"override/{cre_name}.CRE")
         assert cre is not None
@@ -655,6 +658,13 @@ def scs_batch3_fiends_and_divine(work, weidu):
         assert cre[0x250:0x258] == b"\x00" * 8
         bcs = fg.file(f"override/{cre_name}.BCS")
         assert bcs is not None and bcs.startswith(b"SC")
+        assert b"LOCALShostile" in bcs
+        assert b"LOCALSfearaura" in bcs
+        assert b"181OB" in bcs
+    balr_bcs = fg.file("override/CBMGBALR.BCS")
+    assert b"LOCALSstoneskin" in balr_bcs
+    assert b"CBMGBDOM" in balr_bcs
+    assert b"3996 " not in balr_bcs and b"2816 " not in balr_bcs and b"3999 " not in balr_bcs
     for eff_name, exp_cre in (("CBMGCACO", "cbmgbonf"), ("CBMGFIEN", "cbmgcorn"), ("CBMGGATE", "cbmgbalr")):
         eff = fg.file(f"override/{eff_name}.EFF")
         assert eff is not None
@@ -760,19 +770,23 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     sum_ins = make_spl(
         spell_type=2, level=3, school=2, desc=1,
         abilities=[{"min_level": 1, "target": 1, "projectile": 227, "effects": [
+            {"opcode": 272, "power": 3, "p1": 2, "p2": 3, "duration": 42, "save": SAVE_BREATH, "bonus": -4, "resource": "ipdam1"},
             {"opcode": 60, "power": 3, "p1": 50, "p2": 0, "duration": 42, "save": SAVE_BREATH, "bonus": -4},
         ]}],
     )
     ins_plg = make_spl(
         spell_type=2, level=5, school=2, desc=2,
         abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
+            {"opcode": 272, "power": 5, "p1": 2, "p2": 3, "duration": 36, "resource": "ipdam1"},
             {"opcode": 60, "power": 5, "p1": 100, "p2": 0, "duration": 36},
         ]}],
     )
     crp_doom = make_spl(
         spell_type=2, level=7, school=2, desc=3,
         abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
+            {"opcode": 272, "power": 7, "p1": 1, "p2": 3, "duration": 18, "resource": "ipdam2"},
             {"opcode": 60, "power": 7, "p1": 100, "p2": 0, "duration": 18},
+            {"opcode": 146, "power": 7, "p2": 1, "timing": 1, "resource": "FLPR717A"},
         ]}],
     )
     fshield_red = make_spl(
@@ -898,14 +912,13 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     ds_b_rem = {e["resource"].upper() for e in ds_b["abilities"][0]["effects"] if e["opcode"] == 321}
     assert {"SPPR319A", "SPPR517A", "SPPR717A"}.issubset(ds_b_rem)
 
-    # Nature's Beauty: keeps op55 (save vs. spell +3) and caster op215; casts schoolless area
-    # subspell CBMGNB1 (target=1 on op146; CBMGNB1 has school=0, target=5, projectile=159,
-    # failed-save permanent blindness with timing=0 duration=999999 + op318, and 3-round blindness
-    # with timing=0 duration=18 for targets that save).
+    # Nature's Beauty: keeps caster op215; casts schoolless area subspell CBMGNB1 (target=1 on
+    # op146; CBMGNB1 has school=0, target=5, projectile=159, op55 slay ahead of failed-save
+    # permanent blindness with timing=0 duration=999999 + op318, and 3-round blindness with
+    # timing=0 duration=18 for targets that save).
     nb = fg.spl("SPPR704")
     nb_fx = nb["abilities"][0]["effects"]
     assert [(e["opcode"], e["target"], e["resource"].lower(), e["save"], e["bonus"]) for e in nb_fx] == [
-        (55, 2, "", SAVE_SPELL, 3),
         (215, 1, "icclkfr2", 0, 0),
         (146, 1, "cbmgnb1", 0, 0),
     ]
@@ -915,6 +928,7 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     nb1 = fg.spl("CBMGNB1")
     assert nb1["abilities"][0]["target"] == 5
     nb1_fx = nb1["abilities"][0]["effects"]
+    assert nb1_fx[0]["opcode"] == 55 and nb1_fx[0]["p1"] == 1 and nb1_fx[0]["p2"] == 3 and nb1_fx[0]["save"] == SAVE_SPELL and nb1_fx[0]["bonus"] == 3
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 999999 and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
     assert any(e["opcode"] == 318 and e["resource"].lower() == "cbmgnb1" and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 and e["save"] == 0 for e in nb1_fx)
@@ -957,7 +971,7 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
             {"opcode": 142, "power": 7, "p2": 8, "timing": 0, "duration": 999999, "dispel": 1},
         ]}],
     )
-    # SCS-patched Insect Plague (already has op146 -> SPPR517A and valid SPPR517A.SPL)
+    # SCS-patched Insect Plague (already has op146 -> SPPR517A and valid SPPR517A/B/C.SPL)
     ins_scs = make_spl(
         spell_type=2, level=5, school=2,
         abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
@@ -973,6 +987,24 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
             {"opcode": 177, "target": 2, "p2": 2, "timing": 1, "resource": "sppr517b"},
         ]}],
     )
+    ins_scs_b = make_spl(
+        spell_type=2, level=1, school=0,
+        abilities=[{"min_level": 1, "target": 1, "effects": [
+            {"opcode": 318, "target": 2, "p2": 6, "duration": 1, "resource": "sppr517b"},
+            {"opcode": 177, "target": 2, "p2": 2, "timing": 1, "resource": "ipdam1"},
+            {"opcode": 318, "target": 2, "p2": 7, "duration": 1, "resource": "sppr517c"},
+            {"opcode": 177, "target": 2, "p2": 2, "timing": 1, "resource": "sppr517c"},
+        ]}],
+    )
+    ins_scs_c = make_spl(
+        spell_type=2, level=1, school=0,
+        abilities=[{"min_level": 1, "target": 1, "effects": [
+            {"opcode": 0, "target": 2, "p1": -2, "duration": 6},
+            {"opcode": 54, "target": 2, "p1": -2, "duration": 6},
+            {"opcode": 60, "target": 2, "p1": 100, "p2": 0, "duration": 6, "save": SAVE_BREATH, "bonus": -2},
+            {"opcode": 60, "target": 2, "p1": 100, "p2": 1, "duration": 6, "save": SAVE_BREATH, "bonus": -2},
+        ]}],
+    )
     # Skull Trap with custom 1/10/15 layout (no min_level=12 ability) -> must cap 15d6 to 12d6 in place
     skull_custom = make_spl(
         level=3, school=7,
@@ -984,13 +1016,17 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
             for lvl in [1, 10, 15]
         ],
     )
-    # Chromatic Orb with foreign mod effect (op206) -> must preserve op206 on rebuilt abilities
+    # Chromatic Orb with per-ability foreign mod effects (op206 MODORB1 on level 1, MODORB5 on level 5)
     chrom_mod = make_spl(
         level=1, school=6,
         abilities=[
             {"min_level": 1, "projectile": 24, "effects": [
                 {"opcode": 12, "p2": 0x400000, "timing": 1, "dice": 1, "sides": 4},
-                {"opcode": 206, "target": 2, "duration": 6, "resource": "MODORB"},
+                {"opcode": 206, "target": 2, "duration": 6, "resource": "MODORB1"},
+            ]},
+            {"min_level": 5, "projectile": 24, "effects": [
+                {"opcode": 12, "p2": 0x400000, "timing": 1, "dice": 1, "sides": 12},
+                {"opcode": 206, "target": 2, "duration": 6, "resource": "MODORB5"},
             ]},
         ],
     )
@@ -1028,6 +1064,8 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
         "DW#NBSUB.SPL": nb_scs_sub,
         "SPPR517.SPL": ins_scs,
         "SPPR517A.SPL": ins_scs_a,
+        "SPPR517B.SPL": ins_scs_b,
+        "SPPR517C.SPL": ins_scs_c,
         "DUMMY.ITM": make_itm([[]]),
     }
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
@@ -1039,10 +1077,11 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
     assert [a["min_level"] for a in st["abilities"]] == [1, 10, 15]
     assert [a["effects"][0]["dice"] for a in st["abilities"]] == [5, 10, 12]
 
-    # Chromatic Orb preserved foreign op206 on all 6 abilities
+    # Chromatic Orb preserved per-ability foreign op206 without cloning ability 0's onto higher headers
     co = fg.spl("SPWI118")
-    for a in co["abilities"]:
-        assert any(e["opcode"] == 206 and e["resource"] == "MODORB" for e in a["effects"])
+    assert any(e["opcode"] == 206 and e["resource"] == "MODORB1" for e in co["abilities"][0]["effects"])
+    assert not any(e["opcode"] == 206 and e["resource"] == "MODORB1" for e in co["abilities"][4]["effects"])
+    assert any(e["opcode"] == 206 and e["resource"] == "MODORB5" for e in co["abilities"][4]["effects"])
 
     # Defensive Harmony updated only p2=0 to 4 and left p2=1 at 1
     dh = fg.spl("SPPR406")

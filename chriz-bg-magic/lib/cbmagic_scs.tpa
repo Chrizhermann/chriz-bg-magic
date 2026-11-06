@@ -330,26 +330,44 @@ BEGIN
           END
           READ_ASCII ab_off ab0_hdr (0x28)
           FOR (a = 0; a < 6; ++a) BEGIN
-            PATCH_IF (a < ab_cnt) BEGIN
-              READ_ASCII (ab_off + a * 0x28) $"ab_hdr"("%a%") (0x28)
+            SET min_lvl = (a = 5) ? 7 : (a + 1)
+            SET src_a = 0 - 1
+            FOR (oa = 0; (oa < ab_cnt) AND (src_a < 0); ++oa) BEGIN
+              READ_SHORT (ab_off + oa * 0x28 + 0x10) oa_lvl
+              PATCH_IF (oa_lvl = min_lvl) BEGIN
+                SET src_a = oa
+              END
+            END
+            PATCH_IF (src_a < 0) BEGIN
+              PATCH_IF (a < ab_cnt) BEGIN
+                SET src_a = a
+              END ELSE PATCH_IF (ab_cnt = 1) BEGIN
+                SET src_a = 0
+              END
+            END
+            PATCH_IF (src_a >= 0) BEGIN
+              READ_ASCII (ab_off + src_a * 0x28) $"ab_hdr"("%a%") (0x28)
             END ELSE BEGIN
               SPRINT $"ab_hdr"("%a%") ~%ab0_hdr%~
             END
-          END
-          // Preserve any non-owned ability effects on ability 0 (e.g. from another mod).
-          SET extra_cnt = 0
-          READ_SHORT (ab_off + 0x1e) n0
-          READ_SHORT (ab_off + 0x20) first0
-          FOR (i = 0; i < n0; ++i) BEGIN
-            SET fx = fx_off + (first0 + i) * 0x30
-            READ_SHORT fx op
-            PATCH_IF (op != 0) AND (op != 12) AND (op != 15) AND (op != 44) AND (op != 45)
-                 AND (op != 54) AND (op != 55) AND (op != 61) AND (op != 74) AND (op != 134)
-                 AND (op != 139) AND (op != 141) AND (op != 142) AND (op != 174) AND (op != 175)
-                 AND (op != 215) AND (op != 324) BEGIN
-              READ_ASCII fx $"extra_fx"("%extra_cnt%") (0x30)
-              SET extra_cnt += 1
+            // Preserve any non-owned ability effects per ability (e.g. from another mod).
+            SET ecnt = 0
+            PATCH_IF (src_a >= 0) BEGIN
+              READ_SHORT (ab_off + src_a * 0x28 + 0x1e) ns
+              READ_SHORT (ab_off + src_a * 0x28 + 0x20) firsts
+              FOR (i = 0; i < ns; ++i) BEGIN
+                SET fx = fx_off + (firsts + i) * 0x30
+                READ_SHORT fx op
+                PATCH_IF (op != 0) AND (op != 12) AND (op != 15) AND (op != 44) AND (op != 45)
+                     AND (op != 54) AND (op != 55) AND (op != 61) AND (op != 74) AND (op != 134)
+                     AND (op != 139) AND (op != 141) AND (op != 142) AND (op != 174) AND (op != 175)
+                     AND (op != 215) AND (op != 324) BEGIN
+                  READ_ASCII fx $"extra_fx_%a%"("%ecnt%") (0x30)
+                  SET ecnt += 1
+                END
+              END
             END
+            SET $"extra_cnt"("%a%") = ecnt
           END
           FOR (a = 0; a < ab_cnt; ++a) BEGIN
             READ_LONG 0x64 ab_off
@@ -429,19 +447,18 @@ BEGIN
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Re-append any preserved non-owned effects on each ability
-          PATCH_IF (extra_cnt > 0) BEGIN
-            FOR (a = 0; a < 6; ++a) BEGIN
-              FOR (ei = 0; ei < extra_cnt; ++ei) BEGIN
-                READ_LONG 0x64 ab_off
-                READ_LONG 0x6a fx_off
-                READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_n
-                LPF cbmagic_insert_effect INT_VAR ability = a position = cur_n opcode = 0 END
-                READ_LONG 0x64 ab_off
-                READ_LONG 0x6a fx_off
-                READ_SHORT (ab_off + a * 0x28 + 0x20) cur_first
-                SPRINT raw_fx $"extra_fx"("%ei%")
-                WRITE_ASCIIE (fx_off + (cur_first + cur_n) * 0x30) ~%raw_fx%~ (0x30)
-              END
+          FOR (a = 0; a < 6; ++a) BEGIN
+            SET ecnt = $"extra_cnt"("%a%")
+            FOR (ei = 0; ei < ecnt; ++ei) BEGIN
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_n
+              LPF cbmagic_insert_effect INT_VAR ability = a position = cur_n opcode = 0 END
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x20) cur_first
+              SPRINT raw_fx $"extra_fx_%a%"("%ei%")
+              WRITE_ASCIIE (fx_off + (cur_first + cur_n) * 0x30) ~%raw_fx%~ (0x30)
             END
           END
           SET did_change = 1
@@ -524,7 +541,6 @@ BEGIN
   ACTION_IF !found BEGIN
     PRINT ~chriz-bg-magic: WIZARD_SKULL_TRAP is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
-    OUTER_SET removed_ab = 0
     OUTER_SET capped_fx = 0
     OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
@@ -537,44 +553,7 @@ BEGIN
       END ELSE BEGIN
         READ_LONG 0x64 ab_off
         READ_LONG 0x6a fx_off
-        SET has_min_12 = 0
-        SET high_ab = 0
-        FOR (a = 0; a < ab_cnt; ++a) BEGIN
-          READ_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
-          PATCH_IF (min_lvl = 12) BEGIN
-            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-            READ_SHORT (ab_off + a * 0x28 + 0x20) first
-            FOR (i = 0; i < n; ++i) BEGIN
-              SET fx = fx_off + (first + i) * 0x30
-              READ_SHORT fx op
-              READ_LONG (fx + 0x1c) dice
-              PATCH_IF (op = 12) AND (dice = 12) BEGIN
-                SET has_min_12 = 1
-              END
-            END
-          END ELSE PATCH_IF (min_lvl > 12) BEGIN
-            SET high_ab += 1
-          END
-        END
-        PATCH_IF has_min_12 AND (high_ab > 0) BEGIN
-          SET del = 1
-          WHILE del BEGIN
-            SET del = 0
-            READ_LONG 0x64 ab_off
-            READ_SHORT 0x68 ab_cnt
-            FOR (a = 0; (a < ab_cnt) AND !del; ++a) BEGIN
-              READ_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
-              PATCH_IF (min_lvl > 12) BEGIN
-                LPF cbmagic_delete_ability INT_VAR ability = a END
-                SET removed_ab += 1
-                SET del = 1
-              END
-            END
-          END
-        END
-        READ_LONG 0x64 ab_off
-        READ_SHORT 0x68 ab_cnt
-        READ_LONG 0x6a fx_off
+        SET has_12 = 0
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
           READ_SHORT (ab_off + a * 0x28 + 0x1e) n
           READ_SHORT (ab_off + a * 0x28 + 0x20) first
@@ -586,20 +565,23 @@ BEGIN
               PATCH_IF (dice > 12) BEGIN
                 WRITE_LONG (fx + 0x1c) 12
                 SET capped_fx += 1
-              END ELSE PATCH_IF (dice = 12) AND (removed_ab = 0) BEGIN
-                SET already += 1
+              END ELSE PATCH_IF (dice = 12) BEGIN
+                SET has_12 = 1
               END
             END
           END
         END
+        PATCH_IF (capped_fx = 0) AND has_12 BEGIN
+          SET already = 1
+        END
       END
     BUT_ONLY
-    ACTION_IF (removed_ab > 0) OR (capped_fx > 0) BEGIN
+    ACTION_IF (capped_fx > 0) OR (already > 0) BEGIN
       OUTER_SPRINT find @30003
       OUTER_SPRINT replace @30004
       LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~WIZARD_SKULL_TRAP~ END
     END
-    PRINT ~chriz-bg-magic: WIZARD_SKULL_TRAP (%spell%): abilities removed %removed_ab%, dice capped %capped_fx%, already %already%.~
+    PRINT ~chriz-bg-magic: WIZARD_SKULL_TRAP (%spell%): dice capped %capped_fx%, already %already%.~
   END
 END
 
@@ -1061,28 +1043,95 @@ BEGIN
   LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~CLERIC_SYMBOL_FEAR~ END
 END
 
-// Helper: install species-specific summoned-fiend combat scripts (CBMGBONF.BCS, CBMGCORN.BCS, CBMGBALR.BCS).
-DEFINE_ACTION_FUNCTION cbmagic_install_fiend_scripts
+// Helper: create a minimal 1-ability SPL V1 file in override (`override/%res%.spl`).
+DEFINE_ACTION_FUNCTION cbmagic_create_blank_subspell
+  STR_VAR res = ~~
 BEGIN
-  <<<<<<<< .../chriz-bg-magic-inlined/cbmgbonf.baf
-IF
-  Allegiance(Myself,ENEMY)
-  OR(2)
-    Detect([PC])
-    Detect([ALLY])
-  Global("fearsphere","LOCALS",0)
-THEN
-  RESPONSE #100
-    SetGlobal("fearsphere","LOCALS",1)
-    ApplySpell(Myself,DEMON_FEAR)
+  <<<<<<<< .../chriz-bg-magic-inlined/blank_spl
+>>>>>>>>
+  COPY ~.../chriz-bg-magic-inlined/blank_spl~ ~override/%res%.spl~
+    INSERT_BYTES 0 (0x72 + 0x28)
+    WRITE_ASCII 0x00 ~SPL V1  ~ #8
+    WRITE_LONG 0x08 (0 - 1)
+    WRITE_LONG 0x0c (0 - 1)
+    WRITE_SHORT 0x1c 2
+    WRITE_BYTE 0x25 0
+    WRITE_BYTE 0x27 0
+    WRITE_LONG 0x34 1
+    WRITE_LONG 0x50 (0 - 1)
+    WRITE_LONG 0x64 0x72
+    WRITE_SHORT 0x68 1
+    WRITE_LONG 0x6a (0x72 + 0x28)
+    WRITE_SHORT 0x6e 0
+    WRITE_SHORT 0x70 0
+    WRITE_BYTE (0x72 + 0x00) 1
+    WRITE_BYTE (0x72 + 0x0c) 1
+    WRITE_SHORT (0x72 + 0x0e) 300
+    WRITE_SHORT (0x72 + 0x10) 1
+    WRITE_SHORT (0x72 + 0x26) 1
 END
 
+// Helper: install species-specific summoned-fiend combat scripts (CBMGBONF.BCS, CBMGCORN.BCS, CBMGBALR.BCS)
+// and Balor's innate Domination power (CBMGBDOM.SPL).
+DEFINE_ACTION_FUNCTION cbmagic_install_fiend_scripts
+BEGIN
+  ACTION_IF !(FILE_EXISTS ~override/cbmgbdom.spl~) BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_DOMINATION~ RET dom_res = resref dom_found = found END
+    ACTION_IF dom_found BEGIN
+      COPY_EXISTING ~%dom_res%.spl~ ~override/cbmgbdom.spl~
+        WRITE_SHORT 0x1c 4
+        WRITE_BYTE 0x25 0
+        WRITE_LONG 0x34 1
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          WRITE_BYTE (ab_off + a * 0x28 + 0x02) 4
+          WRITE_SHORT (ab_off + a * 0x28 + 0x12) 1
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 324) BEGIN
+              WRITE_ASCII (fx + 0x14) ~CBMGBDOM~ #8
+            END
+          END
+        END
+    END ELSE BEGIN
+      LAF cbmagic_create_blank_subspell STR_VAR res = ~cbmgbdom~ END
+      COPY_EXISTING ~cbmgbdom.spl~ ~override~
+        WRITE_SHORT 0x1c 4
+        WRITE_BYTE 0x25 0
+        WRITE_LONG 0x34 1
+        WRITE_BYTE (0x72 + 0x02) 4
+        WRITE_SHORT (0x72 + 0x12) 1
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 5 target = 2 power = 5 parameter2 = 1003 timing = 0 duration = 48 resist_dispel = 1 savingthrow = 1 savebonus = (0 - 2) END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 power = 5 parameter2 = 43 timing = 0 duration = 48 resist_dispel = 1 savingthrow = 1 savebonus = (0 - 2) END
+      BUT_ONLY
+    END
+  END
+  <<<<<<<< .../chriz-bg-magic-inlined/cbmgbonf.baf
 IF
+  !Allegiance(Myself,ENEMY)
+  Global("hostile","LOCALS",0)
   Detect([PC])
   !See([EVILCUTOFF.0.DEMONIC])
 THEN
   RESPONSE #100
+    SetGlobal("hostile","LOCALS",1)
     Enemy()
+    Continue()
+END
+
+IF
+  See(NearestEnemyOf(Myself))
+  !GlobalTimerNotExpired("fearaura","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("fearaura","LOCALS",6)
+    ReallyForceSpell(Myself,DEMON_FEAR)
+    Continue()
 END
 
 IF
@@ -1112,23 +1161,25 @@ END
 >>>>>>>>
   <<<<<<<< .../chriz-bg-magic-inlined/cbmgcorn.baf
 IF
-  Allegiance(Myself,ENEMY)
-  OR(2)
-    Detect([PC])
-    Detect([ALLY])
-  Global("fearsphere","LOCALS",0)
-THEN
-  RESPONSE #100
-    SetGlobal("fearsphere","LOCALS",1)
-    ApplySpell(Myself,DEMON_FEAR)
-END
-
-IF
+  !Allegiance(Myself,ENEMY)
+  Global("hostile","LOCALS",0)
   Detect([PC])
   !See([EVILCUTOFF.0.DEMONIC])
 THEN
   RESPONSE #100
+    SetGlobal("hostile","LOCALS",1)
     Enemy()
+    Continue()
+END
+
+IF
+  See(NearestEnemyOf(Myself))
+  !GlobalTimerNotExpired("fearaura","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("fearaura","LOCALS",6)
+    ReallyForceSpell(Myself,DEMON_FEAR)
+    Continue()
 END
 
 IF
@@ -1148,65 +1199,48 @@ END
 >>>>>>>>
   <<<<<<<< .../chriz-bg-magic-inlined/cbmgbalr.baf
 IF
-  Allegiance(Myself,ENEMY)
-  OR(2)
-    Detect([PC])
-    Detect([ALLY])
-  Global("fearsphere","LOCALS",0)
-THEN
-  RESPONSE #100
-    SetGlobal("fearsphere","LOCALS",1)
-    ApplySpell(Myself,DEMON_FEAR)
-END
-
-IF
+  !Allegiance(Myself,ENEMY)
+  Global("hostile","LOCALS",0)
   Detect([PC])
   !See([EVILCUTOFF.0.DEMONIC])
 THEN
   RESPONSE #100
+    SetGlobal("hostile","LOCALS",1)
     Enemy()
+    Continue()
 END
 
 IF
-  See([0.0.0.0.0.0.0])
-  !Race(LastSeenBy(Myself),DEMONIC)
-  !CheckStatGT(LastSeenBy(Myself),0,PROTECTION_FROM_EVIL)
-  Global("Prep","LOCALS",0)
+  See(NearestEnemyOf(Myself))
+  !GlobalTimerNotExpired("fearaura","LOCALS")
 THEN
   RESPONSE #100
-    SetGlobal("Prep","LOCALS",1)
-    ForceSpell(Myself,WIZARD_STONE_SKIN)
+    SetGlobalTimer("fearaura","LOCALS",6)
+    ReallyForceSpell(Myself,DEMON_FEAR)
+    Continue()
 END
 
 IF
   See([0.0.0.0.0.0.0])
   !Race(LastSeenBy(Myself),DEMONIC)
   !CheckStatGT(LastSeenBy(Myself),0,PROTECTION_FROM_EVIL)
-  Global("symbol","LOCALS",0)
+  !GlobalTimerNotExpired("stoneskin","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("stoneskin","LOCALS",30)
+    ApplySpell(Myself,WIZARD_STONE_SKIN)
+    Continue()
+END
+
+IF
+  See([0.0.0.0.0.0.0])
+  !Race(LastSeenBy(Myself),DEMONIC)
+  !CheckStatGT(LastSeenBy(Myself),0,PROTECTION_FROM_EVIL)
 THEN
   RESPONSE #30
-    SetGlobal("symbol","LOCALS",1)
-    ForceSpell(LastSeenBy(Myself),WIZARD_SYMBOL_STUN)
+    ForceSpellRES("CBMGBDOM",LastSeenBy(Myself))
     AttackReevaluate(LastSeenBy(Myself),30)
   RESPONSE #70
-    AttackReevaluate(LastSeenBy(Myself),30)
-END
-
-IF
-  See([0.0.0.0.0.0.0])
-  !Race(LastSeenBy(Myself),DEMONIC)
-  !CheckStatGT(LastSeenBy(Myself),0,PROTECTION_FROM_EVIL)
-THEN
-  RESPONSE #20
-    ForceSpell(LastSeenBy(Myself),TANARI_DEATH_GAZE)
-    AttackReevaluate(LastSeenBy(Myself),30)
-  RESPONSE #20
-    ForceSpell(LastSeenBy(Myself),TANARI_PARALYZE)
-    AttackReevaluate(LastSeenBy(Myself),30)
-  RESPONSE #20
-    ForceSpell(LastSeenBy(Myself),WIZARD_DOMINATION)
-    AttackReevaluate(LastSeenBy(Myself),30)
-  RESPONSE #40
     AttackReevaluate(LastSeenBy(Myself),30)
 END
 >>>>>>>>
@@ -1215,49 +1249,13 @@ SC
 CR
 CO
 TR
-16395 255 0 0 0 "" "" OB
+16395 255 1 0 0 "" "" OB
 0 0 0 0 0 0 0 1 0 0 0 0 ""OB
 TR
 TR
-16521 2 0 0 0 "" "" OB
+16399 0 0 0 0 "LOCALShostile" "" OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 TR
-TR
-16500 0 0 0 0 "" "" OB
-2 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16500 0 0 0 0 "" "" OB
-4 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16399 0 0 0 0 "LOCALSfearsphere" "" OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-CO
-RS
-RE
-100AC
-30OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-1 0 0 0 0"LOCALSfearsphere" "" AC
-AC
-160OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-3890 0 0 0 0"" "" AC
-RE
-RS
-CR
-CR
-CO
 TR
 16500 0 0 0 0 "" "" OB
 2 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1270,7 +1268,63 @@ CO
 RS
 RE
 100AC
+30OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+1 0 0 0 0"LOCALShostile" "" AC
+AC
 10OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+AC
+36OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+RE
+RS
+CR
+CR
+CO
+TR
+16412 0 0 0 0 "" "" OB
+0 0 0 0 0 0 0 1 12 0 0 0 ""OB
+TR
+TR
+16449 0 1 0 0 "fearaura" "LOCALS" OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+TR
+CO
+RS
+RE
+100AC
+115OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+6 0 0 0 0"LOCALSfearaura" "" AC
+AC
+181OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 1 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+3890 0 0 0 0"" "" AC
+AC
+36OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1381,49 +1435,13 @@ SC
 CR
 CO
 TR
-16395 255 0 0 0 "" "" OB
+16395 255 1 0 0 "" "" OB
 0 0 0 0 0 0 0 1 0 0 0 0 ""OB
 TR
 TR
-16521 2 0 0 0 "" "" OB
+16399 0 0 0 0 "LOCALShostile" "" OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 TR
-TR
-16500 0 0 0 0 "" "" OB
-2 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16500 0 0 0 0 "" "" OB
-4 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16399 0 0 0 0 "LOCALSfearsphere" "" OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-CO
-RS
-RE
-100AC
-30OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-1 0 0 0 0"LOCALSfearsphere" "" AC
-AC
-160OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-3890 0 0 0 0"" "" AC
-RE
-RS
-CR
-CR
-CO
 TR
 16500 0 0 0 0 "" "" OB
 2 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1436,7 +1454,63 @@ CO
 RS
 RE
 100AC
+30OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+1 0 0 0 0"LOCALShostile" "" AC
+AC
 10OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+AC
+36OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+RE
+RS
+CR
+CR
+CO
+TR
+16412 0 0 0 0 "" "" OB
+0 0 0 0 0 0 0 1 12 0 0 0 ""OB
+TR
+TR
+16449 0 1 0 0 "fearaura" "LOCALS" OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+TR
+CO
+RS
+RE
+100AC
+115OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+6 0 0 0 0"LOCALSfearaura" "" AC
+AC
+181OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 1 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+3890 0 0 0 0"" "" AC
+AC
+36OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1517,49 +1591,13 @@ SC
 CR
 CO
 TR
-16395 255 0 0 0 "" "" OB
+16395 255 1 0 0 "" "" OB
 0 0 0 0 0 0 0 1 0 0 0 0 ""OB
 TR
 TR
-16521 2 0 0 0 "" "" OB
+16399 0 0 0 0 "LOCALShostile" "" OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 TR
-TR
-16500 0 0 0 0 "" "" OB
-2 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16500 0 0 0 0 "" "" OB
-4 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16399 0 0 0 0 "LOCALSfearsphere" "" OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-CO
-RS
-RE
-100AC
-30OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-1 0 0 0 0"LOCALSfearsphere" "" AC
-AC
-160OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-3890 0 0 0 0"" "" AC
-RE
-RS
-CR
-CR
-CO
 TR
 16500 0 0 0 0 "" "" OB
 2 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1572,7 +1610,63 @@ CO
 RS
 RE
 100AC
+30OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+1 0 0 0 0"LOCALShostile" "" AC
+AC
 10OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+AC
+36OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
+RE
+RS
+CR
+CR
+CO
+TR
+16412 0 0 0 0 "" "" OB
+0 0 0 0 0 0 0 1 12 0 0 0 ""OB
+TR
+TR
+16449 0 1 0 0 "fearaura" "LOCALS" OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+TR
+CO
+RS
+RE
+100AC
+115OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+6 0 0 0 0"LOCALSfearaura" "" AC
+AC
+181OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 1 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+3890 0 0 0 0"" "" AC
+AC
+36OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1597,28 +1691,36 @@ TR
 0 0 0 0 0 0 0 1 18 0 0 0 ""OB
 TR
 TR
-16399 0 0 0 0 "LOCALSPrep" "" OB
+16449 0 1 0 0 "stoneskin" "LOCALS" OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 TR
 CO
 RS
 RE
 100AC
-30OB
+115OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-1 0 0 0 0"LOCALSPrep" "" AC
+30 0 0 0 0"LOCALSstoneskin" "" AC
 AC
-113OB
+160OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 1 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 2408 0 0 0 0"" "" AC
+AC
+36OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+OB
+0 0 0 0 0 0 0 0 0 0 0 0 ""OB
+0 0 0 0 0"" "" AC
 RE
 RS
 CR
@@ -1636,29 +1738,17 @@ TR
 16453 0 1 117 0 "" "" OB
 0 0 0 0 0 0 0 1 18 0 0 0 ""OB
 TR
-TR
-16399 0 0 0 0 "LOCALSsymbol" "" OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
 CO
 RS
 RE
 30AC
-30OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-1 0 0 0 0"LOCALSsymbol" "" AC
-AC
 113OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 1 18 0 0 0 ""OB
 OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-2816 0 0 0 0"" "" AC
+0 0 0 0 0"CBMGBDOM" "" AC
 AC
 134OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
@@ -1670,88 +1760,6 @@ OB
 RE
 RE
 70AC
-134OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-30 0 0 0 0"" "" AC
-RE
-RS
-CR
-CR
-CO
-TR
-16412 0 0 0 0 "" "" OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-TR
-TR
-16407 121 1 0 0 "" "" OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-TR
-TR
-16453 0 1 117 0 "" "" OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-TR
-CO
-RS
-RE
-20AC
-113OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-3996 0 0 0 0"" "" AC
-AC
-134OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-30 0 0 0 0"" "" AC
-RE
-RE
-20AC
-113OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-3999 0 0 0 0"" "" AC
-AC
-134OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-30 0 0 0 0"" "" AC
-RE
-RE
-20AC
-113OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-2506 0 0 0 0"" "" AC
-AC
-134OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 1 18 0 0 0 ""OB
-OB
-0 0 0 0 0 0 0 0 0 0 0 0 ""OB
-30 0 0 0 0"" "" AC
-RE
-RE
-40AC
 134OB
 0 0 0 0 0 0 0 0 0 0 0 0 ""OB
 OB
@@ -2021,9 +2029,38 @@ BEGIN
   END
 END
 
-// Helper: find the repeating aura payload subspell of a Blade Barrier / Globe of Blades spell
-// by inspecting op177 -> .EFF (op146/148/232/272) or direct op146/148/232/272 effects,
-// falling back to `%spell%d` if present.
+// Helper: check whether `%cand%.spl` exists and contains at least one opcode 12 (damage) effect.
+DEFINE_PATCH_FUNCTION cbmagic_spl_has_damage
+  STR_VAR cand = ~~
+  RET has_dmg
+BEGIN
+  SET has_dmg = 0
+  PATCH_IF !(~%cand%~ STRING_EQUAL ~~) AND FILE_EXISTS_IN_GAME ~%cand%.spl~ BEGIN
+    INNER_ACTION BEGIN
+      COPY_EXISTING - ~%cand%.spl~ ~override~
+        LPF cbmagic_spl_valid RET c_valid = valid reason END
+        PATCH_IF c_valid BEGIN
+          READ_LONG 0x64 c_ab_off
+          READ_SHORT 0x68 c_ab_cnt
+          READ_LONG 0x6a c_fx_off
+          FOR (ca = 0; ca < c_ab_cnt; ++ca) BEGIN
+            READ_SHORT (c_ab_off + ca * 0x28 + 0x1e) c_n
+            READ_SHORT (c_ab_off + ca * 0x28 + 0x20) c_first
+            FOR (ci = 0; ci < c_n; ++ci) BEGIN
+              READ_SHORT (c_fx_off + (c_first + ci) * 0x30) c_op
+              PATCH_IF (c_op = 12) BEGIN
+                SET has_dmg = 1
+              END
+            END
+          END
+        END
+    END
+  END
+END
+
+// Helper: find the repeating aura payload subspell(s) of a Blade Barrier / Globe of Blades spell
+// by inspecting op177 -> .EFF (op146/148/232/272) or direct op146/148/232/272 effects across all
+// abilities, filtering to subspells that carry opcode 12 damage, and falling back to `%spell%d`.
 DEFINE_ACTION_FUNCTION cbmagic_find_aura_payload
   STR_VAR spell = ~~
   RET payload
@@ -2036,14 +2073,15 @@ BEGIN
         READ_LONG 0x64 ab_off
         READ_SHORT 0x68 ab_cnt
         READ_LONG 0x6a fx_off
-        FOR (a = 0; (a < ab_cnt) AND (~%payload%~ STRING_EQUAL ~~); ++a) BEGIN
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
           SET ab = ab_off + a * 0x28
           READ_SHORT (ab + 0x1e) fx_cnt
           READ_SHORT (ab + 0x20) fx_idx
-          FOR (i = 0; (i < fx_cnt) AND (~%payload%~ STRING_EQUAL ~~); ++i) BEGIN
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
             SET e = fx_off + (fx_idx + i) * 0x30
             READ_SHORT e op
             READ_ASCII (e + 0x14) res (8) NULL
+            SPRINT cand ~~
             PATCH_IF (op = 177) AND !(~%res%~ STRING_EQUAL ~~) BEGIN
               PATCH_IF FILE_EXISTS_IN_GAME ~%res%.eff~ BEGIN
                 INNER_ACTION BEGIN
@@ -2052,31 +2090,37 @@ BEGIN
                       READ_LONG 0x10 eff_op
                       PATCH_IF (eff_op = 146) OR (eff_op = 148) OR (eff_op = 232) OR (eff_op = 272) BEGIN
                         READ_ASCII 0x30 eff_sub (8) NULL
-                        PATCH_IF !(~%eff_sub%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%eff_sub%.spl~) BEGIN
-                          SPRINT payload ~%eff_sub%~
+                        PATCH_IF !(~%eff_sub%~ STRING_EQUAL ~~) BEGIN
+                          SPRINT cand ~%eff_sub%~
                         END
                       END
                     END
                 END
               END
-              PATCH_IF (~%payload%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%res%.spl~) BEGIN
-                SPRINT payload ~%res%~
+              PATCH_IF (~%cand%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%res%.spl~) BEGIN
+                SPRINT cand ~%res%~
               END
             END ELSE PATCH_IF ((op = 146) OR (op = 148) OR (op = 232) OR (op = 272)) AND !(~%res%~ STRING_EQUAL ~~) BEGIN
-              PATCH_IF FILE_EXISTS_IN_GAME ~%res%.spl~ BEGIN
-                SPRINT payload ~%res%~
+              SPRINT cand ~%res%~
+            END
+            PATCH_IF !(~%cand%~ STRING_EQUAL ~~) BEGIN
+              TO_UPPER cand
+              LPF cbmagic_spl_has_damage STR_VAR cand RET has_dmg END
+              PATCH_IF has_dmg AND (INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %cand% ~ ~ %payload% ~) < 0) BEGIN
+                SPRINT payload ~%payload% %cand%~
               END
             END
           END
         END
       END
   END
+  OUTER_PATCH_SAVE payload ~%payload%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
   ACTION_IF (~%payload%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%spell%d.spl~) BEGIN
     OUTER_SPRINT payload ~%spell%d~
   END
 END
 
-// Helper: patch a Blade Barrier / Globe of Blades payload subspell to affect only enemies
+// Helper: patch one or more Blade Barrier / Globe of Blades payload subspells to affect only enemies
 // (leading op318 for !ENEMIES) and allow a save for half damage (special |= 0x100 on op12).
 // When set_8d8 = 1 (Blade Barrier player/NPC payloads), also normalize range to 6 and damage to 8d8.
 DEFINE_ACTION_FUNCTION cbmagic_patch_blade_payload
@@ -2087,79 +2131,84 @@ DEFINE_ACTION_FUNCTION cbmagic_patch_blade_payload
 BEGIN
   OUTER_SET changed = 0
   OUTER_SET already = 0
-  ACTION_IF !(~%payload%~ STRING_EQUAL ~~) AND FILE_EXISTS_IN_GAME ~%payload%.spl~ BEGIN
-    COPY_EXISTING ~%payload%.spl~ ~override~
-      LPF cbmagic_spl_valid RET valid reason END
-      READ_SHORT 0x68 ab_cnt
-      PATCH_IF valid AND (ab_cnt > 0) BEGIN
-        READ_LONG 0x64 ab_off
-        READ_LONG 0x6a fx_off
-        FOR (a = 0; a < ab_cnt; ++a) BEGIN
-          SET ab = ab_off + a * 0x28
-          SET ab_changed = 0
-          READ_SHORT (ab + 0x26) proj
-          PATCH_IF (proj = 218) BEGIN
-            WRITE_SHORT (ab + 0x26) 216
-            SET ab_changed = 1
-          END
-          PATCH_IF set_8d8 BEGIN
-            READ_SHORT (ab + 0x0e) rng
-            PATCH_IF (rng != 6) BEGIN
-              WRITE_SHORT (ab + 0x0e) 6
+  OUTER_PATCH_SAVE list ~%payload%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+  OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE pay ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    ACTION_IF !(~%pay%~ STRING_EQUAL ~~) AND FILE_EXISTS_IN_GAME ~%pay%.spl~ BEGIN
+      COPY_EXISTING ~%pay%.spl~ ~override~
+        LPF cbmagic_spl_valid RET valid reason END
+        READ_SHORT 0x68 ab_cnt
+        PATCH_IF valid AND (ab_cnt > 0) BEGIN
+          READ_LONG 0x64 ab_off
+          READ_LONG 0x6a fx_off
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            SET ab = ab_off + a * 0x28
+            SET ab_changed = 0
+            READ_SHORT (ab + 0x26) proj
+            PATCH_IF (proj = 218) BEGIN
+              WRITE_SHORT (ab + 0x26) 216
               SET ab_changed = 1
             END
-          END
-          READ_SHORT (ab + 0x1e) fx_cnt
-          READ_SHORT (ab + 0x20) fx_idx
-          SET has_guard = 0
-          SET half_changed = 0
-          SET half_already = 0
-          FOR (i = 0; i < fx_cnt; ++i) BEGIN
-            SET e = fx_off + (fx_idx + i) * 0x30
-            READ_SHORT e op
-            PATCH_IF (op = 318) OR (op = 324) BEGIN
-              READ_LONG (e + 0x08) p2
-              READ_ASCII (e + 0x14) res (8) NULL
-              PATCH_IF (p2 = not_enemy_row) AND (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN
-                SET has_guard = 1
-              END
-            END ELSE PATCH_IF (op = 12) BEGIN
-              READ_LONG (e + 0x1c) dice
-              READ_LONG (e + 0x20) sides
-              READ_LONG (e + 0x24) save_type
-              READ_LONG (e + 0x2c) special
-              PATCH_IF set_8d8 AND ((dice != 8) OR (sides != 8)) BEGIN
-                WRITE_LONG (e + 0x1c) 8
-                WRITE_LONG (e + 0x20) 8
+            PATCH_IF set_8d8 BEGIN
+              READ_SHORT (ab + 0x0e) rng
+              PATCH_IF (rng != 6) BEGIN
+                WRITE_SHORT (ab + 0x0e) 6
                 SET ab_changed = 1
               END
-              PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
-                PATCH_IF ((special BAND 0x100) != 0) BEGIN
-                  SET half_already += 1
-                END ELSE BEGIN
-                  WRITE_LONG (e + 0x2c) (special BOR 0x100)
-                  SET half_changed += 1
+            END
+            READ_SHORT (ab + 0x1e) fx_cnt
+            READ_SHORT (ab + 0x20) fx_idx
+            SET has_guard = 0
+            SET half_changed = 0
+            SET half_already = 0
+            FOR (i = 0; i < fx_cnt; ++i) BEGIN
+              SET e = fx_off + (fx_idx + i) * 0x30
+              READ_SHORT e op
+              PATCH_IF (op = 318) OR (op = 324) BEGIN
+                READ_LONG (e + 0x08) p2
+                READ_ASCII (e + 0x14) res (8) NULL
+                PATCH_IF (p2 = not_enemy_row) AND (~%res%~ STRING_EQUAL_CASE ~%pay%~) BEGIN
+                  SET has_guard = 1
+                END
+              END ELSE PATCH_IF (op = 12) BEGIN
+                READ_LONG (e + 0x1c) dice
+                READ_LONG (e + 0x20) sides
+                READ_LONG (e + 0x24) save_type
+                READ_LONG (e + 0x2c) special
+                PATCH_IF set_8d8 AND ((dice != 8) OR (sides != 8)) BEGIN
+                  WRITE_LONG (e + 0x1c) 8
+                  WRITE_LONG (e + 0x20) 8
+                  SET ab_changed = 1
+                END
+                PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
+                  PATCH_IF ((special BAND 0x100) != 0) BEGIN
+                    SET half_already += 1
+                  END ELSE BEGIN
+                    WRITE_LONG (e + 0x2c) (special BOR 0x100)
+                    SET half_changed += 1
+                  END
                 END
               END
             END
-          END
-          PATCH_IF !has_guard BEGIN
-            LPF ADD_SPELL_EFFECT
-              INT_VAR header = a + 1 insert_point = 0 opcode = 318 target = 2 power = 0
-                      parameter1 = 1 parameter2 = not_enemy_row timing = 0 duration = 0 resist_dispel = 0
-              STR_VAR resource = EVAL ~%payload%~
+            PATCH_IF !has_guard BEGIN
+              LPF ADD_SPELL_EFFECT
+                INT_VAR header = a + 1 insert_point = 0 opcode = 318 target = 2 power = 0
+                        parameter1 = 1 parameter2 = not_enemy_row timing = 0 duration = 0 resist_dispel = 0
+                STR_VAR resource = EVAL ~%pay%~
+              END
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              SET changed += 1
+            END ELSE PATCH_IF (half_changed > 0) OR ab_changed BEGIN
+              SET changed += 1
+            END ELSE BEGIN
+              SET already += 1
             END
-            READ_LONG 0x64 ab_off
-            READ_LONG 0x6a fx_off
-            SET changed += 1
-          END ELSE PATCH_IF (half_changed > 0) OR ab_changed BEGIN
-            SET changed += 1
-          END ELSE BEGIN
-            SET already += 1
           END
         END
-      END
-    BUT_ONLY
+      BUT_ONLY
+    END
   END
 END
 
@@ -2402,20 +2451,23 @@ DEFINE_ACTION_FUNCTION cbmagic_write_damage_eff
   INT_VAR dice = 3
           sides = 4
   STR_VAR eff = ~~
+  RET was_valid
 BEGIN
   OUTER_SET valid_eff = 0
   ACTION_IF FILE_EXISTS_IN_GAME ~%eff%.eff~ BEGIN
     COPY_EXISTING - ~%eff%.eff~ ~override~
       PATCH_IF (BUFFER_LENGTH >= 0x110) BEGIN
         READ_LONG 0x10 op
+        READ_LONG 0x20 dmg_type
         READ_LONG 0x38 d
         READ_LONG 0x3c s
         READ_LONG 0x5c disp
-        PATCH_IF (op = 12) AND (d = dice) AND (s = sides) AND (disp = 0) BEGIN
+        PATCH_IF (op = 12) AND (dmg_type = 0) AND (d = dice) AND (s = sides) AND (disp = 0) BEGIN
           SET valid_eff = 1
         END
       END
   END
+  OUTER_SET was_valid = valid_eff
   ACTION_IF !valid_eff BEGIN
     <<<<<<<< .../chriz-bg-magic-inlined/empty_eff
 >>>>>>>>
@@ -2445,8 +2497,8 @@ BEGIN
   ACTION_IF !found BEGIN
     PRINT ~chriz-bg-magic: CLERIC_MAGIC_STONE is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
-    LAF cbmagic_write_damage_eff INT_VAR dice = 3 sides = 4 STR_VAR eff = ~cbmgmst1~ END
-    LAF cbmagic_write_damage_eff INT_VAR dice = 6 sides = 4 STR_VAR eff = ~cbmgmst2~ END
+    LAF cbmagic_write_damage_eff INT_VAR dice = 3 sides = 4 STR_VAR eff = ~cbmgmst1~ RET eff1_valid = was_valid END
+    LAF cbmagic_write_damage_eff INT_VAR dice = 6 sides = 4 STR_VAR eff = ~cbmgmst2~ RET eff2_valid = was_valid END
     OUTER_SET changed = 0
     OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
@@ -2476,11 +2528,27 @@ BEGIN
               READ_LONG (e + 0x08) p2
               READ_ASCII (e + 0x14) eff_res (8) NULL
               PATCH_IF (p2 = 3) AND FILE_EXISTS_IN_GAME ~%eff_res%.eff~ BEGIN
-                PATCH_IF (p1 = 1) BEGIN SET g1 = 1 END
-                PATCH_IF (p1 = 2) BEGIN SET g2 = 1 END
-                PATCH_IF (p1 = 4) BEGIN SET g4 = 1 END
-                PATCH_IF (p1 = 5) BEGIN SET g5 = 1 END
-                PATCH_IF (p1 = 255) BEGIN SET g255 = 1 END
+                SET exp_d = (p1 = 4) ? 6 : 3
+                SET ok_eff = 0
+                INNER_ACTION BEGIN
+                  COPY_EXISTING - ~%eff_res%.eff~ ~override~
+                    PATCH_IF (BUFFER_LENGTH >= 0x110) BEGIN
+                      READ_LONG 0x10 e_op
+                      READ_LONG 0x20 e_dt
+                      READ_LONG 0x38 e_d
+                      READ_LONG 0x3c e_s
+                      PATCH_IF (e_op = 12) AND (e_dt = 0) AND (e_d = exp_d) AND (e_s = 4) BEGIN
+                        SET ok_eff = 1
+                      END
+                    END
+                END
+                PATCH_IF ok_eff BEGIN
+                  PATCH_IF (p1 = 1) BEGIN SET g1 = 1 END
+                  PATCH_IF (p1 = 2) BEGIN SET g2 = 1 END
+                  PATCH_IF (p1 = 4) BEGIN SET g4 = 1 END
+                  PATCH_IF (p1 = 5) BEGIN SET g5 = 1 END
+                  PATCH_IF (p1 = 255) BEGIN SET g255 = 1 END
+                END
               END
             END ELSE PATCH_IF (op = 12) BEGIN
               READ_LONG (e + 0x1c) dice
@@ -2488,7 +2556,7 @@ BEGIN
               PATCH_IF (dice = 1) AND (sides = 4) AND (dmg_e < 0) BEGIN
                 SET dmg_e = e
               END
-              PATCH_IF (any_dmg_e < 0) BEGIN
+              PATCH_IF (dice > 0) AND (sides > 0) AND (any_dmg_e < 0) BEGIN
                 SET any_dmg_e = e
               END
             END
@@ -2497,7 +2565,11 @@ BEGIN
             SET dmg_e = any_dmg_e
           END
           PATCH_IF g1 AND g2 AND g4 AND g5 AND g255 BEGIN
-            SET already += 1
+            PATCH_IF eff1_valid AND eff2_valid BEGIN
+              SET already += 1
+            END ELSE BEGIN
+              SET changed += 1
+            END
           END ELSE PATCH_IF (dmg_e >= 0) BEGIN
             READ_BYTE (dmg_e + 0x03) pw
             READ_BYTE (dmg_e + 0x0d) dp
@@ -2561,34 +2633,6 @@ BEGIN
   END
 END
 
-// Helper: create a minimal 1-ability SPL V1 file in override (`override/%res%.spl`).
-DEFINE_ACTION_FUNCTION cbmagic_create_blank_subspell
-  STR_VAR res = ~~
-BEGIN
-  <<<<<<<< .../chriz-bg-magic-inlined/blank_spl
->>>>>>>>
-  COPY ~.../chriz-bg-magic-inlined/blank_spl~ ~override/%res%.spl~
-    INSERT_BYTES 0 (0x72 + 0x28)
-    WRITE_ASCII 0x00 ~SPL V1  ~ #8
-    WRITE_LONG 0x08 (0 - 1)
-    WRITE_LONG 0x0c (0 - 1)
-    WRITE_SHORT 0x1c 2
-    WRITE_BYTE 0x25 0
-    WRITE_BYTE 0x27 0
-    WRITE_LONG 0x34 1
-    WRITE_LONG 0x50 (0 - 1)
-    WRITE_LONG 0x64 0x72
-    WRITE_SHORT 0x68 1
-    WRITE_LONG 0x6a (0x72 + 0x28)
-    WRITE_SHORT 0x6e 0
-    WRITE_SHORT 0x70 0
-    WRITE_BYTE (0x72 + 0x00) 1
-    WRITE_BYTE (0x72 + 0x0c) 1
-    WRITE_SHORT (0x72 + 0x0e) 300
-    WRITE_SHORT (0x72 + 0x10) 1
-    WRITE_SHORT (0x72 + 0x26) 1
-END
-
 // Helper: patch one insect spell (Summon Insects, Insect Plague, Creeping Doom).
 DEFINE_ACTION_FUNCTION cbmagic_patch_insect_spell
   INT_VAR duration = 6
@@ -2622,24 +2666,59 @@ BEGIN
         READ_LONG 0x6a fx_off
         READ_SHORT (ab_off + 0x1e) fx_cnt
         READ_SHORT (ab_off + 0x20) fx_idx
+        SET has_cast_a = 0
+        SET has_raw_insect = 0
         FOR (i = 0; i < fx_cnt; ++i) BEGIN
           READ_SHORT (fx_off + (fx_idx + i) * 0x30) op0
           READ_ASCII (fx_off + (fx_idx + i) * 0x30 + 0x14) res0 (8) NULL
-          PATCH_IF (op0 = 146) AND (~%res0%~ STRING_EQUAL_CASE ~%spell%a~) AND (FILE_EXISTS_IN_GAME ~%spell%a.spl~) BEGIN
-            INNER_ACTION BEGIN
-              COPY_EXISTING - ~%spell%a.spl~ ~override~
-                LPF cbmagic_spl_valid RET sub_valid = valid reason END
-                PATCH_IF sub_valid BEGIN
-                  READ_SHORT 0x68 sub_ab_cnt
-                  PATCH_IF (sub_ab_cnt > 0) BEGIN
-                    READ_LONG 0x64 sub_ab_off
-                    READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
-                    PATCH_IF (sub_fx_cnt >= 4) BEGIN
-                      SET already = 1
-                    END
-                  END
+          PATCH_IF (op0 = 146) AND (~%res0%~ STRING_EQUAL_CASE ~%spell%a~) BEGIN
+            SET has_cast_a = 1
+          END
+          PATCH_IF (op0 = 272) OR (op0 = 60) BEGIN
+            SET has_raw_insect = 1
+          END
+        END
+        PATCH_IF has_cast_a AND !has_raw_insect
+             AND (FILE_EXISTS_IN_GAME ~%spell%a.spl~)
+             AND (FILE_EXISTS_IN_GAME ~%spell%b.spl~)
+             AND (FILE_EXISTS_IN_GAME ~%spell%c.spl~) BEGIN
+          SET ok_a = 0
+          SET ok_b = 0
+          SET ok_c = 0
+          INNER_ACTION BEGIN
+            COPY_EXISTING - ~%spell%a.spl~ ~override~
+              LPF cbmagic_spl_valid RET sub_valid = valid reason END
+              PATCH_IF sub_valid BEGIN
+                READ_SHORT 0x68 sub_ab_cnt
+                PATCH_IF (sub_ab_cnt > 0) BEGIN
+                  READ_LONG 0x64 sub_ab_off
+                  READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
+                  PATCH_IF (sub_fx_cnt >= 4) BEGIN SET ok_a = 1 END
                 END
-            END
+              END
+            COPY_EXISTING - ~%spell%b.spl~ ~override~
+              LPF cbmagic_spl_valid RET sub_valid = valid reason END
+              PATCH_IF sub_valid BEGIN
+                READ_SHORT 0x68 sub_ab_cnt
+                PATCH_IF (sub_ab_cnt > 0) BEGIN
+                  READ_LONG 0x64 sub_ab_off
+                  READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
+                  PATCH_IF (sub_fx_cnt >= 3) BEGIN SET ok_b = 1 END
+                END
+              END
+            COPY_EXISTING - ~%spell%c.spl~ ~override~
+              LPF cbmagic_spl_valid RET sub_valid = valid reason END
+              PATCH_IF sub_valid BEGIN
+                READ_SHORT 0x68 sub_ab_cnt
+                PATCH_IF (sub_ab_cnt > 0) BEGIN
+                  READ_LONG 0x64 sub_ab_off
+                  READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
+                  PATCH_IF (sub_fx_cnt >= 4) BEGIN SET ok_c = 1 END
+                END
+              END
+          END
+          PATCH_IF ok_a AND ok_b AND ok_c BEGIN
+            SET already = 1
           END
         END
       END
@@ -2689,14 +2768,16 @@ BEGIN
         END
       BUT_ONLY
 
-      // Replace owned main spell effects with op146 -> %spell%a (preserving any foreign mod effects)
+      // Replace owned main spell effects (including op272 repeating damage EFFs and Creeping Doom's
+      // FLPR717A fear subspell cast) with op146 -> %spell%a, preserving any foreign mod effects.
       COPY_EXISTING ~%spell%.spl~ ~override~
         LPF cbmagic_spl_valid RET valid reason END
         READ_SHORT 0x68 ab_cnt
         PATCH_IF valid AND (ab_cnt > 0) BEGIN
-          PATCH_FOR_EACH del_op IN 60 12 54 0 24 142 215 174 233 BEGIN
+          PATCH_FOR_EACH del_op IN 60 12 54 0 24 142 215 174 233 272 BEGIN
             LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = del_op END
           END
+          LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 146 STR_VAR match_resource = ~FLPR717A~ END
           LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 146 STR_VAR match_resource = EVAL ~%spell%a~ END
           SET st = overall_save ? 2 : 0
           LPF ADD_SPELL_EFFECT
@@ -3033,11 +3114,11 @@ BEGIN
   END
 END
 
-// 30. Nature's Beauty (CLERIC_NATURE_BEAUTY): blindness moved to schoolless area subspell
-// (CBMGNB1.SPL, school = 0, target = 5, projectile = 159) so True Sight does not dispel it
-// and single-target deflections do not intercept it, and gated on the save (failed save =
-// humanoids die + permanent blindness with timing=0 duration=999999; successful save = blind
-// for 3 rounds with duration=18).
+// 30. Nature's Beauty (CLERIC_NATURE_BEAUTY): slay (opcode 55, save vs. spell +3) and blindness
+// moved to schoolless area subspell (CBMGNB1.SPL, school = 0, target = 5, projectile = 159) so
+// True Sight does not dispel it, single-target deflections do not intercept it, and one effect
+// list decides both death and blindness (failed save = humanoids die + permanent blindness with
+// timing=0 duration=999999; successful save = blind for 3 rounds with duration=18).
 DEFINE_ACTION_FUNCTION cbmagic_scs_natures_beauty
 BEGIN
   LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_NATURE_BEAUTY~ RET spell = resref found END
@@ -3054,12 +3135,46 @@ BEGIN
         READ_LONG 0x6a fx_off
         READ_SHORT (ab_off + 0x1e) fx_cnt
         READ_SHORT (ab_off + 0x20) fx_idx
+        SET has_cast_nb1 = 0
+        SET has_main_55_74 = 0
         FOR (i = 0; i < fx_cnt; ++i) BEGIN
           SET e = fx_off + (fx_idx + i) * 0x30
           READ_SHORT e op
           READ_BYTE (e + 0x02) tgt
           READ_ASCII (e + 0x14) res (8) NULL
-          PATCH_IF (op = 146) AND (tgt = 1) AND (~%res%~ STRING_EQUAL_CASE ~cbmgnb1~) AND (FILE_EXISTS_IN_GAME ~cbmgnb1.spl~) BEGIN
+          PATCH_IF (op = 146) AND (tgt = 1) AND (~%res%~ STRING_EQUAL_CASE ~cbmgnb1~) BEGIN
+            SET has_cast_nb1 = 1
+          END
+          PATCH_IF (op = 55) OR (op = 74) BEGIN
+            SET has_main_55_74 = 1
+          END
+        END
+        PATCH_IF has_cast_nb1 AND !has_main_55_74 AND (FILE_EXISTS_IN_GAME ~cbmgnb1.spl~) BEGIN
+          SET nb1_ok = 0
+          INNER_ACTION BEGIN
+            COPY_EXISTING - ~cbmgnb1.spl~ ~override~
+              LPF cbmagic_spl_valid RET s_valid = valid reason END
+              PATCH_IF s_valid BEGIN
+                READ_LONG 0x64 s_ab_off
+                READ_SHORT 0x68 s_ab_cnt
+                READ_LONG 0x6a s_fx_off
+                PATCH_IF (s_ab_cnt > 0) BEGIN
+                  READ_SHORT (s_ab_off + 0x1e) s_n
+                  READ_SHORT (s_ab_off + 0x20) s_first
+                  SET has_s55 = 0
+                  SET has_s74 = 0
+                  FOR (si = 0; si < s_n; ++si) BEGIN
+                    READ_SHORT (s_fx_off + (s_first + si) * 0x30) s_op
+                    PATCH_IF (s_op = 55) BEGIN SET has_s55 = 1 END
+                    PATCH_IF (s_op = 74) BEGIN SET has_s74 = 1 END
+                  END
+                  PATCH_IF has_s55 AND has_s74 BEGIN
+                    SET nb1_ok = 1
+                  END
+                END
+              END
+          END
+          PATCH_IF nb1_ok BEGIN
             SET already = 1
           END
         END
@@ -3067,9 +3182,9 @@ BEGIN
     BUT_ONLY
     ACTION_IF !already BEGIN
       // Single schoolless area subspell (CBMGNB1.SPL, school = 0, target = 5, projectile = 159):
-      // applies cosmetics, then permanent blindness (timing = 0, duration = 999999) + op318 on failed
-      // save vs. spell (+3), followed by 3-round blindness (timing = 0, duration = 18) for creatures
-      // that made the save.
+      // applies humanoid slay (opcode 55, save vs. spell +3) and cosmetics, then permanent blindness
+      // (timing = 0, duration = 999999) + op318 on failed save vs. spell (+3), followed by 3-round
+      // blindness (timing = 0, duration = 18) for creatures that made the save.
       COPY_EXISTING ~%spell%.spl~ ~override/cbmgnb1.spl~
         WRITE_LONG 0x08 (0 - 1)
         WRITE_LONG 0x0c (0 - 1)
@@ -3078,6 +3193,7 @@ BEGIN
         WRITE_BYTE (ab_off + 0x0c) 5
         WRITE_SHORT (ab_off + 0x26) 159
         LPF DELETE_EFFECT INT_VAR check_globals = 0 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 55 target = 2 power = 7 parameter1 = 1 parameter2 = 3 timing = 1 resist_dispel = 1 savingthrow = 1 savebonus = 3 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 139 target = 2 power = 7 parameter1 = 14674 timing = 1 resist_dispel = 1 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 141 target = 2 power = 7 parameter2 = 18 timing = 1 resist_dispel = 1 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 61 target = 2 power = 7 parameter1 = 0xc8c8c800 parameter2 = 25 timing = 1 resist_dispel = 1 END
@@ -3088,9 +3204,10 @@ BEGIN
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 74 target = 2 power = 7 timing = 0 duration = 18 resist_dispel = 1 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 power = 7 parameter2 = 8 timing = 0 duration = 18 resist_dispel = 1 END
 
-      // Main spell: delete only owned blindness effects (preserving op55, caster op215, and any
+      // Main spell: delete owned slay and blindness effects (preserving caster op215 and any
       // unrelated effects), and cast CBMGNB1 on self (target = 1) so CBMGNB1's area projectile delivers it.
       COPY_EXISTING ~%spell%.spl~ ~override~
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 55 END
         LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 74 END
         LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 139 match_parameter1 = 14674 END
         LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 141 match_parameter2 = 18 END
