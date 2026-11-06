@@ -6,7 +6,8 @@ move to the Chriz script engine later. Values not named here stay as in the base
 ## Layout
 
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`); any of
+decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`,
+`cbmagic_sr.tpa`, `cbmagic_scs.tpa`, `cbmagic_more.tpa`); any of
 them can move to a component of its own without changes. The user-facing layout is
 Christopher's decision.
 
@@ -389,6 +390,20 @@ Every decided SCS-style spell change is implemented in our own library (`cbmagic
 - **Summon Insects, Insect Plague, Creeping Doom (`cbmagic_scs_insect_plague`):** main spells strip their own repeating damage (`opcode 272`) and deliver all damage and effects through their subspells; spell failure allows a per-round save vs. breath (at 0, -2, and -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them (`op206`); Stoneskin holds off the secondary effects while skins remain (each damage tick strips a skin); items and spells granting immunity to normal weapons (`op120 p2=2`) block and remove them; Death Spell (`SPWI605`) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help.
 - **Nature's Beauty (`cbmagic_scs_natures_beauty`):** both humanoid slay (`opcode 55`, save vs. spell +3) and blindness are moved to a schoolless area subspell (`CBMGNB1.SPL`, `target = 5`, `projectile = 159`, so True Sight does not dispel it via school removal and a single effect list decides both death and blindness): on a failed save, humanoids die and targets suffer permanent blindness; on a successful save, targets are blinded for 3 rounds.
 - **Lesser Restoration:** stays cleric-only (`0x20 = 0x8000`) and otherwise vanilla for now; attribute-drain removal is deferred to the EEex module (`opcode 402` reading the timed effect list without rewriting spell/item files).
+
+## Additional decided spell changes (`chriz-bg-magic/lib/cbmagic_more.tpa`)
+
+- **Priest Protection From Cold (`cbmagic_more_protection_from_cold`) and Protection From Acid (`cbmagic_more_protection_from_acid`):**
+  - Two new priest spells for both clerics and druids (`0x20 = 0x0000`) added via `ADD_SPELL`, using ability location `2` (spell book) and base-game graphics.
+  - **Protection From Cold** (`CLERIC_CBMAGIC_PROTECTION_FROM_COLD`, Priest level 3): built with the same duration scaling (`3 rounds + 1 round/level`, levels 1-20, 24-138 seconds), casting time (6), touch range (1), school (Abjuration), secondary type (`SpecificProtections`), self-refresh (`opcode 321`), spell state (`BUFF_PRO_EFFECTS` = 65), visuals (`ICrmpari` + RGB fade `61`), and expiry sound (`EFF_E04`) as Priest level 3 Protection From Fire (`SPPR306`), granting +100% normal cold resistance (`opcode 28`) and +80% magical cold resistance (`opcode 85`), with base-game cold icons (`SPWI320C` / `SPWI320B`), portrait icon `25` (`Protection From Cold`), and status string `7565`.
+  - **Protection From Acid** (`CLERIC_CBMAGIC_PROTECTION_FROM_ACID`, Priest level 4): built with the same duration scaling (`5 rounds/level`, abilities at level 1 and levels 8-18, 210-540 seconds), casting time (7), touch range (1), school (Abjuration), secondary type (`SpecificProtections`), spell state (`BUFF_PRO_EFFECTS` = 65), visuals (`ICrmpari` + RGB fade `61`), and expiry sound (`EFF_E04`) as Priest level 4 Protection From Lightning (`SPPR407`), setting acid resistance to 100% (`opcode 27`, `parameter2 = 1`, which covers both normal and magical acid since the engine has no separate magical acid stat), with base-game acid icons (`SPWI517C` / `SPWI517B`) and portrait icon `24` (`Protection From Acid`).
+- **Dispelling Screen (`cbmagic_more_dispelling_screen`):**
+  - Replaces Spell Immunity (`SPWI510`) on Wizard level 5 (and its scroll `SCRL6S.ITM`, adding `2510 WIZARD_DISPELLING_SCREEN` to `SPELL.IDS` alongside `WIZARD_SPELL_IMMUNITY`) with Spell Revisions' Dispelling Screen: lasts 5 turns (300 seconds), affects the caster and allies in a 15-ft party-only area (`projectile = 158`, `INAREAPA`), and protects each recipient against one Dispel/Remove Magic (`opcode 101` against `opcode 58` plus string suppression for `14056`) or one Breach (`opcode 206` against `SPWI513B`).
+  - Breach (`SPWI513`, and Wish Breach `SPWISH26` / `SPWISH38` if present) is split into `SPWI513B.SPL` (original Breach payload) + `SPWI513C.SPL` (`opcode 221` removing secondary type `cbm_DispelScreen`), and non-self Dispel/Remove Magic abilities on spells and items receive a trailing `opcode 221` for `cbm_DispelScreen`, so one Breach or one Dispel Magic is absorbed and then strips the screen.
+  - Pierce Shield (`SPWI805`) and Spellstrike (`SPWI903`) strip `cbm_DispelScreen` via `opcode 221` without being absorbed, and their descriptions and scrolls (`SCRL9A`, `SCRL9M`) name Dispelling Screen instead of Spell Immunity.
+  - Spell Immunity's school-selection menu (`opcode 214` / `SPWI510.2DA`) is removed, and its 8 hidden school subspells (`SPWI590`..`SPWI597`) are redirected to cast `SPWI510` (`opcode 146`), so any creature or AI script that memorised or casts `SPWI510` or `SPWI590`..`SPWI597` casts Dispelling Screen.
+- **Nahal's Reckless Dweomer (`cbmagic_more_nahals_reckless_dweomer`):**
+  - Stays a very strong spell as in the base game, except it loses Aura Cleansing: ability target is changed from `7` (caster-instant, bypassing `CGameSprite::Spell`'s round aura check) to `5` (caster, normal spell action) across all abilities so casting Nahal's Reckless Dweomer obeys the normal 1-spell-per-round aura timer, and any explicit `opcode 188` (Cleanse Aura) effect is removed while preserving all other effects and ability breakpoints.
 
 ## Descriptions
 
