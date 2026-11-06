@@ -354,6 +354,11 @@ def sr_biff(extra=None):
             fx.fx(opcode=240, power=4, p2=38, timing=1, dispel=3),
             fx.fx(opcode=267, power=4, p1=14023, timing=0, dispel=3, duration=60 + 6 * lvl),
             fx.fx(opcode=142, power=4, p2=19, timing=0, dispel=3, duration=60 + 6 * lvl),
+            fx.fx(opcode=328, power=4, p2=67, timing=0, dispel=3, duration=60 + 6 * lvl, special=1),
+            fx.fx(opcode=233, power=4, p1=1, p2=131, timing=0, dispel=3, duration=60 + 6 * lvl),
+            fx.fx(opcode=296, power=4, timing=0, dispel=3, duration=60 + 6 * lvl, resource="SPFLAYER"),
+            fx.fx(opcode=9, power=4, p1=1515350784, p2=655365, timing=0, dispel=3, duration=60 + 6 * lvl),
+            fx.fx(opcode=215, power=4, p2=1, timing=0, dispel=3, duration=3, resource="ICFRACTI"),
         ]} for ml, lvl in ((1, 7), (8, 8), (20, 20))],
         desc=FREEACT_DESC,
     )
@@ -361,6 +366,9 @@ def sr_biff(extra=None):
     base["SPPR404.SPL"] = ie.make_spl(2, 4, [{"target": 1, "casting_time": 1, "effects": [
         fx.fx(opcode=321, power=4, timing=0, dispel=0, resource="SPPR419"),
         fx.fx(opcode=321, power=4, timing=0, dispel=0, resource="SPIN103"),
+        fx.fx(opcode=321, power=4, timing=1, dispel=0, resource="GHOULLOR"),
+        fx.fx(opcode=321, power=4, timing=1, dispel=0, resource="DARTMEL"),
+        fx.fx(opcode=321, power=4, timing=1, dispel=0, resource="SPWI409"),
         fx.fx(opcode=11, power=4, timing=1, dispel=3),
         fx.fx(opcode=17, power=4, p1=10, timing=1, dispel=3),
         fx.fx(opcode=79, power=4, timing=1, dispel=3),
@@ -610,7 +618,12 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         check(16 not in p2s_101 and 45 in p2s_101 and 210 in p2s_101, f"SPPR403 101 p2s: {p2s_101}")
         check(not any(e["opcode"] == 206 and e["resource"] == "SPWI305" for e in ab["effects"]), "SPPR403 still blocks Haste")
         check(not any(e["opcode"] == 126 and e["p2"] == 2 for e in ab["effects"]), "SPPR403 still locks movement rate")
-        check(all(e["duration"] in (0, exp_dur) for e in ab["effects"]), f"SPPR403 durations: {ab['effects']}")
+        check(all(e["duration"] in (0, 3, exp_dur) for e in ab["effects"]), f"SPPR403 durations: {ab['effects']}")
+        for comp_op in (328, 233, 296, 9):
+            check(any(e["opcode"] == comp_op and e["duration"] == exp_dur for e in ab["effects"]),
+                  f"SPPR403 companion op {comp_op} not scaled to {exp_dur}: {ab['effects']}")
+        check(any(e["opcode"] == 215 and e["resource"] == "ICFRACTI" and e["duration"] == 3 for e in ab["effects"]),
+              f"SPPR403 casting visual duration changed: {ab['effects']}")
     check("Duration: 1 turn/level" in g.tlk(s["desc"]) and "Slow, and Stun." in g.tlk(s["desc"]), f"SPPR403 text: {g.tlk(s['desc'])}")
 
     # 21. Neutralize Poison: 14 abilities (1, 8..20), cures poison (op 11) + poison immunity (op 101 p2=25) for 420..1200s, no heal/disease/blind/deaf.
@@ -623,6 +636,8 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         ops = {e["opcode"] for e in ab["effects"]}
         check({321, 11, 101, 173, 169, 267, 142, 206}.issubset(ops), f"SPPR404 ops: {ops}")
         check(ops.isdisjoint({17, 79, 75, 81}), f"SPPR404 unwanted ops: {ops}")
+        rem_321 = {e["resource"].upper() for e in ab["effects"] if e["opcode"] == 321}
+        check(rem_321 == {"SPPR404"}, f"SPPR404 op321 resources: {rem_321}")
         check(any(e["opcode"] == 101 and e["p2"] == 25 and e["duration"] == exp_dur for e in ab["effects"]),
               f"SPPR404 ab {idx}: {ab['effects']}")
     check("Duration: 1 turn/level" in g.tlk(s["desc"]) and "immune to poison for 1 turn per level" in g.tlk(s["desc"]),

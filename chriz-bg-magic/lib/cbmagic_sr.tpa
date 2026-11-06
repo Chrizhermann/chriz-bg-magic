@@ -1909,8 +1909,7 @@ BEGIN
               READ_BYTE (fx + 0x0c) timing
               READ_LONG (fx + 0x0e) dur
               PATCH_IF (old_dur > 0) AND (dur = old_dur) AND (dur != target_dur)
-                    AND ((op = 101) OR (op = 126) OR (op = 142) OR (op = 169)
-                         OR (op = 206) OR (op = 267) OR ((op = 174) AND (timing = 4))) BEGIN
+                    AND ((timing = 0) OR (timing = 4)) BEGIN
                 WRITE_LONG (fx + 0x0e) target_dur
                 SET changed += 1
               END
@@ -2021,7 +2020,7 @@ BEGIN
                   PATCH_IF (op = 17) OR (op = 79) OR (op = 75) OR (op = 81)
                         OR ((op = 240) AND ((p2 = 7) OR (p2 = 8) OR (p2 = 112)))
                         OR ((op = 146) AND ((~%res%~ STRING_EQUAL_CASE ~#curedis~) OR (~%res%~ STRING_EQUAL_CASE ~#curedef~) OR (~%res%~ STRING_EQUAL_CASE ~#curebld~)))
-                        OR ((op = 321) AND ((~%res%~ STRING_EQUAL_CASE ~SPPR419~) OR (~%res%~ STRING_EQUAL_CASE ~SPIN103~))) BEGIN
+                        OR ((op = 321) AND !(~%res%~ STRING_EQUAL_CASE ~%spell%~)) BEGIN
                     LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
                     SET changed += 1
                     SET scanning = 1

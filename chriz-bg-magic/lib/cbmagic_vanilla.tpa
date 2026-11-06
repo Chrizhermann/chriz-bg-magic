@@ -21,6 +21,35 @@ BEGIN
   END
 END
 
+// Update the specialist-mage usability bits on all scrolls of `spell` to match the SPL
+// specialist exclusion mask `target_excl` (SPL 0x1e bits 6..7 -> ITM 0x2f bits 6..7;
+// SPL 0x1e bits 8..13 -> ITM 0x2d bits 0..5), preserving all unrelated usability bits.
+DEFINE_ACTION_FUNCTION cbmagic_update_scroll_exclusions
+  INT_VAR target_excl = 0
+  STR_VAR spell = ~~
+BEGIN
+  LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+  OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+  OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE scroll ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    COPY_EXISTING ~%scroll%.itm~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+        READ_BYTE 0x2d kit_usab3
+        READ_BYTE 0x2f kit_usab4
+        SET want_u3 = (kit_usab3 BAND 0xc0) BOR ((target_excl >> 8) BAND 0x3f)
+        SET want_u4 = (kit_usab4 BAND 0x3f) BOR (target_excl BAND 0xc0)
+        PATCH_IF (kit_usab3 != want_u3) BEGIN
+          WRITE_BYTE 0x2d want_u3
+        END
+        PATCH_IF (kit_usab4 != want_u4) BEGIN
+          WRITE_BYTE 0x2f want_u4
+        END
+      END
+    BUT_ONLY
+  END
+END
+
 DEFINE_PATCH_FUNCTION cbmagic_set_priest_druid_only
   RET changed already
 BEGIN
@@ -469,6 +498,7 @@ BEGIN
     PRINT ~chriz-bg-magic: Find Familiar (WIZARD_FIND_FAMILAR) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -482,6 +512,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Find Familiar (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label = ~Find Familiar~ END
       OUTER_SPRINT cbm_find @20000
@@ -533,6 +566,7 @@ BEGIN
     PRINT ~chriz-bg-magic: Cloudkill (WIZARD_CLOUDKILL) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -546,6 +580,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Cloudkill (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0100 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label = ~Cloudkill~ END
       OUTER_SPRINT cbm_find @20004
@@ -563,6 +600,7 @@ BEGIN
     PRINT ~chriz-bg-magic: Death Fog (WIZARD_DEATH_FOG) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -576,6 +614,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Death Fog (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0100 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label = ~Death Fog~ END
       OUTER_SPRINT cbm_find @20004
@@ -686,6 +727,8 @@ BEGIN
   ACTION_IF !found BEGIN
     PRINT ~chriz-bg-magic: Wish (WIZARD_WISH) is not in this game; skipped.~
   END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -699,6 +742,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Wish (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0 STR_VAR spell END
+    END
   END
 END
 
@@ -1074,6 +1120,7 @@ BEGIN
     PRINT ~chriz-bg-magic: %label% (%symbol%) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -1087,6 +1134,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: %label% (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label END
       OUTER_SPRINT cbm_find (AT old_tra)
@@ -1162,6 +1212,7 @@ BEGIN
     ACTION_IF is_valid AND (cur_school > 0) BEGIN
       LAF cbmagic_splprot_row INT_VAR stat = 0x10c value = (0 - 1) relation = 1 RET race_row = row END
       OUTER_SET changed = 0
+      OUTER_SET already = 0
       COPY_EXISTING ~%spell%.spl~ ~override~
         LPF cbmagic_set_school INT_VAR target_school = 2 target_excl = 0x0100 RET changed already END
         PATCH_IF (changed > 0) BEGIN
@@ -1183,6 +1234,9 @@ BEGIN
           END
         END
       BUT_ONLY
+      ACTION_IF (changed > 0) OR (already > 0) BEGIN
+        LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0100 STR_VAR spell END
+      END
       ACTION_IF (changed > 0) BEGIN
         LAF cbmagic_warn_text_language STR_VAR label = ~Stinking Cloud~ END
         OUTER_SPRINT cbm_find @20004
@@ -1201,6 +1255,7 @@ BEGIN
     PRINT ~chriz-bg-magic: Web (WIZARD_WEB) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -1217,6 +1272,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Web (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0100 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label = ~Web~ END
       OUTER_SPRINT cbm_find @20004
@@ -1234,6 +1292,7 @@ BEGIN
     PRINT ~chriz-bg-magic: Incendiary Cloud (WIZARD_INCENDIARY_CLOUD) is not in this game; skipped.~
   END ELSE BEGIN
     OUTER_SET changed = 0
+    OUTER_SET already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF valid BEGIN
@@ -1250,6 +1309,9 @@ BEGIN
         PATCH_WARN ~chriz-bg-magic: Incendiary Cloud (%spell%) left as it is: %reason%.~
       END
     BUT_ONLY
+    ACTION_IF (changed > 0) OR (already > 0) BEGIN
+      LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0100 STR_VAR spell END
+    END
     ACTION_IF (changed > 0) BEGIN
       LAF cbmagic_warn_text_language STR_VAR label = ~Incendiary Cloud~ END
       OUTER_SPRINT cbm_find @20004
@@ -1281,6 +1343,7 @@ BEGIN
     ACTION_IF is_valid AND (cur_school > 0) BEGIN
       LAF cbmagic_splprot_row INT_VAR stat = 0x10c value = (0 - 1) relation = 1 RET race_row = row END
       OUTER_SET changed = 0
+      OUTER_SET already = 0
       COPY_EXISTING ~%spell%.spl~ ~override~
         LPF cbmagic_set_school INT_VAR target_school = 4 target_excl = 0x0800 RET changed already END
         PATCH_IF (changed > 0) BEGIN
@@ -1306,6 +1369,9 @@ BEGIN
         LPF cbmagic_add_immunity_prob INT_VAR row = 15 value = 0 prob_hi = 90 prob_lo = 0 RET added present END
         PATCH_PRINT ~chriz-bg-magic: Power Word, Sleep (%spell%): elf 90%% resistance (row 15) in %added% abilities; %present% were already.~
       BUT_ONLY
+      ACTION_IF (changed > 0) OR (already > 0) BEGIN
+        LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0800 STR_VAR spell END
+      END
       ACTION_IF (changed > 0) BEGIN
         LAF cbmagic_warn_text_language STR_VAR label = ~Power Word, Sleep~ END
         OUTER_SPRINT cbm_find @20005

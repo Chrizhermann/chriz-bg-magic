@@ -75,21 +75,8 @@ BEGIN
       END
     END
   BUT_ONLY
-  LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
-  OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
-  OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
-    OUTER_PATCH_SAVE scroll ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
-    OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
-    COPY_EXISTING ~%scroll%.itm~ ~override~
-      PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
-        READ_BYTE 0x2d kit_usab3
-        PATCH_IF ((kit_usab3 BAND 0x09) != 0x08) BEGIN
-          WRITE_BYTE 0x2d ((kit_usab3 BAND (BNOT 0x01)) BOR 0x08)
-        END
-      END
-    BUT_ONLY
-  END
   ACTION_IF (changed > 0) OR (already > 0) BEGIN
+    LAF cbmagic_update_scroll_exclusions INT_VAR target_excl = 0x0800 STR_VAR spell END
     OUTER_SPRINT find @30011
     OUTER_SPRINT replace @30012
     LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label END

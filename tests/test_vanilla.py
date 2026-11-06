@@ -629,7 +629,7 @@ def _vanilla_biff(**replace):
             ],
         ),
         "SCRL9E.ITM": fx.scroll("SPWI810", IC_VAN_DESC),
-        # Row D. Power Word, Sleep (SPWI220) (with real school=2)
+        # Row D. Power Word, Sleep (SPWI220) (with real school=2) + scroll SCRL6E
         "SPWI220.SPL": _spl_with_hdr(
             school=2,
             excl_1e=0x0100,
@@ -647,6 +647,7 @@ def _vanilla_biff(**replace):
                 )
             ],
         ),
+        "SCRL6E.ITM": fx.scroll("SPWI220", PWS_DESC),
         # Row E. Spook (SPWI125)
         "SPWI125.SPL": _spl_with_hdr(
             school=5,
@@ -888,6 +889,8 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
         check("(Conjuration/Summoning)" in g.tlk(s["desc"]), f"{res} desc: {g.tlk(s['desc'])}")
         _, scrl_id = g.itm_descs(scrl)
         check("(Conjuration/Summoning)" in g.tlk(scrl_id), f"{scrl} desc: {g.tlk(scrl_id)}")
+        scrl_raw = g.file(f"override/{scrl}.ITM")
+        check((scrl_raw[0x2D] & 0x3F) == 0x01 and (scrl_raw[0x2F] & 0xC0) == 0x00, f"{scrl} kit excl: {scrl_raw[0x2D]:#x}, {scrl_raw[0x2F]:#x}")
 
     # 5-6. Wizard & Priest Finger of Death (SPWI713, SPPR708): save vs. Death (4) with bonus 0
     for res in ("SPWI713", "SPPR708"):
@@ -1041,11 +1044,15 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
         check("(Conjuration/Summoning)" in g.tlk(s["desc"]), f"{res} desc: {g.tlk(s['desc'])}")
         _, scrl_id = g.itm_descs(scrl)
         check("(Conjuration/Summoning)" in g.tlk(scrl_id), f"{scrl} desc: {g.tlk(scrl_id)}")
+        scrl_raw = g.file(f"override/{scrl}.ITM")
+        check((scrl_raw[0x2D] & 0x3F) == 0x01 and (scrl_raw[0x2F] & 0xC0) == 0x00, f"{scrl} kit excl: {scrl_raw[0x2D]:#x}, {scrl_raw[0x2F]:#x}")
 
     # Row D. Power Word, Sleep (SPWI220): school Enchantment (4, excl 0x0800), elf (row 15, 0-90),
     # half-elf (row 19, 0-30), undead (row 1), DRAGON, ELEMENTAL, 20 HP gate + wake-on-damage kept
     s = _read_spl_ext(g, "SPWI220")
     check(s["school"] == 4 and s["excl_1e"] == 0x0800, f"SPWI220 school/excl: {s}")
+    scrl6e_raw = g.file("override/SCRL6E.ITM")
+    check((scrl6e_raw[0x2D] & 0x3F) == 0x08 and (scrl6e_raw[0x2F] & 0xC0) == 0x00, f"SCRL6E kit excl: {scrl6e_raw[0x2D]:#x}, {scrl6e_raw[0x2F]:#x}")
     effs = s["abilities"][0]["effects"]
     check(
         (effs[0]["opcode"], effs[0]["p2"], effs[0]["prob2"], effs[0]["prob1"]) == (324, 15, 0, 90),
