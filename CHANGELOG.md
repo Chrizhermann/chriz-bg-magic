@@ -113,8 +113,12 @@
   Lightning) for clerics and druids via `ADD_SPELL`; Dispelling Screen replacing Spell
   Immunity (`SPWI510`, `SCRL6S`, and redirecting `SPWI590`..`SPWI597`, lasting 5 turns in a
   15-ft party area to absorb one Dispel Magic or one Breach, removed by Pierce Shield and
-  Spellstrike); and Nahal's Reckless Dweomer (`SPWI124`) without Aura Cleansing (ability
-  target 7 -> 5 so it respects the round aura timer).
+  Spellstrike); Nahal's Reckless Dweomer (`SPWI124`) without Aura Cleansing (ability
+  target 7 -> 5 so it respects the round aura timer); Improved Haste (`SPWI613`, `SCRL7Q`)
+  rebuilt as a 1-turn party buff in a 15-ft radius without `opcode 16` (+6 movement rate, +1
+  APR, +2 THAC0/AC/Save vs. Breath, dispellable, cures and grants immunity to Slow); and
+  SCS-style mutual cancellation between Haste and Slow across spells and items while keeping
+  vanilla Haste's bonus, duration, and fatigue untouched.
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the
   installer warns that the two do not go together.

@@ -33,6 +33,12 @@ MORE_TEXTS = [
     "Nahal's Reckless Dweomer\n(Invocation/Evocation)\n\nLevel: 1\nRange: Special\nDuration: Special\n"
     "Casting Time: Special\nArea of Effect: Special\nSaving Throw: Special\n\n"
     "This spell is the Wild Mage's ultimate last-resort spell.",
+    # +5: Improved Haste name
+    "Improved Haste",
+    # +6: Improved Haste desc
+    "Improved Haste\n(Alteration)\n\nLevel: 6\nRange: 40 ft.\nDuration: 3 rounds + 1 round/level\nCasting Time: 3\n"
+    "Area of Effect: 1 creature\nSaving Throw: None\n\n"
+    "When cast, this spell doubles the recipient's movement and attacks per round.",
 ]
 (
     SI_NAME,
@@ -40,6 +46,8 @@ MORE_TEXTS = [
     PIERCE_SHIELD_DESC,
     SPELLSTRIKE_DESC,
     NAHAL_DESC,
+    IH_NAME,
+    IH_DESC,
 ) = range(BASE_STRREF, BASE_STRREF + len(MORE_TEXTS))
 
 MORE_SYMBOLS = [
@@ -47,6 +55,8 @@ MORE_SYMBOLS = [
     (1303, "CLERIC_DISPEL_MAGIC"),
     (2124, "WIZARD_NAHALS_RECKLESS_DWEOMER"),
     (2302, "WIZARD_REMOVE_MAGIC"),
+    (2305, "WIZARD_HASTE"),
+    (2312, "WIZARD_SLOW"),
     (2326, "WIZARD_TRUE_DISPEL_MAGIC"),
     (2510, "WIZARD_SPELL_IMMUNITY"),
     (2513, "WIZARD_BREACH"),
@@ -58,6 +68,7 @@ MORE_SYMBOLS = [
     (2595, "WIZARD_SPELL_IMMUNITY_INVOCATION"),
     (2596, "WIZARD_SPELL_IMMUNITY_NECROMANCY"),
     (2597, "WIZARD_SPELL_IMMUNITY_ALTERATION"),
+    (2613, "WIZARD_IMPROVED_HASTE"),
     (2805, "WIZARD_PIERCE_SHIELD"),
     (2903, "WIZARD_SPELL_STRIKE"),
 ]
@@ -223,6 +234,81 @@ def make_more_biff():
             }],
             desc=NAHAL_DESC, school=6, excl=0x7FC0, icon="SPWI124C",
         ),
+        # Vanilla SPWI613 (Improved Haste: 9 abilities, min_level 1, 13..20, single-target, op16 p2=1)
+        "SPWI613.SPL": make_spl_with_excl(
+            1, 6,
+            [
+                {
+                    "target": 1, "range": 40, "min_level": ml, "casting_time": 3, "projectile": 1,
+                    "effects": [
+                        fx.fx(opcode=16, target=2, power=6, p1=0, p2=1, timing=0, dispel=3, duration=18 + 6 * (12 if ml == 1 else ml)),
+                        fx.fx(opcode=141, target=2, power=6, p1=0, p2=4, timing=1, dispel=3),
+                        fx.fx(opcode=61, target=2, power=6, p1=2017213440, p2=1638400, timing=1, dispel=3),
+                        fx.fx(opcode=139, target=2, power=6, p1=14023, p2=0, timing=1, dispel=3),
+                        fx.fx(opcode=174, target=2, power=6, p1=0, p2=0, timing=1, dispel=3, resource="EFF_M28"),
+                        fx.fx(opcode=174, target=2, power=6, p1=0, p2=0, timing=4, dispel=3, duration=18 + 6 * (12 if ml == 1 else ml), resource="EFF_M29"),
+                        fx.fx(opcode=206, target=2, power=6, p1=0, p2=0, timing=0, dispel=1, duration=18 + 6 * (12 if ml == 1 else ml), resource="SPWI305"),
+                    ],
+                }
+                for ml in [1, *range(13, 21)]
+            ],
+            name=IH_NAME, desc=IH_DESC, school=8, sectype=13, excl=0x0040, icon="SPWI613C",
+        ),
+        "SCRL7Q.ITM": fx.scroll("SPWI613", IH_DESC),
+        # Vanilla SPWI305 (Haste: 3 sample abilities at min_level 1, 6, 7 with op16 + fatigue op93)
+        "SPWI305.SPL": make_spl_with_excl(
+            1, 3,
+            [
+                {
+                    "target": 4, "range": 15, "min_level": ml, "casting_time": 3, "projectile": 156,
+                    "effects": [
+                        fx.fx(opcode=16, target=2, power=3, p1=0, p2=0, timing=0, dispel=3, duration=18 + 6 * (5 if ml == 1 else ml)),
+                        fx.fx(opcode=141, target=2, power=3, p1=0, p2=4, timing=1, dispel=3),
+                        fx.fx(opcode=61, target=2, power=3, p1=2017213440, p2=1638400, timing=1, dispel=3),
+                        fx.fx(opcode=139, target=2, power=3, p1=14023, p2=0, timing=1, dispel=3),
+                        fx.fx(opcode=142, target=2, power=3, p1=0, p2=38, timing=0, dispel=3, duration=18 + 6 * (5 if ml == 1 else ml)),
+                        fx.fx(opcode=174, target=2, power=3, p1=0, p2=0, timing=1, dispel=3, resource="EFF_M28"),
+                        fx.fx(opcode=174, target=2, power=3, p1=0, p2=0, timing=4, dispel=3, duration=18 + 6 * (5 if ml == 1 else ml), resource="EFF_M29"),
+                        fx.fx(opcode=93, target=2, power=3, p1=4, p2=0, timing=4, dispel=2, duration=18 + 6 * (5 if ml == 1 else ml)),
+                    ],
+                }
+                for ml in (1, 6, 7)
+            ],
+            school=8, sectype=13, excl=0x0040, icon="SPWI305C",
+        ),
+        # Vanilla SPWI312 (Slow: save vs. spell at -4, op40 + -4 AC op0 + -4 THAC0 op54 + icon 41)
+        "SPWI312.SPL": make_spl_with_excl(
+            1, 3,
+            [{
+                "target": 4, "range": 25, "min_level": 1, "casting_time": 3, "projectile": 177,
+                "effects": [
+                    fx.fx(opcode=321, target=2, power=3, p1=0, p2=0, timing=1, dispel=1, save=1, bonus=-4, resource="spin977"),
+                    fx.fx(opcode=321, target=2, power=3, p1=0, p2=0, timing=1, dispel=1, save=1, bonus=-4, resource="spwi312"),
+                    fx.fx(opcode=40, target=2, power=3, p1=0, p2=0, timing=0, dispel=1, duration=60, save=1, bonus=-4),
+                    fx.fx(opcode=0, target=2, power=3, p1=-4, p2=0, timing=0, dispel=1, duration=60, save=1, bonus=-4),
+                    fx.fx(opcode=54, target=2, power=3, p1=-4, p2=0, timing=0, dispel=1, duration=60, save=1, bonus=-4),
+                    fx.fx(opcode=141, target=2, power=3, p1=0, p2=6, timing=1, dispel=1, save=1, bonus=-4),
+                    fx.fx(opcode=139, target=2, power=3, p1=14668, p2=0, timing=1, dispel=1, save=1, bonus=-4),
+                    fx.fx(opcode=142, target=2, power=3, p1=0, p2=41, timing=0, dispel=1, duration=60, save=1, bonus=-4),
+                    fx.fx(opcode=240, target=2, power=3, p1=0, p2=38, timing=1, dispel=1, save=1, bonus=-4),
+                ],
+            }],
+            school=8, sectype=11, excl=0x0040, icon="SPWI312C",
+        ),
+        # Vanilla POTN14.ITM (Oil of Speed: target=1, 300s Haste + *gulp* string 16233)
+        "POTN14.ITM": ie.make_itm([[
+            fx.fx(opcode=16, target=1, power=0, p1=0, p2=0, timing=0, dispel=1, duration=300),
+            fx.fx(opcode=139, target=1, power=0, p1=16233, p2=0, timing=1, dispel=0),
+            fx.fx(opcode=142, target=1, power=0, p1=0, p2=38, timing=0, dispel=1, duration=300),
+        ]], item_type=9),
+        # Vanilla BLUN30.ITM (Flail of Ages: elemental damage + 33% Slow for 20s + Undead/Golem poison gate)
+        "BLUN30.ITM": ie.make_itm([[
+            fx.fx(opcode=12, target=2, power=0, p1=2, p2=0x10000, timing=1, dispel=0),
+            fx.fx(opcode=40, target=2, power=0, p1=0, p2=0, timing=0, dispel=0, duration=20, prob1=33, prob2=0),
+            fx.fx(opcode=139, target=2, power=0, p1=14000, p2=0, timing=9, dispel=0, prob1=33, prob2=0),
+            fx.fx(opcode=318, target=2, power=0, p1=0, p2=55, timing=0, dispel=0, duration=0, resource="BLUN30"),
+            fx.fx(opcode=12, target=2, power=0, p1=2, p2=0x200000, timing=1, dispel=0),
+        ]], item_type=22),
     })
     # Add SPWI590..SPWI597 (the 8 school subspells of Spell Immunity)
     for idx, school_id in enumerate(range(1, 9)):
@@ -386,6 +472,115 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
     nahal_ops = [(e["opcode"], e["p2"]) for e in nahal_ab["effects"]]
     check(nahal_ops == [(214, 2), (280, 1)], nahal_ops)
 
+    # --- Row 4: Improved Haste (SPWI613) and Haste / Slow mutual cancellation ---
+    check("cbm_Haste" in msectype_txt and "cbm_Slow" in msectype_txt, msectype_txt)
+    ih = parse_spl_full(g.file("override/SPWI613.SPL"))
+    check(ih["level"] == 6 and ih["school"] == 8 and ih["sectype"] == 13, ih)
+    check(g.tlk(ih["name"]) == "Improved Haste", g.tlk(ih["name"]))
+    check("+6 movement rate" in g.tlk(ih["desc"]) and "immune to Slow" in g.tlk(ih["desc"]), g.tlk(ih["desc"]))
+    check([ab["min_level"] for ab in ih["abilities"]] == [1, *range(13, 21)], ih["abilities"])
+    for ab in ih["abilities"]:
+        check(
+            ab["location"] == 2 and ab["target"] == 4 and ab["range"] == 30
+            and ab["casting_time"] == 6 and ab["projectile"] == 158,
+            ab,
+        )
+        ih_ops = [(e["opcode"], e["p1"], e["p2"], e["duration"], e["dispel"], e["resource"].upper()) for e in ab["effects"]]
+        # Must NOT use opcode 16
+        check(all(e["opcode"] != 16 for e in ab["effects"]), ih_ops)
+        # Core party buff bonuses for 60s
+        check((176, 6, 0, 60, 3, "") in ih_ops, ih_ops)
+        check((1, 1, 0, 60, 3, "") in ih_ops, ih_ops)
+        check((54, 2, 0, 60, 3, "") in ih_ops, ih_ops)
+        check((0, 2, 0, 60, 3, "") in ih_ops, ih_ops)
+        check((36, 2, 0, 60, 3, "") in ih_ops, ih_ops)
+        # Slow cure and Slow immunity
+        check((240, 0, 41, 0, 3, "") in ih_ops, ih_ops)
+        check((101, 0, 40, 60, 3, "") in ih_ops, ih_ops)
+        check((169, 0, 41, 60, 3, "") in ih_ops, ih_ops)
+        check((206, -1, 0, 60, 3, "SPWI312") in ih_ops, ih_ops)
+        check((206, -1, 0, 60, 3, "SPWI305") in ih_ops, ih_ops)
+        # Self non-stacking last
+        check(ih_ops[-1] == (206, -1, 0, 60, 3, "SPWI613"), ih_ops[-1])
+
+    # Scroll SCRL7Q.ITM updated for Area target (target=4, op148) and new description
+    scrl7q_raw = g.file("override/SCRL7Q.ITM")
+    check("immune to Slow" in g.tlk(g.itm_descs("SCRL7Q")[1]), g.tlk(g.itm_descs("SCRL7Q")[1]))
+    scrl7q_ab_off, = struct.unpack_from("<I", scrl7q_raw, 0x64)
+    scrl7q_fx_off, = struct.unpack_from("<I", scrl7q_raw, 0x6A)
+    check(scrl7q_raw[scrl7q_ab_off + 0x0C] == 4, scrl7q_raw[scrl7q_ab_off + 0x0C])
+    scrl7q_fx0 = ie.unpack_fx(scrl7q_raw, scrl7q_fx_off)
+    check(scrl7q_fx0["opcode"] == 148 and scrl7q_fx0["target"] == 1, scrl7q_fx0)
+
+    # Haste (SPWI305 -> SPWI305A) and Slow (SPWI312 -> SPWI312A) mutual cancellation
+    neg16 = parse_spl_full(g.file("override/CBMNEG16.SPL"))
+    check(g.tlk(neg16["abilities"][0]["effects"][0]["p1"]) == "Haste cancelled by Slow", neg16)
+    neg40 = parse_spl_full(g.file("override/CBMNEG40.SPL"))
+    check(g.tlk(neg40["abilities"][0]["effects"][0]["p1"]) == "Slow cancelled by Haste", neg40)
+
+    haste_parent = parse_spl_full(g.file("override/SPWI305.SPL"))
+    haste_sub = parse_spl_full(g.file("override/SPWI305A.SPL"))
+    haste_sectype = haste_sub["sectype"]
+    slow_parent = parse_spl_full(g.file("override/SPWI312.SPL"))
+    slow_sub = parse_spl_full(g.file("override/SPWI312A.SPL"))
+    slow_sectype = slow_sub["sectype"]
+    check(haste_sectype != slow_sectype and haste_sectype >= 14 and slow_sectype >= 14, (haste_sectype, slow_sectype))
+
+    for idx, ml in enumerate((1, 6, 7)):
+        dur = 18 + 6 * (5 if ml == 1 else ml)
+        p_ops = [(e["opcode"], e["p1"], e["p2"], e["resource"].upper()) for e in haste_parent["abilities"][idx]["effects"]]
+        check(p_ops == [(146, 0, 1, "SPWI305A"), (221, 10, slow_sectype, "")], p_ops)
+        s_ops = [(e["opcode"], e["p1"], e["p2"], e["duration"], e["resource"].upper()) for e in haste_sub["abilities"][idx]["effects"]]
+        # Prepend gates: 324 (HASTE_IMMUNITY), 221 (cbm_Haste), 326 (STATE_SLOWED -> CBMNEG40), 318 (STATE_SLOWED -> SPWI305A)
+        check(s_ops[0][0] == 324 and s_ops[0][4] == "SPWI305A", s_ops[0])
+        check(s_ops[1] == (221, 10, haste_sectype, 0, ""), s_ops[1])
+        check(s_ops[2][:3] == (326, 0x00010000, 138) and s_ops[2][4] == "CBMNEG40", s_ops[2])
+        check(s_ops[3][:3] == (318, 0x00010000, 138) and s_ops[3][4] == "SPWI305A", s_ops[3])
+        # Vanilla Haste bonus, duration, and fatigue preserved inside SPWI305A
+        check((16, 0, 0, dur, "") in s_ops, s_ops)
+        check((93, 4, 0, dur, "") in s_ops, s_ops)
+        check((142, 0, 38, dur, "") in s_ops, s_ops)
+
+    sp_ops = [(e["opcode"], e["p1"], e["p2"], e["save"], e["bonus"], e["resource"].upper()) for e in slow_parent["abilities"][0]["effects"]]
+    check(sp_ops == [(146, 0, 1, 0, 0, "SPWI312A"), (221, 10, haste_sectype, 0, 0, "")], sp_ops)
+    ss_ops = [(e["opcode"], e["p1"], e["p2"], e["duration"], e["save"], e["bonus"], e["resource"].upper()) for e in slow_sub["abilities"][0]["effects"]]
+    check(ss_ops[0] == (221, 10, slow_sectype, 0, 1, -4, ""), ss_ops[0])
+    check(ss_ops[1][:3] == (326, 0x00008000, 138) and ss_ops[1][6] == "CBMNEG16", ss_ops[1])
+    check(ss_ops[2][:3] == (318, 0x00008000, 138) and ss_ops[2][6] == "SPWI312A", ss_ops[2])
+    check(ss_ops[3][0] == 324 and ss_ops[3][6] == "SPWI312A", ss_ops[3])
+    check((40, 0, 0, 60, 1, -4, "") in ss_ops, ss_ops)
+    check((0, -4, 0, 60, 1, -4, "") in ss_ops, ss_ops)
+    check((54, -4, 0, 60, 1, -4, "") in ss_ops, ss_ops)
+    check((142, 0, 41, 60, 1, -4, "") in ss_ops, ss_ops)
+
+    # Oil of Speed (POTN14.ITM -> POTN14.SPL) keeps *gulp* string (16233) on item and extracts Haste to POTN14.SPL
+    potn14_raw = g.file("override/POTN14.ITM")
+    potn14_fx_off, = struct.unpack_from("<I", potn14_raw, 0x6A)
+    potn14_ab_off, = struct.unpack_from("<I", potn14_raw, 0x64)
+    potn14_na, = struct.unpack_from("<H", potn14_raw, potn14_ab_off + 0x1E)
+    potn14_ops = [ie.unpack_fx(potn14_raw, potn14_fx_off + i * 48) for i in range(potn14_na)]
+    check([(e["opcode"], e["target"], e["p1"], e["p2"], e["resource"]) for e in potn14_ops] == [
+        (146, 1, 0, 1, "POTN14"),
+        (221, 1, 10, slow_sectype, ""),
+        (139, 1, 16233, 0, ""),
+    ], potn14_ops)
+    potn14_sub = parse_spl_full(g.file("override/POTN14.SPL"))
+    check(potn14_sub["sectype"] == haste_sectype, potn14_sub)
+
+    # Flail of Ages (BLUN30.ITM -> BLUN30.SPL) preserves 33% probability on 146/221 and keeps elemental/poison effects
+    blun30_raw = g.file("override/BLUN30.ITM")
+    blun30_fx_off, = struct.unpack_from("<I", blun30_raw, 0x6A)
+    blun30_ab_off, = struct.unpack_from("<I", blun30_raw, 0x64)
+    blun30_na, = struct.unpack_from("<H", blun30_raw, blun30_ab_off + 0x1E)
+    blun30_ops = [ie.unpack_fx(blun30_raw, blun30_fx_off + i * 48) for i in range(blun30_na)]
+    check([(e["opcode"], e["prob1"], e["p2"], e["resource"]) for e in blun30_ops] == [
+        (12, 100, 0x10000, ""),
+        (146, 33, 1, "BLUN30"),
+        (221, 33, haste_sectype, ""),
+        (318, 100, 55, "BLUN30"),
+        (12, 100, 0x200000, ""),
+    ], blun30_ops)
+
     # Idempotency on second install
     after_first = g.tree()
     out2 = g.install()
@@ -436,6 +631,29 @@ def more_batch_variations_and_invalid_inputs(work, weidu):
     # Dispel item (AROW07.ITM) with target=2 opcode 58 vs self-only item (SELF58.ITM) with target=1 opcode 58
     biff["AROW07.ITM"] = ie.make_itm([[fx.fx(opcode=58, target=2, power=0, p1=0, p2=0, timing=1)]])
     biff["SELF58.ITM"] = ie.make_itm([[fx.fx(opcode=58, target=1, power=0, p1=99, p2=0, timing=1)]])
+    # Multi-ability Slow spell (SPCL123.SPL): ability 0 has no Slow; ability 1 has Slow + non-Slow op54 (p1=0)
+    biff["SPCL123.SPL"] = ie.make_spl(
+        4, 1,
+        [
+            {
+                "target": 1, "range": 1, "min_level": 1, "casting_time": 1, "projectile": 1,
+                "effects": [fx.fx(opcode=126, target=2, power=0, p1=0, p2=0, timing=0, dispel=2, duration=40)],
+            },
+            {
+                "target": 1, "range": 1, "min_level": 12, "casting_time": 1, "projectile": 1,
+                "effects": [
+                    fx.fx(opcode=126, target=2, power=0, p1=0, p2=0, timing=0, dispel=2, duration=50),
+                    fx.fx(opcode=54, target=2, power=0, p1=0, p2=0, timing=0, dispel=2, duration=50),
+                    fx.fx(opcode=40, target=2, power=0, p1=0, p2=0, timing=0, dispel=2, duration=12),
+                ],
+            },
+        ],
+    )
+    # Item with opcode 16 p2=1 (BRAC16.ITM)
+    biff["BRAC16.ITM"] = ie.make_itm([[
+        fx.fx(opcode=16, target=1, power=0, p1=0, p2=1, timing=0, dispel=1, duration=20),
+        fx.fx(opcode=142, target=1, power=0, p1=0, p2=110, timing=0, dispel=1, duration=20),
+    ]], item_type=19)
     g = fg.FakeGame(work / "v1", weidu, tlk=tlk, biff=biff)
     out = g.install()
     check(fg.installed_ok(out) and not fg.with_warnings(out), f"expected clean install:\n{out}")
@@ -461,6 +679,16 @@ def more_batch_variations_and_invalid_inputs(work, weidu):
     arow_fx1 = ie.unpack_fx(arow_raw, arow_fx_off + 48)
     check(arow_fx1["opcode"] == 221 and arow_fx1["p1"] == 9 and arow_fx1["p2"] == ds_sectype, arow_fx1)
     check(g.file("override/SELF58.ITM") is None, "self-only SELF58.ITM should not be modified")
+
+    # Multi-ability SPCL123.SPL: ability 0 untouched, ability 1 keeps op126 + op54(p1=0) and extracts op40 to SPCL123A.SPL
+    spcl123 = g.spl("SPCL123")
+    check([(e["opcode"], e["p1"]) for e in spcl123["abilities"][0]["effects"]] == [(126, 0)], spcl123["abilities"][0])
+    ab1_ops = [(e["opcode"], e["p1"], e["resource"].upper()) for e in spcl123["abilities"][1]["effects"]]
+    check(ab1_ops[:3] == [(126, 0, ""), (54, 0, ""), (146, 0, "SPCL123A")] and ab1_ops[3][0] == 221, ab1_ops)
+
+    # BRAC16.ITM (op16 p2=1) sets HASTE_IMMUNITY (op328) inside BRAC16.SPL
+    brac16_sub = parse_spl_full(g.file("override/BRAC16.SPL"))
+    check(any(e["opcode"] == 328 and e["duration"] == 20 for e in brac16_sub["abilities"][0]["effects"]), brac16_sub)
 
     # Corrupted/truncated SPWI124.SPL warns cleanly without aborting the install
     biff_bad = make_more_biff()
