@@ -1,0 +1,375 @@
+{
+ "about": "English specs and build status of the vanilla-batch rows, in the same format as docs/build-specs.json.",
+ "rows": {
+  "arcane.level1.find_familiar": {
+   "resrefs": ["SPWI123"],
+   "parts": [
+    {"spec": "School set to Universal (0) with specialist exclusions cleared so all specialist mages can cast it; description updated.", "status": "done"},
+    {"spec": "In EET, familiar HP should scale across BG1, SoD, SoA and ToB instead of starting BG1 with BG2 HP; blocked pending exact HP numbers per campaign.", "status": "todo"}
+   ]
+  },
+  "arcane.level1.obscuring_mist": {
+   "resrefs": ["SPWI106"],
+   "parts": [
+    {"spec": "Spell Revisions' Obscuring Mist replacement is dropped; Blindness stays as Blindness with its duration shortened from 2 hours to 1 round per 2 caster levels (minimum 2 rounds at levels 1-5, 3 rounds at 6-7, 4 rounds at 8-9, maximum 5 rounds at 10+); description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level10.comet": {
+   "resrefs": ["SPWI925"],
+   "parts": [
+    {"spec": "Stays vanilla for now. Splitting damage into physical and fire is a possible later change.", "status": "later"}
+   ]
+  },
+  "arcane.level2.glitterdust": {
+   "resrefs": ["SPWI224"],
+   "parts": [
+    {"spec": "Stays vanilla (already school Conjuration in BG2:EE 2.7.3.0, and Spell Immunity: Divination blocks only Divination spells).", "status": "done"}
+   ]
+  },
+  "arcane.level2.resist_fear": {
+   "resrefs": ["SPWI210"],
+   "parts": [
+    {"spec": "Stays vanilla. Removing MUMMYDSP.SPL from opcode 321 is blocked because MUMMYDSP.SPL is a Spell Revisions-only resource from SR's dropped Create Undead mummy and does not exist in vanilla BG2:EE.", "status": "todo"}
+   ]
+  },
+  "arcane.level2.sound_burst": {
+   "resrefs": ["SPWI223"],
+   "parts": [
+    {"spec": "Spell Revisions' Sound Burst replacement is dropped; Deafness stays vanilla for now.", "status": "later"}
+   ]
+  },
+  "arcane.level3.monster_summoning_iii": {
+   "resrefs": ["SPWI309"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD Monster Summoning I progression via IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level4.greater_malison": {
+   "resrefs": ["SPWI412"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; Greater Malison stays vanilla.", "status": "done"}
+   ]
+  },
+  "arcane.level4.vitriolic_sphere": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Spell Revisions' Vitriolic Sphere is dropped; the IWD version comes from IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level5.cloudkill": {
+   "resrefs": ["SPWI502"],
+   "parts": [
+    {"spec": "Stays vanilla except school is set to Conjuration (Diviner exclusion) like all cloud spells; description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level5.conjure_lesser_air_elemental": {
+   "resrefs": ["SPWI520"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level5.conjure_lesser_earth_elemental": {
+   "resrefs": ["SPWI521"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level5.conjure_lesser_fire_elemental": {
+   "resrefs": ["SPWI516"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level5.monster_summoning_v": {
+   "resrefs": ["SPWI504"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD Monster Summoning III progression via IWDification.", "status": "done"}
+   ]
+  },
+  "arcane.level5.phantom_blade": {
+   "resrefs": ["SPWI518"],
+   "parts": [
+    {"spec": "Stays vanilla (school Evocation).", "status": "done"}
+   ]
+  },
+  "arcane.level5.waves_of_fatigue": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Spell Revisions' Waves of Fatigue is dropped.", "status": "done"}
+   ]
+  },
+  "arcane.level6.acid_fog": {
+   "resrefs": ["SPWI614"],
+   "parts": [
+    {"spec": "Spell Revisions' Acid Fog replacement is dropped; Death Fog stays as Death Fog with its school set to Conjuration (Diviner exclusion) and description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level6.conjure_air_elemental": {
+   "resrefs": ["SPWI621"],
+   "parts": [
+    {"spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%); description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level6.conjure_earth_elemental": {
+   "resrefs": ["SPWI622"],
+   "parts": [
+    {"spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%); description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level6.conjure_fire_elemental": {
+   "resrefs": ["SPWI620"],
+   "parts": [
+    {"spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%); description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level6.disintegrate": {
+   "resrefs": ["SPWI616"],
+   "parts": [
+    {"spec": "Stays vanilla save-or-die (Death Ward already protects against opcode 238 in vanilla). Its Mordenkainen's Sword counter is built on arcane.level7.mordenkainens_sword.", "status": "done"}
+   ]
+  },
+  "arcane.level6.mislead": {
+   "resrefs": ["SPWI607"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; Mislead stays vanilla.", "status": "done"}
+   ]
+  },
+  "arcane.level6.tensers_transformation": {
+   "resrefs": ["SPWI603"],
+   "parts": [
+    {"spec": "Stays vanilla; mutual exclusion in the Transformation group (with Righteous Magic and Holy Power) waits for the EEex stacking module.", "status": "todo"}
+   ]
+  },
+  "arcane.level7.finger_of_death": {
+   "resrefs": ["SPWI713"],
+   "parts": [
+    {"spec": "Stays vanilla except its slay effect allows a save vs. death with no penalty instead of vs. spell at -2; description updated.", "status": "done"}
+   ]
+  },
+  "arcane.level7.mordenkainens_sword": {
+   "resrefs": ["SPWI716", "SPWI616"],
+   "parts": [
+    {"spec": "Mordenkainen's Sword stays vanilla, and Disintegrate (SPWI616) destroys it instantly without a save (targeting race SWORD via DESTSELF.EFF before the normal disintegrate effect).", "status": "done"}
+   ]
+  },
+  "arcane.level9.black_blade_of_disaster": {
+   "resrefs": ["SPWI915"],
+   "parts": [
+    {"spec": "Stays vanilla.", "status": "done"}
+   ]
+  },
+  "arcane.level9.wish": {
+   "resrefs": ["SPWI919"],
+   "parts": [
+    {"spec": "Stays vanilla except school is set to Universal (0) with specialist exclusions cleared.", "status": "done"}
+   ]
+  },
+  "arcane.summon_nishruu_relocation": {
+   "resrefs": ["SPWI624", "SPWI719"],
+   "parts": [
+    {"spec": "Summon Nishruu and Summon Hakeashar stay at their vanilla spell levels.", "status": "done"}
+   ]
+  },
+  "divine.animal_summoning_iv": {
+   "resrefs": ["SPPR402"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; Animal Summoning I stays vanilla and is restricted to druids and rangers.", "status": "done"}
+   ]
+  },
+  "divine.animal_summoning_v": {
+   "resrefs": ["SPPR501"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; Animal Summoning II stays vanilla and is restricted to druids and rangers.", "status": "done"}
+   ]
+  },
+  "divine.animal_summoning_vi": {
+   "resrefs": ["SPPR602"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; Animal Summoning III stays vanilla and is restricted to druids and rangers.", "status": "done"}
+   ]
+  },
+  "divine.armor_of_faith": {
+   "resrefs": ["SPPR111"],
+   "parts": [
+    {"spec": "Stays vanilla; physical damage resistance stacking rules wait for a decision and the EEex stacking module.", "status": "todo"}
+   ]
+  },
+  "divine.barkskin": {
+   "resrefs": ["SPPR202"],
+   "parts": [
+    {"spec": "Stays vanilla and is restricted to druids and rangers.", "status": "done"},
+    {"spec": "Natural armor bonus type waits for the EEex stacking module.", "status": "todo"}
+   ]
+  },
+  "divine.chant": {
+   "resrefs": ["SPPR203"],
+   "parts": [
+    {"spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification. Favor group stacking waits for the EEex module.", "status": "done"}
+   ]
+  },
+  "divine.conjure_air_elemental": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Spell Revisions' added priest Conjure Air Elemental is dropped.", "status": "done"}
+   ]
+  },
+  "divine.conjure_animals_deprecated": {
+   "resrefs": ["SPPR604"],
+   "parts": [
+    {"spec": "Conjure Animals stays in the game as vanilla and is restricted to druids and rangers.", "status": "done"}
+   ]
+  },
+  "divine.conjure_earth_elemental": {
+   "resrefs": ["SPPR702"],
+   "parts": [
+    {"spec": "Stays at priest level 7; 12/16/24 HD elemental probabilities scale with caster level from 64%/35%/1% at level 11 (61%/37%/2% at 12, 52%/42%/6% at 15) to 37%/51%/12% at level 20+; description updated.", "status": "done"}
+   ]
+  },
+  "divine.conjure_fire_elemental": {
+   "resrefs": ["SPPR605"],
+   "parts": [
+    {"spec": "Stays at priest level 6; 12/16/24 HD elemental probabilities scale with caster level from 64%/35%/1% at level 11 (61%/37%/2% at 12, 52%/42%/6% at 15) to 37%/51%/12% at level 20+; description updated.", "status": "done"}
+   ]
+  },
+  "divine.earth_elemental_transformation": {
+   "resrefs": ["SPPR732"],
+   "parts": [
+    {"spec": "Stays vanilla for now.", "status": "later"}
+   ]
+  },
+  "divine.entangle": {
+   "resrefs": ["SPPR105"],
+   "parts": [
+    {"spec": "Stays vanilla except the save switches from vs. spell to vs. breath (keeping the vanilla +3 bonus), and flying, incorporeal, elemental, giant/ettin and dragon creatures are immune by race (WYVERN, BEHOLDER, MEPHIT, SPECTRE, WRAITH, SHADOW, MIST, ELEMENTAL, GIANT, ETTIN, DRAGON); description updated.", "status": "done"}
+   ]
+  },
+  "divine.finger_of_death": {
+   "resrefs": ["SPPR708"],
+   "parts": [
+    {"spec": "Stays vanilla except its slay effect allows a save vs. death with no penalty instead of vs. spell at -2; description updated.", "status": "done"}
+   ]
+  },
+  "divine.fire_elemental_transformation": {
+   "resrefs": ["SPPR731"],
+   "parts": [
+    {"spec": "Stays vanilla.", "status": "done"}
+   ]
+  },
+  "divine.flame_blade": {
+   "resrefs": ["SPPR206", "FBLADE"],
+   "parts": [
+    {"spec": "Restricted to druids and rangers, and its created blade (FBLADE.ITM) is flagged as a magical weapon (+1 enchantment if unenchanted) so it can strike creatures requiring magical weapons; description updated.", "status": "done"}
+   ]
+  },
+  "divine.holy_smite": {
+   "resrefs": ["SPPR313"],
+   "parts": [
+    {"spec": "Stays vanilla for now.", "status": "later"}
+   ]
+  },
+  "divine.regeneration_druid": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Spell Revisions' level-6 druid copy of Regeneration is dropped; druids use level-7 Regeneration.", "status": "done"}
+   ]
+  },
+  "divine.resist_fear": {
+   "resrefs": ["SPPR108"],
+   "parts": [
+    {"spec": "Stays vanilla. Removing MUMMYDSP.SPL from opcode 321 is blocked because MUMMYDSP.SPL is a Spell Revisions-only resource and does not exist in vanilla BG2:EE.", "status": "todo"}
+   ]
+  },
+  "divine.righteous_fury": {
+   "resrefs": ["SPPR513"],
+   "parts": [
+    {"spec": "Spell Revisions' Righteous Fury is dropped; Righteous Magic stays vanilla with its casting time reduced from 9 to 5 and description updated.", "status": "done"},
+    {"spec": "Mutual exclusion in the Transformation group waits for the EEex stacking module.", "status": "todo"}
+   ]
+  },
+  "divine.shield_of_the_archons": {
+   "resrefs": ["SPPR701"],
+   "parts": [
+    {"spec": "Stays vanilla for now.", "status": "later"}
+   ]
+  },
+  "divine.storm_of_vengeance": {
+   "resrefs": ["SPPR722"],
+   "parts": [
+    {"spec": "Stays vanilla.", "status": "done"}
+   ]
+  },
+  "divine.sunray": {
+   "resrefs": ["SPPR707"],
+   "parts": [
+    {"spec": "Stays vanilla for now.", "status": "later"}
+   ]
+  },
+  "divine.true_seeing": {
+   "resrefs": ["SPPR505", "SPWI609"],
+   "parts": [
+    {"spec": "Stays vanilla with casting time reduced from 8 to 6 on both priest True Seeing (SPPR505) and wizard True Sight (SPWI609); descriptions updated.", "status": "done"}
+   ]
+  },
+  "divine.unholy_blight": {
+   "resrefs": ["SPPR314"],
+   "parts": [
+    {"spec": "Stays vanilla for now; Doom/Curse/Unholy Blight group stacking waits for the EEex stacking module.", "status": "later"}
+   ]
+  }
+ },
+ "chat": [
+  {
+   "id": "chat.elemental_scaling",
+   "title": "Elemental summoning 12/16/24 HD probability scaling",
+   "rows": [
+    "arcane.level6.conjure_fire_elemental",
+    "arcane.level6.conjure_air_elemental",
+    "arcane.level6.conjure_earth_elemental",
+    "divine.conjure_fire_elemental",
+    "divine.conjure_earth_elemental"
+   ],
+   "resrefs": ["SPWI620", "SPWI621", "SPWI622", "SPPR605", "SPPR702"],
+   "parts": [
+    {"spec": "Wizard Conjure Fire/Air/Earth Elemental scale their 12/16/24 HD chances from 64/35/1 at level 12 to 60/35/5 at level 16 and 56/35/9 at level 20+. Druid Conjure Fire/Earth Elemental scale from 64/35/1 at level 11 (61/37/2 at level 12, 52/42/6 at level 15) to 37/51/12 at level 20+.", "status": "done"}
+   ]
+  },
+  {
+   "id": "chat.druid_only_class_lists",
+   "title": "Druid-only priest spells",
+   "rows": [
+    "divine.barkskin",
+    "divine.flame_blade",
+    "divine.animal_summoning_iv",
+    "divine.animal_summoning_v",
+    "divine.animal_summoning_vi",
+    "divine.conjure_animals_deprecated"
+   ],
+   "resrefs": ["SPPR202", "SPPR206", "SPPR402", "SPPR501", "SPPR602", "SPPR604"],
+   "parts": [
+    {"spec": "Barkskin, Flame Blade, Animal Summoning I-III (SPPR402, SPPR501, SPPR602) and Conjure Animals (SPPR604) are restricted to druids and rangers via the priest class flags at SPL offset 0x20.", "status": "done"}
+   ]
+  },
+  {
+   "id": "chat.casting_times",
+   "title": "Per-spell casting time reductions",
+   "rows": ["divine.righteous_fury", "divine.true_seeing"],
+   "resrefs": [
+    "SPPR101",
+    "SPPR503",
+    "SPPR607",
+    "SPPR603",
+    "SPPR612",
+    "SPPR509",
+    "SPPR513",
+    "SPPR505",
+    "SPWI609",
+    "SPPR304",
+    "SPPR309",
+    "SPWI214"
+   ],
+   "parts": [
+    {"spec": "Casting times reduced: Bless (9 to 5), Flame Strike (8 to 5), Heal (9 to 6), Blade Barrier (9 to 6), Bolt of Glory (9 to 6), Magic Resistance (9 to 5), Righteous Magic (9 to 5), True Seeing / True Sight (8 to 6 on SPPR505 and SPWI609), Glyph of Warding (9 to 5), Invisibility Purge (8 to 4) and Strength (9 to 5). Fire Seeds stays at 9.", "status": "done"}
+   ]
+  }
+ ]
+}

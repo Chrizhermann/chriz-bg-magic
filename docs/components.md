@@ -6,8 +6,9 @@ move to the Chriz script engine later. Values not named here stay as in the base
 ## Layout
 
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`); any of them can move to a
-component of its own without changes. The user-facing layout is Christopher's decision.
+decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`); any of
+them can move to a component of its own without changes. The user-facing layout is
+Christopher's decision.
 
 None of the changes below needs EEex. They work on BG2:EE and EET (built and checked on
 2.7.3.0).
@@ -111,6 +112,90 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   stays for now, although Web may be too strong in the base game. An idea on the same list,
   far off: webs that can catch fire.
 - Radius and school come later.
+
+## Schools (`cbmagic_vanilla_find_familiar_universal`, `cbmagic_vanilla_wish_universal`, `cbmagic_vanilla_cloudkill_school`, `cbmagic_vanilla_death_fog_school`)
+
+- Find Familiar and Wish belong to the Universal school (`0`) with no specialist mage
+  exclusions, so every specialist can learn and cast them. Find Familiar's description and
+  scroll say `(Universal)`.
+- Cloudkill and Death Fog belong to Conjuration (`2`, Diviner exclusion) like the other
+  cloud spells. Their descriptions and scrolls say `(Conjuration/Summoning)`.
+
+## Blindness (`cbmagic_vanilla_blindness_duration`)
+
+Blindness lasts 1 round per 2 caster levels, at least 2 rounds and at most 5 rounds (12 s
+at levels 1-5, 18 s at 6-7, 24 s at 8-9, 30 s at 10+), instead of the base game's 2 hours.
+
+- How: a single-ability Blindness spell is expanded to four level-gated abilities (levels
+  1, 6, 8 and 10), or an already level-scaled spell has its blindness effect durations
+  updated in place; instant companion effects (such as the status string) keep their zero
+  duration. Its description and scroll state `1 round/2 levels (2 to 5 rounds)`.
+
+## Finger of Death (`cbmagic_vanilla_wizard_finger_of_death_save`, `cbmagic_vanilla_priest_finger_of_death_save`)
+
+Both wizard and priest Finger of Death allow a save vs. death with no penalty on the slay
+effect (and effects that share its save roll), instead of the base game's save vs. spell
+at -2. The damage on a successful save stays as in the base game; descriptions and the
+wizard scroll are updated.
+
+## Disintegrate vs. Mordenkainen's Sword (`cbmagic_vanilla_mordenkainens_sword_disintegrate`)
+
+Disintegrate destroys Mordenkainen's Sword (`RACE = SWORD`) outright without a saving
+throw, while keeping its normal save-or-die behaviour against other targets.
+
+- How: before the disintegrate effect in each ability, an external effect (`DESTSELF.EFF`
+  targeting `RACE = SWORD`, no save) and a self-immunity block for `RACE = SWORD` are
+  inserted so the sword is destroyed cleanly without running the normal disintegrate roll.
+
+## Entangle (`cbmagic_vanilla_entangle`)
+
+- Save vs. breath instead of vs. spell, keeping the base game's +3 bonus on the entangle
+  effect and every effect that shares its roll. Its description says so.
+- Flying, incorporeal, elemental, giant and dragon creatures are immune by race (`WYVERN`,
+  `BEHOLDER`, `MEPHIT`, `SPECTRE`, `WRAITH`, `SHADOW`, `MIST`, `ELEMENTAL`, `GIANT`,
+  `ETTIN`, `DRAGON`).
+
+## Flame Blade (`cbmagic_vanilla_flame_blade`)
+
+- Restricted to druids and rangers.
+- The created blade (`FBLADE.ITM`) is flagged as a magical weapon with enchantment +1 (if
+  unenchanted), so it can hit creatures that require a magical weapon. Existing higher
+  enchantments from other mods are preserved. Its description is updated.
+
+## Elemental summoning scaling (`cbmagic_vanilla_conjure_fire_elemental_wiz`, `cbmagic_vanilla_conjure_air_elemental_wiz`, `cbmagic_vanilla_conjure_earth_elemental_wiz`, `cbmagic_vanilla_conjure_fire_elemental_priest`, `cbmagic_vanilla_conjure_earth_elemental_priest`)
+
+The three probability windows (12, 16 and 24 Hit Dice elementals) scale per ability level
+while keeping each spell's other effects (including mental combat on the wizard spells):
+
+- Wizard Conjure Fire, Air and Earth Elemental: 64%/35%/1% at level 12, shifting 1% per
+  level from 12 HD to 24 HD (60%/35%/5% at level 16, 56%/35%/9% at level 20+).
+- Druid Conjure Fire and Earth Elemental: 64%/35%/1% at level 11, 61%/37%/2% at level 12,
+  52%/42%/6% at level 15, and 37%/51%/12% at level 20+ (interpolated evenly across levels
+  11-20 with sums at 100%).
+
+## Druid-only priest spells (`cbmagic_vanilla_barkskin_druid`, `cbmagic_vanilla_animal_summoning_1_druid`, `cbmagic_vanilla_animal_summoning_2_druid`, `cbmagic_vanilla_animal_summoning_3_druid`, `cbmagic_vanilla_conjure_animals_druid`)
+
+Barkskin, Flame Blade, Animal Summoning I-III and Conjure Animals are restricted to druids
+and rangers (cleric/paladin exclusion bit set in the priest class word at SPL offset
+`0x20`, preserving alignment bits).
+
+## Per-spell casting times (`cbmagic_vanilla_*_ct`)
+
+Casting times are lowered on abilities that are slower than the target value (faster
+abilities from other mods are preserved) and descriptions are updated:
+
+- Bless (`cbmagic_vanilla_bless_ct`): 9 to 5.
+- Flame Strike (`cbmagic_vanilla_flame_strike_ct`): 8 to 5.
+- Heal (`cbmagic_vanilla_heal_ct`): 9 to 6.
+- Blade Barrier (`cbmagic_vanilla_blade_barrier_ct`): 9 to 6.
+- Bolt of Glory (`cbmagic_vanilla_bolt_of_glory_ct`): 9 to 6.
+- Magic Resistance (`cbmagic_vanilla_magic_resistance_ct`): 9 to 5.
+- Righteous Magic (`cbmagic_vanilla_righteous_magic_ct`): 9 to 5.
+- True Seeing (`cbmagic_vanilla_true_seeing_priest_ct`) and True Sight
+  (`cbmagic_vanilla_true_sight_wizard_ct`): 8 to 6.
+- Glyph of Warding (`cbmagic_vanilla_glyph_of_warding_ct`): 9 to 5.
+- Invisibility Purge (`cbmagic_vanilla_invisibility_purge_ct`): 8 to 4.
+- Strength (`cbmagic_vanilla_strength_ct`): 9 to 5.
 
 ## Descriptions
 
