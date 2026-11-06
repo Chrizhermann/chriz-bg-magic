@@ -34,4 +34,10 @@
 @20021 = ~Casting Time: 8~
 @20022 = ~Casting Time: 6~
 @20023 = ~Casting Time: 5~
-@20024 = ~Casting Time: 4~
+@20024 = ~Casting Time: 3~
+@20025 = ~(Enchantment/Charm)~
+@20026 = ~This resistance is set so that if the target already has more Magic Resistance than the priest would confer, it will actually lower it to the set value\.~
+@20027 = ~This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting.~
+@20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
+@20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
+@20030 = ~(Invocation/Evocation)~
