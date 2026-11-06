@@ -192,6 +192,8 @@ When cast, this spell grants the druid and all party members within sight steady
 @40078 = ~Range: 30 ft.~
 @40079 = ~Improved Invisibility, and Shadow Door\.~
 @40080 = ~Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility.~
+@40081 = ~Divine Power~
+@40082 = ~Faerie Fire~
 // SCS batch description updates (@30000+).
 @30001 = ~Each orb will do damage to the target against which there is no save\(.*\n?\)*~
 @30002 = ~Each orb will do damage to the target against which there is no save and an effect against which the target must save vs. Spell:
@@ -298,6 +300,8 @@ When cast, this spell grants the druid and all party members within sight steady
 
 @30073 = ~Saving Throw vs\. Breath Weapon or run away in fear~
 @30074 = ~Saving Throw vs. Spell at -2 or run away in fear~
+@30075 = ~Pain~
+@30076 = ~Insect Swarm~
 
 // --- More batch strings (@50000+) -------------------------------------------------------
 

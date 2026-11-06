@@ -3,7 +3,7 @@ import struct
 
 from fakegame import FakeGame, installed_ok
 from harness import test
-from ie import SAVE_BREATH, SAVE_SPELL, make_2da, make_ids, make_itm, make_spl, make_tlk
+from ie import SAVE_BREATH, SAVE_SPELL, make_2da, make_ids, make_itm, make_spl, make_states_bam, make_tlk
 
 
 def _spl_with_excl(data, excl=0, cast_gfx=0, priest_type=0, spell_type=None):
@@ -143,6 +143,8 @@ def scs_batch1_arcane_spells(work, weidu):
         ]),
         "SPLSTATE.IDS": make_ids([(29, "FREE_ACTION"), (67, "BUFF_PRO_EFFECTS")]),
         "STATS.IDS": make_ids([(88, "STONESKINS"), (125, "WIZARD_FIRE_SHIELD"), (131, "CLERIC_FREE_ACTION")]),
+        "STATDESC.2DA": make_2da(["DESCRIPTION", "BAM_FILE"], [("0", ["1", "****"])]),
+        "STATES.BAM": make_states_bam(),
         "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
         "SPWI118.SPL": chrom_orb,
         "SPWI325.SPL": meteors,
@@ -185,6 +187,15 @@ def scs_batch1_arcane_spells(work, weidu):
     ab7_fx = co["abilities"][5]["effects"]
     assert any(e["opcode"] == 12 and e["dice"] == 2 and e["sides"] == 8 and e["save"] == 0 for e in ab7_fx)
     assert any(e["opcode"] == 175 and e["duration"] == 78 and e["save"] == SAVE_SPELL and e["bonus"] == 0 for e in ab7_fx)
+    pain_row = next(int(row.split()[0]) for row in fg.file("override/STATDESC.2DA").decode("latin-1").splitlines()
+                    if "CBMIPAN" in row)
+    assert any(e["opcode"] == 142 and e["p2"] == pain_row and e["timing"] == 0 and e["duration"] == 6
+               and e["save"] == SAVE_SPELL for e in co["abilities"][1]["effects"])
+    assert not any(e["opcode"] == 142 and e["p2"] in (8, 55, 13)
+                   for ab in co["abilities"] for e in ab["effects"])
+    pain_bam = fg.file("override/CBMIPAN.BAM")
+    cycle_off = struct.unpack_from("<I", pain_bam, 0x0C)[0] + struct.unpack_from("<H", pain_bam, 0x08)[0] * 12
+    assert struct.unpack_from("<HH", pain_bam, cycle_off) == (91 + 66, (91 + 65) * 3)
     assert "paralyzes the target for 13 rounds" in fg.tlk(co["desc"])
 
     # 2. Melf's Minute Meteors: weapon enchantment 6 -> 2
@@ -835,6 +846,8 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
             (120, "CLERIC_INSECT_PLAGUE"),
             (125, "WIZARD_FIRE_SHIELD"),
         ]),
+        "STATDESC.2DA": make_2da(["DESCRIPTION", "BAM_FILE"], [("0", ["1", "****"])]),
+        "STATES.BAM": make_states_bam(),
         "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
         "SPPR319.SPL": sum_ins,
         "SPPR517.SPL": ins_plg,
@@ -848,6 +861,12 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
     out = fg.install()
     assert installed_ok(out), out
+
+    insect_row = next(int(row.split()[0]) for row in fg.file("override/STATDESC.2DA").decode("latin-1").splitlines()
+                      if "CBMIINS" in row)
+    insect_bam = fg.file("override/CBMIINS.BAM")
+    cycle_off = struct.unpack_from("<I", insect_bam, 0x0C)[0] + struct.unpack_from("<H", insect_bam, 0x08)[0] * 12
+    assert struct.unpack_from("<HH", insect_bam, cycle_off) == (83 + 66, (83 + 65) * 3)
 
     # Insects: main spells cast %spell%A; Stage A has undead + Fire Shield op318 immunities;
     # Stage B has damage ticks + Stoneskin op318 before %spell%C; Stage C has save vs. breath spell failure.
@@ -876,6 +895,8 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
         sf_fxs = [e for e in c_fx if e["opcode"] == 60]
         assert len(sf_fxs) == 2
         assert all(e["p1"] == sf_pct and e["save"] == SAVE_BREATH and e["bonus"] == sf_bonus for e in sf_fxs)
+        assert any(e["opcode"] == 142 and e["target"] == 2 and e["p2"] == insect_row and e["timing"] == 0
+                   and e["duration"] == 6 and e["dispel"] == 2 and e["save"] == 0 for e in c_fx)
         assert any(e["opcode"] == 24 for e in c_fx) == has_fear
 
     assert "Saving Throw vs. Breath Weapon each round" in fg.tlk(fg.spl("SPPR319")["desc"])
@@ -932,6 +953,7 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 999999 and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
     assert any(e["opcode"] == 318 and e["resource"].lower() == "cbmgnb1" and e["save"] == SAVE_SPELL and e["bonus"] == 3 for e in nb1_fx)
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 and e["save"] == 0 for e in nb1_fx)
+    assert not any(e["opcode"] == 142 and e["p2"] == 8 for e in nb1_fx)
     assert "blinded for 3 rounds" in fg.tlk(nb["desc"])
 
     # Idempotence check
@@ -1071,6 +1093,8 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
     out = fg.install()
     assert installed_ok(out), out
+    assert "STATES.BAM is unavailable; CBMIPAN.BAM was not made." in out
+    assert "STATES.BAM is unavailable; CBMIINS.BAM was not made." in out
 
     # Custom Skull Trap kept its min_level=15 ability and capped dice at 12
     st = fg.spl("SPWI313")
@@ -1101,9 +1125,9 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 999999 for e in nb1["abilities"][0]["effects"])
     assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb1["abilities"][0]["effects"])
 
-    # Pre-patched Insect Plague recognized as already done
-    assert "CLERIC_INSECT_PLAGUE (SPPR517): changed 0, already 1." in out
-
-
-
+    # A formerly complete Stage C is rebuilt once to gain its native-swarm portrait row.
+    assert "CLERIC_INSECT_PLAGUE (SPPR517): changed 1, already 0." in out
+    insect_c = fg.spl("SPPR517C")["abilities"][0]["effects"]
+    assert any(e["opcode"] == 142 and e["p2"] == 207 and e["timing"] == 0 and e["duration"] == 6
+               and e["dispel"] == 2 and e["save"] == 0 for e in insect_c)
 

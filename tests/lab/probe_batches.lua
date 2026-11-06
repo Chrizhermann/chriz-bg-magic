@@ -256,4 +256,13 @@ function P.force(who, res)
     return true
 end
 
+-- The rows the character record lists: one entry per row, however many effects ask for it.
+function P.icons(who)
+    local s = type(who) == "number" and party(who) or named(who)
+    local out = {}
+    EEex_Utility_IterateCPtrList(s.m_portraitIcons, function(v) out[#out + 1] = v.icon end)
+    table.sort(out)
+    return out
+end
+
 return true

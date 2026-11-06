@@ -167,6 +167,17 @@ BEGIN
   END
   ACTION_IF !(~%found_res%~ STRING_EQUAL ~~) BEGIN
     PRINT ~chriz-bg-magic: Protection From Acid (%found_res%) is in this game already.~
+    COPY_EXISTING ~%found_res%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_add_self_refresh STR_VAR resource = EVAL ~%found_res%~ RET added = added present = present misplaced = misplaced END
+        PATCH_IF (added > 0) BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Protection From Acid (%found_res%): %added% self-refresh effects added.~
+        END
+      END ELSE BEGIN
+        PATCH_WARN ~chriz-bg-magic: Protection From Acid (%found_res%) left as it is: %reason%.~
+      END
+    BUT_ONLY
   END ELSE BEGIN
     LAF cbmagic_warn_text_language STR_VAR label = ~Protection From Acid~ END
     OUTER_SET name_ref = RESOLVE_STR_REF (@50002)
@@ -234,6 +245,14 @@ BEGIN
     ADD_SPELL ~weidu_external/cbmpacid.spl~ 1 4 ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~
     LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~ RET added_res = resref found END
     ACTION_IF found BEGIN
+      COPY_EXISTING ~%added_res%.spl~ ~override~
+        LPF cbmagic_spl_valid RET valid reason END
+        PATCH_IF valid BEGIN
+          LPF cbmagic_add_self_refresh STR_VAR resource = EVAL ~%added_res%~ RET added = added present = present misplaced = misplaced END
+        END ELSE BEGIN
+          PATCH_WARN ~chriz-bg-magic: Protection From Acid (%added_res%) left as it is: %reason%.~
+        END
+      BUT_ONLY
       PRINT ~chriz-bg-magic: Protection From Acid added as %added_res% (CLERIC_CBMAGIC_PROTECTION_FROM_ACID).~
     END
   END
@@ -1408,6 +1427,13 @@ BEGIN
           WRITE_BYTE (fx + 0x02) 2
           WRITE_BYTE (fx + 0x12) 100
           WRITE_BYTE (fx + 0x13) 0
+          READ_SHORT fx op
+          READ_LONG (fx + 0x08) p2
+          // Wild Slow's extracted portrait row must obey the Slow effect's own
+          // dispel/resistance mode; otherwise it survives a dispelled Slow.
+          PATCH_IF (primary_op = 40) AND (op = 142) AND (p2 = 41) BEGIN
+            WRITE_BYTE (fx + 0x0d) op_dispel
+          END
           PATCH_IF (primary_op = 16) BEGIN
             WRITE_LONG (fx + 0x24) 0
             WRITE_LONG (fx + 0x28) 0

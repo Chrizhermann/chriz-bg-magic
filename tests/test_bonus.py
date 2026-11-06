@@ -413,7 +413,14 @@ def bonus_families_every_pair_and_linked_payloads(work, weidu):
 def bonus_pierce_magic_install_choice_and_preservation(work, weidu):
     mr = effect(166, -15, duration=90, power=6, dispel=2, save=1, bonus=-3, prob1=83, prob2=12)
     other = [effect(221, 8, resource="PROTECT"), effect(166, 25, p2=1), effect(174, resource="VISUAL")]
-    data = spell([*other[:1], mr, *other[1:]], level=6)
+    # The callback and its portrait row are deliberately reordered around an unrelated
+    # effect. A second ability has the same native row but no callback and must stay put.
+    portrait = effect(142, p2=106, target=2, timing=4, duration=99, dispel=2, save=1, bonus=-3)
+    foreign_portrait = effect(142, p2=106, target=1, timing=4, duration=98, dispel=3, save=2, bonus=4)
+    data = ie.make_spl(level=6, abilities=[
+        {"target": 5, "effects": [other[0], portrait, mr, *other[1:]]},
+        {"target": 5, "effects": [foreign_portrait, effect(174, resource="SECOND")]},
+    ], desc=0)
     resources = {"SPWI950.SPL": data}
     for enabled in (False, True):
         g = make_game(work / str(int(enabled)), weidu, resources, [(2950, "WIZARD_PIERCE_MAGIC")],
@@ -429,7 +436,13 @@ def bonus_pierce_magic_install_choice_and_preservation(work, weidu):
             check(len(callbacks) == 1 and callbacks[0]["resource"] == "CBMBPM", "MR callback missing")
             assert_preserved(mr, callbacks[0], ("opcode", "p1", "p2", "resource", "timing", "duration"))
             check(callbacks[0]["timing"] == 1 and callbacks[0]["duration"] == 0, "callback must fire once")
-            check([r for r in result if r["opcode"] != 402] == other, "Pierce unrelated effects changed")
+            icons = [r for r in result if r["opcode"] == 142 and r["p2"] == 106]
+            check(len(icons) == 1 and icons[0]["timing"] == 0 and icons[0]["duration"] == 30,
+                  f"Pierce portrait duration: {icons}")
+            check([r for r in result if r["opcode"] not in (402, 142)] == other,
+                  "Pierce unrelated effects changed")
+            check(rows(g, "SPWI950", 1) == [foreign_portrait, effect(174, resource="SECOND")],
+                  "Pierce changed a native portrait row outside its callback group")
 
 
 @test

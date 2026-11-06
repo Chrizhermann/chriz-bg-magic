@@ -265,6 +265,9 @@ BEGIN
     PRINT ~chriz-bg-magic: WIZARD_CHROMATIC_ORB is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
     LAF cbmagic_free_action_splprot_rows RET splstate_row splstate_val stat_row END
+    OUTER_SET pain_icon_ref = RESOLVE_STR_REF (@30075)
+    LAF cbmagic_state_icon INT_VAR row = 91 STR_VAR resref = ~CBMIPAN~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = pain_icon_ref STR_VAR bam = ~CBMIPAN~ RET pain_icon = icon_row END
     OUTER_SET did_change = 0
     OUTER_SET is_already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
@@ -283,18 +286,26 @@ BEGIN
         SET has_l3_fire_nosave = 0
         SET has_l5_fa = 0
         SET has_invoch = 0
+        SET has_legacy_icon = 0
         SET all_range_50 = 1
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
           READ_SHORT (ab_off + a * 0x28 + 0x0e) rng
           READ_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
           READ_SHORT (ab_off + a * 0x28 + 0x1e) n
           READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          SET ab_has_blind = 0
+          SET ab_has_stun = 0
+          SET ab_has_hold = 0
+          SET ab_icon_8 = 0
+          SET ab_icon_55 = 0
+          SET ab_icon_13 = 0
           PATCH_IF (rng != 50) BEGIN
             SET all_range_50 = 0
           END
           FOR (i = 0; i < n; ++i) BEGIN
             SET fx = fx_off + (first + i) * 0x30
             READ_SHORT fx op
+            READ_LONG (fx + 0x08) p2
             READ_LONG (fx + 0x0e) dur
             READ_ASCII (fx + 0x14) res (8) NULL
             READ_LONG (fx + 0x1c) dice
@@ -307,6 +318,12 @@ BEGIN
             PATCH_IF (op = 215) AND (~%res%~ STRING_EQUAL_CASE ~INVOCH~) BEGIN
               SET has_invoch = 1
             END
+            PATCH_IF (op = 74) BEGIN SET ab_has_blind = 1 END
+            PATCH_IF (op = 45) BEGIN SET ab_has_stun = 1 END
+            PATCH_IF (op = 175) BEGIN SET ab_has_hold = 1 END
+            PATCH_IF (op = 142) AND (p2 = 8) BEGIN SET ab_icon_8 = 1 END
+            PATCH_IF (op = 142) AND (p2 = 55) BEGIN SET ab_icon_55 = 1 END
+            PATCH_IF (op = 142) AND (p2 = 13) BEGIN SET ab_icon_13 = 1 END
             PATCH_IF (min_lvl = 3) AND (op = 12) AND (dice = 1) AND (sides = 3) AND (stype = 0) BEGIN
               SET has_l3_fire_nosave = 1
             END
@@ -320,8 +337,11 @@ BEGIN
               SET has_l7_dmg_nosave = 1
             END
           END
+          PATCH_IF (ab_has_blind AND ab_icon_8) OR (ab_has_stun AND ab_icon_55) OR (ab_has_hold AND ab_icon_13) BEGIN
+            SET has_legacy_icon = 1
+          END
         END
-        PATCH_IF (ab_cnt = 6) AND !has_petrify_or_slay AND has_l7_hold AND has_l7_dmg_nosave AND has_l3_fire_nosave AND has_l5_fa AND !has_invoch AND all_range_50 BEGIN
+        PATCH_IF (ab_cnt = 6) AND !has_petrify_or_slay AND has_l7_hold AND has_l7_dmg_nosave AND has_l3_fire_nosave AND has_l5_fa AND !has_invoch AND !has_legacy_icon AND all_range_50 BEGIN
           SET is_already = 1
         END ELSE BEGIN
           READ_LONG 0x1e excl
@@ -404,18 +424,18 @@ BEGIN
           // Level 1: 1d4 magic damage (no save) + blind 1 round (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 4 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1 opcode = 74 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 8 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 2: 1d6 fire damage (no save) + -1 AC / -1 THAC0 for 1 round (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x80000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 6 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 1 opcode = 0 target = 2 power = 1 parameter1 = 0 - 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 2 opcode = 54 target = 2 power = 1 parameter1 = 0 - 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 3 opcode = 142 target = 2 power = 1 parameter2 = pain_icon timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 5 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 3: 1d8 magic damage (no save) + 1d3 fire damage (no save)
           LPF cbmagic_insert_effect INT_VAR ability = 2 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 8 END
           LPF cbmagic_insert_effect INT_VAR ability = 2 position = 1 opcode = 12 target = 2 power = 1 parameter2 = 0x80000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 3 END
@@ -424,28 +444,25 @@ BEGIN
           // Level 4: 1d10 magic damage (no save) + blind 4 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 10 END
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 1 opcode = 74 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 24 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 8 timing = 0 resist_dispel = 1 duration = 24 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 3 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 24 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 5 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 2 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 24 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 5: 1d12 magic damage (no save) + Free Action immunity + stun 3 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 4 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 12 END
           LPF cbmagic_insert_effect INT_VAR ability = 4 position = 1 opcode = 324 target = 2 power = 1 parameter1 = 0 parameter2 = stat_row timing = 0 resist_dispel = 1 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
           LPF cbmagic_insert_effect INT_VAR ability = 4 position = 2 opcode = 324 target = 2 power = 1 parameter1 = splstate_val parameter2 = splstate_row timing = 0 resist_dispel = 1 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
           LPF cbmagic_insert_effect INT_VAR ability = 4 position = 3 opcode = 45 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 4 opcode = 142 target = 2 power = 1 parameter2 = 55 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 5 opcode = 139 target = 2 power = 1 parameter1 = 1280 timing = 1 resist_dispel = 1 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 6 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 18 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 7 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 8 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 4 opcode = 139 target = 2 power = 1 parameter1 = 1280 timing = 1 resist_dispel = 1 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 5 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 18 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 6 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 7 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 7: 2d8 magic damage (no save) + hold 13 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 2 dicesize = 8 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 1 opcode = 175 target = 2 power = 1 parameter2 = 3 timing = 0 resist_dispel = 1 duration = 78 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 13 timing = 0 resist_dispel = 1 duration = 78 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 78 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 2 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 78 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 3 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 4 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Re-append any preserved non-owned effects on each ability
           FOR (a = 0; a < 6; ++a) BEGIN
             SET ecnt = $"extra_cnt"("%a%")
@@ -2646,6 +2663,7 @@ DEFINE_ACTION_FUNCTION cbmagic_patch_insect_spell
           fs_row = 0
           stoneskin_row = 0
           insect_stat = 120
+          insect_icon = 0
   STR_VAR symbol = ~~
           dmg_eff = ~ipdam1~
           find = ~~
@@ -2713,7 +2731,24 @@ BEGIN
                 PATCH_IF (sub_ab_cnt > 0) BEGIN
                   READ_LONG 0x64 sub_ab_off
                   READ_SHORT (sub_ab_off + 0x1e) sub_fx_cnt
-                  PATCH_IF (sub_fx_cnt >= 4) BEGIN SET ok_c = 1 END
+                  READ_LONG 0x6a sub_fx_off
+                  READ_SHORT (sub_ab_off + 0x20) sub_first
+                  SET has_swarm_icon = 0
+                  FOR (si = 0; si < sub_fx_cnt; ++si) BEGIN
+                    SET sub_fx = sub_fx_off + (sub_first + si) * 0x30
+                    READ_SHORT sub_fx sub_op
+                    READ_BYTE (sub_fx + 0x02) sub_tgt
+                    READ_LONG (sub_fx + 0x08) sub_p2
+                    READ_BYTE (sub_fx + 0x0c) sub_timing
+                    READ_BYTE (sub_fx + 0x0d) sub_dispel
+                    READ_LONG (sub_fx + 0x0e) sub_dur
+                    READ_LONG (sub_fx + 0x24) sub_save
+                    PATCH_IF (sub_op = 142) AND (sub_tgt = 2) AND (sub_p2 = insect_icon)
+                             AND (sub_timing = 0) AND (sub_dispel = 2) AND (sub_dur = 6) AND (sub_save = 0) BEGIN
+                      SET has_swarm_icon = 1
+                    END
+                  END
+                  PATCH_IF (sub_fx_cnt >= 5) AND has_swarm_icon BEGIN SET ok_c = 1 END
                 END
               END
           END
@@ -2758,6 +2793,7 @@ BEGIN
       COPY_EXISTING ~%spell%c.spl~ ~override~
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 0 target = 2 timing = 0 duration = 6 parameter1 = (0 - 2) resist_dispel = 2 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 54 target = 2 timing = 0 duration = 6 parameter1 = (0 - 2) resist_dispel = 2 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 timing = 0 duration = 6 parameter2 = insect_icon resist_dispel = 2 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 60 target = 2 timing = 0 duration = 6 parameter1 = sf_pct parameter2 = 0 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 60 target = 2 timing = 0 duration = 6 parameter1 = sf_pct parameter2 = 1 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 timing = 0 duration = 6 parameter2 = 83 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
@@ -3061,6 +3097,9 @@ BEGIN
   ACTION_IF !(f1 OR f2 OR f3) BEGIN
     PRINT ~chriz-bg-magic: CLERIC_SUMMON_INSECTS, CLERIC_INSECT_PLAGUE, and CLERIC_CREEPING_DOOM are not in SPELL.IDS or have no .spl file — skipping.~
   END ELSE BEGIN
+    OUTER_SET insect_icon_ref = RESOLVE_STR_REF (@30076)
+    LAF cbmagic_state_icon INT_VAR row = 83 STR_VAR resref = ~CBMIINS~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = insect_icon_ref STR_VAR bam = ~CBMIINS~ RET insect_icon = icon_row END
     LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 1 RET undead_row = row END
     OUTER_SET fs_stat = IDS_OF_SYMBOL (~stats~ ~WIZARD_FIRE_SHIELD~)
     ACTION_IF (fs_stat < 0) BEGIN OUTER_SET fs_stat = 125 END
@@ -3078,7 +3117,7 @@ BEGIN
     OUTER_SPRINT replace @30064
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 7 overall_save = 1 overall_bonus = (0 - 4) dmg_tick = 2 sf_pct = 50 sf_bonus = 0 fear = 0
-              undead_row fs_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat insect_icon
       STR_VAR symbol = ~CLERIC_SUMMON_INSECTS~ dmg_eff = ~ipdam1~ find replace
       RET s1 = spell f1 = found
     END
@@ -3088,7 +3127,7 @@ BEGIN
     OUTER_SPRINT replace @30066
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 6 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
-              undead_row fs_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat insect_icon
       STR_VAR symbol = ~CLERIC_INSECT_PLAGUE~ dmg_eff = ~ipdam1~ find replace
       RET s2 = spell f2 = found
     END
@@ -3098,7 +3137,7 @@ BEGIN
     OUTER_SPRINT replace @30068
     LAF cbmagic_patch_insect_spell
       INT_VAR duration = 3 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
-              undead_row fs_row stoneskin_row insect_stat = ins_stat
+              undead_row fs_row stoneskin_row insect_stat = ins_stat insect_icon
       STR_VAR symbol = ~CLERIC_CREEPING_DOOM~ dmg_eff = ~ipdam2~ find replace
       RET s3 = spell f3 = found
     END
@@ -3163,12 +3202,16 @@ BEGIN
                   READ_SHORT (s_ab_off + 0x20) s_first
                   SET has_s55 = 0
                   SET has_s74 = 0
+                  SET has_s_icon = 0
                   FOR (si = 0; si < s_n; ++si) BEGIN
-                    READ_SHORT (s_fx_off + (s_first + si) * 0x30) s_op
+                    SET s_fx = s_fx_off + (s_first + si) * 0x30
+                    READ_SHORT s_fx s_op
+                    READ_LONG (s_fx + 0x08) s_p2
                     PATCH_IF (s_op = 55) BEGIN SET has_s55 = 1 END
                     PATCH_IF (s_op = 74) BEGIN SET has_s74 = 1 END
+                    PATCH_IF (s_op = 142) AND (s_p2 = 8) BEGIN SET has_s_icon = 1 END
                   END
-                  PATCH_IF has_s55 AND has_s74 BEGIN
+                  PATCH_IF has_s55 AND has_s74 AND !has_s_icon BEGIN
                     SET nb1_ok = 1
                   END
                 END
@@ -3199,10 +3242,8 @@ BEGIN
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 61 target = 2 power = 7 parameter1 = 0xc8c8c800 parameter2 = 25 timing = 1 resist_dispel = 1 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 174 target = 2 power = 7 timing = 1 resist_dispel = 1 STR_VAR resource = ~EFF_P71B~ END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 74 target = 2 power = 7 timing = 0 duration = 999999 resist_dispel = 1 savingthrow = 1 savebonus = 3 END
-        LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 power = 7 parameter2 = 8 timing = 0 duration = 999999 resist_dispel = 1 savingthrow = 1 savebonus = 3 END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 power = 7 timing = 0 duration = 1 resist_dispel = 1 savingthrow = 1 savebonus = 3 STR_VAR resource = ~cbmgnb1~ END
         LPF ADD_SPELL_EFFECT INT_VAR opcode = 74 target = 2 power = 7 timing = 0 duration = 18 resist_dispel = 1 END
-        LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 power = 7 parameter2 = 8 timing = 0 duration = 18 resist_dispel = 1 END
 
       // Main spell: delete owned slay and blindness effects (preserving caster op215 and any
       // unrelated effects), and cast CBMGNB1 on self (target = 1) so CBMGNB1's area projectile delivers it.

@@ -20,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "bonus", "smoke")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -360,6 +360,118 @@ def sequencer(c, check):
     c.p("sq-end", 'clear(1, {"SPWI510", "SPWI511"})')
 
 
+RECORD = {}
+
+
+def record_rows(game):
+    """Row label to text, from the installed STATDESC.2DA."""
+    spec = importlib.util.spec_from_file_location("record_ie", HERE.parent / "ie.py")
+    ie = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ie)
+    game = ie.Game(game)
+    for line in game.get("STATDESC", "2DA").decode("latin-1").splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[0].isdigit():
+            RECORD[int(parts[0])] = game.tlk(int(parts[1]))
+
+
+def record(c, check):
+    # What the character record lists, on a fresh dummy per case: the sprite's portrait icons.
+    def fresh(save):
+        c.p("rc-spawn", 'spawn("TASLOI01", 160, 0)')
+        time.sleep(1.1)
+        c.lua("rc-prep", f'CBMP.set_saves("Tasloi", {{spell = {save}, breath = {save}, death = {save}}}, 120) '
+                         'CBMP.fx("Tasloi", 208, 1, 0, 120) return true')
+
+    def apply(res, wait=1.6):
+        c.p(f"rc-{res}", f'self_apply("Tasloi", "{res}")')
+        time.sleep(wait)
+
+    def shown():
+        return sorted(RECORD.get(row, str(row)) for row in c.p("rc-rows", 'icons("Tasloi")') or [])
+
+    def done():
+        c.p("rc-tidy", "remove_all_others()")
+        time.sleep(0.8)
+
+    fresh(20)
+    apply("SPPR116")
+    rows = shown()
+    check("Faerie Fire is listed on a failed save", "Faerie Fire" in rows, rows=rows)
+    done()
+    fresh(1)
+    apply("SPPR116")
+    rows = shown()
+    check("Faerie Fire is not listed on a made save", "Faerie Fire" not in rows, rows=rows)
+    done()
+    for res in ("SPPR319", "SPPR517", "SPPR717"):
+        fresh(20)
+        apply(res)
+        rows = shown()
+        check(f"{res}: a failed save lists the swarm and the spell failure",
+              "Insect Swarm" in rows and "Spell Failure" in rows, rows=rows)
+        done()
+        # Well below 1: Panic carries a -2 penalty, and a save of 1 would still fail one roll in ten.
+        fresh(-5)
+        apply(res)
+        rows = shown()
+        if res == "SPPR319":
+            # Only this spell has a save against the whole swarm.
+            check(f"{res}: a made save keeps the swarm off", not rows, rows=rows)
+        else:
+            check(f"{res}: a made save still lists the swarm, nothing else of it",
+                  "Insect Swarm" in rows and "Spell Failure" not in rows and "Panic" not in rows, rows=rows)
+        done()
+    fresh(20)
+    apply("SPPR412")
+    rows = shown()
+    check("Divine Power is listed by its name", "Divine Power" in rows and "Holy Power" not in rows, rows=rows)
+    done()
+    fresh(20)
+    apply("SPWI608")
+    effects = c.p("rc-pierce", 'ops("Tasloi", {142, 166})') or []
+    icon = [e["dur"] for e in effects if e["op"] == 142 and e["p2"] == 106]
+    lowered = [e["dur"] for e in effects if e["op"] == 166]
+    check("Pierce Magic: the entry ends with the lowered resistance",
+          icon and lowered and abs(icon[0] - lowered[0]) <= 45, effects=effects)
+    done()
+    fresh(20)
+    apply("SPWI411")
+    rows = shown()
+    check("Hopelessness: one entry for the sleeper", "Hopelessness" in rows and "Sleep" not in rows, rows=rows)
+    c.p("rc-wake", 'damage("Tasloi", 1)')
+    time.sleep(1.5)
+    rows = shown()
+    check("Hopelessness: the entry goes when the target wakes", "Hopelessness" not in rows, rows=rows)
+    done()
+    fresh(20)
+    c.p("rc-immune", 'fx("Tasloi", 101, 0, 39, 60)')
+    time.sleep(0.5)
+    apply("SPWI411")
+    rows = shown()
+    check("Hopelessness: no entry on a creature immune to sleep", "Hopelessness" not in rows, rows=rows)
+    done()
+    fresh(20)
+    c.p("rc-strong", 'fx("Tasloi", 44, 19, 1, 60)')
+    time.sleep(0.5)
+    apply("SPPR312")
+    left_out = c.p("rc-strength", 'ops("Tasloi", {328})') or []
+    rows = shown()
+    check("Strength of One: who is left out gets neither entry nor spell state", "Strength" not in rows and not left_out,
+          rows=rows, effects=left_out)
+    done()
+    stale = {"Feebleminded", "Confused", "Rigid Thinking", "Chaos", "Nauseated", "Decaying", "Poisoned"}
+    for res in ("SPWI509", "SPWI401", "SPPR311", "SPWI508", "SPWI213", "SPPR610"):
+        fresh(20)
+        apply(res, 1.4)
+        before = shown()
+        apply("SPPR713", 1.8)
+        rows = shown()
+        check(f"Greater Restoration clears the entries of {res}", (set(before) & stale) and not (set(rows) & stale),
+              before=before, after=rows)
+        done()
+
+
 def smoke(c, check):
     # Every changed spell cast once at a dummy: the game must survive and keep answering.
     c.p("sm-spawn", 'spawn("TASLOI01", 160, 0)')
@@ -685,6 +797,8 @@ def main():
     selected = args[args.index("--only") + 1].split(",")
     if "bonus" in selected and "--game" in args:
         BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
+    if "record" in selected and "--game" in args:
+        record_rows(Path(args[args.index("--game") + 1]))
     sys.argv = [sys.argv[0], *args]
     rp.GROUPS = GROUPS
     rp.run_checks = run_checks

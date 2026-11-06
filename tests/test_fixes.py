@@ -86,8 +86,10 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
             check([e["p2"] for e in a["effects"] if e["opcode"] == 39] == [0] * ops(b["effects"]).count(39),
                   f"{res}: sleep still does not wake")
             check(without(a["effects"], 39) == without(b["effects"], 39), f"{res}: other effects changed")
-            check([{**e, "p2": 0} for e in a["effects"] if e["opcode"] == 39] ==
-                  [{**e, "p2": 0} for e in b["effects"] if e["opcode"] == 39], f"{res}: sleep changed beyond waking")
+            expected_sleep = [{**e, "p2": 0, "special": 44 if res == "SPWI411" else e["special"]}
+                              for e in b["effects"] if e["opcode"] == 39]
+            check([{**e, "p2": 0} for e in a["effects"] if e["opcode"] == 39] == expected_sleep,
+                  f"{res}: sleep changed beyond its owned fields")
     check("WIZARD_POWER_WORD_SLEEP (SPWI220): its 1 sleep effects end on damage already" in out, "PWS")
 
     # Web: immunities first, the web's roll vs. breath (the -2 stays), the own save kept.
@@ -153,7 +155,10 @@ def other_layouts_and_mod_variations(work, weidu):
         fx.fx(opcode=142, power=4, p2=37, duration=54),
         fx.fx(opcode=146, power=4, p2=2, timing=1, save=ie.SAVE_SPELL, resource="SPWI411B")]))
     hopeless_sleep = ie.make_spl(1, 4, fx.by_level([1, 8], lambda lvl: [
-        fx.fx(opcode=39, power=4, p2=1, duration=54), fx.fx(opcode=174, power=4, timing=4, duration=54)]))
+        fx.fx(opcode=142, target=2, power=4, p2=44, duration=54),
+        fx.fx(opcode=39, power=4, p2=1, duration=54),
+        fx.fx(opcode=142, target=1, power=4, p2=44, duration=54),
+        fx.fx(opcode=174, power=4, timing=4, duration=54)]))
     pre = fresh(work / "pre", weidu, tp2=PROBE_TP2.replace("%BODY%", r"""
 COPY_EXISTING ~spwi215.spl~ ~override~
   LPF cbmagic_add_immunity INT_VAR row = 4 value = 119 RET added present END
@@ -184,6 +189,13 @@ COPY_EXISTING ~spwi215.spl~ ~override~
     check(g.file("override/SPWI411.SPL") is None, "the spell that only casts the sleep must stay")
     check([e["p2"] for a in g.spl("SPWI411B")["abilities"] for e in a["effects"] if e["opcode"] == 39] == [0, 0],
           "the sleep in its own spell still does not wake")
+    emotion_fx = [e for a in g.spl("SPWI411B")["abilities"] for e in a["effects"]]
+    check(all(e["special"] == 44 for e in emotion_fx if e["opcode"] == 39),
+          f"Hopelessness sleep row: {emotion_fx}")
+    check(not any(e["opcode"] == 142 and e["target"] == 2 and e["p2"] == 44 for e in emotion_fx),
+          f"Hopelessness target icon survived: {emotion_fx}")
+    check(sum(e["opcode"] == 142 and e["target"] == 1 and e["p2"] == 44 for e in emotion_fx) == 2,
+          f"Hopelessness caster icon was changed: {emotion_fx}")
 
 
 @test

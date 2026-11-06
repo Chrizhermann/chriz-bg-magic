@@ -30,7 +30,8 @@ END
 // Patch one spell with a patch function and, if it casts private payloads of its own
 // (a spell whose resref begins with the spell's, e.g. SPWI523 -> SPWI523D), them too.
 // Other spells it casts are named in the log and left alone: they may belong to others.
-// mode: breath (save vs. breath, anchor_opcode), wake (damage wakes sleepers).
+// mode: breath (save vs. breath, anchor_opcode), wake (damage wakes sleepers),
+// emotion_icon (Emotion: Hopelessness' native sleep portrait row).
 DEFINE_ACTION_FUNCTION cbmagic_patch_spell_and_payloads
   INT_VAR anchor_opcode = 12
   STR_VAR spell = ~~ mode = ~~ label = ~~
@@ -65,11 +66,15 @@ BEGIN
                 SET changed += a
                 SET already += b
                 SET others += c
-              END ELSE BEGIN
+              END ELSE PATCH_IF (~%mode%~ STRING_EQUAL ~wake~) BEGIN
                 LPF cbmagic_wake_on_damage RET a = woken b = already c = lasting END
                 SET changed += a
                 SET already += b
                 SET others += c
+              END ELSE BEGIN
+                LPF cbmagic_emotion_hopelessness_icon RET a = changed b = already END
+                SET changed += a
+                SET already += b
               END
               // Spells this one casts.
               READ_LONG 0x64 ab_off
@@ -219,6 +224,10 @@ BEGIN
     END ELSE BEGIN
       LAF cbmagic_patch_spell_and_payloads STR_VAR spell mode = ~wake~ label = EVAL ~%symbol%~
         RET changed already others END
+      ACTION_IF (~%symbol%~ STRING_EQUAL ~WIZARD_EMOTION_HOPELESSNESS~) BEGIN
+        LAF cbmagic_patch_spell_and_payloads STR_VAR spell mode = ~emotion_icon~ label = EVAL ~%symbol%~
+          RET icon_changed = changed icon_already = already icon_others = others END
+      END
       ACTION_IF (others > 0) BEGIN
         WARN ~chriz-bg-magic: Damage wakes sleepers: %symbol% (%spell%) has %others% sleep effects with a permanent timing that never wake; left as they are.~
       END

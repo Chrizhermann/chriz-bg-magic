@@ -351,6 +351,46 @@ BEGIN
           // Refresh only on recipients of this group, with the actual effect target.
           LPF cbmagic_bonus_refresh INT_VAR group = g STR_VAR self = EVAL ~%source%~ END
         END
+        // Pierce Magic's callback is deliberately instant; its native portrait row must
+        // instead last for the callback's fixed 30 seconds. This scans the reconstructed
+        // group, so direct and linked delivery, reordered effects, and already-converted
+        // callbacks all get the same bounded correction without touching other icons.
+        PATCH_IF (~%kind%~ STRING_EQUAL ~PIERCE~) BEGIN
+          READ_LONG 0x64 ao
+          READ_LONG 0x6a fo
+          PATCH_IF (g < 0) BEGIN
+            READ_SHORT 0x70 pn
+            READ_SHORT 0x6e pf
+          END ELSE BEGIN
+            READ_SHORT (ao + g * 0x28 + 0x1e) pn
+            READ_SHORT (ao + g * 0x28 + 0x20) pf
+          END
+          SET has_pierce_callback = 0
+          FOR (i = 0; i < pn; ++i) BEGIN
+            SET at = fo + (pf + i) * 0x30
+            READ_SHORT at op
+            READ_ASCII (at + 0x14) res (8) NULL
+            PATCH_IF (op = 402) AND (~%res%~ STRING_EQUAL_CASE ~CBMBPM~) BEGIN
+              SET has_pierce_callback = 1
+            END
+          END
+          PATCH_IF has_pierce_callback BEGIN
+            FOR (i = 0; i < pn; ++i) BEGIN
+              SET at = fo + (pf + i) * 0x30
+              READ_SHORT at op
+              READ_LONG (at + 0x08) p2
+              READ_BYTE (at + 0x0c) timing
+              READ_LONG (at + 0x0e) duration
+              PATCH_IF (op = 142) AND (p2 = 106) BEGIN
+                PATCH_IF (timing != 0) OR (duration != 30) BEGIN
+                  WRITE_BYTE (at + 0x0c) 0
+                  WRITE_LONG (at + 0x0e) 30
+                  SET touched = 1
+                END
+              END
+            END
+          END
+        END
         PATCH_IF (~%kind%~ STRING_EQUAL ~FAMILY~) BEGIN
           LPF cbmagic_bonus_family_anchor INT_VAR group = g RET donor END
           PATCH_IF !(~%donor%~ STRING_EQUAL ~~) BEGIN SET touched = 1 END

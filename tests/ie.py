@@ -4,7 +4,7 @@ SPL V1 and 2DA. Used to build made-up test games and to read installed games (re
 import struct
 from pathlib import Path
 
-TYPES = {"2DA": 0x3F4, "ARE": 0x3F2, "BCS": 0x3EF, "CRE": 0x3F1, "EFF": 0x3F8, "IDS": 0x3F0,
+TYPES = {"2DA": 0x3F4, "ARE": 0x3F2, "BAM": 0x3E8, "BCS": 0x3EF, "CRE": 0x3F1, "EFF": 0x3F8, "IDS": 0x3F0,
          "ITM": 0x3ED, "SPL": 0x3EE}
 
 FX_FORMAT = "<HBBiiBBIBB8siiIii"  # one 48-byte SPL/ITM effect
@@ -165,6 +165,20 @@ def make_2da(columns, rows, default="0xffff"):
 
 def make_ids(pairs, header="IDS V1.0"):
     return ("\r\n".join([header] + [f"{n} {s}" for n, s in pairs]) + "\r\n").encode("ascii")
+
+
+def make_states_bam(frames=179, cycles=255):
+    """Minimal BAM V1 with observable cycle table entries for state-icon tests."""
+    frame_off = 0x18
+    cycle_off = frame_off + frames * 12
+    out = bytearray(cycle_off + cycles * 4)
+    out[:8] = b"BAM V1  "
+    struct.pack_into("<H", out, 0x08, frames)
+    out[0x0A] = cycles
+    struct.pack_into("<I", out, 0x0C, frame_off)
+    for cycle in range(cycles):
+        struct.pack_into("<HH", out, cycle_off + cycle * 4, cycle + 1, cycle * 3)
+    return bytes(out)
 
 
 # --- KEY/BIFF ----------------------------------------------------------------------------

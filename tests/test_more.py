@@ -297,6 +297,19 @@ def make_more_biff():
             }],
             school=8, sectype=11, excl=0x0040, icon="SPWI312C",
         ),
+        # Wild Slow puts its portrait row before its Slow effect and includes a foreign row.
+        "SPWM164.SPL": make_spl_with_excl(
+            1, 4,
+            [{
+                "target": 4, "range": 25, "min_level": 1, "casting_time": 3, "projectile": 177,
+                "effects": [
+                    fx.fx(opcode=142, target=2, power=4, p2=41, timing=0, dispel=2, duration=42, save=1, bonus=-2),
+                    fx.fx(opcode=206, target=2, power=4, p1=-1, duration=42, resource="FOREIGN"),
+                    fx.fx(opcode=40, target=2, power=4, p2=0, timing=0, dispel=1, duration=42, save=1, bonus=-2),
+                ],
+            }],
+            school=8, sectype=11, excl=0x0040, icon="SPWI312C",
+        ),
         # Vanilla POTN14.ITM (Oil of Speed: target=1, 300s Haste + *gulp* string 16233)
         "POTN14.ITM": ie.make_itm([[
             fx.fx(opcode=16, target=1, power=0, p1=0, p2=0, timing=0, dispel=1, duration=300),
@@ -391,6 +404,7 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
             ab,
         )
         ops = [(e["opcode"], e["p1"], e["p2"], e["duration"], e["resource"].upper()) for e in ab["effects"]]
+        check(ops[0] == (321, 0, 0, 0, "SPPR401"), ops[0])
         check((27, 100, 1, dur, "") in ops, ops)
         check((142, 0, 24, dur, "") in ops, ops)
         check((328, 0, 65, dur, "") in ops, ops)
@@ -558,6 +572,14 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
     check((54, -4, 0, 60, 1, -4, "") in ss_ops, ss_ops)
     check((142, 0, 41, 60, 1, -4, "") in ss_ops, ss_ops)
 
+    # Wild Slow is split from a reordered source. Its copied portrait row must inherit
+    # the Slow effect's dispel mode rather than keep the former, longer-lived mode.
+    wild_slow = parse_spl_full(g.file("override/SPWM164A.SPL"))
+    wild_fx = wild_slow["abilities"][0]["effects"]
+    wild_primary = next(e for e in wild_fx if e["opcode"] == 40)
+    wild_icon = next(e for e in wild_fx if e["opcode"] == 142 and e["p2"] == 41)
+    check(wild_primary["dispel"] == 1 and wild_icon["dispel"] == wild_primary["dispel"], wild_fx)
+
     # Oil of Speed (POTN14.ITM -> POTN14.SPL) keeps *gulp* string (16233) on item and extracts Haste to POTN14.SPL
     potn14_raw = g.file("override/POTN14.ITM")
     potn14_fx_off, = struct.unpack_from("<I", potn14_raw, 0x6A)
@@ -702,4 +724,3 @@ def more_batch_variations_and_invalid_inputs(work, weidu):
     out_bad = g_bad.install()
     check(fg.installed_ok(out_bad) and fg.with_warnings(out_bad), out_bad)
     check("Nahal's Reckless Dweomer (SPWI124) left as it is" in out_bad, out_bad)
-

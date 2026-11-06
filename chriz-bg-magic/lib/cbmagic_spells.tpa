@@ -234,6 +234,54 @@ BEGIN
   END
 END
 
+// Emotion: Hopelessness uses opcode 39's native portrait row. Give only creature-targeted
+// sleep that row through the effect special field, then remove the separate target icon so
+// an awakened or sleep-immune creature cannot retain it. Caster-side effects stay intact.
+DEFINE_PATCH_FUNCTION cbmagic_emotion_hopelessness_icon
+  RET changed already
+BEGIN
+  SET changed = 0
+  SET already = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET has_target_sleep = 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x02) target
+      READ_LONG (fx + 0x2c) special
+      PATCH_IF (op = 39) AND (target = 2) BEGIN
+        SET has_target_sleep = 1
+        PATCH_IF (special != 44) BEGIN
+          WRITE_LONG (fx + 0x2c) 44
+          SET changed += 1
+        END ELSE BEGIN
+          SET already += 1
+        END
+      END
+    END
+    PATCH_IF has_target_sleep BEGIN
+      FOR (i = n - 1; i >= 0; --i) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_BYTE (fx + 0x02) target
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 142) AND (target = 2) AND (p2 = 44) BEGIN
+          LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+          SET changed += 1
+        END
+      END
+    END
+  END
+END
+
 // A new casting replaces the old one: every ability gets, as its first effect, opcode 321
 // (remove the effects of this resource) naming the spell itself, in the form the base
 // game's own refreshing spells use: target 2 on spells cast at a creature, 1 on spells
