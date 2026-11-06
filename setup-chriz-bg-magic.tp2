@@ -12,6 +12,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_scs.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_bonus.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_more.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_live.tpa~
 END
 
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
@@ -152,4 +153,5 @@ LAF cbmagic_more_improved_haste END
 LAF cbmagic_more_haste_cancels_slow END
 
 
+LAF cbmagic_record_live END
 LAF cbmagic_bonus END

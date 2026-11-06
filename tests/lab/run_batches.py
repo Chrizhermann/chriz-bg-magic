@@ -20,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "bonus", "smoke")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -475,6 +475,109 @@ def record(c, check):
         done()
 
 
+def live(c, check):
+    # Entries that follow a state, on party members: only they have a record.
+    def shown(who):
+        return sorted(RECORD.get(row, str(row)) for row in c.p("lv-rows", f"icons({who})") or [])
+
+    def wait(seconds=1.6):
+        time.sleep(seconds)
+
+    def apply(res, target=1):
+        c.p(f"lv-{res}", f'apply_spell(1, "{res}", "Player{target}")')
+        wait()
+
+    def clear(who, *resources):
+        c.p("lv-clear", f"clear({who}, {{{', '.join(repr(r).replace(chr(39), chr(34)) for r in resources)}}})")
+        wait()
+
+    for res, name, other in (("SPWI206", "Invisible", "Improved Invisibility"), ("SPWI405", "Improved Invisibility", "Invisible")):
+        apply(res)
+        rows = shown(0)
+        check(f"{name} is listed, once", name in rows and other not in rows, rows=rows)
+        clear(0, res)
+        rows = shown(0)
+        check(f"{name} goes with the state", name not in rows, rows=rows)
+    c.p("lv-potion", "fx(0, 20, 0, 0, 30)")
+    wait()
+    rows = shown(0)
+    check("Any source of invisibility counts, not only spells", "Invisible" in rows, rows=rows)
+    c.lua("lv-visible", "EEex_GameObject_ApplyEffect(EEex_Sprite_GetInPortrait(0), { effectID = 116, durationType = 1, "
+                        "sourceID = EEex_Sprite_GetInPortrait(0).m_id, sourceTarget = EEex_Sprite_GetInPortrait(0).m_id }) return true")
+    wait()
+    rows = shown(0)
+    check("Revealed: the entry goes", "Invisible" not in rows, rows=rows)
+
+    apply("SPPR109", 2)
+    rows = shown(1)
+    check("Sanctuary is listed", "Sanctuary" in rows, rows=rows)
+    clear(1, "SPPR109")
+    rows = shown(1)
+    check("Sanctuary goes with the state", "Sanctuary" not in rows, rows=rows)
+
+    apply("SPWI212", 2)
+    rows = shown(1)
+    check("Mirror Image is listed", "Mirror Image" in rows and "Reflected Image" not in rows, rows=rows)
+    clear(1, "SPWI212")
+    rows = shown(1)
+    check("Mirror Image goes with the images", "Mirror Image" not in rows, rows=rows)
+    apply("SPWI120", 2)
+    rows = shown(1)
+    check("Reflected Image is listed", "Reflected Image" in rows and "Mirror Image" not in rows, rows=rows)
+    # A missile finds the image or the character at random.
+    for attempt in range(6):
+        c.p("lv-missile", 'cast(2, "SPWI112", "Player2")')
+        wait(4)
+        rows = shown(1)
+        if "Reflected Image" not in rows:
+            break
+    check("A hit on the image ends the entry", "Reflected Image" not in rows, rows=rows, missiles=attempt + 1)
+    clear(1, "SPWI120")
+
+    apply("SPPR701", 2)
+    rows = shown(1)
+    check("Shield of the Archons shows its own name", "Shield of the Archons" in rows and "Spell Deflection" not in rows, rows=rows)
+    c.p("lv-record", "record_open()")
+    wait()
+    record = c.p("lv-record-read", "record_read()") or []
+    wait()
+    check("The Record itself says so, with the spell's icon", [r for r in record if r["text"] == "Shield of the Archons"
+                                                               and r["bam"] == "STATES" and r["current"] == 181], record=record)
+    c.p("lv-spend", "spend(1, 201, 1)")
+    c.p("lv-missile2", 'cast(2, "SPWI112", "Player2")')
+    wait(5)
+    rows = shown(1)
+    check("Spent, the entry goes", "Shield of the Archons" not in rows and "Spell Deflection" not in rows, rows=rows)
+    clear(1, "SPPR701")
+
+    apply("SPWI318", 2)
+    rows = shown(1)
+    check("Minor Spell Deflection shows its own name", "Minor Spell Deflection" in rows and "Spell Deflection" not in rows, rows=rows)
+    apply("SPWI618", 2)
+    clear(1, "SPWI318")
+    wait()
+    rows = shown(1)
+    check("The real Spell Deflection shows again after the minor one", "Spell Deflection" in rows
+          and "Minor Spell Deflection" not in rows, rows=rows)
+    clear(1, "SPWI618")
+    rows = shown(1)
+    check("Nothing stays", "Spell Deflection" not in rows, rows=rows)
+
+    apply("SPWI522", 2)
+    rows = shown(1)
+    check("Minor Spell Turning shows its own name", "Minor Spell Turning" in rows and "Spell Turning" not in rows, rows=rows)
+    clear(1, "SPWI522")
+    rows = shown(1)
+    check("Minor Spell Turning goes", "Minor Spell Turning" not in rows, rows=rows)
+
+    c.p("lv-spawn", 'spawn("TASLOI01", 160, 0)')
+    wait(1.2)
+    c.p("lv-dummy", 'self_apply("Tasloi", "SPWI206")')
+    wait()
+    rows = c.p("lv-dummy-rows", 'icons("Tasloi")') or []
+    check("No entry for who has no record", not rows, rows=rows)
+
+
 def smoke(c, check):
     # Every changed spell cast once at a dummy: the game must survive and keep answering.
     c.p("sm-spawn", 'spawn("TASLOI01", 160, 0)')
@@ -800,7 +903,7 @@ def main():
     selected = args[args.index("--only") + 1].split(",")
     if "bonus" in selected and "--game" in args:
         BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
-    if "record" in selected and "--game" in args:
+    if {"record", "live"} & set(selected) and "--game" in args:
         record_rows(Path(args[args.index("--game") + 1]))
     sys.argv = [sys.argv[0], *args]
     rp.GROUPS = GROUPS
