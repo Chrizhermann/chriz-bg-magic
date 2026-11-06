@@ -13,6 +13,27 @@ Christopher's decision.
 None of the changes below needs EEex. They work on BG2:EE and EET (built and checked on
 2.7.3.0).
 
+## Healing (`cbmagic_healing.tpa`)
+
+- Cure Light Wounds is `1d8 + 5` at casting time 4; optional IWD Cure Moderate Wounds is
+  `2d8 + 4` and one casting-time unit faster; Cure Medium, Serious and Critical Wounds are
+  `2d8 + 7` at 4, `3d8 + 7` at 6, and `4d8 + 12` at 7. Mass Cure keeps its effect and has
+  casting time 4.
+- Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll
+  and their decided faster casting times. Their ordinary targets keep the original direct
+  spell or touch-charge delivery, saving throw and unrelated effects. The optional IWD
+  Mass Cause Light Wounds keeps its native roll, casting time and save rule.
+- Cause Wounds, IWD Mass Cause Light Wounds and Harm heal undead instead of damaging them.
+  The source damage is blocked for undead before it can run (opcode 324, `GENERAL =
+  UNDEAD`); a private healing payload is then cast only for undead through the complementary
+  opcode-318 guard. For touch spells this happens in the created charge item, not in the
+  parent spell. A charge item shared by another spell is privately cloned and only this
+  spell's creation effect is retargeted. Harm retains its effect on non-undead, has casting
+  time 7, and heals undead completely.
+- Optional IWD symbols absent from `SPELL.IDS` log a normal skip. Every changed English
+  spell description and every actual scroll description must match the expected base text;
+  a mismatch stops the install rather than leaving a false description.
+
 ## Spell Revisions installed
 
 Chriz BG Magic replaces Spell Revisions and the two do not go together (Christopher,

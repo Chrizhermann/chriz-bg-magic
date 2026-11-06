@@ -1,0 +1,895 @@
+// Decided healing changes.  The helpers below identify the Current HP / magic-damage
+// effects by their meaning and preserve every other ability and effect.  Cause Wounds
+// needs an extra split: a guarded, private healing payload runs on undead before a
+// leading opcode 324 blocks the original damage.  For BG2 touch charges that split is
+// deliberately installed on the created ITM, where the damage is actually delivered.
+
+// Set every owned Current HP (opcode 17) effect, or every magic-damage (opcode 12,
+// parameter 2 = 0x400000) effect, to a dice roll.  Other Current HP / damage effects
+// remain untouched: they can be another mod's independent behaviour.
+DEFINE_PATCH_FUNCTION cbmagic_healing_set_roll
+  INT_VAR damage = 0 damage_kind = 0x400000 bonus = 0 dice = 0 sides = 0 rewrite = 1
+  RET matched changed
+BEGIN
+  SET matched = 0
+  SET changed = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x02) target
+      READ_LONG (fx + 0x08) p2
+      PATCH_IF ((damage = 0) AND (op = 17) AND (target = 2)) OR
+               ((damage = 1) AND (op = 12) AND (target = 2) AND (p2 = damage_kind)) BEGIN
+        SET matched += 1
+        READ_LONG (fx + 0x04) old_bonus
+        READ_LONG (fx + 0x1c) old_dice
+        READ_LONG (fx + 0x20) old_sides
+        PATCH_IF rewrite AND ((old_bonus != bonus) OR (old_dice != dice) OR (old_sides != sides)) BEGIN
+          WRITE_LONG (fx + 0x04) bonus
+          WRITE_LONG (fx + 0x1c) dice
+          WRITE_LONG (fx + 0x20) sides
+          SET changed += 1
+        END
+      END
+    END
+  END
+END
+
+// The ITM version of cbmagic_spl_valid.  Touch-charge weapons have 0x38-byte ability
+// headers, but share the same 0x30-byte effect table and global-effect index layout.
+DEFINE_PATCH_FUNCTION cbmagic_healing_itm_valid
+  RET valid reason
+BEGIN
+  SET valid = 0
+  SPRINT reason ~~
+  PATCH_IF (BUFFER_LENGTH < 0x72) BEGIN
+    SPRINT reason ~shorter than an ITM header~
+  END ELSE BEGIN
+    READ_ASCII 0 sig (8)
+    READ_LONG 0x64 ab_off
+    READ_SHORT 0x68 ab_cnt
+    READ_LONG 0x6a fx_off
+    READ_SHORT 0x6e global_first
+    READ_SHORT 0x70 global_cnt
+    PATCH_IF !(~%sig%~ STRING_EQUAL ~ITM V1  ~) BEGIN
+      SPRINT reason ~not an ITM V1 file~
+    END ELSE PATCH_IF (ab_off + ab_cnt * 0x38 > BUFFER_LENGTH) BEGIN
+      SPRINT reason ~its ability table runs past the end of the file~
+    END ELSE PATCH_IF (fx_off + (global_first + global_cnt) * 0x30 > BUFFER_LENGTH) BEGIN
+      SPRINT reason ~its global effects run past the end of the file~
+    END ELSE BEGIN
+      SET valid = 1
+      FOR (a = 0; a < ab_cnt; ++a) BEGIN
+        READ_SHORT (ab_off + a * 0x38 + 0x1e) n
+        READ_SHORT (ab_off + a * 0x38 + 0x20) first
+        PATCH_IF (fx_off + (first + n) * 0x30 > BUFFER_LENGTH) BEGIN
+          SET valid = 0
+          SPRINT reason ~the effects of ability %a% run past the end of the file~
+        END
+        PATCH_IF (global_cnt > 0) AND (n > 0) AND (first < global_first + global_cnt) AND
+                 (global_first < first + n) BEGIN
+          SET valid = 0
+          SPRINT reason ~ability %a% shares effects with the global effects~
+        END
+        FOR (b = a + 1; b < ab_cnt; ++b) BEGIN
+          READ_SHORT (ab_off + b * 0x38 + 0x1e) n2
+          READ_SHORT (ab_off + b * 0x38 + 0x20) first2
+          PATCH_IF (n > 0) AND (n2 > 0) AND (first < first2 + n2) AND (first2 < first + n) BEGIN
+            SET valid = 0
+            SPRINT reason ~abilities %a% and %b% share effects~
+          END
+        END
+      END
+    END
+  END
+END
+
+// Insert an ability effect into an ITM while moving all affected indices.  This is the
+// same offset-safe operation as cbmagic_insert_effect, adjusted for ITM ability headers.
+DEFINE_PATCH_FUNCTION cbmagic_healing_insert_itm_effect
+  INT_VAR ability = 0 position = 0 opcode = 0 target = 2 power = 0 parameter1 = 0 parameter2 = 0
+          timing = 0 resist_dispel = 0 duration = 0 probability1 = 100 probability2 = 0
+          dicenumber = 0 dicesize = 0 savingthrow = 0 savebonus = 0 special = 0
+  STR_VAR resource = ~~
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  READ_SHORT 0x6e global_first
+  READ_SHORT 0x70 global_cnt
+  SET ab = ab_off + ability * 0x38
+  READ_SHORT (ab + 0x1e) n
+  READ_SHORT (ab + 0x20) first
+  SET at = first + ((position > n) ? n : position)
+  SET where = fx_off + at * 0x30
+  INSERT_BYTES where 0x30
+  WRITE_SHORT where opcode
+  WRITE_BYTE (where + 0x02) target
+  WRITE_BYTE (where + 0x03) power
+  WRITE_LONG (where + 0x04) parameter1
+  WRITE_LONG (where + 0x08) parameter2
+  WRITE_BYTE (where + 0x0c) timing
+  WRITE_BYTE (where + 0x0d) resist_dispel
+  WRITE_LONG (where + 0x0e) duration
+  WRITE_BYTE (where + 0x12) probability1
+  WRITE_BYTE (where + 0x13) probability2
+  WRITE_ASCIIE (where + 0x14) ~%resource%~ #8
+  WRITE_LONG (where + 0x1c) dicenumber
+  WRITE_LONG (where + 0x20) dicesize
+  WRITE_LONG (where + 0x24) savingthrow
+  WRITE_LONG (where + 0x28) savebonus
+  WRITE_LONG (where + 0x2c) special
+  PATCH_IF (ab_off >= where) BEGIN
+    SET ab_off += 0x30
+    WRITE_LONG 0x64 ab_off
+    SET ab += 0x30
+  END
+  WRITE_SHORT (ab + 0x1e) (n + 1)
+  FOR (b = 0; b < ab_cnt; ++b) BEGIN
+    PATCH_IF (b != ability) BEGIN
+      READ_SHORT (ab_off + b * 0x38 + 0x20) f2
+      PATCH_IF (f2 >= at) BEGIN
+        WRITE_SHORT (ab_off + b * 0x38 + 0x20) (f2 + 1)
+      END
+    END
+  END
+  PATCH_IF (global_first >= at) AND ((global_cnt > 0) OR (global_first > at)) BEGIN
+    WRITE_SHORT 0x6e (global_first + 1)
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_healing_set_item_roll
+  INT_VAR damage_kind = 0x400000 bonus = 0 dice = 0 sides = 0 rewrite = 1
+  RET matched changed
+BEGIN
+  SET matched = 0
+  SET changed = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x38 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x38 + 0x20) first
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x02) target
+      READ_LONG (fx + 0x08) p2
+      PATCH_IF (op = 12) AND (target = 2) AND (p2 = damage_kind) BEGIN
+        SET matched += 1
+        READ_LONG (fx + 0x04) old_bonus
+        READ_LONG (fx + 0x1c) old_dice
+        READ_LONG (fx + 0x20) old_sides
+        PATCH_IF rewrite AND ((old_bonus != bonus) OR (old_dice != dice) OR (old_sides != sides)) BEGIN
+          WRITE_LONG (fx + 0x04) bonus
+          WRITE_LONG (fx + 0x1c) dice
+          WRITE_LONG (fx + 0x20) sides
+          SET changed += 1
+        END
+      END
+    END
+  END
+END
+
+// Make one clean spell payload from a selected direct Cause Wounds damage effect.  The
+// original effect's current roll is copied after it has been converted, so level-scaled
+// Mass Cause abilities keep their own 1d8 + level values without a hard-coded ability list.
+DEFINE_ACTION_FUNCTION cbmagic_healing_payload_from_spl
+  INT_VAR ability = 0 match = 0 full_heal = 0 damage_kind = 0x400000
+  STR_VAR source = ~~ payload = ~~
+  RET found ambiguous
+BEGIN
+  OUTER_SET found = 0
+  OUTER_SET ambiguous = 0
+  COPY_EXISTING ~%source%.spl~ ~override/%payload%.spl~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF !valid BEGIN
+      SET ambiguous = 1
+      PATCH_PRINT ~chriz-bg-magic: %source% cannot supply %payload%: %reason%.~
+    END ELSE BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      PATCH_IF (ability >= ab_cnt) BEGIN
+        SET ambiguous = 1
+      END ELSE BEGIN
+        READ_SHORT (ab_off + ability * 0x28 + 0x1e) n
+        READ_SHORT (ab_off + ability * 0x28 + 0x20) first
+        SET hits = 0
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_BYTE (fx + 0x02) target
+          READ_LONG (fx + 0x08) p2
+          PATCH_IF (op = 12) AND (target = 2) AND (p2 = damage_kind) BEGIN
+            PATCH_IF (hits = match) BEGIN
+              READ_BYTE (fx + 0x03) power
+              READ_LONG (fx + 0x04) bonus
+              READ_BYTE (fx + 0x0d) resist
+              READ_LONG (fx + 0x1c) dice
+              READ_LONG (fx + 0x20) sides
+              SET found = 1
+            END
+            SET hits += 1
+          END
+        END
+      END
+      PATCH_IF found BEGIN
+        DELETE_BYTES 0 BUFFER_LENGTH
+        INSERT_BYTES 0 (0x72 + 0x28)
+        WRITE_ASCII 0 ~SPL V1  ~ (8)
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x0c (0 - 1)
+        WRITE_SHORT 0x1c 2
+        WRITE_LONG 0x34 1
+        WRITE_LONG 0x50 (0 - 1)
+        WRITE_LONG 0x54 (0 - 1)
+        WRITE_LONG 0x64 0x72
+        WRITE_SHORT 0x68 1
+        WRITE_LONG 0x6a (0x72 + 0x28)
+        WRITE_SHORT 0x6e 0
+        WRITE_SHORT 0x70 0
+        WRITE_BYTE 0x72 1
+        WRITE_SHORT (0x72 + 0x02) 2
+        WRITE_BYTE (0x72 + 0x0c) 1
+        WRITE_SHORT (0x72 + 0x0e) 300
+        WRITE_SHORT (0x72 + 0x10) 1
+        WRITE_SHORT (0x72 + 0x12) 1
+        WRITE_SHORT (0x72 + 0x1e) 0
+        WRITE_SHORT (0x72 + 0x20) 0
+        WRITE_SHORT (0x72 + 0x26) 1
+        LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 17 target = 2 power
+          parameter1 = ((full_heal = 1) ? 100 : bonus) parameter2 = ((full_heal = 1) ? 2 : 0)
+          timing = 1 resist_dispel = resist dicenumber = ((full_heal = 1) ? 0 : dice)
+          dicesize = ((full_heal = 1) ? 0 : sides) END
+      END
+    END
+  BUT_ONLY
+END
+
+// The touch-charge counterpart of cbmagic_healing_payload_from_spl.
+DEFINE_ACTION_FUNCTION cbmagic_healing_payload_from_item
+  INT_VAR ability = 0 match = 0 full_heal = 0 damage_kind = 0x400000
+  STR_VAR source = ~~ payload = ~~
+  RET found ambiguous
+BEGIN
+  OUTER_SET found = 0
+  OUTER_SET ambiguous = 0
+  COPY_EXISTING ~%source%.itm~ ~override/%payload%.spl~
+    LPF cbmagic_healing_itm_valid RET valid reason END
+    PATCH_IF !valid BEGIN
+      SET ambiguous = 1
+      PATCH_PRINT ~chriz-bg-magic: %source% cannot supply %payload%: %reason%.~
+    END ELSE BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      PATCH_IF (ability >= ab_cnt) BEGIN
+        SET ambiguous = 1
+      END ELSE BEGIN
+        READ_SHORT (ab_off + ability * 0x38 + 0x1e) n
+        READ_SHORT (ab_off + ability * 0x38 + 0x20) first
+        SET hits = 0
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_BYTE (fx + 0x02) target
+          READ_LONG (fx + 0x08) p2
+          PATCH_IF (op = 12) AND (target = 2) AND (p2 = damage_kind) BEGIN
+            PATCH_IF (hits = match) BEGIN
+              READ_BYTE (fx + 0x03) power
+              READ_LONG (fx + 0x04) bonus
+              READ_BYTE (fx + 0x0d) resist
+              READ_LONG (fx + 0x1c) dice
+              READ_LONG (fx + 0x20) sides
+              SET found = 1
+            END
+            SET hits += 1
+          END
+        END
+      END
+      PATCH_IF found BEGIN
+        DELETE_BYTES 0 BUFFER_LENGTH
+        INSERT_BYTES 0 (0x72 + 0x28)
+        WRITE_ASCII 0 ~SPL V1  ~ (8)
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x0c (0 - 1)
+        WRITE_SHORT 0x1c 2
+        WRITE_LONG 0x34 1
+        WRITE_LONG 0x50 (0 - 1)
+        WRITE_LONG 0x54 (0 - 1)
+        WRITE_LONG 0x64 0x72
+        WRITE_SHORT 0x68 1
+        WRITE_LONG 0x6a (0x72 + 0x28)
+        WRITE_SHORT 0x6e 0
+        WRITE_SHORT 0x70 0
+        WRITE_BYTE 0x72 1
+        WRITE_SHORT (0x72 + 0x02) 2
+        WRITE_BYTE (0x72 + 0x0c) 1
+        WRITE_SHORT (0x72 + 0x0e) 300
+        WRITE_SHORT (0x72 + 0x10) 1
+        WRITE_SHORT (0x72 + 0x12) 1
+        WRITE_SHORT (0x72 + 0x1e) 0
+        WRITE_SHORT (0x72 + 0x20) 0
+        WRITE_SHORT (0x72 + 0x26) 1
+        LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 17 target = 2 power
+          parameter1 = ((full_heal = 1) ? 100 : bonus) parameter2 = ((full_heal = 1) ? 2 : 0)
+          timing = 1 resist_dispel = resist dicenumber = ((full_heal = 1) ? 0 : dice)
+          dicesize = ((full_heal = 1) ? 0 : sides) END
+      END
+    END
+  BUT_ONLY
+END
+
+// Add the guarded payload and the leading spell immunity for one direct-damage ability.
+// The opcode 318 guard stops the private payload on non-undead; opcode 324 then stops the
+// source spell on undead before its original opcode 12 can execute.  It is intentionally
+// not a damage-then-heal sequence.
+DEFINE_ACTION_FUNCTION cbmagic_healing_split_spl_ability
+  INT_VAR ability = 0 undead_row = 0 nonundead_row = 0 damage_kind = 0x400000
+  STR_VAR source = ~~ payload = ~~
+  RET applicable changed ambiguous
+BEGIN
+  OUTER_SET applicable = 0
+  OUTER_SET changed = 0
+  OUTER_SET ambiguous = 0
+  COPY_EXISTING ~%source%.spl~ ~override~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF !valid BEGIN
+      SET ambiguous = 1
+      PATCH_PRINT ~chriz-bg-magic: %source% cannot receive undead healing: %reason%.~
+    END ELSE BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      PATCH_IF (ability >= ab_cnt) BEGIN
+        SET ambiguous = 1
+      END ELSE BEGIN
+        READ_SHORT (ab_off + ability * 0x28 + 0x1e) n
+        READ_SHORT (ab_off + ability * 0x28 + 0x20) first
+        SPRINT self ~%SOURCE_RES%~
+        SET damage = 0
+        SET guard = 0
+        SET cast = 0
+        SET block = 0
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_LONG (fx + 0x04) p1
+          READ_LONG (fx + 0x08) p2
+          READ_ASCII (fx + 0x14) res (8) NULL
+          TO_UPPER res
+          READ_BYTE (fx + 0x02) target
+          PATCH_IF (op = 12) AND (target = 2) AND (p2 = damage_kind) BEGIN SET damage += 1 END
+          PATCH_IF (op = 318) AND (p1 = 0) AND (p2 = nonundead_row) AND
+                   (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN SET guard = 1 END
+          PATCH_IF (op = 146) AND (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN SET cast = 1 END
+          PATCH_IF (op = 324) AND (p1 = 0) AND (p2 = undead_row) AND
+                   (~%res%~ STRING_EQUAL_CASE ~%self%~) BEGIN SET block = 1 END
+        END
+        PATCH_IF (damage > 0) BEGIN
+          SET applicable = 1
+          PATCH_IF (damage > 1) OR ((guard OR cast OR block) AND !(guard AND cast AND block)) BEGIN
+            SET ambiguous = 1
+          END ELSE PATCH_IF !(guard AND cast AND block) BEGIN
+            LPF cbmagic_insert_effect INT_VAR ability = ability position = 0 opcode = 324 target = 2
+              parameter1 = 0 parameter2 = undead_row timing = 0 resist_dispel = 2 STR_VAR resource = EVAL ~%self%~ END
+            LPF cbmagic_insert_effect INT_VAR ability = ability position = 0 opcode = 146 target = 2
+              parameter2 = 1 timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%payload%~ END
+            LPF cbmagic_insert_effect INT_VAR ability = ability position = 0 opcode = 318 target = 2
+              parameter1 = 0 parameter2 = nonundead_row timing = 0 duration = 1 resist_dispel = 2
+              STR_VAR resource = EVAL ~%payload%~ END
+            SET changed = 1
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+// The same split, but in the charge item's ability.  This is why Serious, Critical and
+// Harm can affect undead correctly: the touch attack's damage is never in their parent SPL.
+DEFINE_ACTION_FUNCTION cbmagic_healing_split_item_ability
+  INT_VAR ability = 0 undead_row = 0 nonundead_row = 0 damage_kind = 0x400000
+  STR_VAR source = ~~ payload = ~~
+  RET applicable changed ambiguous
+BEGIN
+  OUTER_SET applicable = 0
+  OUTER_SET changed = 0
+  OUTER_SET ambiguous = 0
+  COPY_EXISTING ~%source%.itm~ ~override~
+    LPF cbmagic_healing_itm_valid RET valid reason END
+    PATCH_IF !valid BEGIN
+      SET ambiguous = 1
+      PATCH_PRINT ~chriz-bg-magic: %source% cannot receive undead healing: %reason%.~
+    END ELSE BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      PATCH_IF (ability >= ab_cnt) BEGIN
+        SET ambiguous = 1
+      END ELSE BEGIN
+        READ_SHORT (ab_off + ability * 0x38 + 0x1e) n
+        READ_SHORT (ab_off + ability * 0x38 + 0x20) first
+        SPRINT self ~%SOURCE_RES%~
+        SET damage = 0
+        SET guard = 0
+        SET cast = 0
+        SET block = 0
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_LONG (fx + 0x04) p1
+          READ_LONG (fx + 0x08) p2
+          READ_ASCII (fx + 0x14) res (8) NULL
+          TO_UPPER res
+          READ_BYTE (fx + 0x02) target
+          PATCH_IF (op = 12) AND (target = 2) AND (p2 = damage_kind) BEGIN SET damage += 1 END
+          PATCH_IF (op = 318) AND (p1 = 0) AND (p2 = nonundead_row) AND
+                   (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN SET guard = 1 END
+          PATCH_IF (op = 146) AND (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN SET cast = 1 END
+          PATCH_IF (op = 324) AND (p1 = 0) AND (p2 = undead_row) AND
+                   (~%res%~ STRING_EQUAL_CASE ~%self%~) BEGIN SET block = 1 END
+        END
+        PATCH_IF (damage > 0) BEGIN
+          SET applicable = 1
+          PATCH_IF (damage > 1) OR ((guard OR cast OR block) AND !(guard AND cast AND block)) BEGIN
+            SET ambiguous = 1
+          END ELSE PATCH_IF !(guard AND cast AND block) BEGIN
+            LPF cbmagic_healing_insert_itm_effect INT_VAR ability = ability position = 0 opcode = 324 target = 2
+              parameter1 = 0 parameter2 = undead_row timing = 0 resist_dispel = 2 STR_VAR resource = EVAL ~%self%~ END
+            LPF cbmagic_healing_insert_itm_effect INT_VAR ability = ability position = 0 opcode = 146 target = 2
+              parameter2 = 1 timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%payload%~ END
+            LPF cbmagic_healing_insert_itm_effect INT_VAR ability = ability position = 0 opcode = 318 target = 2
+              parameter1 = 0 parameter2 = nonundead_row timing = 0 duration = 1 resist_dispel = 2
+              STR_VAR resource = EVAL ~%payload%~ END
+            SET changed = 1
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_healing_lower_casting_time
+  INT_VAR target_ct = 0
+  RET changed already
+BEGIN
+  SET changed = 0
+  SET already = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+    PATCH_IF (ct > target_ct) BEGIN
+      WRITE_SHORT (ab_off + a * 0x28 + 0x12) target_ct
+      SET changed += 1
+    END ELSE BEGIN
+      SET already += 1
+    END
+  END
+END
+
+// Every changed English description must match.  A stale or unexpectedly rewritten text
+// is a real installer defect, not a quiet "best effort" omission.  The same requirement
+// applies to every actual scroll, while ordinary magic items are deliberately not indexed.
+DEFINE_ACTION_FUNCTION cbmagic_healing_replace_required_text
+  STR_VAR spell = ~~ find = ~~ replace = ~~ label = ~~
+BEGIN
+  OUTER_SET spell_done = 0
+  COPY_EXISTING ~%spell%.spl~ ~override~
+    LPF cbmagic_update_description INT_VAR offset = 0x50 STR_VAR find replace RET matched END
+    SET spell_done = matched
+  BUT_ONLY
+  ACTION_IF !spell_done BEGIN
+    FAIL ~chriz-bg-magic: %label% (%spell%) description does not contain the required English text.~
+  END
+  LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+  OUTER_PATCH_SAVE remaining ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+  OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE scroll ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    OUTER_SET scroll_done = 0
+    COPY_EXISTING ~%scroll%.itm~ ~override~
+      LPF cbmagic_update_description INT_VAR offset = 0x50 STR_VAR find replace RET m1 = matched END
+      LPF cbmagic_update_description INT_VAR offset = 0x54 STR_VAR find replace RET m2 = matched END
+      PATCH_IF m1 OR m2 BEGIN SET scroll_done = 1 END
+    BUT_ONLY
+    ACTION_IF !scroll_done BEGIN
+      FAIL ~chriz-bg-magic: %label% scroll %scroll% does not contain the required English text.~
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_created_items
+  STR_VAR source = ~~
+  RET items valid reason
+BEGIN
+  OUTER_SPRINT items ~~
+  OUTER_SET valid = 0
+  OUTER_SPRINT reason ~~
+  COPY_EXISTING ~%source%.spl~ ~override~
+    LPF cbmagic_spl_valid RET valid_local = valid reason_local = reason END
+    SET valid = valid_local
+    SPRINT reason ~%reason_local%~
+    PATCH_IF valid_local BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      FOR (a = 0; a < ab_cnt; ++a) BEGIN
+        READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_ASCII (fx + 0x14) item (8) NULL
+          TO_UPPER item
+          PATCH_IF (op = 111) AND !(~%item%~ STRING_EQUAL ~~) AND
+                   (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %item% ~ ~%items%~) < 0) BEGIN
+            SPRINT items ~%items% %item%~
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+// A created touch-charge item is cloned only when another spell also creates it.  This
+// keeps the Cause spell's new undead behaviour from leaking into an unrelated producer.
+DEFINE_ACTION_FUNCTION cbmagic_healing_item_is_shared
+  STR_VAR owner = ~~ item = ~~
+  RET shared
+BEGIN
+  OUTER_SET shared = 0
+  COPY_EXISTING_REGEXP GLOB ~^.+\.spl$~ ~override~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF valid BEGIN
+      SPRINT current ~%SOURCE_RES%~
+      TO_UPPER current
+      PATCH_IF !(~%current%~ STRING_EQUAL_CASE ~%owner%~) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; (a < ab_cnt) AND !shared; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; (i < n) AND !shared; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            READ_ASCII (fx + 0x14) res (8) NULL
+            TO_UPPER res
+            PATCH_IF (op = 111) AND (~%res%~ STRING_EQUAL_CASE ~%item%~) BEGIN SET shared = 1 END
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_retarget_created_item
+  STR_VAR source = ~~ old_item = ~~ new_item = ~~
+BEGIN
+  COPY_EXISTING ~%source%.spl~ ~override~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF valid BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_cnt
+      READ_LONG 0x6a fx_off
+      FOR (a = 0; a < ab_cnt; ++a) BEGIN
+        READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+        READ_SHORT (ab_off + a * 0x28 + 0x20) first
+        FOR (i = 0; i < n; ++i) BEGIN
+          SET fx = fx_off + (first + i) * 0x30
+          READ_SHORT fx op
+          READ_ASCII (fx + 0x14) res (8) NULL
+          TO_UPPER res
+          PATCH_IF (op = 111) AND (~%res%~ STRING_EQUAL_CASE ~%old_item%~) BEGIN
+            WRITE_ASCIIE (fx + 0x14) ~%new_item%~ #8
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_patch_touch_item
+  INT_VAR bonus = 0 dice = 0 sides = 0 rewrite = 1 full_heal = 0 damage_kind = 0x400000
+          undead_row = 0 nonundead_row = 0
+  STR_VAR item = ~~ tag = ~~
+  RET matched changed
+BEGIN
+  OUTER_SET matched = 0
+  OUTER_SET changed = 0
+  OUTER_SET abilities = 0
+  OUTER_SET malformed = 0
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~%item%.itm~) BEGIN
+    FAIL ~chriz-bg-magic: expected touch-charge item %item%.itm is not in this game.~
+  END
+  COPY_EXISTING ~%item%.itm~ ~override~
+    LPF cbmagic_healing_itm_valid RET valid reason END
+    PATCH_IF valid BEGIN
+      READ_SHORT 0x68 abilities
+      LPF cbmagic_healing_set_item_roll INT_VAR damage_kind bonus dice sides rewrite RET matched_local = matched changed_local = changed END
+      SET matched = matched_local
+      SET changed = changed_local
+    END ELSE BEGIN
+      SET malformed = 1
+      PATCH_PRINT ~chriz-bg-magic: %item%.itm is not patched: %reason%.~
+    END
+  BUT_ONLY
+  ACTION_IF malformed BEGIN
+    FAIL ~chriz-bg-magic: touch-charge item %item%.itm has an invalid layout.~
+  END
+  ACTION_IF (matched = 0) BEGIN
+    FAIL ~chriz-bg-magic: touch-charge item %item%.itm has no owned magic-damage effect.~
+  END
+  OUTER_FOR (a = 0; a < abilities; ++a) BEGIN
+    OUTER_SPRINT payload ~CBHI%tag%%a%~
+    LAF cbmagic_healing_payload_from_item INT_VAR ability = a full_heal = full_heal damage_kind = damage_kind
+      STR_VAR source = EVAL ~%item%~ payload RET have = found ambiguous = ambiguous END
+    ACTION_IF ambiguous BEGIN
+      FAIL ~chriz-bg-magic: touch-charge item %item%.itm has an ambiguous damage layout in ability %a%.~
+    END
+    ACTION_IF have BEGIN
+      LAF cbmagic_healing_split_item_ability INT_VAR ability = a undead_row = undead_row nonundead_row = nonundead_row damage_kind = damage_kind
+        STR_VAR source = EVAL ~%item%~ payload RET applicable = applicable split_changed = changed ambiguous = ambiguous END
+      ACTION_IF ambiguous OR !applicable BEGIN
+        FAIL ~chriz-bg-magic: touch-charge item %item%.itm could not isolate its damage in ability %a%.~
+      END
+      OUTER_SET changed += split_changed
+    END
+  END
+END
+
+// One named Cure spell: all of its owned Current HP effects become the selected roll and
+// every ability is lowered only to the decided casting-time ceiling.  Faster variants from
+// another mod are preserved.
+DEFINE_ACTION_FUNCTION cbmagic_healing_apply_cure
+  INT_VAR target_ct = 0 bonus = 0 dice = 0 sides = 0 old_roll_tra = 0 new_roll_tra = 0 ct_tra = 0
+  STR_VAR symbol = ~~ label = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %label% (%symbol%) is not in this game; skipped.~
+  END ELSE BEGIN
+    OUTER_SET malformed = 0
+    OUTER_SET matched = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_healing_set_roll INT_VAR bonus dice sides RET matched_local = matched changed = changed END
+        SET matched = matched_local
+        LPF cbmagic_healing_lower_casting_time INT_VAR target_ct RET ct_changed = changed ct_already = already END
+        PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): %matched% healing effects use %dice% dice of %sides% sides + %bonus%; casting time lowered in %ct_changed% abilities (%ct_already% already as fast).~
+      END ELSE BEGIN
+        SET malformed = 1
+        PATCH_PRINT ~chriz-bg-magic: %label% (%spell%) is not patched: %reason%.~
+      END
+    BUT_ONLY
+    ACTION_IF malformed BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) has an invalid SPL layout.~
+    END
+    ACTION_IF (matched = 0) BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) has no owned Current HP effect.~
+    END
+    OUTER_SPRINT find (AT old_roll_tra)
+    OUTER_SPRINT replace (AT new_roll_tra)
+    LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label END
+    OUTER_SPRINT find @60000
+    OUTER_SPRINT replace (AT ct_tra)
+    LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label END
+  END
+END
+
+// Cause spells can be direct IWD spells or BG2 touch-charge creators.  In either shape
+// the original damage effect is guarded off for undead before it runs; the paired private
+// payload has the corresponding healing roll.  A direct spell and a charge item together
+// would be ambiguous rather than silently double-deliver an effect.
+DEFINE_ACTION_FUNCTION cbmagic_healing_apply_cause
+  INT_VAR direct_ct = 0 touch_ct = 0 direct_ct_tra = 0 touch_ct_tra = 0 bonus = 0 dice = 0 sides = 0 rewrite = 1 full_heal = 0
+          damage_kind = 0x400000 old_roll_tra = 0 new_roll_tra = 0 direct_undead_old_tra = 0
+           direct_undead_new_tra = 0 touch_undead_old_tra = 0 touch_undead_new_tra = 0
+  STR_VAR symbol = ~~ label = ~~ tag = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %label% (%symbol%) is not in this game; skipped.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 1 RET undead_row = row END
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 5 RET nonundead_row = row END
+    OUTER_SET malformed = 0
+    OUTER_SET direct_matches = 0
+    OUTER_SET abilities = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        READ_SHORT 0x68 abilities
+        LPF cbmagic_healing_set_roll INT_VAR damage = 1 damage_kind bonus dice sides rewrite
+          RET direct_matches = matched direct_changed = changed END
+      END ELSE BEGIN
+        SET malformed = 1
+        PATCH_PRINT ~chriz-bg-magic: %label% (%spell%) is not patched: %reason%.~
+      END
+    BUT_ONLY
+    ACTION_IF malformed BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) has an invalid SPL layout.~
+    END
+    OUTER_SET touch_matches = 0
+    LAF cbmagic_healing_created_items STR_VAR source = EVAL ~%spell%~ RET created = items created_valid = valid created_reason = reason END
+    ACTION_IF !created_valid BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) cannot inspect created items: %created_reason%.~
+    END
+    ACTION_IF (direct_matches > 0) BEGIN
+      OUTER_FOR (a = 0; a < abilities; ++a) BEGIN
+        OUTER_SPRINT payload ~CBHD%tag%%a%~
+        LAF cbmagic_healing_payload_from_spl INT_VAR ability = a full_heal = full_heal damage_kind = damage_kind
+          STR_VAR source = EVAL ~%spell%~ payload RET have = found ambiguous = ambiguous END
+        ACTION_IF ambiguous BEGIN
+          FAIL ~chriz-bg-magic: %label% (%spell%) has an ambiguous damage layout in ability %a%.~
+        END
+        ACTION_IF have BEGIN
+          LAF cbmagic_healing_split_spl_ability INT_VAR ability = a undead_row = undead_row nonundead_row = nonundead_row damage_kind = damage_kind
+            STR_VAR source = EVAL ~%spell%~ payload RET applicable = applicable split_changed = changed ambiguous = ambiguous END
+          ACTION_IF ambiguous OR !applicable BEGIN
+            FAIL ~chriz-bg-magic: %label% (%spell%) could not isolate its damage in ability %a%.~
+          END
+        END
+      END
+    END ELSE BEGIN
+      OUTER_PATCH_SAVE remaining ~%created%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_SET item_no = 0
+      OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE item ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        OUTER_SPRINT working ~%item%~
+        LAF cbmagic_healing_item_is_shared STR_VAR owner = EVAL ~%spell%~ item RET shared END
+        ACTION_IF shared BEGIN
+          OUTER_SPRINT clone ~CBHT%tag%%item_no%~
+          COPY_EXISTING ~%item%.itm~ ~override/%clone%.itm~
+          LAF cbmagic_healing_retarget_created_item STR_VAR source = EVAL ~%spell%~ old_item = EVAL ~%item%~ new_item = EVAL ~%clone%~ END
+          OUTER_SPRINT working ~%clone%~
+        END
+        LAF cbmagic_healing_patch_touch_item INT_VAR bonus dice sides rewrite full_heal damage_kind undead_row nonundead_row
+          STR_VAR item = EVAL ~%working%~ tag = EVAL ~%tag%%item_no%~ RET item_matches = matched item_changed = changed END
+        OUTER_SET touch_matches += item_matches
+        OUTER_SET item_no += 1
+      END
+    END
+    ACTION_IF (direct_matches > 0) AND (touch_matches > 0) BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) has both direct damage and a patched touch-charge delivery; its owned effect is ambiguous.~
+    END
+    ACTION_IF (direct_matches = 0) AND (touch_matches = 0) BEGIN
+      FAIL ~chriz-bg-magic: %label% (%spell%) has no owned magic-damage effect or touch-charge delivery.~
+    END
+    OUTER_SET target_ct = (direct_matches > 0) ? direct_ct : touch_ct
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        PATCH_IF (target_ct > 0) BEGIN
+          LPF cbmagic_healing_lower_casting_time INT_VAR target_ct RET ct_changed = changed ct_already = already END
+          PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): casting time target %target_ct%, changed in %ct_changed% abilities; %ct_already% already as fast.~
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (old_roll_tra > 0) BEGIN
+      OUTER_SPRINT find (AT old_roll_tra)
+      OUTER_SPRINT replace (AT new_roll_tra)
+      LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label END
+    END
+    ACTION_IF (target_ct > 0) BEGIN
+      OUTER_SPRINT find @60000
+      ACTION_IF (direct_matches > 0) BEGIN
+        OUTER_SPRINT replace (AT direct_ct_tra)
+      END ELSE BEGIN
+        OUTER_SPRINT replace (AT touch_ct_tra)
+      END
+      LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label END
+    END
+    ACTION_IF (direct_matches > 0) BEGIN
+      OUTER_SPRINT find (AT direct_undead_old_tra)
+      OUTER_SPRINT replace (AT direct_undead_new_tra)
+    END ELSE BEGIN
+      OUTER_SPRINT find (AT touch_undead_old_tra)
+      OUTER_SPRINT replace (AT touch_undead_new_tra)
+    END
+    LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label END
+  END
+END
+
+// The Mass Cure effect itself stays exactly as it is; only its casting time and matching
+// text change.
+DEFINE_ACTION_FUNCTION cbmagic_healing_mass_cure
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_MASS_CURE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Mass Cure (CLERIC_MASS_CURE) is not in this game; skipped.~
+  END ELSE BEGIN
+    OUTER_SET malformed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        LPF cbmagic_healing_lower_casting_time INT_VAR target_ct = 4 RET changed = changed already = already END
+        PATCH_PRINT ~chriz-bg-magic: Mass Cure (%spell%): casting time set to 4 in %changed% abilities; %already% already as fast.~
+      END ELSE BEGIN
+        SET malformed = 1
+        PATCH_PRINT ~chriz-bg-magic: Mass Cure (%spell%) is not patched: %reason%.~
+      END
+    BUT_ONLY
+    ACTION_IF malformed BEGIN FAIL ~chriz-bg-magic: Mass Cure (%spell%) has an invalid SPL layout.~ END
+    OUTER_SPRINT find @60000
+    OUTER_SPRINT replace @60001
+    LAF cbmagic_healing_replace_required_text STR_VAR spell find = EVAL ~%find%~ replace = EVAL ~%replace%~ label = ~Mass Cure~ END
+  END
+END
+
+// One action function per decided spell group.  Optional IWDification symbols simply
+// log and skip when they are absent from SPELL.IDS.
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_light
+BEGIN
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 4 bonus = 5 dice = 1 sides = 8 old_roll_tra = 60010 new_roll_tra = 60011 ct_tra = 60001
+    STR_VAR symbol = ~CLERIC_CURE_LIGHT_WOUNDS~ label = ~Cure Light Wounds~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_moderate
+BEGIN
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 4 bonus = 4 dice = 2 sides = 8 old_roll_tra = 60012 new_roll_tra = 60013 ct_tra = 60001
+    STR_VAR symbol = ~CLERIC_CURE_MODERATE_WOUNDS~ label = ~Cure Moderate Wounds~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_medium
+BEGIN
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 4 bonus = 7 dice = 2 sides = 8 old_roll_tra = 60014 new_roll_tra = 60015 ct_tra = 60001
+    STR_VAR symbol = ~CLERIC_CURE_MEDIUM_WOUNDS~ label = ~Cure Medium Wounds~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_serious
+BEGIN
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 6 bonus = 7 dice = 3 sides = 8 old_roll_tra = 60016 new_roll_tra = 60017 ct_tra = 60002
+    STR_VAR symbol = ~CLERIC_CURE_SERIOUS_WOUNDS~ label = ~Cure Serious Wounds~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_critical
+BEGIN
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 7 bonus = 12 dice = 4 sides = 8 old_roll_tra = 60018 new_roll_tra = 60019 ct_tra = 60003
+    STR_VAR symbol = ~CLERIC_CURE_CRITICAL_WOUNDS~ label = ~Cure Critical Wounds~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_cause_wounds
+BEGIN
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 direct_ct_tra = 60001 touch_ct_tra = 60001 bonus = 5 dice = 1 sides = 8 old_roll_tra = 60020 new_roll_tra = 60021
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60031 touch_undead_old_tra = 60032 touch_undead_new_tra = 60033
+    STR_VAR symbol = ~CLERIC_CAUSE_LIGHT_WOUNDS~ label = ~Cause Light Wounds~ tag = ~1~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 direct_ct_tra = 60001 touch_ct_tra = 60001 bonus = 4 dice = 2 sides = 8 old_roll_tra = 60022 new_roll_tra = 60023
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60034 touch_undead_old_tra = 60032 touch_undead_new_tra = 60035
+    STR_VAR symbol = ~CLERIC_CAUSE_MODERATE_WOUNDS~ label = ~Cause Moderate Wounds~ tag = ~2~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 direct_ct_tra = 60001 touch_ct_tra = 60001 bonus = 7 dice = 2 sides = 8 old_roll_tra = 60024 new_roll_tra = 60025
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60036 touch_undead_old_tra = 60032 touch_undead_new_tra = 60037
+    STR_VAR symbol = ~CLERIC_CAUSE_MEDIUM_WOUNDS~ label = ~Cause Medium Wounds~ tag = ~3~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 6 direct_ct_tra = 60001 touch_ct_tra = 60002 bonus = 7 dice = 3 sides = 8 old_roll_tra = 60026 new_roll_tra = 60027
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60038 touch_undead_old_tra = 60032 touch_undead_new_tra = 60039
+    STR_VAR symbol = ~CLERIC_CAUSE_SERIOUS_WOUNDS~ label = ~Cause Serious Wounds~ tag = ~4~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 7 touch_ct = 7 direct_ct_tra = 60003 touch_ct_tra = 60003 bonus = 12 dice = 4 sides = 8 old_roll_tra = 60028 new_roll_tra = 60029
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60040 touch_undead_old_tra = 60032 touch_undead_new_tra = 60041
+    STR_VAR symbol = ~CLERIC_CAUSE_CRITICAL_WOUNDS~ label = ~Cause Critical Wounds~ tag = ~5~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_mass_cause_light
+BEGIN
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 0 touch_ct = 0 direct_ct_tra = 0 touch_ct_tra = 0 rewrite = 0 old_roll_tra = 0 new_roll_tra = 0
+    direct_undead_old_tra = 60030 direct_undead_new_tra = 60042 touch_undead_old_tra = 60030 touch_undead_new_tra = 60042
+    STR_VAR symbol = ~CLERIC_MASS_CAUSE_LIGHT_WOUNDS~ label = ~Mass Cause Light Wounds~ tag = ~6~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_harm
+BEGIN
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 7 touch_ct = 7 direct_ct_tra = 60003 touch_ct_tra = 60003 rewrite = 0 full_heal = 1 damage_kind = 0x400001
+    old_roll_tra = 0 new_roll_tra = 0 direct_undead_old_tra = 60043 direct_undead_new_tra = 60044
+    touch_undead_old_tra = 60043 touch_undead_new_tra = 60044
+    STR_VAR symbol = ~CLERIC_HARM~ label = ~Harm~ tag = ~7~ END
+END
