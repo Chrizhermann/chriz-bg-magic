@@ -16,6 +16,11 @@
   Without EEex at installation, its existing resistance effect is retained.
 - Added offline installer and LuaJIT/Lua 5.3 tests, plus the disposable-lab `bonus` group.
   Live acceptance remains pending. HP and extra-attack type comparisons remain deferred.
+- Healing: Cure Light, Moderate (IWD), Medium, Serious and Critical Wounds now use the
+  decided dice rolls and casting times; Mass Cure casts in 4. Cause Wounds uses the matching
+  rolls and heals undead instead of damaging them while preserving direct and touch-charge
+  delivery. Optional IWD Mass Cause Light Wounds also heals undead; Harm casts in 7 and
+  heals undead completely. Changed spell and scroll descriptions match the new behavior.
 - Spirit Armor: a new casting replaces the old one, so its save bonus and its expiry
   damage no longer stack with themselves.
 - Minor Spell Deflection stops only spells up to level 4 (was 7).

@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import test_fixes  # noqa: E402,F401  (registers its tests)
 import test_frame  # noqa: E402,F401
+import test_healing  # noqa: E402,F401
 import test_vanilla  # noqa: E402,F401
 import test_kept  # noqa: E402,F401
 import test_scs  # noqa: E402,F401

@@ -5,6 +5,7 @@ VERSION ~v0.1.0-dev~
 ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_shared.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_healing.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_vanilla.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
@@ -32,6 +33,15 @@ LAF cbmagic_fix_minor_spell_deflection END
 LAF cbmagic_fix_breath_saves END
 LAF cbmagic_fix_wake_on_damage END
 LAF cbmagic_fix_web END
+LAF cbmagic_healing_cure_light END
+LAF cbmagic_healing_cure_moderate END
+LAF cbmagic_healing_cure_medium END
+LAF cbmagic_healing_cure_serious END
+LAF cbmagic_healing_cure_critical END
+LAF cbmagic_healing_mass_cure END
+LAF cbmagic_healing_cause_wounds END
+LAF cbmagic_healing_mass_cause_light END
+LAF cbmagic_healing_harm END
 LAF cbmagic_vanilla_find_familiar_universal END
 LAF cbmagic_vanilla_blindness_duration END
 LAF cbmagic_vanilla_cloudkill_school END

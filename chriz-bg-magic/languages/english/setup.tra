@@ -40,6 +40,49 @@
 @20027 = ~This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting.~
 @20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
 @20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
+
+// Healing batch.  These are deliberately English search expressions as well as their
+// replacements: a description that no longer says what the mechanic needs to say must
+// stop the install instead of quietly advertising the wrong spell.
+@60000 = ~Casting Time: [0-9]+~
+@60001 = ~Casting Time: 4~
+@60002 = ~Casting Time: 6~
+@60003 = ~Casting Time: 7~
+@60010 = ~causes 8 points of wound or other injury damage to the creature's body to be healed\.~
+@60011 = ~causes 1d8 + 5 points of wound or other injury damage to the creature's body to be healed.~
+@60012 = ~heals 11 Hit Points~
+@60013 = ~heals 2d8 + 4 Hit Points~
+@60014 = ~heals 14 points of wound or other injury damage from the creature's body\.~
+@60015 = ~heals 2d8 + 7 points of wound or other injury damage from the creature's body.~
+@60016 = ~heals 17 points of wound or other injury damage to the creature's body\.~
+@60017 = ~heals 3d8 + 7 points of wound or other injury damage to the creature's body.~
+@60018 = ~heals 27 points of damage from wounds or other injuries\.~
+@60019 = ~heals 4d8 + 12 points of damage from wounds or other injuries.~
+@60020 = ~8 points~
+@60021 = ~1d8 + 5 points~
+@60022 = ~11 points~
+@60023 = ~2d8 + 4 points~
+@60024 = ~14 points~
+@60025 = ~2d8 + 7 points~
+@60026 = ~17 points~
+@60027 = ~3d8 + 7 points~
+@60028 = ~27 points~
+@60029 = ~4d8 + 12 points~
+@60030 = ~This spell has no effect on undead, constructs, or extraplanar creatures\.~
+@60031 = ~Undead are healed for 1d8 + 5 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60032 = ~There is no Saving Throw\.~
+@60033 = ~There is no Saving Throw. Undead are healed for 1d8 + 5 Hit Points.~
+@60034 = ~Undead are healed for 2d8 + 4 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60035 = ~There is no Saving Throw. Undead are healed for 2d8 + 4 Hit Points.~
+@60036 = ~Undead are healed for 2d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60037 = ~There is no Saving Throw. Undead are healed for 2d8 + 7 Hit Points.~
+@60038 = ~Undead are healed for 3d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60039 = ~There is no Saving Throw. Undead are healed for 3d8 + 7 Hit Points.~
+@60040 = ~Undead are healed for 4d8 + 12 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60041 = ~There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.~
+@60042 = ~Undead are healed for 1d8 + 1/level Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60043 = ~reduces the target to 1 Hit Point\.~
+@60044 = ~reduces the target to 1 Hit Point. Undead are healed completely instead.~
 @20030 = ~(Invocation/Evocation)~
 // Kept / decided SR batch strings (@40000+).
 @40000 = ~until 24 hours have passed~
