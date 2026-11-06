@@ -281,6 +281,18 @@ Every match is by opcode and parameter within an ability. Unrelated effects, add
 abilities, and other users of a native icon stay intact. A second install recognizes
 matching entries and does not add another one.
 
+## Record entries that follow a state (`cbmagic_record_live`, `lua/M_CBMREC.lua`)
+
+A fixed entry would stay after a state ends early, so these follow the state at runtime. No spell
+changes; EEex is required, without it they are left out.
+
+- Invisible, Improved Invisibility, Sanctuary, Mirror Image and Reflected Image are listed while the
+  state lasts, from any source, also items.
+- Shield of the Archons, Minor Spell Deflection and Minor Spell Turning show their own name in place
+  of the big spell's row, until the last level is spent. With the big spell active at the same time,
+  the big spell's row stays.
+- Only party members: nobody else has a record.
+
 ## Power Word: Sleep (`cbmagic_vanilla_power_word_sleep`)
 
 - School set to Enchantment (`4`, Invoker exclusion); description and scroll updated.

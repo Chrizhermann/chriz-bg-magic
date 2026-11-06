@@ -463,6 +463,37 @@ def record(c, check):
     check("Strength of One: who is left out gets neither entry nor spell state", "Strength" not in rows and not left_out,
           rows=rows, effects=left_out)
     done()
+    # Errors of the base game.
+    for res, wanted, unwanted in (("SPWI315", "Wraithform", "Invulnerable"), ("SPWI802", "Spell Deflection", "Protection From Magic"),
+                                  ("SPWI201", "Blur", None), ("SPPR613", "Physical Mirror", None),
+                                  ("SPWI213", "Nauseated", "Sleep"), ("SPWI816", "Stunned", "Stun"),
+                                  ("SPWI106", "Blinded", "Blind"), ("SPWI223", "Deafened", "Deaf")):
+        fresh(20)
+        apply(res)
+        rows = shown()
+        check(f"{res} is listed as {wanted}", wanted in rows and unwanted not in rows, rows=rows)
+        done()
+    # Exaltation turns enemies away (opcode 324), so a party member takes it.
+    c.p("rc-saves", "set_saves(0, {spell = 20, breath = 20, death = 20}, 60)")
+    for bad, gone in (("SPWI509", "Feebleminded"), ("SPWI401", "Confused")):
+        c.p(f"rc-{bad}", f'apply_spell(1, "{bad}", "Player1")')
+        time.sleep(1.4)
+        before = [RECORD.get(row, str(row)) for row in c.p("rc-rows0", "icons(0)") or []]
+        c.p("rc-exalt", 'apply_spell(1, "OHTYR1", "Player1")')
+        time.sleep(1.8)
+        rows = [RECORD.get(row, str(row)) for row in c.p("rc-rows0", "icons(0)") or []]
+        check(f"Exaltation clears {gone}", gone in before and gone not in rows, before=before, after=rows)
+        c.p("rc-exalt-end", f'clear(0, {{"{bad}", "OHTYR1"}})')
+        time.sleep(1)
+    for bad, cure, gone in (("SPPR610", "SPPR212", "Decaying"), ("SPPR610", "SPPR404", "Decaying"),
+                            ("SPPR610", "SPPR607", "Decaying"), ("SPWI215", "SPPR308", "Webbed")):
+        fresh(20)
+        apply(bad, 1.4)
+        before = shown()
+        apply(cure, 1.8)
+        rows = shown()
+        check(f"{cure} clears {gone}", gone in before and gone not in rows, before=before, after=rows)
+        done()
     stale = {"Feebleminded", "Confused", "Rigid Thinking", "Chaos", "Nauseated", "Decaying", "Poisoned"}
     for res in ("SPWI509", "SPWI401", "SPPR311", "SPWI508", "SPWI213", "SPPR610"):
         fresh(20)
