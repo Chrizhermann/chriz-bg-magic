@@ -13,11 +13,13 @@
 - Web: save vs. breath instead of vs. spell (the -2 stays); spiders, amorphous creatures,
   dragons and the very obvious flying and incorporeal creatures are immune.
 - Arcane kept/decided changes: Invisibility (8 hours), Luck (15 rounds, self-refreshing),
-  Clairvoyance (indoor/outdoor backstab immunity for 3-10 rounds), Invisibility 10' Radius
-  (casting time 1, 1 turn), Confusion (4/5/6 rounds at levels 1/15/20), Universal school for
+  Clairvoyance (indoor/outdoor backstab immunity for 3-10 rounds), Invisibility Sphere
+  (renamed from Invisibility, 10' Radius, casting time 1, 1 turn, ally-only radius 110 via
+  `ADD_PROJECTILE`), Confusion (4/5/6 rounds at levels 1/15/20), Universal school for
   Minor Sequencer, Contingency, Spell Sequencer, Spell Trigger and Chain Contingency,
-  Teleport Field (Save vs. Spell at -4), Oracle (dispels illusions up to level 9 in a 30-ft
-  radius), and Sphere of Chaos (5-outcome 1-round table with Save vs. Spell at -4).
+  Teleport Field (range 30 ft., Save vs. Spell at -4), Oracle (dispels illusions up to level
+  9 in a 30-ft radius-450 enemy-only area via `ADD_PROJECTILE`), and Sphere of Chaos
+  (5-outcome 1-round table with Save vs. Spell at -4).
 - Divine kept/decided changes: Bless (casting time 5, 30s + 1 round/level across levels
   1-20), Shillelagh (druid-only), Doom (casting time 1, -2 damage, Save vs. Spell scaling 0
   to -4), Faerie Fire (new level-1 druid spell via `ADD_SPELL`), Aid (hit-point-only bonus

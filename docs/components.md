@@ -124,25 +124,30 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 - **Clairvoyance (`cbmagic_kept_clairvoyance`)**: works indoors as well as outdoors and
   grants the caster dispellable immunity to backstab for 3 rounds at level 5 plus 1 round
   per 2 caster levels (up to 10 rounds at level 19) instead of revealing the outdoor map.
-- **Invisibility 10' Radius (`cbmagic_kept_invisibility_sphere`)**: casting time 1 (from
-  9) and duration 1 turn (60 seconds, from 24 hours).
+- **Invisibility Sphere (`cbmagic_kept_invisibility_sphere`)**: renames Invisibility, 10'
+  Radius to Invisibility Sphere in spell and scroll names and descriptions, sets casting
+  time to 1 (from 9), duration to 1 turn (60 seconds, from 24 hours), and uses an
+  ally-only radius-110 area (`cbminv10.pro` via `ADD_PROJECTILE`).
 - **Confusion (`cbmagic_kept_confusion`)**: lasts 4 rounds at levels 1-14, 5 rounds at
-  levels 15-19, and 6 rounds at level 20+. Save vs. Spell at -2 and all other properties
-  stay as in the base game.
+  levels 15-19, and 6 rounds at level 20+, preserving existing ability breakpoints. Save
+  vs. Spell at -2 and all other properties stay as in the base game.
 - **Sequencers and Contingencies (`cbmagic_kept_minor_sequencer`,
   `cbmagic_kept_contingency`, `cbmagic_kept_spell_sequencer`,
   `cbmagic_kept_spell_trigger`, `cbmagic_kept_chain_contingency`)**: Minor Sequencer,
   Contingency, Spell Sequencer, Spell Trigger, and Chain Contingency belong to the
   Universal school and clear specialist exclusion flags on the spells and their scrolls, so
   all specialist mages (including Diviners) can learn and cast them.
-- **Teleport Field (`cbmagic_kept_teleport_field`)**: enemies in the field get a Save vs.
-  Spell at -4 to avoid being teleported (base game: no save).
+- **Teleport Field (`cbmagic_kept_teleport_field`)**: range is 30 ft. (from 40 ft.) and
+  enemies in the field get a Save vs. Spell at -4 to avoid being teleported (base game: no
+  save).
 - **Oracle (`cbmagic_kept_oracle`)**: dispels illusion spells up to 9th level (from 5th)
-  in a 30-ft enemy-only area around the caster (range 1).
-- **Sphere of Chaos (`cbmagic_kept_sphere_of_chaos`)**: keeps its name, level 7, and
-  10-round enemy-only aura around the caster. Each round, enemies in the area save vs.
-  Spell at -4 or suffer one of 5 random effects for 1 round (6 seconds): feeblemind
-  (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).
+  in a 30-ft (radius 450) enemy-only area around the caster (`cbmoracl.pro` via
+  `ADD_PROJECTILE`, range 1) and updates the affected-spell list in the description.
+- **Sphere of Chaos (`cbmagic_kept_sphere_of_chaos`)**: keeps its name, level 7, point
+  targeting within range 40 ft., and 10-round enemy-only field. Each round, enemies in the
+  area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6 seconds):
+  feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold
+  (20%).
 
 ### Divine spells
 
@@ -156,9 +161,11 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   negate, scaling from no penalty at level 1 to -4 at level 9 (steps at levels 1, 3, 5, 7,
   and 9).
 - **Faerie Fire (`cbmagic_kept_faerie_fire`)**: new level-1 druid-only spell added via
-  `ADD_SPELL` (`CLERIC_CBMAGIC_FAERIE_FIRE`). In a 5-ft enemy-only area (range 20, casting
-  time 1), targets that fail a Save vs. Spell suffer a -2 AC penalty, lose and cannot
-  gain invisibility, and glow violet for 4 rounds.
+  `ADD_SPELL` (`CLERIC_CBMAGIC_FAERIE_FIRE`), using ability location 2 and base-game
+  Invisibility Purge icons (`SPPR309C` / `SPPR309B`). In a hostile 5-ft (radius 75)
+  enemy-only area (`cbmffir.pro` via `ADD_PROJECTILE`, range 20, casting time 1), targets
+  that fail a Save vs. Spell suffer a -2 AC penalty, lose and cannot gain invisibility,
+  and glow violet for 4 rounds.
 - **Aid (`cbmagic_kept_aid`)**: replaces the base game's combined Bless/HP effect (opcode
   129) with a hit-point-only bonus of `1d8 + min(L, 10)` where `L = max(ability level, 3)`,
   lasting 1 turn per level, refreshing on recast, and displaying its own portrait icon
@@ -173,15 +180,16 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   cures disease, blindness, or deafness.
 - **Divine Power (`cbmagic_kept_divine_power`)**: renames Holy Power to Divine Power in
   name and description, sets casting time to 4 (from 6), and grants non-fighter clerics
-  (single-class Cleric, Cleric/Thief, Cleric/Mage) fighter bonus attacks per round (+1/2
-  APR at levels 7-12, +1 APR at level 13+).
+  (single-class Cleric, Cleric/Thief, Cleric/Mage) dispellable fighter bonus attacks per
+  round (+1/2 APR at levels 7-12, +1 APR at level 13+).
 - **Negative Plane Protection (`cbmagic_kept_negative_plane_protection`)**: lasts 1 turn
   per level (levels 7-20, 420-1200 seconds) for both clerics and druids; all other
   properties stay as in the base game.
 - **Iron Skins / Stoneskin (`cbmagic_kept_iron_skins`)**: renamed Stoneskin, with casting
   time 1 (from 9); skin progression and duration stay as in the base game.
 - **Mass Regenerate (`cbmagic_kept_mass_regenerate`)**: new level-5 druid-only spell added
-  via `ADD_SPELL` (`CLERIC_CBMAGIC_MASS_REGENERATE`). In a sight-range party-only area
+  via `ADD_SPELL` (`CLERIC_CBMAGIC_MASS_REGENERATE`), using ability location 2 and
+  base-game Regeneration icons (`SPPR711C` / `SPPR711B`). In a sight-range party-only area
   around the caster (`cbmmreg.pro` via `ADD_PROJECTILE`, radius 452, casting time 5), party
   members within sight regenerate 2 Hit Points per round (1 HP every 3 seconds) for 1 turn +
   2 rounds per level (up to 30 rounds at level 10); a new casting replaces the previous one.
@@ -190,7 +198,8 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   replaces an earlier casting on the same target.
 - **Greater Restoration (`cbmagic_kept_greater_restoration`)**: keeps the base game's
   cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun,
-  Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.
+  Sleep, Petrification (removed before the full heal), Polymorph, curses, Blindness, and
+  Deafness.
 
 ## Descriptions
 

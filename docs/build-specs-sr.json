@@ -22,13 +22,13 @@
   "arcane.level3.invisibility_sphere": {
    "resrefs": ["SPWI307"],
    "parts": [
-    {"spec": "Casting time is 1 (from 9) and duration is 1 turn (60 seconds, from 24 hours). Its description and scroll say so.", "status": "done"}
+    {"spec": "Renamed Invisibility Sphere in spell and scroll names and descriptions, casting time is 1 (from 9), duration is 1 turn (60 seconds, from 24 hours), and uses an ally-only radius-110 projectile (cbminv10.pro via ADD_PROJECTILE).", "status": "done"}
    ]
   },
   "arcane.level4.confusion": {
    "resrefs": ["SPWI401"],
    "parts": [
-    {"spec": "Duration is 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6 rounds (36s) at level 20+. Save vs. Spell at -2 and everything else stay vanilla.", "status": "done"}
+    {"spec": "Duration is 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6 rounds (36s) at level 20+, preserving existing ability breakpoints. Save vs. Spell at -2 and everything else stay vanilla.", "status": "done"}
    ]
   },
   "arcane.level4.simbuls_spell_matrix": {
@@ -40,13 +40,13 @@
   "arcane.level4.teleport_field": {
    "resrefs": ["SPWI421"],
    "parts": [
-    {"spec": "Allows a Save vs. Spell at -4 to avoid being teleported (vanilla: no save). Its description and scroll say so.", "status": "done"}
+    {"spec": "Range is 30 ft. (from 40 ft.) and allows a Save vs. Spell at -4 to avoid being teleported (vanilla: no save). Its description and scroll say so.", "status": "done"}
    ]
   },
   "arcane.level5.oracle": {
    "resrefs": ["SPWI515"],
    "parts": [
-    {"spec": "Dispels illusion spells up to 9th level (from 5th) in a 30-ft enemy-only area centered on the caster (range 1, projectile OHVRNP).", "status": "done"}
+    {"spec": "Dispels illusion spells up to 9th level (from 5th) in a 30-ft (radius 450) enemy-only area centered on the caster (range 1, projectile cbmoracl.pro via ADD_PROJECTILE), and lists the affected high-level illusions in its description.", "status": "done"}
    ]
   },
   "arcane.level6.contingency": {
@@ -58,7 +58,7 @@
   "arcane.level7.chaos": {
    "resrefs": ["SPWI711"],
    "parts": [
-    {"spec": "Sphere of Chaos keeps its name, level 7, and 10-round enemy-only field around the caster. Each round, enemies in the area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6s): feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).", "status": "done"}
+    {"spec": "Sphere of Chaos keeps its name, level 7, point targeting within range 40 ft., and 10-round enemy-only field. Each round, enemies in the area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6s): feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).", "status": "done"}
    ]
   },
   "arcane.level7.simbuls_spell_sequencer": {
@@ -113,7 +113,7 @@
   "divine.divine_power": {
    "resrefs": ["SPPR412"],
    "parts": [
-    {"spec": "Renamed Divine Power in name and description, casting time 4 (from 6), and grants single/multi-class non-fighter clerics fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).", "status": "done"}
+    {"spec": "Renamed Divine Power in name and description, casting time 4 (from 6), and grants single/multi-class non-fighter clerics dispellable fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).", "status": "done"}
    ]
   },
   "divine.doom": {
@@ -125,7 +125,7 @@
   "divine.faerie_fire": {
    "resrefs": [],
    "parts": [
-    {"spec": "New level-1 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_FAERIE_FIRE). 5-ft enemy-only area, casting time 1, range 20, duration 4 rounds (24s), Save vs. Spell negates: -2 AC penalty, cures and prevents invisibility, and outlines targets in a violet glow.", "status": "done"}
+    {"spec": "New level-1 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_FAERIE_FIRE), using base-game icons SPPR309C/SPPR309B and ability location 2. Hostile 5-ft (radius 75) enemy-only area (cbmffir.pro via ADD_PROJECTILE), casting time 1, range 20, duration 4 rounds (24s), Save vs. Spell negates: -2 AC penalty, cures and prevents invisibility, and outlines targets in a violet glow.", "status": "done"}
    ]
   },
   "divine.free_action": {
@@ -137,7 +137,7 @@
   "divine.mass_regenerate": {
    "resrefs": [],
    "parts": [
-    {"spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE). Sight-range party-only area centered on the caster (projectile cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), and replaces an earlier casting of itself.", "status": "done"}
+    {"spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE), using base-game icons SPPR711C/SPPR711B and ability location 2. Sight-range party-only area centered on the caster (projectile cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), and replaces an earlier casting of itself.", "status": "done"}
    ]
   },
   "divine.neutralize_poison": {
@@ -185,7 +185,7 @@
   "divine.greater_restoration": {
    "resrefs": ["SPPR713"],
    "parts": [
-    {"spec": "Keeps vanilla cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun, Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.", "status": "done"}
+    {"spec": "Keeps vanilla cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun, Sleep, Petrification (before the full heal), Polymorph, curses, Blindness, and Deafness.", "status": "done"}
    ]
   },
   "divine.negative_plane_protection": {
