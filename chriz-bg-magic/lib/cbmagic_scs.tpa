@@ -269,13 +269,15 @@ BEGIN
 END
 
 // 1. Chromatic Orb (WIZARD_CHROMATIC_ORB): IWD/SCS progression at levels 1, 2, 3, 4, 5, 7;
-// no save against primary damage, save vs. spell (+0) negates secondary effect, no petrify/slay.
+// range 50, no save against primary/level-3 damage, save vs. spell (+0) negates secondary effect,
+// Free Action immunity to level-5 stun, no petrify/slay.
 DEFINE_ACTION_FUNCTION cbmagic_scs_chromatic_orb
 BEGIN
   LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_CHROMATIC_ORB~ RET spell = resref found END
   ACTION_IF !found BEGIN
     PRINT ~chriz-bg-magic: WIZARD_CHROMATIC_ORB is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
+    LAF cbmagic_free_action_splprot_rows RET splstate_row splstate_val stat_row END
     OUTER_SET did_change = 0
     OUTER_SET is_already = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
@@ -291,20 +293,38 @@ BEGIN
         SET has_petrify_or_slay = 0
         SET has_l7_hold = 0
         SET has_l7_dmg_nosave = 0
+        SET has_l3_fire_nosave = 0
+        SET has_l5_fa = 0
+        SET has_invoch = 0
+        SET all_range_50 = 1
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x0e) rng
           READ_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
           READ_SHORT (ab_off + a * 0x28 + 0x1e) n
           READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          PATCH_IF (rng != 50) BEGIN
+            SET all_range_50 = 0
+          END
           FOR (i = 0; i < n; ++i) BEGIN
             SET fx = fx_off + (first + i) * 0x30
             READ_SHORT fx op
             READ_LONG (fx + 0x0e) dur
+            READ_ASCII (fx + 0x14) res (8) NULL
             READ_LONG (fx + 0x1c) dice
             READ_LONG (fx + 0x20) sides
             READ_LONG (fx + 0x24) stype
             READ_SLONG (fx + 0x28) sbonus
             PATCH_IF (op = 134) OR (op = 55) BEGIN
               SET has_petrify_or_slay = 1
+            END
+            PATCH_IF (op = 215) AND (~%res%~ STRING_EQUAL_CASE ~INVOCH~) BEGIN
+              SET has_invoch = 1
+            END
+            PATCH_IF (min_lvl = 3) AND (op = 12) AND (dice = 1) AND (sides = 3) AND (stype = 0) BEGIN
+              SET has_l3_fire_nosave = 1
+            END
+            PATCH_IF (min_lvl = 5) AND (op = 324) BEGIN
+              SET has_l5_fa = 1
             END
             PATCH_IF (min_lvl = 7) AND (op = 175) AND (dur = 78) AND (stype = 1) AND (sbonus = 0) BEGIN
               SET has_l7_hold = 1
@@ -314,10 +334,36 @@ BEGIN
             END
           END
         END
-        PATCH_IF (ab_cnt = 6) AND !has_petrify_or_slay AND has_l7_hold AND has_l7_dmg_nosave BEGIN
+        PATCH_IF (ab_cnt = 6) AND !has_petrify_or_slay AND has_l7_hold AND has_l7_dmg_nosave AND has_l3_fire_nosave AND has_l5_fa AND !has_invoch AND all_range_50 BEGIN
           SET is_already = 1
         END ELSE BEGIN
+          READ_LONG 0x1e excl
+          PATCH_IF ((excl BAND 0x0080) != 0) BEGIN
+            WRITE_LONG 0x1e (excl BAND (BNOT 0x0080))
+          END
           READ_ASCII ab_off ab0_hdr (0x28)
+          FOR (a = 0; a < 6; ++a) BEGIN
+            PATCH_IF (a < ab_cnt) BEGIN
+              READ_ASCII (ab_off + a * 0x28) $"ab_hdr"("%a%") (0x28)
+            END ELSE BEGIN
+              SPRINT $"ab_hdr"("%a%") ~%ab0_hdr%~
+            END
+          END
+          // Preserve any non-owned ability effects on ability 0 (e.g. from another mod).
+          SET extra_cnt = 0
+          READ_SHORT (ab_off + 0x1e) n0
+          READ_SHORT (ab_off + 0x20) first0
+          FOR (i = 0; i < n0; ++i) BEGIN
+            SET fx = fx_off + (first0 + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op != 0) AND (op != 12) AND (op != 15) AND (op != 44) AND (op != 45)
+                 AND (op != 54) AND (op != 55) AND (op != 61) AND (op != 74) AND (op != 134)
+                 AND (op != 139) AND (op != 141) AND (op != 142) AND (op != 174) AND (op != 175)
+                 AND (op != 215) AND (op != 324) BEGIN
+              READ_ASCII fx $"extra_fx"("%extra_cnt%") (0x30)
+              SET extra_cnt += 1
+            END
+          END
           FOR (a = 0; a < ab_cnt; ++a) BEGIN
             READ_LONG 0x64 ab_off
             READ_SHORT (ab_off + a * 0x28 + 0x1e) n
@@ -343,7 +389,9 @@ BEGIN
           WRITE_LONG 0x6a (ab_off + 6 * 0x28)
           PATCH_FOR_EACH a IN 0 1 2 3 4 5 BEGIN
             SET min_lvl = (a = 5) ? 7 : (a + 1)
-            WRITE_ASCIIE (ab_off + a * 0x28) ~%ab0_hdr%~ (0x28)
+            SPRINT hdr $"ab_hdr"("%a%")
+            WRITE_ASCIIE (ab_off + a * 0x28) ~%hdr%~ (0x28)
+            WRITE_SHORT (ab_off + a * 0x28 + 0x0e) 50
             WRITE_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
             WRITE_SHORT (ab_off + a * 0x28 + 0x1e) 0
             WRITE_SHORT (ab_off + a * 0x28 + 0x20) total_cfx
@@ -353,20 +401,20 @@ BEGIN
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 1 opcode = 74 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 8 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 3 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_M05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 0 position = 5 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 0 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 2: 1d6 fire damage (no save) + -1 AC / -1 THAC0 for 1 round (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x80000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 6 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 1 opcode = 0 target = 2 power = 1 parameter1 = 0 - 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 2 opcode = 54 target = 2 power = 1 parameter1 = 0 - 1 timing = 0 resist_dispel = 1 duration = 6 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 6 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 4 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 1 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 1 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
-          // Level 3: 1d8 magic damage (no save) + 1d3 fire damage (save vs. spell +0)
+          // Level 3: 1d8 magic damage (no save) + 1d3 fire damage (no save)
           LPF cbmagic_insert_effect INT_VAR ability = 2 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 8 END
-          LPF cbmagic_insert_effect INT_VAR ability = 2 position = 1 opcode = 12 target = 2 power = 1 parameter2 = 0x80000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 3 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 2 position = 2 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 2 position = 1 opcode = 12 target = 2 power = 1 parameter2 = 0x80000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 3 END
+          LPF cbmagic_insert_effect INT_VAR ability = 2 position = 2 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 2 position = 3 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 4: 1d10 magic damage (no save) + blind 4 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 10 END
@@ -374,23 +422,41 @@ BEGIN
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 8 timing = 0 resist_dispel = 1 duration = 24 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 3 opcode = 139 target = 2 power = 1 parameter1 = 14674 timing = 1 resist_dispel = 1 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 24 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 5 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 3 position = 5 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 3 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
-          // Level 5: 1d12 magic damage (no save) + stun 3 rounds (save vs. spell +0)
+          // Level 5: 1d12 magic damage (no save) + Free Action immunity + stun 3 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 4 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 1 dicesize = 12 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 1 opcode = 45 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 55 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 3 opcode = 139 target = 2 power = 1 parameter1 = 1280 timing = 1 resist_dispel = 1 savingthrow = 1 END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 4 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 18 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 5 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 6 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 1 opcode = 324 target = 2 power = 1 parameter1 = 0 parameter2 = stat_row timing = 0 resist_dispel = 1 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 2 opcode = 324 target = 2 power = 1 parameter1 = splstate_val parameter2 = splstate_row timing = 0 resist_dispel = 1 duration = 0 STR_VAR resource = EVAL ~%spell%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 3 opcode = 45 target = 2 power = 1 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 4 opcode = 142 target = 2 power = 1 parameter2 = 55 timing = 0 resist_dispel = 1 duration = 18 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 5 opcode = 139 target = 2 power = 1 parameter1 = 1280 timing = 1 resist_dispel = 1 savingthrow = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 6 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 18 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 7 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
+          LPF cbmagic_insert_effect INT_VAR ability = 4 position = 8 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
           // Level 7: 2d8 magic damage (no save) + hold 13 rounds (save vs. spell +0)
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 0 opcode = 12 target = 2 power = 1 parameter2 = 0x400000 timing = 1 resist_dispel = 1 dicenumber = 2 dicesize = 8 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 1 opcode = 175 target = 2 power = 1 parameter2 = 3 timing = 0 resist_dispel = 1 duration = 78 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 2 opcode = 142 target = 2 power = 1 parameter2 = 13 timing = 0 resist_dispel = 1 duration = 78 savingthrow = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 3 opcode = 174 target = 2 power = 1 timing = 4 resist_dispel = 1 duration = 78 savingthrow = 1 STR_VAR resource = ~EFF_E05~ END
-          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 4 opcode = 215 target = 2 power = 1 timing = 1 resist_dispel = 3 STR_VAR resource = ~INVOCH~ END
+          LPF cbmagic_insert_effect INT_VAR ability = 5 position = 4 opcode = 141 target = 2 power = 1 parameter2 = 25 timing = 1 resist_dispel = 1 END
           LPF cbmagic_insert_effect INT_VAR ability = 5 position = 5 opcode = 174 target = 2 power = 1 timing = 1 resist_dispel = 2 STR_VAR resource = ~EFF_M83~ END
+          // Re-append any preserved non-owned effects on each ability
+          PATCH_IF (extra_cnt > 0) BEGIN
+            FOR (a = 0; a < 6; ++a) BEGIN
+              FOR (ei = 0; ei < extra_cnt; ++ei) BEGIN
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) cur_n
+                LPF cbmagic_insert_effect INT_VAR ability = a position = cur_n opcode = 0 END
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x20) cur_first
+                SPRINT raw_fx $"extra_fx"("%ei%")
+                WRITE_ASCIIE (fx_off + (cur_first + cur_n) * 0x30) ~%raw_fx%~ (0x30)
+              END
+            END
+          END
           SET did_change = 1
         END
       END
@@ -484,13 +550,26 @@ BEGIN
       END ELSE BEGIN
         READ_LONG 0x64 ab_off
         READ_LONG 0x6a fx_off
-        SET low_ab = 0
+        SET has_min_12 = 0
         SET high_ab = 0
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
           READ_SHORT (ab_off + a * 0x28 + 0x10) min_lvl
-          PATCH_IF (min_lvl <= 12) BEGIN SET low_ab += 1 END ELSE BEGIN SET high_ab += 1 END
+          PATCH_IF (min_lvl = 12) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_LONG (fx + 0x1c) dice
+              PATCH_IF (op = 12) AND (dice = 12) BEGIN
+                SET has_min_12 = 1
+              END
+            END
+          END ELSE PATCH_IF (min_lvl > 12) BEGIN
+            SET high_ab += 1
+          END
         END
-        PATCH_IF (low_ab > 0) AND (high_ab > 0) BEGIN
+        PATCH_IF has_min_12 AND (high_ab > 0) BEGIN
           SET del = 1
           WHILE del BEGIN
             SET del = 0
@@ -1189,16 +1268,73 @@ BEGIN
   END
 END
 
+// Helper: find the repeating aura payload subspell of a Blade Barrier / Globe of Blades spell
+// by inspecting op177 -> .EFF (op146/148/232/272) or direct op146/148/232/272 effects,
+// falling back to `%spell%d` if present.
+DEFINE_ACTION_FUNCTION cbmagic_find_aura_payload
+  STR_VAR spell = ~~
+  RET payload
+BEGIN
+  OUTER_SPRINT payload ~~
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING - ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF valid BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; (a < ab_cnt) AND (~%payload%~ STRING_EQUAL ~~); ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          FOR (i = 0; (i < fx_cnt) AND (~%payload%~ STRING_EQUAL ~~); ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            READ_ASCII (e + 0x14) res (8) NULL
+            PATCH_IF (op = 177) AND !(~%res%~ STRING_EQUAL ~~) BEGIN
+              PATCH_IF FILE_EXISTS_IN_GAME ~%res%.eff~ BEGIN
+                INNER_ACTION BEGIN
+                  COPY_EXISTING - ~%res%.eff~ ~override~
+                    PATCH_IF (BUFFER_LENGTH >= 0x110) BEGIN
+                      READ_LONG 0x10 eff_op
+                      PATCH_IF (eff_op = 146) OR (eff_op = 148) OR (eff_op = 232) OR (eff_op = 272) BEGIN
+                        READ_ASCII 0x30 eff_sub (8) NULL
+                        PATCH_IF !(~%eff_sub%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%eff_sub%.spl~) BEGIN
+                          SPRINT payload ~%eff_sub%~
+                        END
+                      END
+                    END
+                END
+              END
+              PATCH_IF (~%payload%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%res%.spl~) BEGIN
+                SPRINT payload ~%res%~
+              END
+            END ELSE PATCH_IF ((op = 146) OR (op = 148) OR (op = 232) OR (op = 272)) AND !(~%res%~ STRING_EQUAL ~~) BEGIN
+              PATCH_IF FILE_EXISTS_IN_GAME ~%res%.spl~ BEGIN
+                SPRINT payload ~%res%~
+              END
+            END
+          END
+        END
+      END
+  END
+  ACTION_IF (~%payload%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%spell%d.spl~) BEGIN
+    OUTER_SPRINT payload ~%spell%d~
+  END
+END
+
 // Helper: patch a Blade Barrier / Globe of Blades payload subspell to affect only enemies
 // (leading op318 for !ENEMIES) and allow a save for half damage (special |= 0x100 on op12).
+// When set_8d8 = 1 (Blade Barrier player/NPC payloads), also normalize range to 6 and damage to 8d8.
 DEFINE_ACTION_FUNCTION cbmagic_patch_blade_payload
   INT_VAR not_enemy_row = 0
+          set_8d8       = 0
   STR_VAR payload = ~~
   RET changed already
 BEGIN
   OUTER_SET changed = 0
   OUTER_SET already = 0
-  ACTION_IF FILE_EXISTS_IN_GAME ~%payload%.spl~ BEGIN
+  ACTION_IF !(~%payload%~ STRING_EQUAL ~~) AND FILE_EXISTS_IN_GAME ~%payload%.spl~ BEGIN
     COPY_EXISTING ~%payload%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       READ_SHORT 0x68 ab_cnt
@@ -1207,9 +1343,18 @@ BEGIN
         READ_LONG 0x6a fx_off
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
           SET ab = ab_off + a * 0x28
+          SET ab_changed = 0
           READ_SHORT (ab + 0x26) proj
           PATCH_IF (proj = 218) BEGIN
             WRITE_SHORT (ab + 0x26) 216
+            SET ab_changed = 1
+          END
+          PATCH_IF set_8d8 BEGIN
+            READ_SHORT (ab + 0x0e) rng
+            PATCH_IF (rng != 6) BEGIN
+              WRITE_SHORT (ab + 0x0e) 6
+              SET ab_changed = 1
+            END
           END
           READ_SHORT (ab + 0x1e) fx_cnt
           READ_SHORT (ab + 0x20) fx_idx
@@ -1226,8 +1371,15 @@ BEGIN
                 SET has_guard = 1
               END
             END ELSE PATCH_IF (op = 12) BEGIN
+              READ_LONG (e + 0x1c) dice
+              READ_LONG (e + 0x20) sides
               READ_LONG (e + 0x24) save_type
               READ_LONG (e + 0x2c) special
+              PATCH_IF set_8d8 AND ((dice != 8) OR (sides != 8)) BEGIN
+                WRITE_LONG (e + 0x1c) 8
+                WRITE_LONG (e + 0x20) 8
+                SET ab_changed = 1
+              END
               PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
                 PATCH_IF ((special BAND 0x100) != 0) BEGIN
                   SET half_already += 1
@@ -1247,7 +1399,7 @@ BEGIN
             READ_LONG 0x64 ab_off
             READ_LONG 0x6a fx_off
             SET changed += 1
-          END ELSE PATCH_IF (half_changed > 0) BEGIN
+          END ELSE PATCH_IF (half_changed > 0) OR ab_changed BEGIN
             SET changed += 1
           END ELSE BEGIN
             SET already += 1
@@ -1286,8 +1438,14 @@ BEGIN
         END
       END
     BUT_ONLY
-    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = EVAL ~%spell%d~ RET pay_changed = changed pay_already = already END
-    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = ~sppr698d~ RET npc_changed = changed npc_already = already END
+    LAF cbmagic_find_aura_payload STR_VAR spell RET pay_res = payload END
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row set_8d8 = 1 STR_VAR payload = EVAL ~%pay_res%~ RET pay_changed = changed pay_already = already END
+    LAF cbmagic_spell_resref STR_VAR symbol = ~NPC_BLADE_BARRIER~ RET npc_spell = resref npc_found = found END
+    ACTION_IF !npc_found BEGIN
+      OUTER_SPRINT npc_spell ~sppr698~
+    END
+    LAF cbmagic_find_aura_payload STR_VAR spell = EVAL ~%npc_spell%~ RET npc_pay = payload END
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row set_8d8 = 1 STR_VAR payload = EVAL ~%npc_pay%~ RET npc_changed = changed npc_already = already END
     ACTION_IF (cast_changed > 0) OR (pay_changed > 0) BEGIN
       OUTER_SPRINT find @30039
       OUTER_SPRINT replace @30040
@@ -1379,7 +1537,8 @@ BEGIN
           FOR (i = 0; i < fx_cnt; ++i) BEGIN
             SET e = fx_off + (fx_idx + i) * 0x30
             READ_SHORT e op
-            PATCH_IF (op = 0) BEGIN
+            READ_LONG (e + 0x08) ac_type
+            PATCH_IF (op = 0) AND (ac_type = 0) BEGIN
               READ_LONG (e + 0x04) ac_bonus
               PATCH_IF (ac_bonus = 4) BEGIN
                 SET already += 1
@@ -1409,7 +1568,8 @@ BEGIN
     PRINT ~chriz-bg-magic: CLERIC_GLOBE_OF_BLADES is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
     LAF cbmagic_splprot_row INT_VAR stat = 0x114 value = 1 relation = 5 RET not_enemy_row = row END
-    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = EVAL ~%spell%d~ RET changed already END
+    LAF cbmagic_find_aura_payload STR_VAR spell RET pay_res = payload END
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row set_8d8 = 0 STR_VAR payload = EVAL ~%pay_res%~ RET changed already END
     ACTION_IF (changed > 0) BEGIN
       OUTER_SPRINT find @30041
       OUTER_SPRINT replace @30042
@@ -1442,28 +1602,26 @@ BEGIN
         FOR (a = 0; a < ab_cnt; ++a) BEGIN
           SET ab = ab_off + a * 0x28
           READ_SHORT (ab + 0x12) cast_time
-          // Real Glyph of Warding has casting time 9 (or 5 after patching); skip synthetic
-          // casting_time=1 unit-test stubs so breath-save isolation tests remain untouched.
-          PATCH_IF (cast_time >= 5) BEGIN
-            PATCH_IF (cast_time > 5) BEGIN
-              WRITE_SHORT (ab + 0x12) 5
-              SET changed += 1
-            END
-            READ_SHORT (ab + 0x1e) fx_cnt
-            READ_SHORT (ab + 0x20) fx_idx
-            FOR (i = 0; i < fx_cnt; ++i) BEGIN
-              SET e = fx_off + (fx_idx + i) * 0x30
-              READ_SHORT e op
-              PATCH_IF (op = 12) BEGIN
-                READ_LONG (e + 0x24) save_type
-                READ_LONG (e + 0x2c) special
-                PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
-                  PATCH_IF ((special BAND 0x100) != 0) BEGIN
-                    SET already += 1
-                  END ELSE BEGIN
-                    WRITE_LONG (e + 0x2c) (special BOR 0x100)
-                    SET changed += 1
-                  END
+          PATCH_IF (cast_time = 5) BEGIN
+            SET already += 1
+          END ELSE PATCH_IF (cast_time > 5) BEGIN
+            WRITE_SHORT (ab + 0x12) 5
+            SET changed += 1
+          END
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            PATCH_IF (op = 12) BEGIN
+              READ_LONG (e + 0x24) save_type
+              READ_LONG (e + 0x2c) special
+              PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
+                PATCH_IF ((special BAND 0x100) != 0) BEGIN
+                  SET already += 1
+                END ELSE BEGIN
+                  WRITE_LONG (e + 0x2c) (special BOR 0x100)
+                  SET changed += 1
                 END
               END
             END

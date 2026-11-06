@@ -167,11 +167,21 @@ def scs_batch1_arcane_spells(work, weidu):
     out = fg.install()
     assert installed_ok(out), out
 
-    # 1. Chromatic Orb: 6 abilities (1, 2, 3, 4, 5, 7), no petrify/slay, l7 has 2d8 (no save) + hold 78s
+    # 1. Chromatic Orb: 6 abilities (1, 2, 3, 4, 5, 7), range 50, no petrify/slay/INVOCH,
+    # l3 has no save on 1d3 fire, l5 has Free Action op324 after 1d12 damage, l7 has 2d8 (no save) + hold 78s
+    co_raw = fg.file("override/SPWI118.SPL")
+    co_ab_off = struct.unpack_from("<I", co_raw, 0x64)[0]
+    for a_idx in range(6):
+        assert struct.unpack_from("<H", co_raw, co_ab_off + a_idx * 0x28 + 0x0E)[0] == 50
     co = fg.spl("SPWI118")
     assert [a["min_level"] for a in co["abilities"]] == [1, 2, 3, 4, 5, 7]
     for a in co["abilities"]:
-        assert all(e["opcode"] not in (55, 134) for e in a["effects"])
+        assert all(e["opcode"] not in (55, 134, 215) for e in a["effects"])
+        assert any(e["opcode"] == 141 and e["p2"] == 25 for e in a["effects"])
+    ab3_fx = co["abilities"][2]["effects"]
+    assert [ (e["dice"], e["sides"], e["save"]) for e in ab3_fx if e["opcode"] == 12 ] == [(1, 8, 0), (1, 3, 0)]
+    ab5_fx = co["abilities"][4]["effects"]
+    assert [e["opcode"] for e in ab5_fx[:4]] == [12, 324, 324, 45]
     ab7_fx = co["abilities"][5]["effects"]
     assert any(e["opcode"] == 12 and e["dice"] == 2 and e["sides"] == 8 and e["save"] == 0 for e in ab7_fx)
     assert any(e["opcode"] == 175 and e["duration"] == 78 and e["save"] == SAVE_SPELL and e["bonus"] == 0 for e in ab7_fx)
@@ -672,12 +682,17 @@ def scs_batch3_fiends_and_divine(work, weidu):
 
     # Blade Barrier & Globe of Blades
     assert _ab_cast_times(fg.file("override/SPPR603.SPL")) == [6]
-    assert _ab_projectiles(fg.file("override/SPPR698D.SPL")) == [216]
+    npc_bb_raw = fg.file("override/SPPR698D.SPL")
+    assert _ab_projectiles(npc_bb_raw) == [216]
+    npc_ab_off = struct.unpack_from("<I", npc_bb_raw, 0x64)[0]
+    assert struct.unpack_from("<H", npc_bb_raw, npc_ab_off + 0x0E)[0] == 6
     for pay_res in ("SPPR603D", "SPPR698D", "SPPR725D"):
         pay = fg.spl(pay_res)
         fxs = pay["abilities"][0]["effects"]
         assert fxs[0]["opcode"] == 318
         assert fxs[1]["opcode"] == 12 and (fxs[1]["special"] & 0x100) != 0
+        if pay_res in ("SPPR603D", "SPPR698D"):
+            assert fxs[1]["dice"] == 8 and fxs[1]["sides"] == 8
     assert "Any enemy attempting" in fg.tlk(fg.spl("SPPR603")["desc"])
     assert "Any enemy attempting" in fg.tlk(fg.spl("SPPR725")["desc"])
 
@@ -905,20 +920,57 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
             {"opcode": 146, "target": 2, "p2": 1, "timing": 1, "resource": "sppr517a"},
         ]}],
     )
+    # Skull Trap with custom 1/10/15 layout (no min_level=12 ability) -> must cap 15d6 to 12d6 in place
+    skull_custom = make_spl(
+        level=3, school=7,
+        abilities=[
+            {"min_level": lvl, "target": 4, "projectile": 96, "effects": [
+                {"opcode": 12, "p2": 0x400000, "timing": 1, "dice": max(5, lvl), "sides": 6,
+                 "save": SAVE_SPELL, "special": 0x100},
+            ]}
+            for lvl in [1, 10, 15]
+        ],
+    )
+    # Chromatic Orb with foreign mod effect (op206) -> must preserve op206 on rebuilt abilities
+    chrom_mod = make_spl(
+        level=1, school=6,
+        abilities=[
+            {"min_level": 1, "projectile": 24, "effects": [
+                {"opcode": 12, "p2": 0x400000, "timing": 1, "dice": 1, "sides": 4},
+                {"opcode": 206, "target": 2, "duration": 6, "resource": "MODORB"},
+            ]},
+        ],
+    )
+    # Defensive Harmony with specific AC modifier (p2=1, slashing +1) alongside general AC (p2=0, +2)
+    dh_mod = make_spl(
+        spell_type=2, level=4, school=4,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 0, "power": 4, "p1": 2, "p2": 0, "duration": 36, "dispel": 3},
+            {"opcode": 0, "power": 4, "p1": 1, "p2": 1, "duration": 36, "dispel": 3},
+        ]}],
+    )
     biff = {
         "SPELL.IDS": make_ids([
+            (2118, "WIZARD_CHROMATIC_ORB"),
+            (2313, "WIZARD_SKULL_TRAP"),
             (2708, "WIZARD_MANTLE"),
+            (1406, "CLERIC_DEFENSIVE_HARMONY"),
             (1704, "CLERIC_NATURE_BEAUTY"),
             (1517, "CLERIC_INSECT_PLAGUE"),
         ]),
+        "SPLSTATE.IDS": make_ids([(29, "FREE_ACTION")]),
         "STATS.IDS": make_ids([
             (88, "STONESKINS"),
             (120, "CLERIC_INSECT_PLAGUE"),
             (125, "WIZARD_FIRE_SHIELD"),
+            (131, "CLERIC_FREE_ACTION"),
             (181, "WIZARD_PROTECTION_FROM_NORMAL_WEAPONS"),
         ]),
         "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
+        "SPWI118.SPL": chrom_mod,
+        "SPWI313.SPL": skull_custom,
         "SPWI708.SPL": mantle_mod,
+        "SPPR406.SPL": dh_mod,
         "SPPR704.SPL": nb_scs,
         "DW#NBSUB.SPL": nb_scs_sub,
         "SPPR517.SPL": ins_scs,
@@ -927,6 +979,20 @@ def scs_mod_variations_and_scs_coexistence(work, weidu):
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
     out = fg.install()
     assert installed_ok(out), out
+
+    # Custom Skull Trap kept its min_level=15 ability and capped dice at 12
+    st = fg.spl("SPWI313")
+    assert [a["min_level"] for a in st["abilities"]] == [1, 10, 15]
+    assert [a["effects"][0]["dice"] for a in st["abilities"]] == [5, 10, 12]
+
+    # Chromatic Orb preserved foreign op206 on all 6 abilities
+    co = fg.spl("SPWI118")
+    for a in co["abilities"]:
+        assert any(e["opcode"] == 206 and e["resource"] == "MODORB" for e in a["effects"])
+
+    # Defensive Harmony updated only p2=0 to 4 and left p2=1 at 1
+    dh = fg.spl("SPPR406")
+    assert [(e["p1"], e["p2"]) for e in dh["abilities"][0]["effects"] if e["opcode"] == 0] == [(4, 0), (1, 1)]
 
     # Mantle kept its casting feature and extra op142 effect while gaining +3 weapon immunity
     m = fg.spl("SPWI708")
