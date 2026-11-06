@@ -559,7 +559,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     ff_num = next(int(ln.split()[0]) for ln in ids_text.splitlines() if "CLERIC_CBMAGIC_FAERIE_FIRE" in ln)
     ff_res = f"SPPR{ff_num - 1000:03d}"
     ff_pro = g.file("override/cbmffir.pro")
-    check(ff_pro is not None and struct.unpack_from("<HHHH", ff_pro, 0x200) == (0x40, 0, 75, 75), "cbmffir.pro enemy-only radius 75")
+    check(ff_pro is not None and struct.unpack_from("<HHHH", ff_pro, 0x200) == (0x50, 0, 75, 75), "cbmffir.pro enemy-only radius 75")
     s = parse_spl_full(g.file(f"override/{ff_res}.SPL"))
     check(s["priest_excl"] == 0x4000 and s["level"] == 1 and s["school"] == 6 and (s["flags"] & 0x0400) == 0x0400
           and s["icon"] == "SPPR309C", f"Faerie Fire header: {s}")

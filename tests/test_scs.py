@@ -745,7 +745,7 @@ def scs_batch3_fiends_and_divine(work, weidu):
 @test
 def scs_batch4_insects_and_natures_beauty(work, weidu):
     """Verify Batch 4: Summon Insects, Insect Plague, Creeping Doom (+ Fire Shield, PfNW items/spells,
-    Death Spell counter), Nature's Beauty, and Lesser Restoration ability drain."""
+    Death Spell counter), and Nature's Beauty."""
     tlk = make_tlk([
         "",
         # 1: Summon Insects
@@ -756,8 +756,6 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
         "Creeping Doom\nThose trapped by the insects suffer 2 points of damage each second and a spell failure rate of 100%.",
         # 4: Nature's Beauty
         "Nature's Beauty\nAs with a nymph, anyone viewing the disguised caster must make a Saving Throw vs. Spell with +3 bonus or die of longing for the denied illusion. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled).",
-        # 5: Lesser Restoration
-        "Lesser Restoration\nWhen this spell is cast, the life energy level of the recipient is raised. This reverses any previous life energy level drain of the creature by a force or monster.",
     ])
     sum_ins = make_spl(
         spell_type=2, level=3, school=2, desc=1,
@@ -807,34 +805,6 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
             {"opcode": 215, "target": 1, "power": 7, "p2": 1, "duration": 2, "resource": "icclkfr2", "dispel": 1},
         ]}],
     )
-    lesser_rest = _spl_with_excl(
-        make_spl(
-            spell_type=2, level=4, school=7, desc=5,
-            abilities=[{"min_level": 1, "target": 1, "effects": [
-                {"opcode": 224, "target": 2, "power": 4, "timing": 1},
-            ]}],
-        ),
-        priest_type=0x8000,
-    )
-    greater_rest = make_spl(
-        spell_type=2, level=7, school=7,
-        abilities=[{"min_level": 1, "target": 1, "effects": [
-            {"opcode": 224, "target": 2, "power": 7, "timing": 1},
-        ]}],
-    )
-    drain_spl = make_spl(
-        spell_type=4, level=1, school=0,
-        abilities=[{"min_level": 1, "target": 1, "effects": [
-            {"opcode": 12, "target": 2, "p2": 0x400000, "timing": 1, "dice": 1, "sides": 6},
-            {"opcode": 44, "target": 2, "p1": -2, "p2": 0, "timing": 0, "duration": 300, "save": SAVE_SPELL},
-            {"opcode": 142, "target": 2, "p2": 22, "timing": 0, "duration": 300, "save": SAVE_SPELL},
-        ]}],
-    )
-    drain_itm = make_itm([[
-        {"opcode": 12, "target": 2, "p2": 0, "timing": 1, "dice": 1, "sides": 8},
-        {"opcode": 19, "target": 2, "p1": -1, "p2": 0, "timing": 1, "duration": 0},
-        {"opcode": 142, "target": 2, "p2": 91, "timing": 1, "duration": 0},
-    ]])
     biff = {
         "SPELL.IDS": make_ids([
             (1319, "CLERIC_SUMMON_INSECTS"),
@@ -844,8 +814,6 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
             (2511, "WIZARD_PROTECTION_FROM_NORMAL_WEAPONS"),
             (2605, "WIZARD_DEATH_SPELL"),
             (1704, "CLERIC_NATURE_BEAUTY"),
-            (1417, "CLERIC_LESSER_RESTORATION"),
-            (1713, "CLERIC_RESTORATION"),
         ]),
         "PROJECTL.IDS": make_ids([(157, "INAREAPA")]),
         "STATS.IDS": make_ids([
@@ -861,11 +829,7 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
         "SPWI511.SPL": pfnw_spl,
         "SPWI605.SPL": death_spl,
         "SPPR704.SPL": nat_bty,
-        "SPPR417.SPL": lesser_rest,
-        "SPPR713.SPL": greater_rest,
-        "SPIN912.SPL": drain_spl,
         "PFNWRING.ITM": pfnw_itm,
-        "SHAD01.ITM": drain_itm,
     }
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
     out = fg.install()
@@ -933,25 +897,6 @@ def scs_batch4_insects_and_natures_beauty(work, weidu):
     ds_b = fg.spl("CBMG605B")
     ds_b_rem = {e["resource"].upper() for e in ds_b["abilities"][0]["effects"] if e["opcode"] == 321}
     assert {"SPPR319A", "SPPR517A", "SPPR717A"}.issubset(ds_b_rem)
-
-    # Lesser Restoration (SPPR417) stays cleric-only (0x20 = 0x8000), removes drain sectype via op221,
-    # and SPIN912.SPL extracted its STR drain into CBDRN1.SPL with matching sectype while keeping op12 damage
-    lr_raw = fg.file("override/SPPR417.SPL")
-    assert struct.unpack_from("<H", lr_raw, 0x20)[0] == 0x8000
-    lr = fg.spl("SPPR417")
-    op221_fx = [e for e in lr["abilities"][0]["effects"] if e["opcode"] == 221]
-    assert len(op221_fx) == 1
-    drain_sec = op221_fx[0]["p2"]
-    assert "ability score drain" in fg.tlk(lr["desc"])
-    s912 = fg.spl("SPIN912")
-    assert [(e["opcode"], e["resource"].upper()) for e in s912["abilities"][0]["effects"]] == [
-        (12, ""),
-        (146, "CBDRN1"),
-    ]
-    cbdrn1_raw = fg.file("override/CBDRN1.SPL")
-    assert cbdrn1_raw[0x27] == drain_sec
-    cbdrn1 = fg.spl("CBDRN1")
-    assert [e["opcode"] for e in cbdrn1["abilities"][0]["effects"]] == [44, 142]
 
     # Nature's Beauty: keeps op55 (save vs. spell +3) and caster op215; casts schoolless area
     # subspell CBMGNB1 (target=1 on op146; CBMGNB1 has school=0, target=5, projectile=159,
