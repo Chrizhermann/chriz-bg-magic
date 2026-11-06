@@ -290,48 +290,70 @@ BEGIN
       PATCH_IF (lvl = 19) BEGIN SET c16 = 49 SET c24 = 11 END
       PATCH_IF (lvl = 20) BEGIN SET c16 = 51 SET c24 = 12 END
     END
-    SET fx1 = 0 - 1
-    SET fx2 = 0 - 1
-    SET fx3 = 0 - 1
+    // Collect the 3 distinct sub-100% probability windows (sorted by prob_lo ascending).
+    SET n_win = 0
     FOR (i = 0; i < n; ++i) BEGIN
       SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_ASCII (fx + 0x14) res (8) NULL
-      PATCH_IF (op = 177) BEGIN
-        PATCH_IF (INDEX (CASE_INSENSITIVE ~1~ ~%res%~) >= 0) AND (fx1 < 0) BEGIN
-          SET fx1 = fx
-        END ELSE PATCH_IF (INDEX (CASE_INSENSITIVE ~2~ ~%res%~) >= 0) AND (fx2 < 0) BEGIN
-          SET fx2 = fx
-        END ELSE PATCH_IF (INDEX (CASE_INSENSITIVE ~3~ ~%res%~) >= 0) AND (fx3 < 0) BEGIN
-          SET fx3 = fx
+      READ_BYTE (fx + 0x12) p_hi
+      READ_BYTE (fx + 0x13) p_lo
+      PATCH_IF !((p_lo = 0) AND (p_hi = 100)) BEGIN
+        SET seen = 0
+        FOR (w = 0; w < n_win; ++w) BEGIN
+          PATCH_IF ($win_lo(~%w%~) = p_lo) AND ($win_hi(~%w%~) = p_hi) BEGIN
+            SET seen = 1
+          END
+        END
+        PATCH_IF (seen = 0) BEGIN
+          SET $win_lo(~%n_win%~) = p_lo
+          SET $win_hi(~%n_win%~) = p_hi
+          SET n_win += 1
         END
       END
     END
-    PATCH_IF (fx1 < 0) OR (fx2 < 0) OR (fx3 < 0) BEGIN
+    PATCH_IF (n_win != 3) BEGIN
       SET missing += 1
     END ELSE BEGIN
-      SET t1_hi = c12
-      SET t1_lo = 0
-      SET t2_hi = c12 + c16
-      SET t2_lo = c12 + 1
-      SET t3_hi = 100
-      SET t3_lo = c12 + c16 + 1
-      READ_BYTE (fx1 + 0x12) p1_hi
-      READ_BYTE (fx1 + 0x13) p1_lo
-      READ_BYTE (fx2 + 0x12) p2_hi
-      READ_BYTE (fx2 + 0x13) p2_lo
-      READ_BYTE (fx3 + 0x12) p3_hi
-      READ_BYTE (fx3 + 0x13) p3_lo
-      PATCH_IF (p1_hi = t1_hi) AND (p1_lo = t1_lo) AND (p2_hi = t2_hi) AND (p2_lo = t2_lo) AND (p3_hi = t3_hi) AND (p3_lo = t3_lo) BEGIN
-        SET already += 1
-      END ELSE BEGIN
-        WRITE_BYTE (fx1 + 0x12) t1_hi
-        WRITE_BYTE (fx1 + 0x13) t1_lo
-        WRITE_BYTE (fx2 + 0x12) t2_hi
-        WRITE_BYTE (fx2 + 0x13) t2_lo
-        WRITE_BYTE (fx3 + 0x12) t3_hi
-        WRITE_BYTE (fx3 + 0x13) t3_lo
+      // Sort the 3 windows by win_lo ascending.
+      FOR (w1 = 0; w1 < 2; ++w1) BEGIN
+        FOR (w2 = w1 + 1; w2 < 3; ++w2) BEGIN
+          PATCH_IF ($win_lo(~%w2%~) < $win_lo(~%w1%~)) BEGIN
+            SET tmp_lo = $win_lo(~%w1%~)
+            SET tmp_hi = $win_hi(~%w1%~)
+            SET $win_lo(~%w1%~) = $win_lo(~%w2%~)
+            SET $win_hi(~%w1%~) = $win_hi(~%w2%~)
+            SET $win_lo(~%w2%~) = tmp_lo
+            SET $win_hi(~%w2%~) = tmp_hi
+          END
+        END
+      END
+      SET $new_lo(~0~) = 0
+      SET $new_hi(~0~) = c12
+      SET $new_lo(~1~) = c12 + 1
+      SET $new_hi(~1~) = c12 + c16
+      SET $new_lo(~2~) = c12 + c16 + 1
+      SET $new_hi(~2~) = 100
+      SET ab_changed = 0
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_BYTE (fx + 0x12) p_hi
+        READ_BYTE (fx + 0x13) p_lo
+        FOR (w = 0; w < 3; ++w) BEGIN
+          PATCH_IF (p_lo = $win_lo(~%w%~)) AND (p_hi = $win_hi(~%w%~)) BEGIN
+            SET t_lo = $new_lo(~%w%~)
+            SET t_hi = $new_hi(~%w%~)
+            PATCH_IF (p_lo != t_lo) OR (p_hi != t_hi) BEGIN
+              WRITE_BYTE (fx + 0x12) t_hi
+              WRITE_BYTE (fx + 0x13) t_lo
+              SET ab_changed = 1
+            END
+            SET w = 3
+          END
+        END
+      END
+      PATCH_IF (ab_changed > 0) BEGIN
         SET changed += 1
+      END ELSE BEGIN
+        SET already += 1
       END
     END
   END
