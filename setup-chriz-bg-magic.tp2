@@ -7,6 +7,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_vanilla.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
 END
 
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
@@ -79,3 +80,30 @@ LAF cbmagic_vanilla_contingency_universal END
 LAF cbmagic_vanilla_spell_sequencer_universal END
 LAF cbmagic_vanilla_spell_trigger_universal END
 LAF cbmagic_vanilla_chain_contingency_universal END
+LAF cbmagic_kept_invisibility END
+LAF cbmagic_kept_luck END
+LAF cbmagic_kept_clairvoyance END
+LAF cbmagic_kept_invisibility_sphere END
+LAF cbmagic_kept_confusion END
+LAF cbmagic_kept_minor_sequencer END
+LAF cbmagic_kept_teleport_field END
+LAF cbmagic_kept_oracle END
+LAF cbmagic_kept_contingency END
+LAF cbmagic_kept_sphere_of_chaos END
+LAF cbmagic_kept_spell_sequencer END
+LAF cbmagic_kept_spell_trigger END
+LAF cbmagic_kept_chain_contingency END
+LAF cbmagic_kept_bless END
+LAF cbmagic_kept_shillelagh END
+LAF cbmagic_kept_doom END
+LAF cbmagic_kept_faerie_fire END
+LAF cbmagic_kept_aid END
+LAF cbmagic_kept_silence END
+LAF cbmagic_kept_free_action END
+LAF cbmagic_kept_neutralize_poison END
+LAF cbmagic_kept_divine_power END
+LAF cbmagic_kept_negative_plane_protection END
+LAF cbmagic_kept_iron_skins END
+LAF cbmagic_kept_mass_regenerate END
+LAF cbmagic_kept_regeneration END
+LAF cbmagic_kept_greater_restoration END

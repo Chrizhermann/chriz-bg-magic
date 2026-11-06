@@ -41,3 +41,111 @@
 @20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
 @20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
 @20030 = ~(Invocation/Evocation)~
+// Kept / decided SR batch strings (@40000+).
+@40000 = ~until 24 hours have passed~
+@40001 = ~until 8 hours have passed~
+@40002 = ~3 rounds~
+@40003 = ~15 rounds~
+@40004 = ~Casting Time: 9~
+@40005 = ~Casting Time: 1~
+@40007 = ~until 1 turn has passed~
+@40008 = ~Duration: 5 rounds \+ 1 round/6 levels~
+@40009 = ~Duration: 4 rounds (5 at 15th level, 6 at 20th level)~
+@40010 = ~The spell lasts for 5 rounds plus 1 round every 6 levels of the caster\.~
+@40011 = ~The spell lasts for 4 rounds (5 rounds at 15th level and 6 rounds at 20th level).~
+@40012 = ~(Invocation/Evocation)~
+@40013 = ~(Evocation)~
+@40014 = ~(Universal)~
+@40015 = ~Saving Throw: None~
+@40016 = ~Saving Throw: Neg.~
+@40017 = ~randomly teleports all enemies in this area for the duration of the spell\.~
+@40018 = ~randomly teleports all enemies in this area for the duration of the spell unless they make a Saving Throw vs. Spell with a -4 penalty.~
+@40019 = ~120-ft\. radius~
+@40020 = ~30-ft. radius~
+@40021 = ~Illusion/Phantasm spells of 5th level and lower~
+@40022 = ~Illusion/Phantasm spells of 9th level and lower~
+@40023 = ~All enemies within the area of effect[^|]*target is hasted~
+@40024 = ~All enemies within the area of effect must save vs. Spell at -4 or suffer one of the following random effects for 1 round:
+ - target is feebleminded
+ - target is confused
+ - target is panicked
+ - target is put to sleep (wakes on damage)
+ - target is held~
+@40025 = ~Casting Time: 5~
+@40026 = ~Casting Time: 6~
+@40027 = ~Casting Time: 4~
+@40028 = ~that of a Fighter of the same level,~
+@40029 = ~that of a Fighter of the same level (including base attacks per round at levels 7 and 13),~
+@40030 = ~receives a -2 penalty to all\([^|]*\)rolls, including THAC0 and Saving Throws\. There is no [Ss]aving [Tt]hrow for this spell~
+@40031 = ~receives a -2 penalty to THAC0, damage rolls, and Saving Throws unless the target makes a Saving Throw vs. Spell (with an additional -1 penalty at 3rd, 5th, 7th, and 9th level, up to -4)~
+@40032 = ~Faerie Fire~
+@40033 = ~Faerie Fire
+(Evocation)
+
+Level: 1
+Sphere: Combat, Weather
+Range: 40 ft.
+Duration: 4 rounds
+Casting Time: 1
+Area of Effect: 5-ft. radius
+Saving Throw: Neg.
+
+This spell outlines enemies in the area of effect with a pale violet glow. Outlined creatures suffer a -2 penalty to Armor Class and cannot become invisible for 4 rounds unless they make a Saving Throw vs. Spell.~
+@40034 = ~Duration: 1 turn \+ 1 round/level~
+@40035 = ~Duration: 1 turn/level~
+@40036 = ~Web, Hold Person, Grease, and Entangle\.~
+@40037 = ~Web, Hold Person, Grease, Entangle, Slow, and Stun.~
+@40038 = ~Mass Regenerate~
+@40039 = ~Mass Regenerate
+(Alteration)
+
+Level: 5
+Sphere: Healing
+Range: 0
+Duration: 1 turn + 2 rounds/level
+Casting Time: 5
+Area of Effect: Sight
+Saving Throw: None
+
+When cast, this spell grants the druid and all party members within sight steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
+@40040 = ~Duration: Instant~
+@40041 = ~When this spell is cast upon a poisoned individual,[^|]*as well as blindness and deafness\.~
+@40042 = ~When this spell is cast upon an individual, it immediately neutralizes any poison and renders the target immune to poison for 1 turn per level of the caster.~
+@40043 = ~Range: Special~
+@40044 = ~Range: Caster~
+@40045 = ~Duration: 3 rounds + 1 round/2 levels (maximum 10 rounds)~
+@40046 = ~Area of Effect: Special~
+@40047 = ~Area of Effect: The caster~
+@40048 = ~The Clairvoyance spell empowers the wizard[^|]*cannot reveal creatures or their movements\.~
+@40049 = ~Clairvoyance grants the caster foresight of incoming danger, making the caster immune to backstab attacks for the duration of the spell. The spell lasts for 3 rounds at 5th level, plus 1 additional round every 2 levels thereafter, to a maximum of 10 rounds at 19th level.~
+@40050 = ~Each creature in the area~
+@40051 = ~Each enemy creature in the area~
+@40052 = ~Stoneskin~
+@40053 = ~Iron Skins~
+@40054 = ~an outer skin of iron~
+@40055 = ~an outer skin of stone~
+@40056 = ~Duration: 1 round/2 levels~
+@40057 = ~Duration: 1 round/level~
+@40058 = ~3 Hit Points per second\.~
+@40059 = ~2 Hit Points per second, and multiple castings do not stack.~
+@40060 = ~1 round per 2 levels~
+@40061 = ~1 round per level~
+@40062 = ~18 Hit Points per round for 7 rounds~
+@40063 = ~12 Hit Points per round for 14 rounds~
+@40064 = ~Aid~
+@40065 = ~Duration: 6 rounds~
+@40066 = ~Duration: 5 rounds + 1 round/level (maximum 25 rounds)~
+@40067 = ~Duration: 1 round \+ 1 round/level~
+@40068 = ~gains the benefits of a Bless spell ([^)]*) and a special bonus of 1d8 additional Hit Points~
+@40069 = ~gains a special bonus of 1d8 additional Hit Points +1 per level of the caster (up to a maximum of 1d8+10)~
+@40070 = ~Divine Power~
+@40071 = ~Holy Power~
+@40072 = ~It fully heals the target and cures any diseases or poisons\.~
+@40073 = ~It fully heals the target and cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep.~
+@40074 = ~Duration: 5 rounds~
+@40075 = ~Invisibility Sphere~
+@40076 = ~Invisibility,? 10' Radius~
+@40077 = ~Range: 40 ft\.~
+@40078 = ~Range: 30 ft.~
+@40079 = ~Improved Invisibility, and Shadow Door\.~
+@40080 = ~Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility.~

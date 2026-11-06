@@ -1,0 +1,2913 @@
+// Kept and adjusted Spell Revisions changes for chriz-bg-magic, one action function per
+// decided spell. docs/components.md describes what each one does; docs/build-specs-sr.json
+// summarizes the decisions.
+
+// Ensures an ability with `min_level` exists without discarding any existing abilities.
+// When `min_level` is not present, clones the nearest preceding ability (`ml <= min_level`,
+// or ability 0 if all existing abilities have `ml > min_level`) and inserts it in sorted
+// `min_level` order, shifting subsequent ability effect indices and casting effect indices.
+DEFINE_PATCH_FUNCTION cbmagic_ensure_ability_min_level
+  INT_VAR min_level = 1
+  RET ability_index inserted
+BEGIN
+  SET ability_index = 0 - 1
+  SET inserted = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  SET src_ab = 0
+  SET ins_ab = ab_cnt
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+    PATCH_IF (ml = min_level) AND (ability_index < 0) BEGIN
+      SET ability_index = a
+    END
+    PATCH_IF (ml <= min_level) BEGIN
+      SET src_ab = a
+    END
+    PATCH_IF (ml > min_level) AND (ins_ab = ab_cnt) BEGIN
+      SET ins_ab = a
+    END
+  END
+  PATCH_IF (ability_index < 0) AND (ab_cnt > 0) BEGIN
+    READ_ASCII (ab_off + src_ab * 0x28) src_ab_bytes (0x28)
+    READ_SHORT (ab_off + src_ab * 0x28 + 0x1e) src_n
+    READ_SHORT (ab_off + src_ab * 0x28 + 0x20) src_first
+    READ_ASCII (fx_off + src_first * 0x30) src_fx_bytes (src_n * 0x30)
+    PATCH_IF (ins_ab < ab_cnt) BEGIN
+      READ_SHORT (ab_off + ins_ab * 0x28 + 0x20) ins_first
+    END ELSE BEGIN
+      READ_SHORT (ab_off + (ab_cnt - 1) * 0x28 + 0x1e) prev_n
+      READ_SHORT (ab_off + (ab_cnt - 1) * 0x28 + 0x20) prev_first
+      SET ins_first = prev_first + prev_n
+    END
+    SET where_ab = ab_off + ins_ab * 0x28
+    INSERT_BYTES where_ab 0x28
+    WRITE_ASCIIE where_ab ~%src_ab_bytes%~ (0x28)
+    WRITE_SHORT (where_ab + 0x10) min_level
+    WRITE_SHORT (where_ab + 0x1e) src_n
+    WRITE_SHORT (where_ab + 0x20) ins_first
+    PATCH_IF (fx_off >= where_ab) BEGIN
+      SET fx_off += 0x28
+      WRITE_LONG 0x6a fx_off
+    END
+    SET ab_cnt += 1
+    WRITE_SHORT 0x68 ab_cnt
+    PATCH_IF (src_n > 0) BEGIN
+      SET where_fx = fx_off + ins_first * 0x30
+      INSERT_BYTES where_fx (src_n * 0x30)
+      WRITE_ASCIIE where_fx ~%src_fx_bytes%~ (src_n * 0x30)
+      PATCH_IF (ab_off >= where_fx) BEGIN
+        SET ab_off += (src_n * 0x30)
+        WRITE_LONG 0x64 ab_off
+      END
+      FOR (b = ins_ab + 1; b < ab_cnt; ++b) BEGIN
+        READ_SHORT (ab_off + b * 0x28 + 0x20) f2
+        WRITE_SHORT (ab_off + b * 0x28 + 0x20) (f2 + src_n)
+      END
+      READ_SHORT 0x6e cast_first
+      READ_SHORT 0x70 cast_cnt
+      PATCH_IF (cast_first >= ins_first) AND ((cast_cnt > 0) OR (cast_first > ins_first)) BEGIN
+        WRITE_SHORT 0x6e (cast_first + src_n)
+      END
+    END
+    SET ability_index = ins_ab
+    SET inserted = 1
+  END
+END
+
+// Appends a clone of ability 0 at the end of the ability table with `min_level` and scales
+// any effect whose duration equals `base_dur` (when base_dur > 0) to `new_dur`.
+DEFINE_PATCH_FUNCTION cbmagic_clone_first_ability
+  INT_VAR min_level = 1 base_dur = 0 new_dur = 0
+  RET new_ability
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  READ_ASCII ab_off ab0_bytes (0x28)
+  READ_SHORT (ab_off + 0x1e) n0
+  READ_SHORT (ab_off + (ab_cnt - 1) * 0x28 + 0x1e) prev_n
+  READ_SHORT (ab_off + (ab_cnt - 1) * 0x28 + 0x20) prev_first
+  SET new_ability = ab_cnt
+  SET where_ab = ab_off + ab_cnt * 0x28
+  INSERT_BYTES where_ab 0x28
+  WRITE_ASCIIE where_ab ~%ab0_bytes%~ (0x28)
+  WRITE_SHORT (where_ab + 0x10) min_level
+  WRITE_SHORT (where_ab + 0x1e) 0
+  WRITE_SHORT (where_ab + 0x20) (prev_first + prev_n)
+  PATCH_IF (fx_off >= where_ab) BEGIN
+    SET fx_off += 0x28
+    WRITE_LONG 0x6a fx_off
+  END
+  WRITE_SHORT 0x68 (ab_cnt + 1)
+  FOR (i = 0; i < n0; ++i) BEGIN
+    READ_LONG 0x64 ab_off
+    READ_LONG 0x6a fx_off
+    READ_SHORT (ab_off + 0x20) first0
+    SET src = fx_off + (first0 + i) * 0x30
+    READ_SHORT src op
+    READ_BYTE (src + 0x02) target
+    READ_BYTE (src + 0x03) power
+    READ_SLONG (src + 0x04) p1
+    READ_SLONG (src + 0x08) p2
+    READ_BYTE (src + 0x0c) timing
+    READ_BYTE (src + 0x0d) resist_dispel
+    READ_LONG (src + 0x0e) dur
+    READ_BYTE (src + 0x12) prob1
+    READ_BYTE (src + 0x13) prob2
+    READ_ASCII (src + 0x14) res (8) NULL
+    READ_LONG (src + 0x1c) dicenumber
+    READ_LONG (src + 0x20) dicesize
+    READ_LONG (src + 0x24) savingthrow
+    READ_SLONG (src + 0x28) savebonus
+    READ_LONG (src + 0x2c) special
+    PATCH_IF (base_dur > 0) AND (dur = base_dur) BEGIN
+      SET dur = new_dur
+    END
+    LPF cbmagic_insert_effect
+      INT_VAR ability = new_ability position = i opcode = op target power parameter1 = p1 parameter2 = p2
+              timing resist_dispel duration = dur probability1 = prob1 probability2 = prob2
+              dicenumber dicesize savingthrow savebonus special
+      STR_VAR resource = EVAL ~%res%~
+    END
+  END
+END
+
+// Sets the duration of the owned `anchor_opcode` payload (timing = 0) and its actual
+// companion effects in the same ability (portrait icon op 142, expiry sound op 174 with
+// timing = 4, duration visual op 215 with timing = 0, and Luck's save/skill bonus opcodes
+// when anchor_opcode = 133) that share the anchor's duration to `new_dur`.
+DEFINE_PATCH_FUNCTION cbmagic_set_anchored_duration
+  INT_VAR anchor_opcode = 0 new_dur = 0
+  RET changed already
+BEGIN
+  SET changed = 0
+  SET already = 0
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  FOR (a = 0; a < ab_cnt; ++a) BEGIN
+    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+    READ_SHORT (ab_off + a * 0x28 + 0x20) first
+    SET old_dur = 0 - 1
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET fx = fx_off + (first + i) * 0x30
+      READ_SHORT fx op
+      READ_BYTE (fx + 0x0c) timing
+      READ_LONG (fx + 0x0e) dur
+      PATCH_IF (op = anchor_opcode) AND (timing = 0) AND (old_dur < 0) BEGIN
+        SET old_dur = dur
+      END
+    END
+    PATCH_IF (old_dur >= 0) BEGIN
+      SET ab_changed = 0
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_BYTE (fx + 0x0c) timing
+        READ_LONG (fx + 0x0e) dur
+        SET is_owned = 0
+        PATCH_IF (op = anchor_opcode) AND (timing = 0) BEGIN
+          SET is_owned = 1
+        END ELSE PATCH_IF ((op = 142) AND (timing = 0))
+                       OR ((op = 174) AND (timing = 4))
+                       OR ((op = 215) AND (timing = 0)) BEGIN
+          SET is_owned = 1
+        END ELSE PATCH_IF (anchor_opcode = 133) AND (timing = 0)
+                      AND (((op >= 33) AND (op <= 37)) OR (op = 59)
+                           OR ((op >= 90) AND (op <= 92))
+                           OR ((op >= 275) AND (op <= 277))) BEGIN
+          SET is_owned = 1
+        END
+        PATCH_IF is_owned AND (dur = old_dur) AND (dur != new_dur) BEGIN
+          WRITE_LONG (fx + 0x0e) new_dur
+          SET ab_changed = 1
+        END
+      END
+      PATCH_IF ab_changed BEGIN
+        SET changed += 1
+      END ELSE PATCH_IF (old_dur = new_dur) BEGIN
+        SET already += 1
+      END
+    END
+  END
+END
+
+// Finds or appends a STATDESC.2DA portrait icon row with `desc_ref` and `bam`, returning
+// its row number in `icon_row` (defaults to 207 when STATDESC.2DA is absent in minimal
+// test fixtures).
+DEFINE_ACTION_FUNCTION cbmagic_statdesc_row
+  INT_VAR desc_ref = 0
+  STR_VAR bam = ~SPPR150D~
+  RET icon_row
+BEGIN
+  OUTER_SET icon_row = 207
+  ACTION_IF (FILE_EXISTS_IN_GAME ~statdesc.2da~) BEGIN
+    COPY_EXISTING ~statdesc.2da~ ~override~
+      COUNT_2DA_COLS cols
+      PATCH_IF (cols >= 3) BEGIN
+        COUNT_2DA_ROWS 3 rows
+        SET found_row = 0 - 1
+        SET max_id = 0
+        FOR (r = 0; r < rows; ++r) BEGIN
+          READ_2DA_ENTRY r 0 3 row_id
+          READ_2DA_ENTRY r 1 3 row_str
+          READ_2DA_ENTRY r 2 3 row_bam
+          PATCH_IF IS_AN_INT row_id BEGIN
+            PATCH_IF (row_id > max_id) BEGIN
+              SET max_id = row_id
+            END
+            PATCH_IF (~%row_bam%~ STRING_EQUAL_CASE ~%bam%~) AND (IS_AN_INT row_str) AND (row_str = desc_ref) BEGIN
+              SET found_row = row_id
+            END
+          END
+        END
+        PATCH_IF (found_row >= 0) BEGIN
+          SET icon_row = found_row
+        END ELSE BEGIN
+          SET icon_row = max_id + 1
+          INSERT_2DA_ROW rows 3 ~%icon_row% %desc_ref% %bam%~
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// Makes a wizard spell and its scrolls belong to the Universal school (school 0, no
+// specialist mage exclusion bits).
+DEFINE_ACTION_FUNCTION cbmagic_make_universal_school
+  STR_VAR symbol = ~~ label = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %label% (%symbol%) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET valid_spl = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: %label% (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        SET valid_spl = 1
+        READ_SHORT 0x1e excl
+        READ_BYTE 0x25 school
+        SET new_excl = (excl BAND (BNOT 0x3fc0))
+        PATCH_IF (school != 0) OR (new_excl != excl) BEGIN
+          WRITE_SHORT 0x1e new_excl
+          WRITE_BYTE 0x25 0
+          SET changed = 1
+        END
+      END
+    BUT_ONLY
+    ACTION_IF valid_spl BEGIN
+      LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+      OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE scroll ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        COPY_EXISTING ~%scroll%.itm~ ~override~
+          PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+            READ_BYTE 0x2d u1
+            READ_BYTE 0x2f u3
+            SET nu1 = (u1 BAND (BNOT 0x3f))
+            SET nu3 = (u3 BAND (BNOT 0xc0))
+            PATCH_IF (nu1 != u1) OR (nu3 != u3) BEGIN
+              WRITE_BYTE 0x2d nu1
+              WRITE_BYTE 0x2f nu3
+              SET changed = 1
+            END
+          END
+        BUT_ONLY
+      END
+      ACTION_IF changed BEGIN
+        PRINT ~chriz-bg-magic: %label% (%spell%): school set to Universal for all specialist mages.~
+        LAF cbmagic_warn_text_language STR_VAR label END
+        OUTER_SPRINT f1 @40012
+        OUTER_SPRINT f2 @40013
+        OUTER_SPRINT rep @40014
+        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%rep%~ label END
+        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%rep%~ label END
+      END ELSE BEGIN
+        PRINT ~chriz-bg-magic: %label% (%spell%): already Universal.~
+      END
+    END
+  END
+END
+
+// --- Invisibility (row arcane.level2.invisibility) ------------------------------------
+// Duration is 8 hours (2400 seconds) instead of 24 hours (7200 seconds).
+DEFINE_ACTION_FUNCTION cbmagic_kept_invisibility
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_INVISIBILITY~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Invisibility (WIZARD_INVISIBILITY) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Invisibility (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_set_anchored_duration INT_VAR anchor_opcode = 20 new_dur = 2400 RET changed already END
+        PATCH_IF (changed > 0) BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Invisibility (%spell%): duration set to 2400s in %changed% abilities.~
+        END ELSE PATCH_IF (already > 0) BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Invisibility (%spell%): duration is 2400s already.~
+        END ELSE BEGIN
+          PATCH_WARN ~chriz-bg-magic: Invisibility (%spell%) left as it is: no timed invisibility effect (opcode 20).~
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Invisibility~ END
+      OUTER_SPRINT cbm_find @40000
+      OUTER_SPRINT cbm_replace @40001
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Invisibility~ END
+    END
+  END
+END
+
+// --- Luck (row arcane.level2.luck) ----------------------------------------------------
+// Vanilla effect (+1 to luck and skill checks), duration 15 rounds (90 seconds), and a
+// new casting replaces the old one.
+DEFINE_ACTION_FUNCTION cbmagic_kept_luck
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_LUCK~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Luck (WIZARD_LUCK) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Luck (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_set_anchored_duration INT_VAR anchor_opcode = 133 new_dur = 90 RET dur_changed = changed already END
+        PATCH_IF (dur_changed = 0) AND (already = 0) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Luck (%spell%) left as it is: no timed luck effect (opcode 133).~
+        END ELSE BEGIN
+          LPF cbmagic_add_self_refresh RET ref_added = added ref_present = present misplaced END
+          SET changed = dur_changed + ref_added
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Luck (%spell%): duration set to 90s in %dur_changed% abilities; self-refresh added in %ref_added%.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Luck (%spell%): duration 90s and self-refresh present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Luck~ END
+      OUTER_SPRINT cbm_find @40002
+      OUTER_SPRINT cbm_replace @40003
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Luck~ END
+    END
+  END
+END
+
+// --- Clairvoyance (row arcane.level3.clairvoyance) ------------------------------------
+// Usable indoors and outdoors; grants the caster dispellable immunity to backstab (opcode
+// 292) for 3 rounds + 1 round/2 levels (up to 10 rounds at level 19) instead of revealing
+// the outdoor map. Preserves any existing ability headers and adds missing breakpoints.
+DEFINE_ACTION_FUNCTION cbmagic_kept_clairvoyance
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_CLAIRVOYANCE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Clairvoyance (WIZARD_CLAIRVOYANCE) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Clairvoyance (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x18 flags
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Clairvoyance (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_117 = 0
+          SET has_292_any = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              PATCH_IF (op = 117) BEGIN SET has_117 = 1 END
+              PATCH_IF (op = 292) BEGIN SET has_292_any = 1 END
+            END
+          END
+          PATCH_IF (has_117 = 0) AND (has_292_any = 0) BEGIN
+            PATCH_WARN ~chriz-bg-magic: Clairvoyance (%spell%) left as it is: neither map reveal (opcode 117) nor backstab immunity (opcode 292) found.~
+          END ELSE BEGIN
+            SET new_flags = (flags BAND (BNOT 0x2000))
+            PATCH_IF (new_flags != flags) BEGIN
+              WRITE_LONG 0x18 new_flags
+              SET changed += 1
+            END
+            READ_BYTE 0x27 sectype
+            PATCH_IF (sectype = 0) BEGIN
+              WRITE_BYTE 0x27 2
+              SET changed += 1
+            END
+            // Ensure breakpoints 1, 7, 9, 11, 13, 15, 17, 19 exist without discarding existing abilities.
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 1 RET ability_index ins = inserted END
+            SET changed += ins
+            FOR (step = 1; step <= 7; ++step) BEGIN
+              SET min_lvl = 5 + step * 2
+              LPF cbmagic_ensure_ability_min_level INT_VAR min_level = min_lvl RET ability_index ins = inserted END
+              SET changed += ins
+            END
+            READ_SHORT 0x68 ab_cnt
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_LONG 0x64 ab_off
+              SET ab = ab_off + a * 0x28
+              READ_BYTE (ab + 0x0c) ab_t
+              READ_SHORT (ab + 0x0e) ab_rng
+              READ_SHORT (ab + 0x10) ml
+              READ_SHORT (ab + 0x26) ab_proj
+              PATCH_IF (ab_t != 5) BEGIN WRITE_BYTE (ab + 0x0c) 5 SET changed += 1 END
+              PATCH_IF (ab_rng != 0) BEGIN WRITE_SHORT (ab + 0x0e) 0 SET changed += 1 END
+              PATCH_IF (ab_proj != 1) BEGIN WRITE_SHORT (ab + 0x26) 1 SET changed += 1 END
+              SET eff_lvl = (ml < 5) ? 5 : ((ml > 19) ? 19 : ml)
+              SET steps = (eff_lvl - 5) / 2
+              SET target_dur = 18 + steps * 6
+              // Delete map reveal (opcode 117) if present.
+              SET scanning = 1
+              WHILE scanning BEGIN
+                SET scanning = 0
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+                READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+                FOR (i = 0; (i < na) AND !scanning; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  PATCH_IF (op = 117) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
+                    SET changed += 1
+                    SET scanning = 1
+                  END
+                END
+              END
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              SET has_321 = 0
+              SET has_292 = 0
+              SET has_142 = 0
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_BYTE (fx + 0x02) t
+                READ_BYTE (fx + 0x03) pwr
+                READ_SLONG (fx + 0x08) p2
+                READ_BYTE (fx + 0x0d) rd
+                READ_LONG (fx + 0x0e) dur
+                READ_ASCII (fx + 0x14) res (8) NULL
+                PATCH_IF (op = 215) OR (op = 141) OR (op = 61) OR (op = 174) BEGIN
+                  PATCH_IF (t != 1) OR (pwr != 3) OR (rd != 3) BEGIN
+                    WRITE_BYTE (fx + 0x02) 1
+                    WRITE_BYTE (fx + 0x03) 3
+                    WRITE_BYTE (fx + 0x0d) 3
+                    SET changed += 1
+                  END
+                END
+                PATCH_IF (op = 321) AND (~%res%~ STRING_EQUAL_CASE ~%spell%~) AND (i = 0) BEGIN
+                  SET has_321 = 1
+                END
+                PATCH_IF (op = 292) BEGIN
+                  SET has_292 = 1
+                  PATCH_IF (t != 1) OR (pwr != 3) OR (p2 != 1) OR (rd != 3) OR (dur != target_dur) BEGIN
+                    WRITE_BYTE (fx + 0x02) 1
+                    WRITE_BYTE (fx + 0x03) 3
+                    WRITE_LONG (fx + 0x08) 1
+                    WRITE_BYTE (fx + 0x0c) 0
+                    WRITE_BYTE (fx + 0x0d) 3
+                    WRITE_LONG (fx + 0x0e) target_dur
+                    SET changed += 1
+                  END
+                END
+                PATCH_IF (op = 142) AND (p2 = 57) BEGIN
+                  SET has_142 = 1
+                  PATCH_IF (t != 1) OR (pwr != 3) OR (rd != 3) OR (dur != target_dur) BEGIN
+                    WRITE_BYTE (fx + 0x02) 1
+                    WRITE_BYTE (fx + 0x03) 3
+                    WRITE_BYTE (fx + 0x0c) 0
+                    WRITE_BYTE (fx + 0x0d) 3
+                    WRITE_LONG (fx + 0x0e) target_dur
+                    SET changed += 1
+                  END
+                END
+              END
+              PATCH_IF !has_142 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 142 target = 1 power = 3
+                  parameter2 = 57 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_292 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 292 target = 1 power = 3
+                  parameter2 = 1 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_321 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 321 target = 1 power = 3
+                  timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%spell%~ END
+                SET changed += 1
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Clairvoyance (%spell%): indoor/outdoor backstab immunity for 3-10 rounds.~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Clairvoyance (%spell%): backstab immunity progression present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Clairvoyance~ END
+      OUTER_SPRINT f1 @40043
+      OUTER_SPRINT r1 @40044
+      OUTER_SPRINT f2 @40040
+      OUTER_SPRINT r2 @40045
+      OUTER_SPRINT f3 @40046
+      OUTER_SPRINT r3 @40047
+      OUTER_SPRINT f4 @40048
+      OUTER_SPRINT r4 @40049
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Clairvoyance~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Clairvoyance~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f3%~ replace = EVAL ~%r3%~ label = ~Clairvoyance~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f4%~ replace = EVAL ~%r4%~ label = ~Clairvoyance~ END
+    END
+  END
+END
+
+// --- Invisibility Sphere (row arcane.level3.invisibility_sphere) ----------------------
+// Renamed Invisibility Sphere in spell and scroll names/descriptions, casting time 1
+// (from 9), duration 1 turn (60 seconds, from 24 hours), and uses an ally-only radius-110
+// projectile of our own (cbminv10.pro via ADD_PROJECTILE).
+DEFINE_ACTION_FUNCTION cbmagic_kept_invisibility_sphere
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_INVISIBILITY_10_FOOT~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Invisibility Sphere (WIZARD_INVISIBILITY_10_FOOT) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_game_language RET lang END
+    OUTER_SET new_name_ref = RESOLVE_STR_REF (@40075)
+    OUTER_SET proj_id = IDS_OF_SYMBOL (~projectl~ ~cbminv10~)
+    ACTION_IF (proj_id >= 0) BEGIN
+      OUTER_SET proj_id += 1
+    END ELSE BEGIN
+      OUTER_SET can_add_proj = 0
+      ACTION_IF (FILE_EXISTS_IN_GAME ~projectl.ids~) BEGIN
+        COPY_EXISTING - ~projectl.ids~ ~override~
+          PATCH_IF (INDEX_BUFFER (~[0-9]~ 8) >= 0) BEGIN
+            SET can_add_proj = 1
+          END
+      END
+      ACTION_IF can_add_proj BEGIN
+        ACTION_IF (FILE_EXISTS_IN_GAME ~invis10.pro~) BEGIN
+          COPY_EXISTING - ~invis10.pro~ ~weidu_external/cbminv10.pro~
+            WRITE_SHORT 0x204 110
+            WRITE_SHORT 0x206 110
+        END ELSE BEGIN
+          COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbminv10.pro~
+            DELETE_BYTES 0 BUFFER_LENGTH
+            INSERT_BYTES 0 0x300
+            WRITE_ASCII 0 ~PRO V1.0~ (8)
+            WRITE_SHORT 0x08 3
+            WRITE_SHORT 0x0a 20
+            WRITE_LONG 0x100 0x280
+            WRITE_ASCII 0x104 ~TRAVEL~ (8)
+            WRITE_ASCII 0x11c ~STTRAVL2~ (8)
+            WRITE_SHORT 0x132 256
+            WRITE_SHORT 0x200 0xc0
+            WRITE_SHORT 0x202 0
+            WRITE_SHORT 0x204 110
+            WRITE_SHORT 0x206 110
+            WRITE_SHORT 0x210 100
+            WRITE_SHORT 0x214 0
+            WRITE_BYTE 0x216 1
+            WRITE_BYTE 0x217 255
+            WRITE_SHORT 0x218 8
+            WRITE_SHORT 0x21a 79
+        END
+        ADD_PROJECTILE ~weidu_external/cbminv10.pro~
+        OUTER_SET proj_id = cbminv10
+      END ELSE BEGIN
+        OUTER_SET proj_id = 159
+      END
+    END
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Invisibility Sphere (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        LPF cbmagic_set_anchored_duration INT_VAR anchor_opcode = 20 new_dur = 60 RET dur_changed = changed already END
+        PATCH_IF (dur_changed = 0) AND (already = 0) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Invisibility Sphere (%spell%) left as it is: no timed invisibility effect (opcode 20).~
+        END ELSE BEGIN
+          PATCH_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+            READ_SLONG 0x08 cur_name
+            PATCH_IF (cur_name != new_name_ref) BEGIN
+              WRITE_LONG 0x08 new_name_ref
+              SET changed += 1
+            END
+          END
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+            READ_SHORT (ab_off + a * 0x28 + 0x26) proj
+            PATCH_IF (ct != 1) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x12) 1
+              SET changed += 1
+            END
+            PATCH_IF (proj != proj_id) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x26) proj_id
+              SET changed += 1
+            END
+          END
+          SET changed += dur_changed
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Invisibility Sphere (%spell%): renamed, casting time 1, duration 60s, radius-110 ally projectile %proj_id%.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Invisibility Sphere (%spell%): renamed, casting time 1, duration 60s, and projectile %proj_id% present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+        LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+        OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+        OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+          OUTER_PATCH_SAVE scroll ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+          OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+          COPY_EXISTING ~%scroll%.itm~ ~override~
+            PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+              READ_SLONG 0x0c s_name
+              PATCH_IF (s_name != new_name_ref) BEGIN
+                WRITE_LONG 0x0c new_name_ref
+              END
+            END
+          BUT_ONLY
+        END
+      END
+      LAF cbmagic_warn_text_language STR_VAR label = ~Invisibility Sphere~ END
+      OUTER_SPRINT f0 @40076
+      OUTER_SPRINT r0 @40075
+      OUTER_SPRINT f1 @40004
+      OUTER_SPRINT r1 @40005
+      OUTER_SPRINT f2 @40000
+      OUTER_SPRINT r2 @40007
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f0%~ replace = EVAL ~%r0%~ label = ~Invisibility Sphere~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Invisibility Sphere~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Invisibility Sphere~ END
+    END
+  END
+END
+
+// --- Confusion (row arcane.level4.confusion) ------------------------------------------
+// Duration is 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6
+// rounds (36s) at level 20+. Preserves existing ability headers (e.g. 1, 6, 12, 18) and
+// adds missing breakpoints (15, 20) around them.
+DEFINE_ACTION_FUNCTION cbmagic_kept_confusion
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_CONFUSION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Confusion (WIZARD_CONFUSION) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Confusion (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Confusion (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_128 = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_BYTE (fx + 0x0c) timing
+              PATCH_IF (op = 128) AND (timing = 0) BEGIN SET has_128 = 1 END
+            END
+          END
+          PATCH_IF !has_128 BEGIN
+            PATCH_WARN ~chriz-bg-magic: Confusion (%spell%) left as it is: no timed confusion effect (opcode 128).~
+          END ELSE BEGIN
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 1 RET ability_index ins1 = inserted END
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 15 RET ability_index ins15 = inserted END
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 20 RET ability_index ins20 = inserted END
+            SET changed += (ins1 + ins15 + ins20)
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              SET target_dur = (ml >= 20) ? 36 : ((ml >= 15) ? 30 : 24)
+              SET old_dur = 0 - 1
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_BYTE (fx + 0x0c) timing
+                READ_LONG (fx + 0x0e) dur
+                PATCH_IF (op = 128) AND (timing = 0) AND (old_dur < 0) BEGIN
+                  SET old_dur = dur
+                END
+              END
+              PATCH_IF (old_dur >= 0) BEGIN
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_SLONG (fx + 0x08) p2
+                  READ_BYTE (fx + 0x0c) timing
+                  READ_LONG (fx + 0x0e) dur
+                  READ_ASCII (fx + 0x14) res (8) NULL
+                  PATCH_IF ((op = 128) AND (timing = 0))
+                        OR ((op = 142) AND (p2 = 3) AND (timing = 0))
+                        OR ((op = 215) AND (timing = 0) AND (~%res%~ STRING_EQUAL_CASE ~SPCONFUS~))
+                        OR ((op = 174) AND (timing = 4)) BEGIN
+                    PATCH_IF (dur != target_dur) BEGIN
+                      WRITE_LONG (fx + 0x0e) target_dur
+                      SET changed += 1
+                    END
+                  END
+                END
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Confusion (%spell%): duration set to 4 rounds (5 at level 15, 6 at level 20).~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Confusion (%spell%): 4/5/6 round progression present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Confusion~ END
+      OUTER_SPRINT f1 @40008
+      OUTER_SPRINT r1 @40009
+      OUTER_SPRINT f2 @40010
+      OUTER_SPRINT r2 @40011
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Confusion~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Confusion~ END
+    END
+  END
+END
+
+// --- Minor Sequencer (row arcane.level4.simbuls_spell_matrix) -------------------------
+DEFINE_ACTION_FUNCTION cbmagic_kept_minor_sequencer
+BEGIN
+  LAF cbmagic_make_universal_school STR_VAR symbol = ~WIZARD_MINOR_SEQUENCER~ label = ~Minor Sequencer~ END
+END
+
+// --- Teleport Field (row arcane.level4.teleport_field) --------------------------------
+// Range 30 ft (from 40 ft) and Save vs. Spell at -4 instead of no save.
+DEFINE_ACTION_FUNCTION cbmagic_kept_teleport_field
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_TELEPORT_FIELD~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Teleport Field (WIZARD_TELEPORT_FIELD) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Teleport Field (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_222 = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 222) BEGIN SET has_222 = 1 END
+          END
+        END
+        PATCH_IF !has_222 BEGIN
+          PATCH_WARN ~chriz-bg-magic: Teleport Field (%spell%) left as it is: no teleport field effect (opcode 222).~
+        END ELSE BEGIN
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x0e) rng
+            PATCH_IF (rng != 30) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x0e) 30
+              SET changed += 1
+            END
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_BYTE (fx + 0x02) target
+              READ_LONG (fx + 0x24) save
+              READ_SLONG (fx + 0x28) bonus
+              PATCH_IF (target = 2) BEGIN
+                PATCH_IF ((save BAND 1) = 0) OR (bonus != (0 - 4)) BEGIN
+                  WRITE_LONG (fx + 0x24) ((save BAND (BNOT 0x1f)) BOR 1)
+                  WRITE_LONG (fx + 0x28) (0 - 4)
+                  SET changed += 1
+                END
+              END
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Teleport Field (%spell%): range 30 and Save vs. Spell at -4.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Teleport Field (%spell%): range 30 and Save vs. Spell at -4 already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Teleport Field~ END
+      OUTER_SPRINT f0 @40077
+      OUTER_SPRINT r0 @40078
+      OUTER_SPRINT f1 @40015
+      OUTER_SPRINT r1 @40016
+      OUTER_SPRINT f2 @40017
+      OUTER_SPRINT r2 @40018
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f0%~ replace = EVAL ~%r0%~ label = ~Teleport Field~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Teleport Field~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Teleport Field~ END
+    END
+  END
+END
+
+// --- Oracle (row arcane.level5.oracle) ------------------------------------------------
+// Dispels illusion spells up to 9th level (from 5th), range 1, 30-ft (radius 450)
+// enemy-only area projectile of our own (cbmoracl.pro via ADD_PROJECTILE).
+DEFINE_ACTION_FUNCTION cbmagic_kept_oracle
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_ORACLE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Oracle (WIZARD_ORACLE) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET proj_id = IDS_OF_SYMBOL (~projectl~ ~cbmoracl~)
+    ACTION_IF (proj_id >= 0) BEGIN
+      OUTER_SET proj_id += 1
+    END ELSE BEGIN
+      OUTER_SET can_add_proj = 0
+      ACTION_IF (FILE_EXISTS_IN_GAME ~projectl.ids~) BEGIN
+        COPY_EXISTING - ~projectl.ids~ ~override~
+          PATCH_IF (INDEX_BUFFER (~[0-9]~ 8) >= 0) BEGIN
+            SET can_add_proj = 1
+          END
+      END
+      ACTION_IF can_add_proj BEGIN
+        ACTION_IF (FILE_EXISTS_IN_GAME ~bignarea.pro~) BEGIN
+          COPY_EXISTING - ~bignarea.pro~ ~weidu_external/cbmoracl.pro~
+            WRITE_SHORT 0x200 0x40
+            WRITE_SHORT 0x204 450
+            WRITE_SHORT 0x206 450
+        END ELSE BEGIN
+          COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmoracl.pro~
+            DELETE_BYTES 0 BUFFER_LENGTH
+            INSERT_BYTES 0 0x300
+            WRITE_ASCII 0 ~PRO V1.0~ (8)
+            WRITE_SHORT 0x08 3
+            WRITE_SHORT 0x0a 40
+            WRITE_LONG 0x0c 2
+            WRITE_SHORT 0x28 2
+            WRITE_SHORT 0x200 0x40
+            WRITE_SHORT 0x202 0
+            WRITE_SHORT 0x204 450
+            WRITE_SHORT 0x206 450
+            WRITE_SHORT 0x210 100
+            WRITE_SHORT 0x214 0
+            WRITE_BYTE 0x216 1
+            WRITE_BYTE 0x217 255
+            WRITE_SHORT 0x218 67
+            WRITE_SHORT 0x21a 1
+        END
+        ADD_PROJECTILE ~weidu_external/cbmoracl.pro~
+        OUTER_SET proj_id = cbmoracl
+      END ELSE BEGIN
+        OUTER_SET proj_id = 338
+      END
+    END
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Oracle (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_disp = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 220) OR (op = 221) BEGIN SET has_disp = 1 END
+          END
+        END
+        PATCH_IF !has_disp BEGIN
+          PATCH_WARN ~chriz-bg-magic: Oracle (%spell%) left as it is: no school/secondary-type removal effect (opcode 220 or 221).~
+        END ELSE BEGIN
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x0e) rng
+            READ_SHORT (ab_off + a * 0x28 + 0x26) proj
+            PATCH_IF (rng != 1) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x0e) 1
+              SET changed += 1
+            END
+            PATCH_IF (proj != proj_id) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x26) proj_id
+              SET changed += 1
+            END
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_LONG (fx + 0x04) p1
+              READ_LONG (fx + 0x08) p2
+              PATCH_IF ((op = 220) AND (p2 = 5)) OR ((op = 221) AND (p2 = 3)) BEGIN
+                PATCH_IF (p1 != 9) BEGIN
+                  WRITE_LONG (fx + 0x04) 9
+                  SET changed += 1
+                END
+              END
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Oracle (%spell%): dispels up to level 9, range 1, enemy-only 30-ft projectile %proj_id%.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Oracle (%spell%): dispels up to level 9 in a 30-ft radius already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Oracle~ END
+      OUTER_SPRINT f1 @40019
+      OUTER_SPRINT r1 @40020
+      OUTER_SPRINT f2 @40021
+      OUTER_SPRINT r2 @40022
+      OUTER_SPRINT f3 @40079
+      OUTER_SPRINT r3 @40080
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Oracle~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f3%~ replace = EVAL ~%r3%~ label = ~Oracle~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Oracle~ END
+    END
+  END
+END
+
+// --- Contingency (row arcane.level6.contingency) --------------------------------------
+DEFINE_ACTION_FUNCTION cbmagic_kept_contingency
+BEGIN
+  LAF cbmagic_make_universal_school STR_VAR symbol = ~WIZARD_CONTINGENCY~ label = ~Contingency~ END
+END
+
+// --- Sphere of Chaos (row arcane.level7.chaos) ----------------------------------------
+// Keeps vanilla's name, level 7, and 10-round enemy-only aura projectile (PFIELD). Each
+// round, enemies in the area save vs. Spell at -4 or suffer one of 5 random effects for
+// 1 round (6s): feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage
+// (20%), or hold (20%).
+DEFINE_ACTION_FUNCTION cbmagic_kept_sphere_of_chaos
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SPHERE_OF_CHAOS~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Sphere of Chaos (WIZARD_SPHERE_OF_CHAOS) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Sphere of Chaos (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Sphere of Chaos (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET recognizable = 0
+          SET all_already = 1
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET c_76 = 0
+            SET c_128 = 0
+            SET c_24 = 0
+            SET c_39 = 0
+            SET c_175 = 0
+            SET c_old = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_LONG (fx + 0x08) p2
+              READ_LONG (fx + 0x0e) dur
+              READ_BYTE (fx + 0x12) p1_prob
+              READ_BYTE (fx + 0x13) p2_prob
+              READ_LONG (fx + 0x24) save
+              READ_SLONG (fx + 0x28) bonus
+              PATCH_IF (p1_prob < 100) OR (p2_prob > 0) OR (op = 128) OR (op = 39) OR (op = 13) OR (op = 76) BEGIN
+                SET recognizable = 1
+              END
+              PATCH_IF (op = 13) OR (op = 16) OR (op = 17) OR (op = 111) OR (op = 12)
+                    OR (op = 109) OR (op = 238) OR (op = 222) OR (op = 172) BEGIN
+                SET c_old = 1
+              END
+              PATCH_IF (op = 76) AND (dur = 6) AND (p1_prob = 20) AND (p2_prob = 0) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
+                SET c_76 = 1
+              END
+              PATCH_IF (op = 128) AND (dur = 6) AND (p1_prob = 40) AND (p2_prob = 21) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
+                SET c_128 = 1
+              END
+              PATCH_IF (op = 24) AND (dur = 6) AND (p1_prob = 60) AND (p2_prob = 41) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
+                SET c_24 = 1
+              END
+              PATCH_IF (op = 39) AND (p2 = 0) AND (dur = 6) AND (p1_prob = 80) AND (p2_prob = 61) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
+                SET c_39 = 1
+              END
+              PATCH_IF (op = 175) AND (dur = 6) AND (p1_prob = 100) AND (p2_prob = 81) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
+                SET c_175 = 1
+              END
+            END
+            PATCH_IF !(c_76 AND c_128 AND c_24 AND c_39 AND c_175 AND !c_old) BEGIN
+              SET all_already = 0
+            END
+          END
+          PATCH_IF !recognizable BEGIN
+            PATCH_WARN ~chriz-bg-magic: Sphere of Chaos (%spell%) left as it is: no random chaos effects found.~
+          END ELSE PATCH_IF all_already BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Sphere of Chaos (%spell%): 5-outcome table present already.~
+          END ELSE BEGIN
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              // Delete only the old random-outcome effects (prob1 < 100 or prob2 > 0) and old
+              // outcome opcodes (111, 128, 12, 109, 238, 17, 39, 222, 16, 13, 172, 76, 24, 175),
+              // preserving shared hit visuals/sounds (op 141, 61, 174) and any unrelated 100..0 effects.
+              SET scanning = 1
+              WHILE scanning BEGIN
+                SET scanning = 0
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+                READ_SHORT (ab_off + a * 0x28 + 0x20) first
+                FOR (i = 0; (i < n) AND !scanning; ++i) BEGIN
+                  SET fx = fx_off + (first + i) * 0x30
+                  READ_SHORT fx op
+                  READ_BYTE (fx + 0x12) p1_prob
+                  READ_BYTE (fx + 0x13) p2_prob
+                  PATCH_IF (p1_prob < 100) OR (p2_prob > 0)
+                        OR (op = 111) OR (op = 128) OR (op = 12) OR (op = 109)
+                        OR (op = 238) OR (op = 17) OR (op = 39) OR (op = 222)
+                        OR (op = 16) OR (op = 13) OR (op = 172)
+                        OR (op = 76) OR (op = 24) OR (op = 175) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+                    SET scanning = 1
+                  END
+                END
+              END
+              // Update shared hit visual/sound companions (op 141, 61, 174) in ability a to Save vs. Spell at -4.
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x28 + 0x20) first
+              FOR (i = 0; i < n; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_SHORT fx op
+                PATCH_IF (op = 141) OR (op = 61) OR (op = 174) BEGIN
+                  WRITE_LONG (fx + 0x24) 1
+                  WRITE_LONG (fx + 0x28) (0 - 4)
+                END
+              END
+              // Append the 5 random outcomes (20% each, Save vs. Spell at -4, 6s duration).
+              // 1. 0..20: Feeblemind (op 76 + icon 48)
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 76 target = 2 power = 7
+                timing = 0 resist_dispel = 1 duration = 6 probability1 = 20 probability2 = 0
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
+                parameter2 = 48 timing = 0 resist_dispel = 1 duration = 6 probability1 = 20 probability2 = 0
+                savingthrow = 1 savebonus = (0 - 4) END
+              // 2. 21..40: Confusion (op 128 + string 14782 + icon 3 + SPCONFUS)
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 128 target = 2 power = 7
+                timing = 0 resist_dispel = 1 duration = 6 probability1 = 40 probability2 = 21
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 139 target = 2 power = 7
+                parameter1 = 14782 timing = 1 resist_dispel = 1 duration = 0 probability1 = 40 probability2 = 21
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
+                parameter2 = 3 timing = 0 resist_dispel = 1 duration = 6 probability1 = 40 probability2 = 21
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 215 target = 2 power = 7
+                parameter2 = 1 timing = 0 resist_dispel = 1 duration = 6 probability1 = 40 probability2 = 21
+                savingthrow = 1 savebonus = (0 - 4) STR_VAR resource = ~SPCONFUS~ END
+              // 3. 41..60: Panic (op 24 + string 14007 + icon 36)
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 24 target = 2 power = 7
+                timing = 0 resist_dispel = 1 duration = 6 probability1 = 60 probability2 = 41
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 139 target = 2 power = 7
+                parameter1 = 14007 timing = 1 resist_dispel = 1 duration = 0 probability1 = 60 probability2 = 41
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
+                parameter2 = 36 timing = 0 resist_dispel = 1 duration = 6 probability1 = 60 probability2 = 41
+                savingthrow = 1 savebonus = (0 - 4) END
+              // 4. 61..80: Sleep waking on damage (op 39 p2=0 + icon 14)
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 39 target = 2 power = 7
+                parameter2 = 0 timing = 0 resist_dispel = 1 duration = 6 probability1 = 80 probability2 = 61
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
+                parameter2 = 14 timing = 0 resist_dispel = 1 duration = 6 probability1 = 80 probability2 = 61
+                savingthrow = 1 savebonus = (0 - 4) END
+              // 5. 81..100: Hold (op 175 p2=2 + icon 13 + string 14102)
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 175 target = 2 power = 7
+                parameter2 = 2 timing = 0 resist_dispel = 1 duration = 6 probability1 = 100 probability2 = 81
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
+                parameter2 = 13 timing = 0 resist_dispel = 1 duration = 6 probability1 = 100 probability2 = 81
+                savingthrow = 1 savebonus = (0 - 4) END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 139 target = 2 power = 7
+                parameter1 = 14102 timing = 1 resist_dispel = 1 duration = 0 probability1 = 100 probability2 = 81
+                savingthrow = 1 savebonus = (0 - 4) END
+            END
+            SET changed = 1
+            PATCH_PRINT ~chriz-bg-magic: Sphere of Chaos (%spell%): updated to 5-outcome table (1 round, Save vs. Spell at -4).~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Sphere of Chaos~ END
+      OUTER_SPRINT cbm_find @40023
+      OUTER_SPRINT cbm_replace @40024
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Sphere of Chaos~ END
+    END
+  END
+END
+
+// --- Spell Sequencer (row arcane.level7.simbuls_spell_sequencer) ----------------------
+DEFINE_ACTION_FUNCTION cbmagic_kept_spell_sequencer
+BEGIN
+  LAF cbmagic_make_universal_school STR_VAR symbol = ~WIZARD_SPELL_SEQUENCER~ label = ~Spell Sequencer~ END
+END
+
+// --- Spell Trigger (row arcane.level8.simbuls_spell_trigger) --------------------------
+DEFINE_ACTION_FUNCTION cbmagic_kept_spell_trigger
+BEGIN
+  LAF cbmagic_make_universal_school STR_VAR symbol = ~WIZARD_SPELL_TRIGGER~ label = ~Spell Trigger~ END
+END
+
+// --- Chain Contingency (row arcane.level9.chain_contingency) --------------------------
+DEFINE_ACTION_FUNCTION cbmagic_kept_chain_contingency
+BEGIN
+  LAF cbmagic_make_universal_school STR_VAR symbol = ~WIZARD_CHAIN_CONTINGENCY~ label = ~Chain Contingency~ END
+END
+
+// ======================================================================================
+// Divine spells
+// ======================================================================================
+
+// Checks whether a priest spell added via ADD_SPELL with `symbol` in SPELL.IDS (or with
+// header icon `marker` and druid-only `0x4000` in SPPR<level>01..99) is already in the game.
+DEFINE_ACTION_FUNCTION cbmagic_find_added_priest_spell
+  INT_VAR level = 1
+  STR_VAR symbol = ~~ marker = ~~
+  RET found_res
+BEGIN
+  OUTER_SPRINT found_res ~~
+  LAF cbmagic_spell_resref STR_VAR symbol RET resref found END
+  ACTION_IF found BEGIN
+    OUTER_SPRINT found_res ~%resref%~
+  END ELSE BEGIN
+    OUTER_FOR (num = 1; (num <= 99) AND (~%found_res%~ STRING_EQUAL ~~); ++num) BEGIN
+      ACTION_IF (num < 10) BEGIN
+        OUTER_SPRINT cand ~SPPR%level%0%num%~
+      END ELSE BEGIN
+        OUTER_SPRINT cand ~SPPR%level%%num%~
+      END
+      ACTION_IF (FILE_EXISTS_IN_GAME ~%cand%.spl~) BEGIN
+        COPY_EXISTING - ~%cand%.spl~ ~override~
+          PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+            READ_SHORT 0x20 p_excl
+            READ_ASCII 0x3a hdr_icon (8) NULL
+            PATCH_IF (p_excl = 0x4000) AND (~%hdr_icon%~ STRING_EQUAL_CASE ~%marker%~) BEGIN
+              SPRINT found_res ~%cand%~
+            END
+          END
+      END
+    END
+  END
+END
+
+// --- Bless (row divine.bless) ---------------------------------------------------------
+// Casting time 5 (from 9), duration 30 seconds + 1 round per caster level across 20
+// abilities (levels 1-20, 36-150s), usable by clerics and druids as in vanilla.
+// Preserves existing abilities and adds missing breakpoints.
+DEFINE_ACTION_FUNCTION cbmagic_kept_bless
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_BLESS~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Bless (CLERIC_BLESS) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Bless (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Bless (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_130 = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              PATCH_IF (op = 130) BEGIN SET has_130 = 1 END
+            END
+          END
+          PATCH_IF !has_130 BEGIN
+            PATCH_WARN ~chriz-bg-magic: Bless (%spell%) left as it is: no Bless effect (opcode 130).~
+          END ELSE BEGIN
+            READ_SHORT 0x20 p_excl
+            SET new_excl = (p_excl BAND 0x3fff)
+            PATCH_IF (new_excl != p_excl) BEGIN
+              WRITE_SHORT 0x20 new_excl
+              SET changed += 1
+            END
+            FOR (lvl = 1; lvl <= 20; ++lvl) BEGIN
+              LPF cbmagic_ensure_ability_min_level INT_VAR min_level = lvl RET ability_index ins = inserted END
+              SET changed += ins
+            END
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+              READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              PATCH_IF (ct != 5) BEGIN
+                WRITE_SHORT (ab_off + a * 0x28 + 0x12) 5
+                SET changed += 1
+              END
+              SET eff_lvl = (ml < 1) ? 1 : ((ml > 20) ? 20 : ml)
+              SET target_dur = 30 + eff_lvl * 6
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x08) p2
+                READ_BYTE (fx + 0x0c) timing
+                READ_LONG (fx + 0x0e) dur
+                PATCH_IF ((op = 130) AND (timing = 0))
+                      OR ((op = 142) AND (p2 = 17) AND (timing = 0))
+                      OR ((op = 174) AND (timing = 4)) BEGIN
+                  PATCH_IF (dur != target_dur) BEGIN
+                    WRITE_LONG (fx + 0x0e) target_dur
+                    SET changed += 1
+                  END
+                END
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Bless (%spell%): casting time 5 and 30s + 1 round/level scaling across 20 abilities.~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Bless (%spell%): casting time 5 and 30s + 1 round/level scaling present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Bless~ END
+      OUTER_SPRINT f1 @40004
+      OUTER_SPRINT r1 @40025
+      OUTER_SPRINT f2 @40065
+      OUTER_SPRINT r2 @40066
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Bless~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Bless~ END
+    END
+  END
+END
+
+// --- Aid (row divine.aid) -------------------------------------------------------------
+// Replaces the opcode-129 Aid payload with a hit-point-only bonus (opcode 18, min(L,10) +
+// 1d8 with L = max(ability level, 3)), lasting 1 turn per level (60*L seconds), refreshing
+// on recast, and displaying its own portrait icon (STATDESC row with SPPR150D).
+DEFINE_ACTION_FUNCTION cbmagic_kept_aid
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_AID~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Aid (CLERIC_AID) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET aid_desc_ref = RESOLVE_STR_REF (@40064)
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = aid_desc_ref STR_VAR bam = ~SPPR150D~ RET icon_row END
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Aid (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_aid = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 129) OR (op = 18) BEGIN SET has_aid = 1 END
+          END
+        END
+        PATCH_IF !has_aid BEGIN
+          PATCH_WARN ~chriz-bg-magic: Aid (%spell%) left as it is: no Aid or HP bonus effect (opcode 129/18).~
+        END ELSE BEGIN
+          LPF cbmagic_add_self_refresh RET ref_added = added ref_present = present misplaced END
+          SET changed += ref_added
+          READ_SHORT 0x68 ab_cnt
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+            SET eff_lvl = (ml < 3) ? 3 : ml
+            SET hp_flat = (eff_lvl > 10) ? 10 : eff_lvl
+            SET target_dur = 60 * eff_lvl
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET old_dur = 0 - 1
+            SET payload_seen = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x04) p1
+              READ_SLONG (fx + 0x08) p2
+              READ_BYTE (fx + 0x0c) timing
+              READ_LONG (fx + 0x0e) dur
+              READ_LONG (fx + 0x1c) dn
+              READ_LONG (fx + 0x20) ds
+              PATCH_IF ((op = 129) OR (op = 18)) AND (timing = 0) AND !payload_seen BEGIN
+                SET payload_seen = 1
+                SET old_dur = dur
+                PATCH_IF (op != 18) OR (p1 != hp_flat) OR (p2 != 0) OR (dur != target_dur) OR (dn != 1) OR (ds != 8) BEGIN
+                  WRITE_SHORT fx 18
+                  WRITE_LONG (fx + 0x04) hp_flat
+                  WRITE_LONG (fx + 0x08) 0
+                  WRITE_BYTE (fx + 0x0c) 0
+                  WRITE_LONG (fx + 0x0e) target_dur
+                  WRITE_LONG (fx + 0x1c) 1
+                  WRITE_LONG (fx + 0x20) 8
+                  SET changed += 1
+                END
+              END
+            END
+            // Remove any duplicate opcode 129 effects in this ability.
+            SET scanning = 1
+            WHILE scanning BEGIN
+              SET scanning = 0
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x28 + 0x20) first
+              FOR (i = 0; (i < n) AND !scanning; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_SHORT fx op
+                PATCH_IF (op = 129) BEGIN
+                  LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+                  SET changed += 1
+                  SET scanning = 1
+                END
+              END
+            END
+            // Stretch timed companion effects (glow, expiry sound, portrait icon) that shared old_dur.
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET has_icon = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x08) p2
+              READ_BYTE (fx + 0x0c) timing
+              READ_LONG (fx + 0x0e) dur
+              PATCH_IF ((timing = 0) OR (timing = 3) OR (timing = 4))
+                    AND (old_dur > 0) AND (dur = old_dur) AND (dur != target_dur)
+                    AND !((op = 215) AND (dur <= 6)) BEGIN
+                WRITE_LONG (fx + 0x0e) target_dur
+                SET changed += 1
+              END
+              PATCH_IF (op = 142) AND (p2 = icon_row) BEGIN
+                SET has_icon = 1
+                PATCH_IF (dur != target_dur) BEGIN
+                  WRITE_LONG (fx + 0x0e) target_dur
+                  SET changed += 1
+                END
+              END
+            END
+            PATCH_IF !has_icon BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 2
+                parameter2 = icon_row timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Aid (%spell%): hit-point-only bonus, 1 turn/level, self-refreshing, icon row %icon_row%.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Aid (%spell%): hit-point-only bonus, 1 turn/level, self-refreshing, and icon present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Aid~ END
+      OUTER_SPRINT f1 @40067
+      OUTER_SPRINT r1 @40035
+      OUTER_SPRINT f2 @40068
+      OUTER_SPRINT r2 @40069
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Aid~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Aid~ END
+    END
+  END
+END
+
+// --- Shillelagh (row divine.shillelagh) -----------------------------------------------
+// Vanilla mechanics, restricted to druids (cleric/paladin excluded at 0x20).
+DEFINE_ACTION_FUNCTION cbmagic_kept_shillelagh
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_SHILLELAGH~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Shillelagh (CLERIC_SHILLELAGH) is not in this game; left out.~
+  END ELSE BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Shillelagh (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_SHORT 0x20 p_excl
+        SET target_excl = ((p_excl BAND (BNOT 0xc000)) BOR 0x4000)
+        PATCH_IF (p_excl != target_excl) BEGIN
+          WRITE_SHORT 0x20 target_excl
+          PATCH_PRINT ~chriz-bg-magic: Shillelagh (%spell%): restricted to druids.~
+        END ELSE BEGIN
+          PATCH_PRINT ~chriz-bg-magic: Shillelagh (%spell%): restricted to druids already.~
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// --- Doom (row divine.doom) -----------------------------------------------------------
+// Casting time 1, -2 to THAC0, damage rolls (opcode 73) and all saves (no AC penalty),
+// Save vs. Spell negates with penalty scaling from 0 at level 1 to -4 at level 9 (steps
+// at 1, 3, 5, 7, 9). Preserves existing abilities and adds op 73 after leading op 321s.
+DEFINE_ACTION_FUNCTION cbmagic_kept_doom
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_DOOM~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Doom (CLERIC_DOOM) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Doom (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Doom (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_doom = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              PATCH_IF (op = 54) OR ((op >= 33) AND (op <= 37)) BEGIN
+                SET has_doom = 1
+              END
+            END
+          END
+          PATCH_IF !has_doom BEGIN
+            PATCH_WARN ~chriz-bg-magic: Doom (%spell%) left as it is: no THAC0 or save penalty found.~
+          END ELSE BEGIN
+            FOR (step = 0; step <= 4; ++step) BEGIN
+              SET ml = 1 + step * 2
+              LPF cbmagic_ensure_ability_min_level INT_VAR min_level = ml RET ability_index ins = inserted END
+              SET changed += ins
+            END
+            READ_SHORT 0x68 ab_cnt
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_LONG 0x64 ab_off
+              READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+              READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+              PATCH_IF (ct != 1) BEGIN
+                WRITE_SHORT (ab_off + a * 0x28 + 0x12) 1
+                SET changed += 1
+              END
+              SET sb = (ml >= 9) ? (0 - 4) : ((ml >= 7) ? (0 - 3) : ((ml >= 5) ? (0 - 2) : ((ml >= 3) ? (0 - 1) : 0)))
+              // Remove any AC penalty (op 0) or misplaced op 73 (before a leading op 321).
+              SET scanning = 1
+              WHILE scanning BEGIN
+                SET scanning = 0
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+                READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+                SET last_321 = 0 - 1
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  PATCH_IF (op = 321) BEGIN SET last_321 = i END
+                END
+                FOR (i = 0; (i < na) AND !scanning; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  PATCH_IF (op = 0) OR ((op = 73) AND (i <= last_321)) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
+                    SET changed += 1
+                    SET scanning = 1
+                  END
+                END
+              END
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              SET has_73 = 0
+              SET pos_insert = na
+              SET dur0 = 60
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x04) p1
+                READ_LONG (fx + 0x0e) d
+                PATCH_IF (op = 73) AND (p1 = (0 - 2)) BEGIN SET has_73 = 1 END
+                PATCH_IF (op = 54) BEGIN
+                  SET pos_insert = i + 1
+                  PATCH_IF (d > 0) BEGIN SET dur0 = d END
+                END ELSE PATCH_IF ((op >= 33) AND (op <= 37)) AND (pos_insert = na) BEGIN
+                  SET pos_insert = i
+                  PATCH_IF (d > 0) BEGIN SET dur0 = d END
+                END
+              END
+              PATCH_IF !has_73 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = pos_insert opcode = 73 target = 2 power = 1
+                  parameter1 = (0 - 2) parameter2 = 0 timing = 0 resist_dispel = 1 duration = dur0
+                  savingthrow = 1 savebonus = sb END
+                SET changed += 1
+              END
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_LONG (fx + 0x24) cur_sv
+                READ_SLONG (fx + 0x28) cur_sb
+                PATCH_IF (op != 321) AND ((cur_sv != 1) OR (cur_sb != sb)) BEGIN
+                  WRITE_LONG (fx + 0x24) 1
+                  WRITE_LONG (fx + 0x28) sb
+                  SET changed += 1
+                END
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Doom (%spell%): casting time 1, -2 damage, Save vs. Spell scaling to -4.~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Doom (%spell%): damage penalty, casting time 1, and scaling save present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Doom~ END
+      OUTER_SPRINT f1 @40004
+      OUTER_SPRINT r1 @40005
+      OUTER_SPRINT f2 @40015
+      OUTER_SPRINT r2 @40016
+      OUTER_SPRINT f3 @40030
+      OUTER_SPRINT r3 @40031
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Doom~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Doom~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f3%~ replace = EVAL ~%r3%~ label = ~Doom~ END
+    END
+  END
+END
+
+// --- Faerie Fire (row divine.faerie_fire) ---------------------------------------------
+// New level-1 druid-only spell added via ADD_SPELL (symbol CLERIC_CBMAGIC_FAERIE_FIRE).
+// 5-ft (radius 75) enemy-only area projectile (cbmffir.pro via ADD_PROJECTILE), casting
+// time 1, range 20, duration 4 rounds (24s), Save vs. Spell negates: -2 AC penalty, cures
+// and prevents invisibility, purple glow. Uses base-game icons SPPR309C / SPPR309B.
+DEFINE_ACTION_FUNCTION cbmagic_kept_faerie_fire
+BEGIN
+  LAF cbmagic_find_added_priest_spell INT_VAR level = 1
+    STR_VAR symbol = ~CLERIC_CBMAGIC_FAERIE_FIRE~ marker = ~SPPR309C~
+    RET found_res
+  END
+  ACTION_IF !(~%found_res%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: Faerie Fire (%found_res%) is in this game already.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Faerie Fire~ END
+    OUTER_SET proj_id = IDS_OF_SYMBOL (~projectl~ ~cbmffir~)
+    ACTION_IF (proj_id >= 0) BEGIN
+      OUTER_SET proj_id += 1
+    END ELSE BEGIN
+      OUTER_SET can_add_proj = 0
+      ACTION_IF (FILE_EXISTS_IN_GAME ~projectl.ids~) BEGIN
+        COPY_EXISTING - ~projectl.ids~ ~override~
+          PATCH_IF (INDEX_BUFFER (~[0-9]~ 8) >= 0) BEGIN
+            SET can_add_proj = 1
+          END
+      END
+      ACTION_IF can_add_proj BEGIN
+        COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmffir.pro~
+          DELETE_BYTES 0 BUFFER_LENGTH
+          INSERT_BYTES 0 0x300
+          WRITE_ASCII 0 ~PRO V1.0~ (8)
+          WRITE_SHORT 0x08 3
+          WRITE_SHORT 0x0a 20
+          WRITE_LONG 0x0c 3
+          WRITE_ASCII 0x10 ~TRA_04A~ (8)
+          WRITE_ASCII 0x18 ~CAS_M08~ (8)
+          WRITE_SHORT 0x28 2
+          WRITE_LONG 0x100 0x80
+          WRITE_ASCII 0x104 ~TRAVEL~ (8)
+          WRITE_ASCII 0x11c ~STTRAVL1~ (8)
+          WRITE_SHORT 0x132 256
+          WRITE_SHORT 0x200 0x40
+          WRITE_SHORT 0x202 0
+          WRITE_SHORT 0x204 75
+          WRITE_SHORT 0x206 75
+          WRITE_SHORT 0x210 100
+          WRITE_SHORT 0x214 197
+          WRITE_BYTE 0x216 1
+          WRITE_BYTE 0x217 255
+          WRITE_SHORT 0x218 67
+          WRITE_SHORT 0x21a 48
+        ADD_PROJECTILE ~weidu_external/cbmffir.pro~
+        OUTER_SET proj_id = cbmffir
+      END ELSE BEGIN
+        OUTER_SET proj_id = 190
+      END
+    END
+    OUTER_SET name_ref = RESOLVE_STR_REF (@40032)
+    OUTER_SET desc_ref = RESOLVE_STR_REF (@40033)
+    // Build a clean SPL V1 in weidu_external and hand it to ADD_SPELL.
+    COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmffir.spl~
+      DELETE_BYTES 0 BUFFER_LENGTH
+      INSERT_BYTES 0 (0x72 + 0x28)
+      WRITE_ASCII 0 ~SPL V1  ~ (8)
+      WRITE_LONG 0x08 name_ref
+      WRITE_LONG 0x0c (0 - 1)
+      WRITE_LONG 0x18 0x04000400
+      WRITE_SHORT 0x1c 2
+      WRITE_SHORT 0x20 0x4000
+      WRITE_SHORT 0x22 10
+      WRITE_BYTE 0x25 6
+      WRITE_BYTE 0x27 0
+      WRITE_LONG 0x34 1
+      WRITE_ASCII 0x3a ~SPPR309C~ (8)
+      WRITE_LONG 0x50 desc_ref
+      WRITE_LONG 0x54 (0 - 1)
+      WRITE_LONG 0x64 0x72
+      WRITE_SHORT 0x68 1
+      WRITE_LONG 0x6a (0x72 + 0x28)
+      WRITE_SHORT 0x6e 0
+      WRITE_SHORT 0x70 0
+      WRITE_BYTE 0x72 1
+      WRITE_SHORT (0x72 + 0x02) 2
+      WRITE_ASCII (0x72 + 0x04) ~SPPR309B~ (8)
+      WRITE_BYTE (0x72 + 0x0c) 4
+      WRITE_SHORT (0x72 + 0x0e) 20
+      WRITE_SHORT (0x72 + 0x10) 1
+      WRITE_SHORT (0x72 + 0x12) 1
+      WRITE_SHORT (0x72 + 0x14) 1
+      WRITE_SHORT (0x72 + 0x1e) 0
+      WRITE_SHORT (0x72 + 0x20) 0
+      WRITE_SHORT (0x72 + 0x22) 1
+      WRITE_SHORT (0x72 + 0x26) proj_id
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 136 target = 2 power = 1
+        timing = 1 resist_dispel = 2 duration = 0 savingthrow = 0 savebonus = 0 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 321 target = 2 power = 1
+        timing = 1 resist_dispel = 3 duration = 0 savingthrow = 1 savebonus = 0 STR_VAR resource = ~CBMFFIR~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 47 target = 2 power = 1
+        timing = 1 resist_dispel = 1 duration = 0 savingthrow = 1 savebonus = 0 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 0 target = 2 power = 1
+        parameter1 = (0 - 2) parameter2 = 0 timing = 0 resist_dispel = 1 duration = 24 savingthrow = 1 savebonus = 0 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 101 target = 2 power = 1
+        parameter2 = 20 timing = 0 resist_dispel = 1 duration = 24 savingthrow = 1 savebonus = 0 END
+      FOR (loc = 0; loc <= 6; ++loc) BEGIN
+        LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 8 target = 2 power = 1
+          parameter1 = 1687590400 parameter2 = loc timing = 0 resist_dispel = 1 duration = 24
+          savingthrow = 1 savebonus = 0 END
+      END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 174 target = 2 power = 1
+        timing = 1 resist_dispel = 1 duration = 0 savingthrow = 1 savebonus = 0 STR_VAR resource = ~EFF_P86~ END
+    COPY - ~weidu_external/cbmffir.spl~ ~weidu_external/cbmffir.spl~
+    ADD_SPELL ~weidu_external/cbmffir.spl~ 1 1 ~CLERIC_CBMAGIC_FAERIE_FIRE~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_FAERIE_FIRE~ RET added_res = resref found END
+    ACTION_IF found BEGIN
+      COPY_EXISTING ~%added_res%.spl~ ~override~
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + 0x1e) n0
+        READ_SHORT (ab_off + 0x20) first0
+        FOR (i = 0; i < n0; ++i) BEGIN
+          SET fx = fx_off + (first0 + i) * 0x30
+          READ_SHORT fx op
+          PATCH_IF (op = 321) BEGIN
+            WRITE_ASCIIE (fx + 0x14) ~%added_res%~ #8
+          END
+        END
+      BUT_ONLY
+      PRINT ~chriz-bg-magic: Faerie Fire added as %added_res% (CLERIC_CBMAGIC_FAERIE_FIRE) with projectile %proj_id%.~
+    END
+  END
+END
+
+// --- Silence 15' Radius (row divine.silence) ------------------------------------------
+// Affects enemies only (projectile SPARBLNP instead of all-creatures SPKLARBL).
+DEFINE_ACTION_FUNCTION cbmagic_kept_silence
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_SILENCE_15_FOOT~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Silence 15' Radius (CLERIC_SILENCE_15_FOOT) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET proj_id = IDS_OF_SYMBOL (~projectl~ ~sparblnp~)
+    ACTION_IF (proj_id >= 0) BEGIN
+      OUTER_SET proj_id += 1
+    END ELSE BEGIN
+      OUTER_SET proj_id = 169
+    END
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Silence 15' Radius (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Silence 15' Radius (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x26) proj
+            PATCH_IF (proj != proj_id) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x26) proj_id
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Silence 15' Radius (%spell%): enemy-only projectile (%proj_id%) set in %changed% abilities.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Silence 15' Radius (%spell%): uses enemy-only projectile (%proj_id%) already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Silence 15' Radius~ END
+      OUTER_SPRINT cbm_find @40050
+      OUTER_SPRINT cbm_replace @40051
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Silence 15' Radius~ END
+    END
+  END
+END
+
+// --- Free Action (row divine.free_action) ---------------------------------------------
+// Usable by druids and rangers as well as clerics, duration 1 turn/level (60s/level),
+// adds Stun immunity, and no longer blocks Haste or movement bonuses.
+DEFINE_ACTION_FUNCTION cbmagic_kept_free_action
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_FREE_ACTION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Free Action (CLERIC_FREE_ACTION) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Free Action (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_fa = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            READ_LONG (fx + 0x08) p2
+            PATCH_IF (op = 101) AND ((p2 = 109) OR (p2 = 154) OR (p2 = 157) OR (p2 = 175)) BEGIN
+              SET has_fa = 1
+            END
+          END
+        END
+        PATCH_IF !has_fa BEGIN
+          PATCH_WARN ~chriz-bg-magic: Free Action (%spell%) left as it is: no movement/hold immunity effects found.~
+        END ELSE BEGIN
+          READ_SHORT 0x20 p_excl
+          SET new_excl = (p_excl BAND (BNOT 0xc000))
+          PATCH_IF (new_excl != p_excl) BEGIN
+            WRITE_SHORT 0x20 new_excl
+            SET changed += 1
+          END
+          // Remove Haste-blocking effects across all abilities.
+          SET scanning = 1
+          WHILE scanning BEGIN
+            SET scanning = 0
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; (a < ab_cnt) AND !scanning; ++a) BEGIN
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x28 + 0x20) first
+              FOR (i = 0; (i < n) AND !scanning; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x04) p1
+                READ_SLONG (fx + 0x08) p2
+                READ_ASCII (fx + 0x14) res (8) NULL
+                PATCH_IF ((op = 101) AND (p2 = 16))
+                      OR ((op = 206) AND ((p2 = 16) OR (~%res%~ STRING_EQUAL_CASE ~SPWI305~)
+                          OR (~%res%~ STRING_EQUAL_CASE ~SPRA301~) OR (~%res%~ STRING_EQUAL_CASE ~SPIN828~)
+                          OR (~%res%~ STRING_EQUAL_CASE ~SPIN572~)))
+                      OR ((op = 267) AND ((p1 = 14023) OR (p2 = 16)))
+                      OR ((op = 169) AND (p2 = 38))
+                      OR ((op = 240) AND (p2 = 38))
+                      OR ((op = 126) AND (p1 = 100) AND (p2 = 2)) BEGIN
+                  LPF cbmagic_delete_effect INT_VAR index = (first + i) END
+                  SET changed += 1
+                  SET scanning = 1
+                END
+              END
+            END
+          END
+          // Update duration on the owned Free Action effects and ensure Stun immunities are present.
+          READ_SHORT 0x68 ab_cnt
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+            SET eff_lvl = (ml < 7) ? 7 : ml
+            SET target_dur = 60 * eff_lvl
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET old_dur = 0 - 1
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x08) p2
+              READ_LONG (fx + 0x0e) dur
+              PATCH_IF (op = 101) AND ((p2 = 109) OR (p2 = 154) OR (p2 = 157) OR (p2 = 175)) AND (old_dur < 0) BEGIN
+                SET old_dur = dur
+              END
+            END
+            SET has_45 = 0
+            SET has_210 = 0
+            SET has_169_55 = 0
+            SET has_267_1280 = 0
+            SET has_267_14043 = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x04) p1
+              READ_SLONG (fx + 0x08) p2
+              READ_BYTE (fx + 0x0c) timing
+              READ_LONG (fx + 0x0e) dur
+              PATCH_IF (old_dur > 0) AND (dur = old_dur) AND (dur != target_dur)
+                    AND ((op = 101) OR (op = 126) OR (op = 142) OR (op = 169)
+                         OR (op = 206) OR (op = 267) OR ((op = 174) AND (timing = 4))) BEGIN
+                WRITE_LONG (fx + 0x0e) target_dur
+                SET changed += 1
+              END
+              PATCH_IF (op = 101) AND (p2 = 45) BEGIN SET has_45 = 1 END
+              PATCH_IF (op = 101) AND (p2 = 210) BEGIN SET has_210 = 1 END
+              PATCH_IF (op = 169) AND (p2 = 55) BEGIN SET has_169_55 = 1 END
+              PATCH_IF (op = 267) AND (p1 = 1280) BEGIN SET has_267_1280 = 1 END
+              PATCH_IF (op = 267) AND (p1 = 14043) BEGIN SET has_267_14043 = 1 END
+            END
+            PATCH_IF !has_45 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 101 target = 2 power = 4
+                parameter2 = 45 timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+            PATCH_IF !has_210 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 101 target = 2 power = 4
+                parameter2 = 210 timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+            PATCH_IF !has_169_55 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 169 target = 2 power = 4
+                parameter2 = 55 timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+            PATCH_IF !has_267_1280 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 267 target = 2 power = 4
+                parameter1 = 1280 timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+            PATCH_IF !has_267_14043 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 267 target = 2 power = 4
+                parameter1 = 14043 timing = 0 resist_dispel = 3 duration = target_dur END
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Free Action (%spell%): druid/cleric usability, 1 turn/level, Stun protection added, Haste allowed.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Free Action (%spell%): already updated.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Free Action~ END
+      OUTER_SPRINT f1 @40034
+      OUTER_SPRINT r1 @40035
+      OUTER_SPRINT f2 @40036
+      OUTER_SPRINT r2 @40037
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Free Action~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Free Action~ END
+    END
+  END
+END
+
+// --- Neutralize Poison (row divine.neutralize_poison) ---------------------------------
+// Cures poison and grants immunity to poison for 1 turn/level (levels 7-20, 420-1200s);
+// does not heal 10 HP or cure disease, blindness, or deafness.
+DEFINE_ACTION_FUNCTION cbmagic_kept_neutralize_poison
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_NEUTRALIZE_POISON~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Neutralize Poison (CLERIC_NEUTRALIZE_POISON) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Neutralize Poison (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Neutralize Poison (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_11 = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              PATCH_IF (op = 11) BEGIN SET has_11 = 1 END
+            END
+          END
+          PATCH_IF !has_11 BEGIN
+            PATCH_WARN ~chriz-bg-magic: Neutralize Poison (%spell%) left as it is: no cure poison effect (opcode 11).~
+          END ELSE BEGIN
+            // Remove only the non-poison cure/heal effects that our design drops from Neutralize Poison,
+            // preserving any unrelated effects in existing abilities.
+            READ_SHORT 0x68 ab_cnt
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              SET scanning = 1
+              WHILE scanning BEGIN
+                SET scanning = 0
+                READ_LONG 0x64 ab_off
+                READ_LONG 0x6a fx_off
+                READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+                READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+                FOR (i = 0; (i < na) AND !scanning; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_SLONG (fx + 0x08) p2
+                  READ_ASCII (fx + 0x14) res (8) NULL
+                  PATCH_IF (op = 17) OR (op = 79) OR (op = 75) OR (op = 81)
+                        OR ((op = 240) AND ((p2 = 7) OR (p2 = 8) OR (p2 = 112)))
+                        OR ((op = 321) AND ((~%res%~ STRING_EQUAL_CASE ~SPPR419~) OR (~%res%~ STRING_EQUAL_CASE ~SPIN103~))) BEGIN
+                    LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
+                    SET changed += 1
+                    SET scanning = 1
+                  END
+                END
+              END
+            END
+            // Ensure breakpoints 1, 8..20 while preserving all existing abilities.
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 1 RET ability_index ins = inserted END
+            SET changed += ins
+            FOR (lvl = 8; lvl <= 20; ++lvl) BEGIN
+              LPF cbmagic_ensure_ability_min_level INT_VAR min_level = lvl RET ability_index ins = inserted END
+              SET changed += ins
+            END
+            // Ensure self-refresh (321) and 1 turn/level poison-immunity effects in every ability.
+            READ_SHORT 0x68 ab_cnt
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+              SET eff_lvl = (ml < 7) ? 7 : ((ml > 20) ? 20 : ml)
+              SET target_dur = 60 * eff_lvl
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              SET has_self_321 = 0
+              SET has_101_25 = 0
+              SET has_173 = 0
+              SET has_169_6 = 0
+              SET has_267_14662 = 0
+              SET has_142_30 = 0
+              SET has_174_e07 = 0
+              SET has_206_411 = 0
+              SET has_206_502 = 0
+              SET has_206_979 = 0
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x04) p1
+                READ_SLONG (fx + 0x08) p2
+                READ_BYTE (fx + 0x0c) tm
+                READ_LONG (fx + 0x0e) dur
+                READ_ASCII (fx + 0x14) res (8) NULL
+                PATCH_IF (op = 321) AND (~%res%~ STRING_EQUAL_CASE ~%spell%~) BEGIN
+                  SET has_self_321 = 1
+                END
+                PATCH_IF (op = 101) AND (p2 = 25) BEGIN
+                  SET has_101_25 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 173) AND (p1 = 100) AND (p2 = 1) BEGIN
+                  SET has_173 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 169) AND (p2 = 6) BEGIN
+                  SET has_169_6 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 267) AND (p1 = 14662) BEGIN
+                  SET has_267_14662 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 142) AND (p2 = 30) BEGIN
+                  SET has_142_30 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 174) AND (tm = 4) AND (~%res%~ STRING_EQUAL_CASE ~EFF_E07~) BEGIN
+                  SET has_174_e07 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 206) AND (~%res%~ STRING_EQUAL_CASE ~SPPR411~) BEGIN
+                  SET has_206_411 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 206) AND (~%res%~ STRING_EQUAL_CASE ~SPWI502~) BEGIN
+                  SET has_206_502 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+                PATCH_IF (op = 206) AND (~%res%~ STRING_EQUAL_CASE ~SPIN979~) BEGIN
+                  SET has_206_979 = 1
+                  PATCH_IF (dur != target_dur) BEGIN WRITE_LONG (fx + 0x0e) target_dur SET changed += 1 END
+                END
+              END
+              PATCH_IF !has_self_321 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 321 target = 2 power = 4
+                  timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%spell%~ END
+                SET changed += 1
+              END
+              PATCH_IF !has_101_25 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 101 target = 2 power = 4
+                  parameter2 = 25 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_173 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 173 target = 2 power = 4
+                  parameter1 = 100 parameter2 = 1 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_169_6 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 169 target = 2 power = 4
+                  parameter2 = 6 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_267_14662 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 267 target = 2 power = 4
+                  parameter1 = 14662 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_142_30 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 4
+                  parameter2 = 30 timing = 0 resist_dispel = 3 duration = target_dur END
+                SET changed += 1
+              END
+              PATCH_IF !has_174_e07 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 174 target = 2 power = 4
+                  timing = 4 resist_dispel = 3 duration = target_dur STR_VAR resource = ~EFF_E07~ END
+                SET changed += 1
+              END
+              PATCH_IF !has_206_411 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 206 target = 2 power = 4
+                  timing = 0 resist_dispel = 3 duration = target_dur STR_VAR resource = ~SPPR411~ END
+                SET changed += 1
+              END
+              PATCH_IF !has_206_502 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 206 target = 2 power = 4
+                  timing = 0 resist_dispel = 3 duration = target_dur STR_VAR resource = ~SPWI502~ END
+                SET changed += 1
+              END
+              PATCH_IF !has_206_979 BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 206 target = 2 power = 4
+                  timing = 0 resist_dispel = 3 duration = target_dur STR_VAR resource = ~SPIN979~ END
+                SET changed += 1
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Neutralize Poison (%spell%): cures poison and grants immunity for 1 turn/level.~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Neutralize Poison (%spell%): poison cure and 1 turn/level immunity present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Neutralize Poison~ END
+      OUTER_SPRINT f1 @40040
+      OUTER_SPRINT r1 @40035
+      OUTER_SPRINT f2 @40041
+      OUTER_SPRINT r2 @40042
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Neutralize Poison~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Neutralize Poison~ END
+    END
+  END
+END
+
+// --- Divine Power / Holy Power (row divine.divine_power) ------------------------------
+// Renamed Divine Power in name and description, casting time 4 (from 6), and grants
+// single/multi-class non-fighter clerics (CLASS.IDS 3, 15, 14) fighter bonus attacks per
+// round (+1/2 APR at levels 7-12 via CBM412A.EFF, +1 APR at level 13+ via CBM412B.EFF).
+DEFINE_ACTION_FUNCTION cbmagic_kept_divine_power
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_HOLY_POWER~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Holy Power (CLERIC_HOLY_POWER) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_game_language RET lang END
+    OUTER_SET new_name_ref = RESOLVE_STR_REF (@40070)
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Holy Power (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_hp = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 54) OR (op = 44) OR (op = 18) BEGIN SET has_hp = 1 END
+          END
+        END
+        PATCH_IF !has_hp BEGIN
+          PATCH_WARN ~chriz-bg-magic: Holy Power (%spell%) left as it is: no Holy Power effects found.~
+        END ELSE BEGIN
+          PATCH_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+            READ_SLONG 0x08 cur_name
+            PATCH_IF (cur_name != new_name_ref) BEGIN
+              WRITE_LONG 0x08 new_name_ref
+              SET changed += 1
+            END
+          END
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+            READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+            PATCH_IF (ct != 4) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x12) 4
+              SET changed += 1
+            END
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET eff_lvl = (ml < 7) ? 7 : ml
+            SET ab_dur = 6 * eff_lvl
+            SPRINT eff_res ~CBM412A~
+            PATCH_IF (ml >= 13) BEGIN
+              SPRINT eff_res ~CBM412B~
+            END
+            SET has_c3 = 0
+            SET has_c15 = 0
+            SET has_c14 = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x04) p1
+              READ_SLONG (fx + 0x08) p2
+              READ_BYTE (fx + 0x0d) rd
+              READ_LONG (fx + 0x0e) dur
+              READ_ASCII (fx + 0x14) res (8) NULL
+              PATCH_IF ((op = 54) OR (op = 44) OR (op = 142)) AND (dur > 0) BEGIN
+                SET ab_dur = dur
+              END
+              PATCH_IF (op = 177) AND (p2 = 5) AND (~%res%~ STRING_EQUAL_CASE ~%eff_res%~) BEGIN
+                PATCH_IF (rd != 3) BEGIN
+                  WRITE_BYTE (fx + 0x0d) 3
+                  SET changed += 1
+                END
+                PATCH_IF (p1 = 3) BEGIN SET has_c3 = 1 END
+                PATCH_IF (p1 = 15) BEGIN SET has_c15 = 1 END
+                PATCH_IF (p1 = 14) BEGIN SET has_c14 = 1 END
+              END
+            END
+            PATCH_IF !has_c3 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 177 target = 1 power = 4
+                parameter1 = 3 parameter2 = 5 timing = 0 resist_dispel = 3 duration = ab_dur
+                STR_VAR resource = EVAL ~%eff_res%~ END
+              SET changed += 1
+            END
+            PATCH_IF !has_c15 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 177 target = 1 power = 4
+                parameter1 = 15 parameter2 = 5 timing = 0 resist_dispel = 3 duration = ab_dur
+                STR_VAR resource = EVAL ~%eff_res%~ END
+              SET changed += 1
+            END
+            PATCH_IF !has_c14 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 177 target = 1 power = 4
+                parameter1 = 14 parameter2 = 5 timing = 0 resist_dispel = 3 duration = ab_dur
+                STR_VAR resource = EVAL ~%eff_res%~ END
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Holy Power (%spell%): renamed Divine Power, casting time 4, and fighter APR progression added.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Holy Power (%spell%): Divine Power name, casting time 4, and fighter APR progression present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      ACTION_FOR_EACH pair IN ~CBM412A:6~ ~CBM412B:1~ BEGIN
+        OUTER_PATCH_SAVE eff_name ~%pair%~ BEGIN REPLACE_TEXTUALLY ~:.*$~ ~~ END
+        OUTER_PATCH_SAVE apr_val ~%pair%~ BEGIN REPLACE_TEXTUALLY ~^.*:~ ~~ END
+        COPY ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~override/%eff_name%.eff~
+          DELETE_BYTES 0 BUFFER_LENGTH
+          INSERT_BYTES 0 0x110
+          WRITE_ASCII 0 ~EFF V2.0~ (8)
+          WRITE_ASCII 0x08 ~EFF V2.0~ (8)
+          WRITE_LONG 0x10 1
+          WRITE_LONG 0x14 1
+          WRITE_LONG 0x18 4
+          WRITE_LONG 0x1c apr_val
+          WRITE_LONG 0x20 0
+          WRITE_SHORT 0x24 0
+          WRITE_LONG 0x28 120
+          WRITE_SHORT 0x2c 100
+      END
+      LAF cbmagic_warn_text_language STR_VAR label = ~Divine Power~ END
+      OUTER_SPRINT f0 @40071
+      OUTER_SPRINT r0 @40070
+      OUTER_SPRINT f1 @40026
+      OUTER_SPRINT r1 @40027
+      OUTER_SPRINT f2 @40028
+      OUTER_SPRINT r2 @40029
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f0%~ replace = EVAL ~%r0%~ label = ~Divine Power~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Divine Power~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Divine Power~ END
+    END
+  END
+END
+
+// --- Negative Plane Protection (row divine.negative_plane_protection) -----------------
+// Duration 1 turn/level (60s/level across abilities at min_level 1, 8..20 for caster
+// levels 7..20, 420..1200s), usable by both clerics and druids, otherwise vanilla.
+DEFINE_ACTION_FUNCTION cbmagic_kept_negative_plane_protection
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_NEGATIVE_PLANE_PROTECTION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Negative Plane Protection (CLERIC_NEGATIVE_PLANE_PROTECTION) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Negative Plane Protection (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Negative Plane Protection (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          SET has_216 = 0
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+            READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+            FOR (i = 0; i < na; ++i) BEGIN
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x08) p2
+              PATCH_IF (op = 101) AND (p2 = 216) BEGIN SET has_216 = 1 END
+            END
+          END
+          PATCH_IF !has_216 BEGIN
+            PATCH_WARN ~chriz-bg-magic: Negative Plane Protection (%spell%) left as it is: no level-drain immunity (opcode 101 p2=216).~
+          END ELSE BEGIN
+            READ_SHORT 0x20 p_excl
+            PATCH_IF ((p_excl BAND 0xc000) != 0) BEGIN
+              WRITE_SHORT 0x20 (p_excl BAND 0x3fff)
+              SET changed += 1
+            END
+            // Ensure breakpoints 1, 8..20 while preserving all existing abilities.
+            LPF cbmagic_ensure_ability_min_level INT_VAR min_level = 1 RET ability_index ins = inserted END
+            SET changed += ins
+            FOR (lvl = 8; lvl <= 20; ++lvl) BEGIN
+              LPF cbmagic_ensure_ability_min_level INT_VAR min_level = lvl RET ability_index ins = inserted END
+              SET changed += ins
+            END
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+              SET eff_lvl = (ml < 7) ? 7 : ((ml > 20) ? 20 : ml)
+              SET target_dur = 60 * eff_lvl
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+              READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+              SET old_dur = 0 - 1
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x08) p2
+                READ_LONG (fx + 0x0e) dur
+                PATCH_IF (op = 101) AND (p2 = 216) AND (old_dur < 0) BEGIN
+                  SET old_dur = dur
+                END
+              END
+              PATCH_IF (old_dur > 0) AND (old_dur != target_dur) BEGIN
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_BYTE (fx + 0x0c) tm
+                  READ_LONG (fx + 0x0e) dur
+                  PATCH_IF (dur = old_dur) AND (
+                    (((op = 101) OR (op = 267) OR (op = 142) OR (op = 169)) AND (tm = 0))
+                    OR ((op = 174) AND (tm = 4))
+                  ) BEGIN
+                    WRITE_LONG (fx + 0x0e) target_dur
+                    SET changed += 1
+                  END
+                END
+              END
+            END
+            PATCH_IF (changed > 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Negative Plane Protection (%spell%): duration set to 1 turn/level (levels 7-20) for clerics and druids.~
+            END ELSE BEGIN
+              PATCH_PRINT ~chriz-bg-magic: Negative Plane Protection (%spell%): 1 turn/level duration and cleric/druid usability present already.~
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Negative Plane Protection~ END
+      OUTER_SPRINT cbm_find @40074
+      OUTER_SPRINT cbm_replace @40035
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Negative Plane Protection~ END
+    END
+  END
+END
+
+// --- Iron Skins -> Stoneskin (row divine.stoneskin) -----------------------------------
+// Named Stoneskin, casting time 1 (from 9), skins and duration as vanilla.
+DEFINE_ACTION_FUNCTION cbmagic_kept_iron_skins
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_IRONSKIN~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Iron Skins (CLERIC_IRONSKIN) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_game_language RET lang END
+    OUTER_SET new_name_ref = RESOLVE_STR_REF (@40052)
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Iron Skins (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_218 = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 218) BEGIN SET has_218 = 1 END
+          END
+        END
+        PATCH_IF !has_218 BEGIN
+          PATCH_WARN ~chriz-bg-magic: Iron Skins (%spell%) left as it is: no stoneskin effect (opcode 218).~
+        END ELSE BEGIN
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+            PATCH_IF (ct != 1) BEGIN
+              WRITE_SHORT (ab_off + a * 0x28 + 0x12) 1
+              SET changed += 1
+            END
+          END
+          PATCH_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+            READ_SLONG 0x08 cur_name
+            PATCH_IF (cur_name != new_name_ref) BEGIN
+              WRITE_LONG 0x08 new_name_ref
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Iron Skins (%spell%): renamed Stoneskin and casting time set to 1.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Iron Skins (%spell%): Stoneskin name and casting time 1 present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Iron Skins~ END
+      OUTER_SPRINT f1 @40053
+      OUTER_SPRINT r1 @40052
+      OUTER_SPRINT f2 @40004
+      OUTER_SPRINT r2 @40005
+      OUTER_SPRINT f3 @40054
+      OUTER_SPRINT r3 @40055
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Iron Skins~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Iron Skins~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f3%~ replace = EVAL ~%r3%~ label = ~Iron Skins~ END
+    END
+  END
+END
+
+// --- Mass Regenerate (row divine.mass_regenerate) -------------------------------------
+// New level-5 druid-only spell added via ADD_SPELL (symbol CLERIC_CBMAGIC_MASS_REGENERATE).
+// Sight-range party-only area (cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5,
+// regenerates 2 HP per round (1 HP per 3 seconds) for 1 turn + 2 rounds/level (72s at
+// level 1 up to 180s at level 10), not stackable with itself.
+// Uses existing base-game Regeneration icons: SPPR711C (spellbook) and SPPR711B (ability bar).
+DEFINE_ACTION_FUNCTION cbmagic_kept_mass_regenerate
+BEGIN
+  LAF cbmagic_find_added_priest_spell INT_VAR level = 5
+    STR_VAR symbol = ~CLERIC_CBMAGIC_MASS_REGENERATE~ marker = ~SPPR711C~
+    RET found_res
+  END
+  ACTION_IF !(~%found_res%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: Mass Regenerate (%found_res%) is in this game already.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Mass Regenerate~ END
+    OUTER_SET proj_id = IDS_OF_SYMBOL (~projectl~ ~cbmmreg~)
+    ACTION_IF (proj_id >= 0) BEGIN
+      OUTER_SET proj_id += 1
+    END ELSE BEGIN
+      OUTER_SET can_add_proj = 0
+      ACTION_IF (FILE_EXISTS_IN_GAME ~projectl.ids~) BEGIN
+        COPY_EXISTING - ~projectl.ids~ ~override~
+          PATCH_IF (INDEX_BUFFER (~[0-9]~ 8) >= 0) BEGIN
+            SET can_add_proj = 1
+          END
+      END
+      ACTION_IF can_add_proj BEGIN
+        COPY ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmmreg.pro~
+          DELETE_BYTES 0 BUFFER_LENGTH
+          INSERT_BYTES 0 0x300
+          WRITE_ASCII 0 ~PRO V1.0~ (8)
+          WRITE_SHORT 0x08 3
+          WRITE_SHORT 0x0a 20
+          WRITE_LONG 0x0c 3
+          WRITE_ASCII 0x10 ~TRA_04A~ (8)
+          WRITE_ASCII 0x18 ~CAS_M08~ (8)
+          WRITE_SHORT 0x28 2
+          WRITE_SHORT 0x100 0x80
+          WRITE_ASCII 0x104 ~TRAVEL~ (8)
+          WRITE_ASCII 0x11c ~STTRAVL1~ (8)
+          WRITE_SHORT 0x132 256
+          WRITE_SHORT 0x200 0xd0
+          WRITE_SHORT 0x202 0
+          WRITE_SHORT 0x204 452
+          WRITE_SHORT 0x206 452
+          WRITE_SHORT 0x210 100
+          WRITE_SHORT 0x214 196
+          WRITE_BYTE 0x216 1
+          WRITE_BYTE 0x217 255
+          WRITE_BYTE 0x218 67
+          WRITE_SHORT 0x21a 47
+        ADD_PROJECTILE ~weidu_external/cbmmreg.pro~
+        OUTER_SET proj_id = cbmmreg
+      END ELSE BEGIN
+        OUTER_SET proj_id = 337
+      END
+    END
+    OUTER_SET name_ref = RESOLVE_STR_REF (@40038)
+    OUTER_SET desc_ref = RESOLVE_STR_REF (@40039)
+    COPY - ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~weidu_external/cbmmreg.spl~
+      DELETE_BYTES 0 BUFFER_LENGTH
+      INSERT_BYTES 0 (0x72 + 0x28)
+      WRITE_ASCII 0 ~SPL V1  ~ (8)
+      WRITE_LONG 0x08 name_ref
+      WRITE_LONG 0x0c (0 - 1)
+      WRITE_LONG 0x18 0
+      WRITE_SHORT 0x1c 2
+      WRITE_SHORT 0x20 0x4000
+      WRITE_SHORT 0x22 14
+      WRITE_BYTE 0x25 8
+      WRITE_BYTE 0x27 0
+      WRITE_LONG 0x34 5
+      WRITE_ASCII 0x3a ~SPPR711C~ (8)
+      WRITE_LONG 0x50 desc_ref
+      WRITE_LONG 0x54 (0 - 1)
+      WRITE_LONG 0x64 0x72
+      WRITE_SHORT 0x68 1
+      WRITE_LONG 0x6a (0x72 + 0x28)
+      WRITE_SHORT 0x6e 0
+      WRITE_SHORT 0x70 0
+      WRITE_BYTE 0x72 1
+      WRITE_SHORT (0x72 + 0x02) 2
+      WRITE_ASCII (0x72 + 0x04) ~SPPR711B~ (8)
+      WRITE_BYTE (0x72 + 0x0c) 5
+      WRITE_SHORT (0x72 + 0x0e) 1
+      WRITE_SHORT (0x72 + 0x10) 1
+      WRITE_SHORT (0x72 + 0x12) 5
+      WRITE_SHORT (0x72 + 0x14) 1
+      WRITE_SHORT (0x72 + 0x1e) 0
+      WRITE_SHORT (0x72 + 0x20) 0
+      WRITE_SHORT (0x72 + 0x22) 1
+      WRITE_SHORT (0x72 + 0x26) proj_id
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 321 target = 2 power = 5
+        timing = 1 resist_dispel = 3 duration = 0 STR_VAR resource = ~CBMMREG~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 98 target = 2 power = 5
+        parameter1 = 3 parameter2 = 3 timing = 0 resist_dispel = 3 duration = 72 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 142 target = 2 power = 5
+        parameter2 = 87 timing = 0 resist_dispel = 3 duration = 72 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 139 target = 2 power = 5
+        parameter1 = 11006 timing = 1 resist_dispel = 3 duration = 0 END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 174 target = 2 power = 5
+        timing = 4 resist_dispel = 3 duration = 72 STR_VAR resource = ~EFF_E03~ END
+      LPF cbmagic_insert_effect INT_VAR ability = 0 position = 999 opcode = 215 target = 2 power = 5
+        parameter2 = 1 timing = 0 resist_dispel = 3 duration = 3 STR_VAR resource = ~ICWRATI~ END
+      FOR (lvl = 2; lvl <= 10; ++lvl) BEGIN
+        SET dur = 60 + lvl * 12
+        LPF cbmagic_clone_first_ability INT_VAR min_level = lvl base_dur = 72 new_dur = dur RET new_ability END
+      END
+    COPY - ~weidu_external/cbmmreg.spl~ ~weidu_external/cbmmreg.spl~
+    ADD_SPELL ~weidu_external/cbmmreg.spl~ 1 5 ~CLERIC_CBMAGIC_MASS_REGENERATE~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_MASS_REGENERATE~ RET added_res = resref found END
+    ACTION_IF found BEGIN
+      COPY_EXISTING ~%added_res%.spl~ ~override~
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) na
+          READ_SHORT (ab_off + a * 0x28 + 0x20) fa
+          FOR (i = 0; i < na; ++i) BEGIN
+            SET fx = fx_off + (fa + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 321) BEGIN
+              WRITE_ASCIIE (fx + 0x14) ~%added_res%~ #8
+            END
+          END
+        END
+      BUT_ONLY
+      PRINT ~chriz-bg-magic: Mass Regenerate added as %added_res% (CLERIC_CBMAGIC_MASS_REGENERATE) with projectile %proj_id%.~
+    END
+  END
+END
+
+// --- Regenerate (row divine.regeneration) ---------------------------------------------
+// Druid-only (0x20), stays level 7, heals 2 HP per second (from 3) for 1 round per level
+// (from 1 round per 2 levels), not stackable with itself (opcode 321 self-refresh).
+DEFINE_ACTION_FUNCTION cbmagic_kept_regeneration
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_REGENERATE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Regenerate (CLERIC_REGENERATE) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Regenerate (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_98 = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 98) BEGIN SET has_98 = 1 END
+          END
+        END
+        PATCH_IF !has_98 BEGIN
+          PATCH_WARN ~chriz-bg-magic: Regenerate (%spell%) left as it is: no regeneration effect (opcode 98).~
+        END ELSE BEGIN
+          READ_SHORT 0x20 p_excl
+          SET target_excl = ((p_excl BAND (BNOT 0xc000)) BOR 0x4000)
+          PATCH_IF (p_excl != target_excl) BEGIN
+            WRITE_SHORT 0x20 target_excl
+            SET changed += 1
+          END
+          LPF cbmagic_add_self_refresh RET ref_added = added ref_present = present misplaced END
+          SET changed += ref_added
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          READ_LONG 0x6a fx_off
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_SHORT (ab_off + a * 0x28 + 0x10) ml
+            SET eff_lvl = (ml < 14) ? 14 : ml
+            SET target_dur = 6 * eff_lvl
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET old_dur = 0 - 1
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x04) p1
+              READ_LONG (fx + 0x0e) dur
+              PATCH_IF (op = 98) BEGIN
+                SET old_dur = dur
+                PATCH_IF (p1 != 2) BEGIN
+                  WRITE_LONG (fx + 0x04) 2
+                  SET changed += 1
+                END
+              END
+            END
+            PATCH_IF (old_dur > 0) AND (old_dur != target_dur) BEGIN
+              FOR (i = 0; i < n; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_LONG (fx + 0x0e) dur
+                PATCH_IF (dur = old_dur) BEGIN
+                  WRITE_LONG (fx + 0x0e) target_dur
+                  SET changed += 1
+                END
+              END
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Regenerate (%spell%): druid-only, 2 HP/s, 1 round/level, self-refreshing.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Regenerate (%spell%): druid-only, 2 HP/s, 1 round/level, self-refreshing already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Regenerate~ END
+      OUTER_SPRINT f1 @40056
+      OUTER_SPRINT r1 @40057
+      OUTER_SPRINT f2 @40058
+      OUTER_SPRINT r2 @40059
+      OUTER_SPRINT f3 @40060
+      OUTER_SPRINT r3 @40061
+      OUTER_SPRINT f4 @40062
+      OUTER_SPRINT r4 @40063
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f1%~ replace = EVAL ~%r1%~ label = ~Regenerate~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f2%~ replace = EVAL ~%r2%~ label = ~Regenerate~ END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find = EVAL ~%f3%~ replace = EVAL ~%r3%~ label = ~Regenerate~ END
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%f4%~ replace = EVAL ~%r4%~ label = ~Regenerate~ END
+    END
+  END
+END
+
+// --- Greater Restoration (row divine.greater_restoration) -----------------------------
+// Keeps vanilla cures, casting time (3), and caster fatigue drawback, and adds cures for
+// Hold, Stun, Sleep, Petrification (opcode 43 placed before opcode 17 heal), Polymorph,
+// curses, Blindness, and Deafness.
+DEFINE_ACTION_FUNCTION cbmagic_kept_greater_restoration
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_RESTORATION~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Greater Restoration (CLERIC_RESTORATION) is not in this game; left out.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Greater Restoration (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        SET has_rest = 0
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            PATCH_IF (op = 224) OR (op = 17) BEGIN SET has_rest = 1 END
+          END
+        END
+        PATCH_IF !has_rest BEGIN
+          PATCH_WARN ~chriz-bg-magic: Greater Restoration (%spell%) left as it is: no restoration/healing effect (opcode 224/17).~
+        END ELSE BEGIN
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+            READ_SHORT (ab_off + a * 0x28 + 0x20) first
+            SET has_162 = 0
+            SET has_46 = 0
+            SET has_2 = 0
+            SET has_43 = 0
+            SET pos_43 = 0 - 1
+            SET pos_17 = 0 - 1
+            SET has_112_squirp = 0
+            SET has_321_spwi415 = 0
+            SET has_26 = 0
+            SET has_75 = 0
+            SET has_81 = 0
+            SET has_i13 = 0
+            SET has_i55 = 0
+            SET has_i14 = 0
+            SET has_i124 = 0
+            SET has_i35 = 0
+            SET has_i8 = 0
+            SET has_i112 = 0
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_SLONG (fx + 0x08) p2
+              READ_ASCII (fx + 0x14) res (8) NULL
+              PATCH_IF (op = 17) AND (pos_17 < 0) BEGIN SET pos_17 = i END
+              PATCH_IF (op = 162) BEGIN SET has_162 = 1 END
+              PATCH_IF (op = 46) BEGIN SET has_46 = 1 END
+              PATCH_IF (op = 2) BEGIN SET has_2 = 1 END
+              PATCH_IF (op = 43) BEGIN
+                SET has_43 = 1
+                PATCH_IF (pos_43 < 0) BEGIN SET pos_43 = i END
+              END
+              PATCH_IF (op = 112) AND (~%res%~ STRING_EQUAL_CASE ~SQUIRP~) BEGIN SET has_112_squirp = 1 END
+              PATCH_IF (op = 321) AND (~%res%~ STRING_EQUAL_CASE ~SPWI415~) BEGIN SET has_321_spwi415 = 1 END
+              PATCH_IF (op = 26) BEGIN SET has_26 = 1 END
+              PATCH_IF (op = 75) BEGIN SET has_75 = 1 END
+              PATCH_IF (op = 81) BEGIN SET has_81 = 1 END
+              PATCH_IF (op = 240) BEGIN
+                PATCH_IF (p2 = 13) BEGIN SET has_i13 = 1 END
+                PATCH_IF (p2 = 55) BEGIN SET has_i55 = 1 END
+                PATCH_IF (p2 = 14) BEGIN SET has_i14 = 1 END
+                PATCH_IF (p2 = 124) BEGIN SET has_i124 = 1 END
+                PATCH_IF (p2 = 35) BEGIN SET has_i35 = 1 END
+                PATCH_IF (p2 = 8) BEGIN SET has_i8 = 1 END
+                PATCH_IF (p2 = 112) BEGIN SET has_i112 = 1 END
+              END
+            END
+            // Cure Stone to Flesh (opcode 43) must precede Current HP bonus (opcode 17).
+            PATCH_IF has_43 AND (pos_17 >= 0) AND (pos_43 > pos_17) BEGIN
+              LPF cbmagic_delete_effect INT_VAR index = (first + pos_43) END
+              SET has_43 = 0
+              SET changed += 1
+            END
+            PATCH_IF !has_43 BEGIN
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x28 + 0x20) first
+              SET ins_43 = 999
+              FOR (i = 0; i < n; ++i) BEGIN
+                READ_SHORT (fx_off + (first + i) * 0x30) op
+                PATCH_IF (op = 17) AND (ins_43 = 999) BEGIN SET ins_43 = i END
+              END
+              LPF cbmagic_insert_effect INT_VAR ability = a position = ins_43 opcode = 43 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_162 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 162 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_46 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 46 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_2 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 2 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_112_squirp BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 112 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = ~SQUIRP~ END
+              SET changed += 1
+            END
+            PATCH_IF !has_321_spwi415 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 321 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 STR_VAR resource = ~SPWI415~ END
+              SET changed += 1
+            END
+            PATCH_IF !has_26 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 26 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_75 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 75 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_81 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 81 target = 2 power = 7
+                timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i13 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 13 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i55 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 55 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i14 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 14 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i124 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 124 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i35 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 35 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i8 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 8 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+            PATCH_IF !has_i112 BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                parameter2 = 112 timing = 1 resist_dispel = 2 duration = 0 END
+              SET changed += 1
+            END
+          END
+          PATCH_IF (changed > 0) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Greater Restoration (%spell%): added cures for Hold, Stun, Sleep, Petrification, Polymorph, curses, Blindness, and Deafness.~
+          END ELSE BEGIN
+            PATCH_PRINT ~chriz-bg-magic: Greater Restoration (%spell%): additional condition cures present already.~
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_warn_text_language STR_VAR label = ~Greater Restoration~ END
+      OUTER_SPRINT cbm_find @40072
+      OUTER_SPRINT cbm_replace @40073
+      LAF cbmagic_update_texts STR_VAR spell find = EVAL ~%cbm_find%~ replace = EVAL ~%cbm_replace%~ label = ~Greater Restoration~ END
+    END
+  END
+END

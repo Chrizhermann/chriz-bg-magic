@@ -41,6 +41,27 @@
 - Faster casting times on Bless, Flame Strike, Heal, Blade Barrier, Bolt of Glory, Magic
   Resistance, Righteous Magic, True Seeing, True Sight, Glyph of Warding, Invisibility
   Purge, Strength and Fire Seeds.
+- Arcane kept/decided changes: Invisibility (8 hours), Luck (15 rounds, self-refreshing),
+  Clairvoyance (indoor/outdoor backstab immunity for 3-10 rounds), Invisibility Sphere
+  (renamed from Invisibility, 10' Radius, casting time 1, 1 turn, ally-only radius 110 via
+  `ADD_PROJECTILE`), Confusion (4/5/6 rounds at levels 1/15/20), Universal school for
+  Minor Sequencer, Contingency, Spell Sequencer, Spell Trigger and Chain Contingency,
+  Teleport Field (range 30 ft., Save vs. Spell at -4), Oracle (dispels illusions up to level
+  9 in a 30-ft radius-450 enemy-only area via `ADD_PROJECTILE`), and Sphere of Chaos
+  (5-outcome 1-round table with Save vs. Spell at -4).
+- Divine kept/decided changes: Bless (casting time 5, 30s + 1 round/level across levels
+  1-20), Shillelagh (druid-only), Doom (casting time 1, -2 damage, Save vs. Spell scaling 0
+  to -4), Faerie Fire (new level-1 druid spell via `ADD_SPELL`), Aid (hit-point-only bonus
+  `1d8 + min(L,10)`, 1 turn/level, self-refreshing, own portrait icon via `STATDESC.2DA`),
+  Silence 15' Radius (enemies only), Free Action (usable by druids, 1 turn/level, Stun
+  protection, allows Haste), Neutralize Poison (cures poison + 1 turn/level poison
+  immunity), Divine Power (Holy Power renamed Divine Power, casting time 4, fighter APR for
+  non-fighter clerics), Negative Plane Protection (1 turn/level for both clerics and
+  druids), Iron Skins (renamed Stoneskin, casting time 1), Mass Regenerate (new level-5
+  druid spell via `ADD_SPELL`, sight-range party-only projectile via `ADD_PROJECTILE`),
+  Regenerate (druid-only, 2 HP/s for 1 round/level, self-refreshing), and Greater
+  Restoration (adds cures for Hold, Stun, Sleep, Petrification, Polymorph, curses,
+  Blindness, and Deafness).
 - Descriptions that named the old behaviour are updated (English).
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the
