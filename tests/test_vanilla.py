@@ -805,7 +805,6 @@ def _vanilla_biff(**replace):
     }
 
     ct_fixtures = [
-        ("SPPR101", 2, 1, 9, BLESS_DESC, [dict(opcode=132, target=2)]),
         ("SPPR503", 2, 5, 8, FSTRIKE_DESC, [fx.damage(fx.FIRE, 8)]),
         ("SPPR607", 2, 6, 9, HEAL_DESC, [dict(opcode=17, target=2)]),
         ("SPPR603", 2, 6, 9, BBARRIER_DESC, [dict(opcode=177, target=1)]),
@@ -992,7 +991,6 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
 
     # 21-33. Casting times and descriptions (including Invisibility Purge=3 and Fire Seeds=6)
     expected_cts = [
-        ("SPPR101", 5),
         ("SPPR503", 5),
         ("SPPR607", 6),
         ("SPPR603", 6),
@@ -1188,8 +1186,8 @@ def vanilla_batch_alternate_layouts_and_preservation(work, weidu):
         ),
         # 3. FBLADE.ITM already upgraded by another mod to +2 enchantment
         "FBLADE.ITM": _make_fblade_itm(flags=0x28, enchantment=2),
-        # 4. Bless (SPPR101) already lowered to casting time 3 by another mod (should stay 3, not raised to 5)
-        "SPPR101.SPL": _spl_with_hdr(
+        # 4. Heal (SPPR607) already lowered to casting time 3 by another mod (should stay 3, not raised to 6)
+        "SPPR607.SPL": _spl_with_hdr(
             spell_type=2,
             level=1,
             desc=BLESS_DESC,
@@ -1218,8 +1216,8 @@ def vanilla_batch_alternate_layouts_and_preservation(work, weidu):
     check((struct.unpack_from("<I", fb_raw, 0x18)[0] & 0x40) == 0x40, "FBLADE magical flag")
     check(struct.unpack_from("<I", fb_raw, 0x60)[0] == 2, "FBLADE enchantment 2 preserved")
 
-    # Verify Bless kept faster casting time 3 (and was not copied to override)
-    check(g.file("override/SPPR101.SPL") is None, "SPPR101 with faster ct=3 should not be overwritten")
+    # Verify Heal kept faster casting time 3 (and was not copied to override)
+    check(g.file("override/SPPR607.SPL") is None, "SPPR607 with faster ct=3 should not be overwritten")
 
 
 @test

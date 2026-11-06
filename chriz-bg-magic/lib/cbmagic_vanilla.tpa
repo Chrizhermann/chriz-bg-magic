@@ -883,12 +883,6 @@ END
 
 // --- Decided changes: Group D (per-spell casting times from rules.md) ------------------
 
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_bless_ct
-BEGIN
-  LAF cbmagic_apply_casting_time INT_VAR target_ct = 5 old_tra = 20020 new_tra = 20023
-    STR_VAR symbol = ~CLERIC_BLESS~ label = ~Bless~ END
-END
-
 DEFINE_ACTION_FUNCTION cbmagic_vanilla_flame_strike_ct
 BEGIN
   LAF cbmagic_apply_casting_time INT_VAR target_ct = 5 old_tra = 20021 new_tra = 20023
@@ -1840,32 +1834,3 @@ BEGIN
 END
 
 // Row L (Universal school for sequencers and contingencies):
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_minor_sequencer_universal
-BEGIN
-  LAF cbmagic_apply_universal_school INT_VAR old_tra = 20030
-    STR_VAR symbol = ~WIZARD_MINOR_SEQUENCER~ label = ~Minor Sequencer~ END
-END
-
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_contingency_universal
-BEGIN
-  LAF cbmagic_apply_universal_school INT_VAR old_tra = 20004
-    STR_VAR symbol = ~WIZARD_CONTINGENCY~ label = ~Contingency~ END
-END
-
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_spell_sequencer_universal
-BEGIN
-  LAF cbmagic_apply_universal_school INT_VAR old_tra = 20030
-    STR_VAR symbol = ~WIZARD_SPELL_SEQUENCER~ label = ~Spell Sequencer~ END
-END
-
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_spell_trigger_universal
-BEGIN
-  LAF cbmagic_apply_universal_school INT_VAR old_tra = 20030
-    STR_VAR symbol = ~WIZARD_SPELL_TRIGGER~ label = ~Spell Trigger~ END
-END
-
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_chain_contingency_universal
-BEGIN
-  LAF cbmagic_apply_universal_school INT_VAR old_tra = 20004
-    STR_VAR symbol = ~WIZARD_CHAIN_CONTINGENCY~ label = ~Chain Contingency~ END
-END

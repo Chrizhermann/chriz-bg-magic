@@ -50,7 +50,6 @@ LAF cbmagic_vanilla_animal_summoning_1_druid END
 LAF cbmagic_vanilla_animal_summoning_2_druid END
 LAF cbmagic_vanilla_animal_summoning_3_druid END
 LAF cbmagic_vanilla_conjure_animals_druid END
-LAF cbmagic_vanilla_bless_ct END
 LAF cbmagic_vanilla_flame_strike_ct END
 LAF cbmagic_vanilla_heal_ct END
 LAF cbmagic_vanilla_blade_barrier_ct END
@@ -75,11 +74,6 @@ LAF cbmagic_vanilla_aoe_bypass_mirror_image END
 LAF cbmagic_vanilla_dispel_magic_items END
 LAF cbmagic_vanilla_magic_resistance END
 LAF cbmagic_vanilla_strength_of_one END
-LAF cbmagic_vanilla_minor_sequencer_universal END
-LAF cbmagic_vanilla_contingency_universal END
-LAF cbmagic_vanilla_spell_sequencer_universal END
-LAF cbmagic_vanilla_spell_trigger_universal END
-LAF cbmagic_vanilla_chain_contingency_universal END
 LAF cbmagic_kept_invisibility END
 LAF cbmagic_kept_luck END
 LAF cbmagic_kept_clairvoyance END
