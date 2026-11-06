@@ -1,6 +1,13 @@
 {
  "about": "English specs and build status of the more-batch decisions (cbmagic_more.tpa), by decision-page row. Same format as docs/build-specs.json.",
  "rows": {
+  "arcane.haste_slow": {
+   "resrefs": ["SPWI305", "SPWI312", "SPWI613", "SCRL7Q"],
+   "parts": [
+    {"spec": "Haste and Slow cancel each other across spells and items as in SCS (haste_cancels_slow.tpa): Haste on a slowed target displays 'Slow cancelled by Haste', removes the Slow (sectype cbm_Slow), and does not start Haste or its fatigue; Slow on a hasted target displays 'Haste cancelled by Slow', removes the Haste (sectype cbm_Haste), and does not start Slow. Haste stays vanilla in every other way (bonus, duration, fatigue).", "status": "done"},
+    {"spec": "Improved Haste (SPWI613 and scroll SCRL7Q) becomes the party buff of Spell Revisions, built cleanly without opcode 16 so there is no second speed clock: keeps all 9 ability headers (min_level 1, 13..20), Area target (4), range 30, casting time 6, party-friendly 15-ft radius projectile 158 (INAREAPA), duration 1 turn (60s), dispellable (sectype 13 NON-COMBAT, resist_dispel 3), granting +6 movement rate (opcode 176), +1 APR (opcode 1), +2 THAC0 (opcode 54), +2 AC (opcode 0), +2 Saving Throws vs. Breath (opcode 36), curing any active Slow (opcode 221 cbm_Slow + opcode 240 icon 41), granting immunity to Slow for 60s (opcode 101 p2=40, opcode 169 p2=41, opcode 267 strings, opcode 206 against Slow spells, and HASTE_IMMUNITY splstate blocking extracted Slow subspells), and preventing stacking with Haste and itself.", "status": "done"}
+   ]
+  },
   "arcane.level1.nahals_reckless_dweomer": {
    "resrefs": ["SPWI124"],
    "parts": [

@@ -807,3 +807,1025 @@ BEGIN
     BUT_ONLY
   END
 END
+
+// ======================================================================================
+// Row arcane.haste_slow: Improved Haste (SPWI613) and Haste / Slow mutual cancellation
+// ======================================================================================
+
+// Ensures MSECTYPE.2DA has cbm_Haste and cbm_Slow (strref -1), SPLSTATE.IDS has
+// HASTE_IMMUNITY, and SPLPROT.2DA has the SPLSTATE (0x112 -1 1) and STATE (0x111 -1 8)
+// rows. Safe to call from both cbmagic_more_improved_haste and cbmagic_more_haste_cancels_slow.
+DEFINE_ACTION_FUNCTION cbmagic_ensure_haste_slow_ids
+  RET haste_sectype slow_sectype haste_splstate splstate_row state_row
+BEGIN
+  OUTER_SET haste_sectype = 0 - 1
+  OUTER_SET slow_sectype = 0 - 1
+  ACTION_IF (FILE_EXISTS_IN_GAME ~msectype.2da~) BEGIN
+    COPY_EXISTING - ~msectype.2da~ ~override~
+      COUNT_2DA_ROWS 2 rcnt
+      FOR (r = 0; r < rcnt; ++r) BEGIN
+        READ_2DA_ENTRY r 0 2 rname
+        PATCH_IF (~%rname%~ STRING_EQUAL_CASE ~cbm_Haste~) BEGIN
+          SET haste_sectype = r
+        END
+        PATCH_IF (~%rname%~ STRING_EQUAL_CASE ~cbm_Slow~) BEGIN
+          SET slow_sectype = r
+        END
+      END
+    ACTION_IF (haste_sectype < 0) BEGIN
+      OUTER_SET haste_sectype = rcnt
+      OUTER_SET rcnt += 1
+      APPEND ~msectype.2da~ ~cbm_Haste -1~
+    END
+    ACTION_IF (slow_sectype < 0) BEGIN
+      OUTER_SET slow_sectype = rcnt
+      OUTER_SET rcnt += 1
+      APPEND ~msectype.2da~ ~cbm_Slow -1~
+    END
+  END ELSE BEGIN
+    OUTER_SET haste_sectype = 14
+    OUTER_SET slow_sectype = 15
+  END
+
+  OUTER_SET haste_splstate = 0 - 1
+  ACTION_IF (FILE_EXISTS_IN_GAME ~splstate.ids~) BEGIN
+    OUTER_SET haste_splstate = IDS_OF_SYMBOL (~splstate~ ~HASTE_IMMUNITY~)
+    ACTION_IF (haste_splstate < 0) BEGIN
+      COPY_EXISTING - ~splstate.ids~ ~override~
+        COUNT_2DA_ROWS 2 scnt
+        FOR (s = 0; s < scnt; ++s) BEGIN
+          READ_2DA_ENTRY s 0 2 sid
+          PATCH_IF (IS_AN_INT sid) BEGIN
+            SET $cbm_used_splstate(~%sid%~) = 1
+          END
+        END
+        FOR (cand = 1; (cand <= 255) AND (haste_splstate < 0); ++cand) BEGIN
+          PATCH_IF !(VARIABLE_IS_SET $cbm_used_splstate(~%cand%~)) BEGIN
+            SET haste_splstate = cand
+          END
+        END
+      ACTION_IF (haste_splstate < 0) BEGIN
+        OUTER_SET haste_splstate = 250
+      END
+      APPEND ~splstate.ids~ ~%haste_splstate% HASTE_IMMUNITY~
+      CLEAR_IDS_MAP
+    END
+  END ELSE BEGIN
+    OUTER_SET haste_splstate = 122
+  END
+
+  OUTER_SET splstate_row = 110
+  OUTER_SET state_row = 138
+END
+
+// Inserts an effect into ability `ability` at `position` on either an SPL V1 (`is_itm = 0`,
+// stride 0x28) or an ITM V1 (`is_itm = 1`, stride 0x38) buffer.
+DEFINE_PATCH_FUNCTION cbmagic_insert_ab_fx
+  INT_VAR is_itm = 0 ability = 0 position = 0 opcode = 0 target = 2 power = 0
+          parameter1 = 0 parameter2 = 0 timing = 0 resist_dispel = 0 duration = 0
+          probability1 = 100 probability2 = 0 dicenumber = 0 dicesize = 0
+          savingthrow = 0 savebonus = 0 special = 0
+  STR_VAR resource = ~~
+BEGIN
+  SET ab_size = is_itm ? 0x38 : 0x28
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  READ_SHORT 0x6e cast_first
+  READ_SHORT 0x70 cast_cnt
+  SET ab = ab_off + ability * ab_size
+  READ_SHORT (ab + 0x1e) n
+  READ_SHORT (ab + 0x20) first
+  SET at = first + ((position > n) ? n : position)
+  SET where = fx_off + at * 0x30
+  INSERT_BYTES where 0x30
+  WRITE_SHORT where opcode
+  WRITE_BYTE (where + 0x02) target
+  WRITE_BYTE (where + 0x03) power
+  WRITE_LONG (where + 0x04) parameter1
+  WRITE_LONG (where + 0x08) parameter2
+  WRITE_BYTE (where + 0x0c) timing
+  WRITE_BYTE (where + 0x0d) resist_dispel
+  WRITE_LONG (where + 0x0e) duration
+  WRITE_BYTE (where + 0x12) probability1
+  WRITE_BYTE (where + 0x13) probability2
+  WRITE_ASCIIE (where + 0x14) ~%resource%~ #8
+  WRITE_LONG (where + 0x1c) dicenumber
+  WRITE_LONG (where + 0x20) dicesize
+  WRITE_LONG (where + 0x24) savingthrow
+  WRITE_LONG (where + 0x28) savebonus
+  WRITE_LONG (where + 0x2c) special
+  PATCH_IF (ab_off >= where) BEGIN
+    SET ab_off += 0x30
+    WRITE_LONG 0x64 ab_off
+    SET ab += 0x30
+  END
+  WRITE_SHORT (ab + 0x1e) (n + 1)
+  FOR (b = 0; b < ab_cnt; ++b) BEGIN
+    PATCH_IF (b != ability) BEGIN
+      READ_SHORT (ab_off + b * ab_size + 0x20) f2
+      PATCH_IF (f2 >= at) BEGIN
+        WRITE_SHORT (ab_off + b * ab_size + 0x20) (f2 + 1)
+      END
+    END
+  END
+  PATCH_IF (cast_first >= at) AND ((cast_cnt > 0) OR (cast_first > at)) BEGIN
+    WRITE_SHORT 0x6e (cast_first + 1)
+  END
+END
+
+// Deletes the effect at global index `index` on either an SPL V1 (`is_itm = 0`) or ITM V1 (`is_itm = 1`).
+DEFINE_PATCH_FUNCTION cbmagic_delete_ab_fx
+  INT_VAR is_itm = 0 index = 0
+BEGIN
+  SET ab_size = is_itm ? 0x38 : 0x28
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_cnt
+  READ_LONG 0x6a fx_off
+  READ_SHORT 0x6e cast_first
+  READ_SHORT 0x70 cast_cnt
+  SET where = fx_off + index * 0x30
+  DELETE_BYTES where 0x30
+  PATCH_IF (ab_off > where) BEGIN
+    SET ab_off -= 0x30
+    WRITE_LONG 0x64 ab_off
+  END
+  FOR (b = 0; b < ab_cnt; ++b) BEGIN
+    READ_SHORT (ab_off + b * ab_size + 0x1e) n
+    READ_SHORT (ab_off + b * ab_size + 0x20) first
+    PATCH_IF (index >= first) AND (index < first + n) BEGIN
+      WRITE_SHORT (ab_off + b * ab_size + 0x1e) (n - 1)
+    END ELSE PATCH_IF (first > index) BEGIN
+      WRITE_SHORT (ab_off + b * ab_size + 0x20) (first - 1)
+    END
+  END
+  PATCH_IF (index >= cast_first) AND (index < cast_first + cast_cnt) BEGIN
+    WRITE_SHORT 0x70 (cast_cnt - 1)
+  END ELSE PATCH_IF (cast_first > index) BEGIN
+    WRITE_SHORT 0x6e (cast_first - 1)
+  END
+END
+
+// --- Improved Haste (row arcane.haste_slow) -------------------------------------------
+// Wizard level 6 (SPWI613, WIZARD_IMPROVED_HASTE) becomes the party buff of Spell
+// Revisions, built cleanly without opcode 16 so there is no second speed clock:
+// - Keeps all existing ability headers (9 abilities: min_level 1, 13..20)
+// - Area target (4), range 30, casting time 6, party-friendly 15-ft radius projectile 158 (INAREAPA)
+// - Duration 1 turn (60s), dispellable (resist_dispel = 3, header sectype = 13 NON-COMBAT):
+//   +6 movement rate (opcode 176), +1 APR (opcode 1), +2 THAC0 (opcode 54), +2 AC (opcode 0),
+//   +2 save vs. Breath (opcode 36), portrait icon 110 ('Improved Haste'), string 14023 ('Hasted'),
+//   Alteration visual (opcode 141 p2=4), RGB fade (opcode 61), sounds EFF_M28 / EFF_M29.
+// - Works when slowed and ends a running Slow (opcode 221 p2=cbm_Slow, opcode 240 p2=41).
+// - Grants immunity to Slow for 60s (opcode 101 p2=40, opcode 169 p2=41, opcode 267 for
+//   14668/14000/335, opcode 206 against SPWI312/SPIN977/SPIN983/SPWM164/SPWISH25/SPIN575,
+//   and HASTE_IMMUNITY splstate so extracted Slow subspells are blocked).
+// - Ends any running normal Haste (opcode 221 p2=cbm_Haste, opcode 240 p2=38) and prevents
+//   Haste / Improved Haste stacking for 60s (HASTE_IMMUNITY splstate + opcode 206 against
+//   SPWI305, SPRA301, SPIN828, SPIN572, SPCL521, SPWISH36, SPWISH37, SPWISH40, SPWI613).
+DEFINE_ACTION_FUNCTION cbmagic_more_improved_haste
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_IMPROVED_HASTE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Improved Haste (WIZARD_IMPROVED_HASTE) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_warn_text_language STR_VAR label = ~Improved Haste~ END
+    LAF cbmagic_ensure_haste_slow_ids RET haste_sectype slow_sectype haste_splstate splstate_row state_row END
+    OUTER_SET ih_name_ref = RESOLVE_STR_REF (@50009)
+    OUTER_SET ih_desc_ref = RESOLVE_STR_REF (@50010)
+    OUTER_SET changed = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Improved Haste (%spell%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        PATCH_IF (ab_cnt < 1) BEGIN
+          PATCH_WARN ~chriz-bg-magic: Improved Haste (%spell%) left as it is: it has no abilities.~
+        END ELSE BEGIN
+          WRITE_LONG 0x08 ih_name_ref
+          WRITE_LONG 0x50 ih_desc_ref
+          WRITE_SHORT 0x1c 1
+          WRITE_BYTE 0x25 8
+          WRITE_BYTE 0x27 13
+          WRITE_LONG 0x34 6
+          FOR (a = 0; a < ab_cnt; ++a) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            SET ao = ab_off + a * 0x28
+            WRITE_BYTE ao 1
+            WRITE_SHORT (ao + 0x02) 2
+            WRITE_BYTE (ao + 0x0c) 4
+            WRITE_SHORT (ao + 0x0e) 30
+            WRITE_SHORT (ao + 0x12) 6
+            WRITE_SHORT (ao + 0x26) 158
+            READ_SHORT (ao + 0x1e) cur_na
+            READ_SHORT (ao + 0x20) cur_fa
+            FOR (k = cur_na - 1; k >= 0; --k) BEGIN
+              LPF cbmagic_delete_effect INT_VAR index = (cur_fa + k) END
+            END
+            SET pos = 0
+            // 1. Cure any running Slow (cbm_Slow sectype + Slow icon 41) and normal Haste (cbm_Haste + icon 38).
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 221 target = 2 power = 6 parameter1 = 10 parameter2 = slow_sectype
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 240 target = 2 power = 6 parameter1 = 0 parameter2 = 41
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 221 target = 2 power = 6 parameter1 = 10 parameter2 = haste_sectype
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 240 target = 2 power = 6 parameter1 = 0 parameter2 = 38
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            // 2. Core party buff bonuses for 60s (1 turn), without opcode 16.
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 176 target = 2 power = 6 parameter1 = 6 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 1 target = 2 power = 6 parameter1 = 1 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 54 target = 2 power = 6 parameter1 = 2 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 0 target = 2 power = 6 parameter1 = 2 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 36 target = 2 power = 6 parameter1 = 2 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            // 3. Immunity to Slow for 60s and HASTE_IMMUNITY spellstate.
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 101 target = 2 power = 6 parameter1 = 0 parameter2 = 40
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 169 target = 2 power = 6 parameter1 = 0 parameter2 = 41
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 267 target = 2 power = 6 parameter1 = 14668 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 267 target = 2 power = 6 parameter1 = 14000 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 267 target = 2 power = 6 parameter1 = 335 parameter2 = 0
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 328 target = 2 power = 6 parameter1 = 0 parameter2 = haste_splstate
+              timing = 0 resist_dispel = 3 duration = 60 special = 1 END
+            SET pos += 1
+            // 4. Visuals, string, portrait icon 110, and sounds.
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 141 target = 2 power = 6 parameter1 = 0 parameter2 = 4
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 61 target = 2 power = 6 parameter1 = 2017213440 parameter2 = 1638400
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 139 target = 2 power = 6 parameter1 = 14023 parameter2 = 0
+              timing = 1 resist_dispel = 3 duration = 0 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 142 target = 2 power = 6 parameter1 = 0 parameter2 = 110
+              timing = 0 resist_dispel = 3 duration = 60 END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 174 target = 2 power = 6 parameter1 = 0 parameter2 = 0
+              timing = 1 resist_dispel = 3 duration = 0 STR_VAR resource = ~EFF_M28~ END
+            SET pos += 1
+            LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+              opcode = 174 target = 2 power = 6 parameter1 = 0 parameter2 = 0
+              timing = 4 resist_dispel = 3 duration = 60 STR_VAR resource = ~EFF_M29~ END
+            SET pos += 1
+            // 5. Spell-level immunities (Slow spells, Haste spells, and self-stacking SPWI613 last).
+            PATCH_FOR_EACH blk_res IN
+              ~SPWI312~ ~SPIN977~ ~SPIN983~ ~SPWM164~ ~SPWISH25~ ~SPIN575~
+              ~SPWI305~ ~SPRA301~ ~SPIN828~ ~SPIN572~ ~SPCL521~ ~SPWISH36~ ~SPWISH37~ ~SPWISH40~
+              ~%spell%~
+            BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = pos
+                opcode = 206 target = 2 power = 6 parameter1 = (0 - 1) parameter2 = 0
+                timing = 0 resist_dispel = 3 duration = 60 STR_VAR resource = EVAL ~%blk_res%~ END
+              SET pos += 1
+            END
+          END
+          SET changed = 1
+        END
+      END
+    BUT_ONLY
+
+    ACTION_IF changed BEGIN
+      LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+      OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE sc ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        COPY_EXISTING ~%sc%.itm~ ~override~
+          PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+            WRITE_LONG 0x0c ih_name_ref
+            WRITE_LONG 0x54 ih_desc_ref
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              SET ao = ab_off + a * 0x38
+              PATCH_IF (ao + 0x38 <= BUFFER_LENGTH) BEGIN
+                READ_SHORT (ao + 0x1e) na
+                READ_SHORT (ao + 0x20) fa
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  PATCH_IF (fx + 0x30 <= BUFFER_LENGTH) BEGIN
+                    READ_SHORT fx op
+                    READ_ASCII (fx + 0x14) res (8) NULL
+                    PATCH_IF (op = 146) AND (~%res%~ STRING_EQUAL_CASE ~%spell%~) BEGIN
+                      WRITE_BYTE (ao + 0x0c) 4
+                      WRITE_SHORT (ao + 0x0e) 30
+                      WRITE_SHORT fx 148
+                      WRITE_BYTE (fx + 0x02) 1
+                    END
+                  END
+                END
+              END
+            END
+          END
+        BUT_ONLY
+      END
+      PRINT ~chriz-bg-magic: Improved Haste (%spell%): party buff (proj 158, 60s, +6 move, +1 APR, +2 THAC0/AC/Breath, Slow cure & immunity, no opcode 16).~
+    END
+  END
+END
+
+// Finds an unused 1..8-character SPL resref for a Haste/Slow subspell extracted from `parent`.
+DEFINE_ACTION_FUNCTION cbmagic_find_subspell_name
+  STR_VAR parent = ~~
+  RET subspell
+BEGIN
+  OUTER_SPRINT subspell ~~
+  OUTER_SPRINT up_parent ~%parent%~
+  ACTION_TO_UPPER up_parent
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~%up_parent%.spl~) BEGIN
+    OUTER_SPRINT subspell ~%up_parent%~
+  END ELSE BEGIN
+    OUTER_SET len = STRING_LENGTH ~%up_parent%~
+    OUTER_SPRINT base ~%up_parent%~
+    ACTION_IF (len >= 8) BEGIN
+      OUTER_PATCH_SAVE base ~%up_parent%~ BEGIN
+        DELETE_BYTES 7 (len - 7)
+      END
+    END
+    ACTION_FOR_EACH ch IN A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 BEGIN
+      ACTION_IF (~%subspell%~ STRING_EQUAL ~~) AND !(FILE_EXISTS_IN_GAME ~%base%%ch%.spl~) BEGIN
+        OUTER_SPRINT subspell ~%base%%ch%~
+      END
+    END
+    ACTION_IF (~%subspell%~ STRING_EQUAL ~~) BEGIN
+      OUTER_FOR (n = 1; (n <= 9999) AND (~%subspell%~ STRING_EQUAL ~~); ++n) BEGIN
+        ACTION_IF (n < 10) BEGIN
+          OUTER_SPRINT cand ~CBHS000%n%~
+        END ELSE ACTION_IF (n < 100) BEGIN
+          OUTER_SPRINT cand ~CBHS00%n%~
+        END ELSE ACTION_IF (n < 1000) BEGIN
+          OUTER_SPRINT cand ~CBHS0%n%~
+        END ELSE BEGIN
+          OUTER_SPRINT cand ~CBHS%n%~
+        END
+        ACTION_IF !(FILE_EXISTS_IN_GAME ~%cand%.spl~) BEGIN
+          OUTER_SPRINT subspell ~%cand%~
+        END
+      END
+    END
+  END
+END
+
+// Returns is_match = 1 when the effect at `fx_off` belongs to the Haste (`primary_op = 16`)
+// or Slow (`primary_op = 40`) payload being extracted into a subspell.
+DEFINE_PATCH_FUNCTION cbmagic_is_haste_slow_effect
+  INT_VAR primary_op = 16 fx_off = 0 op_prob1 = 100 op_prob2 = 0
+  STR_VAR parent_res = ~~ eff_res = ~~
+  RET is_match
+BEGIN
+  SET is_match = 0
+  READ_SHORT fx_off op
+  READ_SLONG (fx_off + 0x04) p1
+  READ_LONG (fx_off + 0x08) p2
+  READ_BYTE (fx_off + 0x0c) tim
+  READ_LONG (fx_off + 0x0e) dur
+  READ_BYTE (fx_off + 0x12) pr1
+  READ_BYTE (fx_off + 0x13) pr2
+  READ_ASCII (fx_off + 0x14) res (8) NULL
+  PATCH_IF (pr1 = op_prob1) AND (pr2 = op_prob2) BEGIN
+    PATCH_IF (op = primary_op) AND (~%eff_res%~ STRING_EQUAL ~~) BEGIN
+      SET is_match = 1
+    END ELSE PATCH_IF (op = 177) AND !(~%eff_res%~ STRING_EQUAL ~~) AND (~%res%~ STRING_EQUAL_CASE ~%eff_res%~) BEGIN
+      SET is_match = 1
+    END ELSE PATCH_IF ((op = 206) OR (op = 318) OR (op = 324)) AND (~%res%~ STRING_EQUAL_CASE ~%parent_res%~) AND (tim != 1) AND (dur > 1) BEGIN
+      SET is_match = 1
+    END ELSE PATCH_IF (primary_op = 16) BEGIN
+      PATCH_IF (op = 93) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 142) AND ((p2 = 38) OR (p2 = 110)) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 139) AND ((p1 = 14023) OR (p1 = 14667)) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 141) AND (p2 = 4) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 61) AND (p1 = 2017213440) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 174) AND ((~%res%~ STRING_EQUAL_CASE ~EFF_M28~) OR (~%res%~ STRING_EQUAL_CASE ~EFF_M29~) OR (~%res%~ STRING_EQUAL_CASE ~EFF_M72D~)) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 206) AND (dur > 1) AND ((~%res%~ STRING_EQUAL_CASE ~SPWI305~) OR (~%res%~ STRING_EQUAL_CASE ~SPRA301~) OR (~%res%~ STRING_EQUAL_CASE ~SPCL521~)) BEGIN
+        SET is_match = 1
+      END
+    END ELSE PATCH_IF (primary_op = 40) BEGIN
+      PATCH_IF ((op = 0) OR (op = 54)) AND (p1 < 0) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 240) AND (p2 = 38) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 142) AND (p2 = 41) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 139) AND ((p1 = 14668) OR (p1 = 14000) OR (p1 = 335)) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 141) AND (p2 = 6) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 61) AND (p1 = 2017213440) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 215) AND ((~%res%~ STRING_EQUAL_CASE ~ICMAGICH~) OR (~%res%~ STRING_EQUAL_CASE ~SPCLOUD1~) OR (~%res%~ STRING_EQUAL_CASE ~WEBENTD~)) BEGIN
+        SET is_match = 1
+      END ELSE PATCH_IF (op = 174) AND ((~%res%~ STRING_EQUAL_CASE ~EFF_M28~) OR (~%res%~ STRING_EQUAL_CASE ~EFF_M29~)) BEGIN
+        SET is_match = 1
+      END
+    END
+  END
+END
+
+// Extracts the Haste (`primary_op = 16`) or Slow (`primary_op = 40`) payload from
+// `%resref%.%ext%` (either all abilities of an SPL when `header < 0`, or ability `header`
+// of an ITM when `is_itm = 1`) into a new subspell `%subspell%.spl` and wires the mutual
+// cancellation and immunity checks as SCS `haste_cancels_slow.tpa` does.
+DEFINE_ACTION_FUNCTION cbmagic_extract_haste_or_slow
+  INT_VAR primary_op = 16 header = (0 - 1) is_itm = 0
+          haste_sectype = 0 slow_sectype = 0 haste_splstate = 0
+          splstate_row = 110 state_row = 138
+  STR_VAR resref = ~~ ext = ~spl~ eff_res = ~~
+  RET subspell
+BEGIN
+  LAF cbmagic_find_subspell_name STR_VAR parent = EVAL ~%resref%~ RET subspell END
+  OUTER_SET sub_sectype = (primary_op = 16) ? haste_sectype : slow_sectype
+
+  // 1. Create %subspell%.spl from the parent SPL or ITM ability.
+  ACTION_IF !is_itm BEGIN
+    COPY_EXISTING ~%resref%.%ext%~ ~override/%subspell%.spl~
+      WRITE_LONG 0x08 (0 - 1)
+      WRITE_LONG 0x50 (0 - 1)
+      WRITE_BYTE 0x27 sub_sectype
+      READ_SHORT 0x70 cast_cnt
+      WHILE (cast_cnt > 0) BEGIN
+        READ_SHORT 0x6e cast_first
+        LPF cbmagic_delete_effect INT_VAR index = cast_first END
+        READ_SHORT 0x70 cast_cnt
+      END
+  END ELSE BEGIN
+    OUTER_SPRINT ab_fx_data ~~
+    OUTER_SET ab_fx_cnt = 0
+    COPY_EXISTING - ~%resref%.%ext%~ ~override~
+      READ_LONG 0x64 ab_off
+      READ_LONG 0x6a fx_off
+      SET ao = ab_off + header * 0x38
+      READ_SHORT (ao + 0x1e) ab_fx_cnt
+      READ_SHORT (ao + 0x20) ab_fx_first
+      READ_ASCII (fx_off + ab_fx_first * 0x30) ab_fx_data (ab_fx_cnt * 0x30)
+    COPY ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~override/%subspell%.spl~
+      DELETE_BYTES 0 BUFFER_LENGTH
+      INSERT_BYTES 0 (0x72 + 0x28 + ab_fx_cnt * 0x30)
+      WRITE_ASCII 0 ~SPL V1  ~ (8)
+      WRITE_LONG 0x08 (0 - 1)
+      WRITE_LONG 0x0c (0 - 1)
+      WRITE_SHORT 0x1c 1
+      WRITE_BYTE 0x25 0
+      WRITE_BYTE 0x27 sub_sectype
+      WRITE_LONG 0x34 0
+      WRITE_LONG 0x50 (0 - 1)
+      WRITE_LONG 0x54 (0 - 1)
+      WRITE_LONG 0x64 0x72
+      WRITE_SHORT 0x68 1
+      WRITE_LONG 0x6a (0x72 + 0x28)
+      WRITE_SHORT 0x6e 0
+      WRITE_SHORT 0x70 0
+      WRITE_BYTE 0x72 1
+      WRITE_SHORT (0x72 + 0x02) 2
+      WRITE_BYTE (0x72 + 0x0c) 1
+      WRITE_SHORT (0x72 + 0x0e) 30
+      WRITE_SHORT (0x72 + 0x10) 1
+      WRITE_SHORT (0x72 + 0x12) 0
+      WRITE_SHORT (0x72 + 0x14) 1
+      WRITE_SHORT (0x72 + 0x1e) ab_fx_cnt
+      WRITE_SHORT (0x72 + 0x20) 0
+      WRITE_SHORT (0x72 + 0x22) 1
+      WRITE_SHORT (0x72 + 0x24) 1
+      WRITE_SHORT (0x72 + 0x26) 1
+      WRITE_ASCIIE (0x72 + 0x28) ~%ab_fx_data%~ (ab_fx_cnt * 0x30)
+  END
+
+  // 2. Filter %subspell%.spl so each ability keeps only the extracted Haste/Slow effects
+  // and prepends the mutual-cancellation / immunity gates.
+  COPY_EXISTING ~%subspell%.spl~ ~override~
+    READ_LONG 0x64 ab_off
+    READ_SHORT 0x68 ab_cnt
+    READ_LONG 0x6a fx_off
+    FOR (a = 0; a < ab_cnt; ++a) BEGIN
+      READ_LONG 0x64 ab_off
+      READ_LONG 0x6a fx_off
+      SET ao = ab_off + a * 0x28
+      WRITE_BYTE (ao + 0x0c) 1
+      WRITE_SHORT (ao + 0x26) 1
+      READ_SHORT (ao + 0x10) ml
+      READ_SHORT (ao + 0x1e) na
+      READ_SHORT (ao + 0x20) fa
+      SET has_primary = 0
+      SET op_prob1 = 100
+      SET op_prob2 = 0
+      SET op_pwr = 0
+      SET op_p2 = 0
+      SET op_dur = 0
+      SET op_dispel = 0
+      SET op_save = 0
+      SET op_bonus = 0
+      PATCH_IF (ml <= 50) OR is_itm BEGIN
+        FOR (i = 0; i < na; ++i) BEGIN
+          SET fx = fx_off + (fa + i) * 0x30
+          READ_SHORT fx op
+          READ_ASCII (fx + 0x14) res (8) NULL
+          PATCH_IF ((op = primary_op) AND (~%eff_res%~ STRING_EQUAL ~~)) OR
+                   ((op = 177) AND !(~%eff_res%~ STRING_EQUAL ~~) AND (~%res%~ STRING_EQUAL_CASE ~%eff_res%~)) BEGIN
+            SET has_primary = 1
+            READ_BYTE (fx + 0x03) op_pwr
+            READ_LONG (fx + 0x08) op_p2
+            READ_BYTE (fx + 0x0d) op_dispel
+            READ_LONG (fx + 0x0e) op_dur
+            READ_BYTE (fx + 0x12) op_prob1
+            READ_BYTE (fx + 0x13) op_prob2
+            READ_LONG (fx + 0x24) op_save
+            READ_SLONG (fx + 0x28) op_bonus
+          END
+        END
+      END
+      FOR (i = na - 1; i >= 0; --i) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        SET ao = ab_off + a * 0x28
+        READ_SHORT (ao + 0x20) fa
+        SET fx = fx_off + (fa + i) * 0x30
+        SET keep = 0
+        PATCH_IF has_primary BEGIN
+          LPF cbmagic_is_haste_slow_effect
+            INT_VAR primary_op fx_off = fx op_prob1 op_prob2
+            STR_VAR parent_res = EVAL ~%resref%~ eff_res = EVAL ~%eff_res%~
+            RET keep = is_match
+          END
+        END
+        PATCH_IF !keep BEGIN
+          LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
+        END ELSE BEGIN
+          WRITE_BYTE (fx + 0x02) 2
+          WRITE_BYTE (fx + 0x12) 100
+          WRITE_BYTE (fx + 0x13) 0
+          PATCH_IF (primary_op = 16) BEGIN
+            WRITE_LONG (fx + 0x24) 0
+            WRITE_LONG (fx + 0x28) 0
+            READ_BYTE (fx + 0x0d) cur_disp
+            PATCH_IF (cur_disp = 1) BEGIN
+              WRITE_BYTE (fx + 0x0d) 3
+            END
+          END
+        END
+      END
+      PATCH_IF has_primary BEGIN
+        PATCH_IF (primary_op = 16) BEGIN
+          // If an opcode-16 source uses parameter2=1 (Improved Haste mode), mark HASTE_IMMUNITY too.
+          PATCH_IF (op_p2 = 1) AND (~%eff_res%~ STRING_EQUAL ~~) BEGIN
+            SET st_disp = (op_dispel = 1) ? 3 : op_dispel
+            LPF cbmagic_insert_effect INT_VAR ability = a position = 0
+              opcode = 328 target = 2 power = op_pwr parameter1 = 0 parameter2 = haste_splstate
+              timing = 0 resist_dispel = st_disp duration = op_dur special = 1 END
+          END
+          // Prepend in order: 324 (HASTE_IMMUNITY), 221 (cbm_Haste refresh), 326 (STATE_SLOWED -> CBMNEG40), 318 (STATE_SLOWED blocks Haste).
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 0
+            opcode = 324 target = 2 power = op_pwr parameter1 = haste_splstate parameter2 = splstate_row
+            timing = 0 resist_dispel = 0 duration = 1 STR_VAR resource = EVAL ~%subspell%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 1
+            opcode = 221 target = 2 power = op_pwr parameter1 = 10 parameter2 = haste_sectype
+            timing = 1 resist_dispel = 0 duration = 0 END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 2
+            opcode = 326 target = 2 power = op_pwr parameter1 = 0x00010000 parameter2 = state_row
+            timing = 1 resist_dispel = 0 duration = 0 STR_VAR resource = ~CBMNEG40~ END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 3
+            opcode = 318 target = 2 power = op_pwr parameter1 = 0x00010000 parameter2 = state_row
+            timing = 0 resist_dispel = 0 duration = 1 STR_VAR resource = EVAL ~%subspell%~ END
+        END ELSE BEGIN
+          // Slow subspell: 221 (cbm_Slow refresh on failed save), 326 (STATE_HASTED -> CBMNEG16),
+          // 318 (STATE_HASTED blocks Slow), 324 (HASTE_IMMUNITY blocks Slow on Improved Haste targets).
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 0
+            opcode = 221 target = 2 power = op_pwr parameter1 = 10 parameter2 = slow_sectype
+            timing = 1 resist_dispel = 0 duration = 0 savingthrow = op_save savebonus = op_bonus END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 1
+            opcode = 326 target = 2 power = op_pwr parameter1 = 0x00008000 parameter2 = state_row
+            timing = 0 resist_dispel = 0 duration = 1 STR_VAR resource = ~CBMNEG16~ END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 2
+            opcode = 318 target = 2 power = op_pwr parameter1 = 0x00008000 parameter2 = state_row
+            timing = 0 resist_dispel = 0 duration = 1 STR_VAR resource = EVAL ~%subspell%~ END
+          LPF cbmagic_insert_effect INT_VAR ability = a position = 3
+            opcode = 324 target = 2 power = op_pwr parameter1 = haste_splstate parameter2 = splstate_row
+            timing = 0 resist_dispel = 0 duration = 1 STR_VAR resource = EVAL ~%subspell%~ END
+        END
+      END
+    END
+  BUT_ONLY
+
+  // 3. Patch parent %resref%.%ext%: replace extracted effects with opcode 146 (%subspell%)
+  // followed by opcode 221 (opposite sectype removal).
+  COPY_EXISTING ~%resref%.%ext%~ ~override~
+    SET ab_size = is_itm ? 0x38 : 0x28
+    READ_LONG 0x64 ab_off
+    READ_SHORT 0x68 ab_cnt
+    READ_LONG 0x6a fx_off
+    FOR (a = 0; a < ab_cnt; ++a) BEGIN
+      PATCH_IF (header < 0) OR (a = header) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        SET ao = ab_off + a * ab_size
+        SET ml = 0
+        PATCH_IF !is_itm BEGIN
+          READ_SHORT (ao + 0x10) ml
+        END
+        PATCH_IF (ml <= 50) OR is_itm BEGIN
+          // On Slow files, strip legacy cross-Slow opcode 321s replaced by cbm_Slow sectype removal.
+          PATCH_IF (primary_op = 40) BEGIN
+            READ_SHORT (ao + 0x1e) na
+            READ_SHORT (ao + 0x20) fa
+            FOR (i = na - 1; i >= 0; --i) BEGIN
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              SET ao = ab_off + a * ab_size
+              READ_SHORT (ao + 0x20) fa
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_ASCII (fx + 0x14) res (8) NULL
+              PATCH_IF (op = 321) AND (
+                (~%res%~ STRING_EQUAL_CASE ~SPIN977~) OR
+                (~%res%~ STRING_EQUAL_CASE ~SPWISH25~) OR
+                (~%res%~ STRING_EQUAL_CASE ~SPWM164~) OR
+                (~%res%~ STRING_EQUAL_CASE ~SPIN983~) OR
+                (~%res%~ STRING_EQUAL_CASE ~SPIN575~) OR
+                (~%res%~ STRING_EQUAL_CASE ~SPWI312~)
+              ) BEGIN
+                LPF cbmagic_delete_ab_fx INT_VAR is_itm index = (fa + i) END
+              END
+            END
+          END
+
+          READ_LONG 0x64 ab_off
+          READ_LONG 0x6a fx_off
+          SET ao = ab_off + a * ab_size
+          READ_SHORT (ao + 0x1e) na
+          READ_SHORT (ao + 0x20) fa
+          SET has_primary = 0
+          SET op_pos = 0
+          SET op_tgt = 2
+          SET op_pwr = 0
+          SET op_dispel = 0
+          SET op_prob1 = 100
+          SET op_prob2 = 0
+          SET op_save = 0
+          SET op_bonus = 0
+          SET op_special = 0
+          FOR (i = 0; i < na; ++i) BEGIN
+            SET fx = fx_off + (fa + i) * 0x30
+            READ_SHORT fx op
+            READ_ASCII (fx + 0x14) res (8) NULL
+            PATCH_IF !has_primary AND (
+              ((op = primary_op) AND (~%eff_res%~ STRING_EQUAL ~~)) OR
+              ((op = 177) AND !(~%eff_res%~ STRING_EQUAL ~~) AND (~%res%~ STRING_EQUAL_CASE ~%eff_res%~))
+            ) BEGIN
+              SET has_primary = 1
+              SET op_pos = i
+              READ_BYTE (fx + 0x02) op_tgt
+              READ_BYTE (fx + 0x03) op_pwr
+              READ_BYTE (fx + 0x0d) op_dispel
+              READ_BYTE (fx + 0x12) op_prob1
+              READ_BYTE (fx + 0x13) op_prob2
+              READ_LONG (fx + 0x24) op_save
+              READ_SLONG (fx + 0x28) op_bonus
+              READ_LONG (fx + 0x2c) op_special
+            END
+          END
+
+          PATCH_IF has_primary BEGIN
+            SET cast_disp = op_dispel
+            SET cast_save = op_save
+            SET cast_bonus = op_bonus
+            SET cast_spec = op_special
+            SET rem_sectype = (primary_op = 16) ? slow_sectype : haste_sectype
+            SET rem_save = op_save
+            SET rem_bonus = op_bonus
+            PATCH_IF (primary_op = 40) BEGIN
+              PATCH_IF (cast_disp = 1) BEGIN
+                SET cast_disp = 3
+              END
+              SET cast_save = 0
+              SET cast_bonus = 0
+              SET cast_spec = 0
+              SET rem_save = 0
+              SET rem_bonus = 0
+            END
+            // Insert opcode 146 (%subspell%) and opcode 221 (remove opposite sectype) right after op_pos.
+            LPF cbmagic_insert_ab_fx INT_VAR is_itm ability = a position = (op_pos + 1)
+              opcode = 146 target = op_tgt power = op_pwr parameter1 = 0 parameter2 = 1
+              timing = 1 resist_dispel = cast_disp duration = 0
+              probability1 = op_prob1 probability2 = op_prob2
+              savingthrow = cast_save savebonus = cast_bonus special = cast_spec
+              STR_VAR resource = EVAL ~%subspell%~ END
+            LPF cbmagic_insert_ab_fx INT_VAR is_itm ability = a position = (op_pos + 2)
+              opcode = 221 target = op_tgt power = op_pwr parameter1 = 10 parameter2 = rem_sectype
+              timing = 1 resist_dispel = op_dispel duration = 0
+              probability1 = op_prob1 probability2 = op_prob2
+              savingthrow = rem_save savebonus = rem_bonus END
+
+            // Delete all extracted Haste/Slow effects from ability `a` (leaving the new 146 and 221).
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            SET ao = ab_off + a * ab_size
+            READ_SHORT (ao + 0x1e) na
+            FOR (i = na - 1; i >= 0; --i) BEGIN
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              SET ao = ab_off + a * ab_size
+              READ_SHORT (ao + 0x20) fa
+              SET fx = fx_off + (fa + i) * 0x30
+              READ_SHORT fx op
+              READ_LONG (fx + 0x08) p2
+              READ_ASCII (fx + 0x14) res (8) NULL
+              PATCH_IF !((op = 146) AND (~%res%~ STRING_EQUAL_CASE ~%subspell%~)) AND
+                       !((op = 221) AND (p2 = rem_sectype)) BEGIN
+                LPF cbmagic_is_haste_slow_effect
+                  INT_VAR primary_op fx_off = fx op_prob1 op_prob2
+                  STR_VAR parent_res = EVAL ~%resref%~ eff_res = EVAL ~%eff_res%~
+                  RET del = is_match
+                END
+                PATCH_IF del BEGIN
+                  LPF cbmagic_delete_ab_fx INT_VAR is_itm index = (fa + i) END
+                END
+              END
+            END
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END
+
+// --- Haste and Slow cancel each other (row arcane.haste_slow) -------------------------
+// Follows SCS haste_cancels_slow.tpa:
+// - Haste on a slowed target displays "Slow cancelled by Haste" (CBMNEG40), ends the Slow
+//   (opcode 221 p2=cbm_Slow), and the Haste (and its fatigue) does not start.
+// - Slow on a hasted target displays "Haste cancelled by Slow" (CBMNEG16), ends the Haste
+//   (opcode 221 p2=cbm_Haste), and the Slow does not start.
+// - Haste stays vanilla in every other way: no change to its bonus, duration, or fatigue.
+DEFINE_ACTION_FUNCTION cbmagic_more_haste_cancels_slow
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_HASTE~ RET h_res = resref h_found = found END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_SLOW~ RET s_res = resref s_found = found END
+  ACTION_IF !h_found AND !s_found BEGIN
+    PRINT ~chriz-bg-magic: Haste / Slow (WIZARD_HASTE, WIZARD_SLOW) are not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_ensure_haste_slow_ids RET haste_sectype slow_sectype haste_splstate splstate_row state_row END
+    OUTER_SET str_haste_canc = RESOLVE_STR_REF (@50011)
+    OUTER_SET str_slow_canc = RESOLVE_STR_REF (@50012)
+
+    // 1. Create message-only helper subspells CBMNEG16.SPL and CBMNEG40.SPL if not present.
+    ACTION_FOR_EACH msg_spl IN ~CBMNEG16~ ~CBMNEG40~ BEGIN
+      ACTION_IF !(FILE_EXISTS_IN_GAME ~%msg_spl%.spl~) BEGIN
+        OUTER_SET msg_ref = (~%msg_spl%~ STRING_EQUAL_CASE ~CBMNEG16~) ? str_haste_canc : str_slow_canc
+        COPY ~chriz-bg-magic/lib/cbmagic_shared.tpa~ ~override/%msg_spl%.spl~
+          DELETE_BYTES 0 BUFFER_LENGTH
+          INSERT_BYTES 0 (0x72 + 0x28 + 0x30)
+          WRITE_ASCII 0 ~SPL V1  ~ (8)
+          WRITE_LONG 0x08 (0 - 1)
+          WRITE_LONG 0x0c (0 - 1)
+          WRITE_SHORT 0x1c 1
+          WRITE_LONG 0x50 (0 - 1)
+          WRITE_LONG 0x54 (0 - 1)
+          WRITE_LONG 0x64 0x72
+          WRITE_SHORT 0x68 1
+          WRITE_LONG 0x6a (0x72 + 0x28)
+          WRITE_BYTE 0x72 1
+          WRITE_SHORT (0x72 + 0x02) 2
+          WRITE_BYTE (0x72 + 0x0c) 1
+          WRITE_SHORT (0x72 + 0x0e) 30
+          WRITE_SHORT (0x72 + 0x10) 1
+          WRITE_SHORT (0x72 + 0x14) 1
+          WRITE_SHORT (0x72 + 0x1e) 1
+          WRITE_SHORT (0x72 + 0x22) 1
+          WRITE_SHORT (0x72 + 0x24) 1
+          WRITE_SHORT (0x72 + 0x26) 1
+          SET fx = 0x72 + 0x28
+          WRITE_SHORT fx 139
+          WRITE_BYTE (fx + 0x02) 2
+          WRITE_LONG (fx + 0x04) msg_ref
+          WRITE_BYTE (fx + 0x0c) 1
+          WRITE_BYTE (fx + 0x12) 100
+      END
+    END
+
+    // 2. Scan SPL files for abilities (min_level <= 50) that apply opcode 16 or 40.
+    ACTION_CLEAR_ARRAY cbm_spl_todo
+    COPY_EXISTING_REGEXP - GLOB ~^.+\.spl$~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+        LPF cbmagic_spl_valid RET valid reason END
+        PATCH_IF valid BEGIN
+          SPRINT sres ~%SOURCE_RES%~
+          TO_UPPER sres
+          READ_BYTE 0x27 sec
+          PATCH_IF (sec != haste_sectype) AND (sec != slow_sectype) AND
+                   !(~%sres%~ STRING_EQUAL_CASE ~CBMNEG16~) AND
+                   !(~%sres%~ STRING_EQUAL_CASE ~CBMNEG40~) BEGIN
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            SET has_16 = 0
+            SET has_40 = 0
+            SET already_done = 0
+            SPRINT eff16 ~~
+            SPRINT eff40 ~~
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              SET ao = ab_off + a * 0x28
+              READ_SHORT (ao + 0x10) ml
+              PATCH_IF (ml <= 50) BEGIN
+                READ_SHORT (ao + 0x1e) na
+                READ_SHORT (ao + 0x20) fa
+                FOR (i = 0; i < na; ++i) BEGIN
+                  SET fx = fx_off + (fa + i) * 0x30
+                  READ_SHORT fx op
+                  READ_LONG (fx + 0x08) p2
+                  READ_ASCII (fx + 0x14) res (8) NULL
+                  TO_UPPER res
+                  PATCH_IF (op = 221) AND ((p2 = haste_sectype) OR (p2 = slow_sectype)) BEGIN
+                    SET already_done = 1
+                  END
+                  PATCH_IF (op = 16) BEGIN
+                    SET has_16 = 1
+                  END
+                  PATCH_IF (op = 40) BEGIN
+                    SET has_40 = 1
+                  END
+                  PATCH_IF (op = 177) AND !(~%res%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%res%.eff~) BEGIN
+                    INNER_ACTION BEGIN
+                      COPY_EXISTING - ~%res%.eff~ ~override~
+                        PATCH_IF (BUFFER_LENGTH >= 0x90) BEGIN
+                          READ_LONG 0x10 e_op
+                          READ_SHORT 0x24 e_tim
+                          PATCH_IF (e_tim != 2) AND (e_op = 16) BEGIN
+                            SET has_16 = 1
+                            SPRINT eff16 ~%res%~
+                          END
+                          PATCH_IF (e_tim != 2) AND (e_op = 40) BEGIN
+                            SET has_40 = 1
+                            SPRINT eff40 ~%res%~
+                          END
+                        END
+                    END
+                  END
+                END
+              END
+            END
+            PATCH_IF !already_done AND (has_16 OR has_40) BEGIN
+              PATCH_IF has_16 BEGIN
+                SPRINT $cbm_spl_todo(~%sres%~ ~16~) ~%eff16%~
+              END
+              PATCH_IF has_40 BEGIN
+                SPRINT $cbm_spl_todo(~%sres%~ ~40~) ~%eff40%~
+              END
+            END
+          END
+        END
+      END
+
+    OUTER_SET spl_haste_cnt = 0
+    OUTER_SET spl_slow_cnt = 0
+    ACTION_PHP_EACH cbm_spl_todo AS k => eff_res BEGIN
+      LAF cbmagic_extract_haste_or_slow
+        INT_VAR primary_op = k_1 header = (0 - 1) is_itm = 0
+                haste_sectype slow_sectype haste_splstate splstate_row state_row
+        STR_VAR resref = EVAL ~%k_0%~ ext = ~spl~ eff_res = EVAL ~%eff_res%~
+        RET subspell
+      END
+      ACTION_IF (k_1 = 16) BEGIN
+        OUTER_SET spl_haste_cnt += 1
+      END ELSE BEGIN
+        OUTER_SET spl_slow_cnt += 1
+      END
+    END
+
+    // 3. Scan ITM files for ability headers that apply opcode 16 or 40.
+    ACTION_CLEAR_ARRAY cbm_itm_todo
+    COPY_EXISTING_REGEXP - GLOB ~^.+\.itm$~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+        READ_ASCII 0 sig (8)
+        PATCH_IF (~%sig%~ STRING_EQUAL ~ITM V1  ~) BEGIN
+          READ_LONG 0x64 ab_off
+          READ_SHORT 0x68 ab_cnt
+          READ_LONG 0x6a fx_off
+          PATCH_IF (ab_off >= 0x72) AND (ab_off + ab_cnt * 0x38 <= fx_off) AND (fx_off <= BUFFER_LENGTH) BEGIN
+            SPRINT ires ~%SOURCE_RES%~
+            TO_UPPER ires
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              SET ao = ab_off + a * 0x38
+              READ_SHORT (ao + 0x1e) na
+              READ_SHORT (ao + 0x20) fa
+              SET has_16 = 0
+              SET has_40 = 0
+              SET already_done = 0
+              SPRINT eff16 ~~
+              SPRINT eff40 ~~
+              FOR (i = 0; i < na; ++i) BEGIN
+                SET fx = fx_off + (fa + i) * 0x30
+                PATCH_IF (fx + 0x30 <= BUFFER_LENGTH) BEGIN
+                  READ_SHORT fx op
+                  READ_LONG (fx + 0x08) p2
+                  READ_ASCII (fx + 0x14) res (8) NULL
+                  TO_UPPER res
+                  PATCH_IF (op = 221) AND ((p2 = haste_sectype) OR (p2 = slow_sectype)) BEGIN
+                    SET already_done = 1
+                  END
+                  PATCH_IF (op = 16) BEGIN
+                    SET has_16 = 1
+                  END
+                  PATCH_IF (op = 40) BEGIN
+                    SET has_40 = 1
+                  END
+                  PATCH_IF (op = 177) AND !(~%res%~ STRING_EQUAL ~~) AND (FILE_EXISTS_IN_GAME ~%res%.eff~) BEGIN
+                    INNER_ACTION BEGIN
+                      COPY_EXISTING - ~%res%.eff~ ~override~
+                        PATCH_IF (BUFFER_LENGTH >= 0x90) BEGIN
+                          READ_LONG 0x10 e_op
+                          READ_SHORT 0x24 e_tim
+                          PATCH_IF (e_tim != 2) AND (e_op = 16) BEGIN
+                            SET has_16 = 1
+                            SPRINT eff16 ~%res%~
+                          END
+                          PATCH_IF (e_tim != 2) AND (e_op = 40) BEGIN
+                            SET has_40 = 1
+                            SPRINT eff40 ~%res%~
+                          END
+                        END
+                    END
+                  END
+                END
+              END
+              PATCH_IF !already_done AND has_16 BEGIN
+                SPRINT $cbm_itm_todo(~%ires%~ ~%a%~ ~16~) ~%eff16%~
+              END
+              PATCH_IF !already_done AND has_40 BEGIN
+                SPRINT $cbm_itm_todo(~%ires%~ ~%a%~ ~40~) ~%eff40%~
+              END
+            END
+          END
+        END
+      END
+
+    OUTER_SET itm_haste_cnt = 0
+    OUTER_SET itm_slow_cnt = 0
+    ACTION_PHP_EACH cbm_itm_todo AS k => eff_res BEGIN
+      LAF cbmagic_extract_haste_or_slow
+        INT_VAR primary_op = k_2 header = k_1 is_itm = 1
+                haste_sectype slow_sectype haste_splstate splstate_row state_row
+        STR_VAR resref = EVAL ~%k_0%~ ext = ~itm~ eff_res = EVAL ~%eff_res%~
+        RET subspell
+      END
+      ACTION_IF (k_2 = 16) BEGIN
+        OUTER_SET itm_haste_cnt += 1
+      END ELSE BEGIN
+        OUTER_SET itm_slow_cnt += 1
+      END
+    END
+
+    PRINT ~chriz-bg-magic: Haste and Slow cancel each other (%spl_haste_cnt% Haste spells, %spl_slow_cnt% Slow spells, %itm_haste_cnt% Haste item abilities, %itm_slow_cnt% Slow item abilities patched).~
+  END
+END
+

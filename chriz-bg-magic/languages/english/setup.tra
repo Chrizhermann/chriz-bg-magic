@@ -304,4 +304,23 @@ This spell wards the caster and nearby allies with a protective screen against m
 @50007 = ~Spell Immunity, Globe Of Invulnerability~
 @50008 = ~Dispelling Screen, Globe Of Invulnerability~
 
+@50009 = ~Improved Haste~
+@50010 = ~Improved Haste
+(Alteration)
+
+Level: 6
+Range: 30 ft.
+Duration: 1 turn
+Casting Time: 6
+Area of Effect: 15-ft. radius
+Saving Throw: None
+
+When this spell is cast, all allied creatures within a 15-ft. radius are infused with magical speed for 1 turn. Affected creatures move at twice their normal rate (+6 movement rate), gain 1 extra attack per round, and receive a +2 bonus to THAC0, Armor Class, and Saving Throws vs. Breath. Unlike the 3rd-level Haste spell, Improved Haste does not fatigue the recipients when its duration expires.
+
+Improved Haste dispels any Slow effects on the recipients and renders them immune to Slow for its duration. Its effects are dispellable and are not cumulative with Haste or other similar magical speed effects.~
+
+@50011 = ~Haste cancelled by Slow~
+@50012 = ~Slow cancelled by Haste~
+
+
 

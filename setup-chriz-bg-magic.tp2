@@ -137,4 +137,7 @@ LAF cbmagic_more_protection_from_cold END
 LAF cbmagic_more_protection_from_acid END
 LAF cbmagic_more_dispelling_screen END
 LAF cbmagic_more_nahals_reckless_dweomer END
+LAF cbmagic_more_improved_haste END
+LAF cbmagic_more_haste_cancels_slow END
+
 
