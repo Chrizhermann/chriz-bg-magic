@@ -1,0 +1,48 @@
+{
+ "about": "English behavior specifications for the bonus batch. Done denotes implementation with offline tests, not live acceptance. Spell resources are resolved from installed SPELL.IDS symbols; optional IWD spell slots are not fixed.",
+ "rows": {
+  "rules.bonus_types": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Compare each statistic independently within Morale, Favor, Luck, Dodge, Deflection and Curse. Retain the strongest bonus and strongest penalty of each type; combine different types and untyped modifiers. Leave weaker effects available to resume after stronger effects expire. Apply the rule to all creatures through EEex.", "status": "done"},
+    {"spec": "Morale covers THAC0, damage and saves from Emotion: Courage, Emotion: Hope, Righteous Wrath, Blood Rage and Animal Rage. Favor covers those values from Bless, Prayer and Recitation, plus Chant's saves. Luck covers Luck's Luck and saves and Chant's Luck. Dodge covers positive AC and saves from Blur and Defensive Harmony. Deflection covers positive AC and saves from Entropy Shield and Aura of Flaming Death, and only saves from Spirit Armor and Barkskin. Curse covers negative THAC0, damage, saves and Luck from Doom, Curse and Unholy Blight.", "status": "done"},
+    {"spec": "Leave base AC, AC penalties, attributes, resistances, spell failure, Greater Malison and Slow outside type comparison. Preserve unrelated spell data and effects. Missing optional spells produce informational log lines.", "status": "done"},
+    {"spec": "Refresh typed spells on recast, including linked payloads. Convert native Bless, Chant and Luck effects into plain modifiers with their original timing and signed-byte amounts, retaining Bless's morale increase and existing separate saves or skill bonuses. Retain Champion's Strength's native effect. Copy changed linked resources privately and preserve shared originals.", "status": "done"},
+    {"spec": "Allocate private spell states, stamp the listener, verify its rebuild marker before stat writes, ignore delayed effects and stop the listener after ten errors. Include external EFF contributions by reading the payload of successful active opcode-177 wrappers, preserving native eligibility checks and wrapper timing. This extends the original direct-effect-list approach because external payloads are executed inline. Without EEex, leave different-spell stacking active while retaining self-refresh.", "status": "done"},
+    {"spec": "Include each affected amount and its type in new English spell and scroll description strings, preserving shared original strings and logging unsupported text.", "status": "done"}
+   ]
+  },
+  "rules.transformation_family": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Tenser's Transformation, Divine Power, Righteous Magic, Champion's Strength, Blood Rage and Animal Rage are mutually exclusive. A higher installed spell level removes and blocks lower members for its main buff's duration and dispellability; equal-level members replace one another on recast. Include linked payloads and refresh the current member. No EEex requirement.", "status": "done"}
+   ]
+  },
+  "rules.regeneration_family": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Regenerate, this mod's Mass Regenerate, an optional installed Mass Regenerate and Trollish Fortitude use the same level-based exclusion rule as Transformation. Remove the older member before applying any new protection or regeneration. No EEex requirement.", "status": "done"}
+   ]
+  },
+  "arcane.level6.pierce_magic": {
+   "resrefs": ["SPWI608"],
+   "parts": [
+    {"spec": "When the EEex bootstrap resource is present during installation, replace the additive MR penalty with a Lua call. Read current target MR at impact, reduce it by floor(MR / 2) clamped to 10 through 40 percentage points for 30 seconds, and preserve other spell effects. Without EEex at installation, retain the existing resistance effect and description. Reinstall after changing EEex availability.", "status": "done"}
+   ]
+  },
+  "rules.deferred_bonus_values": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Courage and Righteous Wrath temporary HP continue accumulating in this build. Any later exclusion for their HP portions needs a separate decision supported by lab results.", "status": "later"},
+    {"spec": "Extra attacks and the interaction between Righteous Wrath, Haste and Improved Haste await the Haste design. Do not tag or adjust APR in this batch. Character-sheet source breakdown text and German descriptions are also deferred.", "status": "later"}
+   ]
+  },
+  "validation.bonus": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "Run fabricated installer cases for tags, conversions, alternate layouts, mode rejection, self-refresh, private shared-EFF delivery, repeat application, every family pair, state allocation, description ownership and Pierce Magic's EEex install choice. Run independent listener cases under both LuaJIT and Lua 5.3.", "status": "done"},
+    {"spec": "Provide the bonus lab group for installed spell combinations, expiry fallback, friendly and hostile effects, self-refresh, an untyped control, stable rebuilds, family precedence and Pierce Magic MR values. Live tests are pending, including real equipment, save/reload, rest, area changes, normal projectile casting, no-EEex gameplay and a character-sheet screenshot.", "status": "pending-lab"}
+   ]
+  }
+ }
+}

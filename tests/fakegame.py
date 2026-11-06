@@ -35,7 +35,7 @@ class FakeGame:
         if game == "eet":
             (self.root / "override/eet.flag").write_bytes(b"EET")
         resources = [(m, ie.TYPES["ARE"], b"AREAV1.0") for m in GAME_MARKERS[game]]
-        for name, data in (biff or {}).items():
+        for name, data in {"SPLSTATE.IDS": ie.make_ids([(0, "CHAOTIC_COMMANDS")]), **(biff or {})}.items():
             stem, ext = name.rsplit(".", 1)
             resources.append((stem, ie.TYPES[ext.upper()], data))
         ie.write_key_bif(self.root, resources)

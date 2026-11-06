@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Selected spells now use Morale, Favor, Luck, Dodge, Deflection and Curse bonus types.
+  EEex compares each statistic separately: a type contributes its strongest bonus and
+  strongest penalty, while different types and untyped effects combine. Weaker effects
+  resume when stronger ones expire. Spell and scroll descriptions identify typed values.
+- Typed spells refresh themselves on recast, including their linked payloads. Shared
+  external effects are isolated before patching. Optional IWD spells are found by symbol
+  and skipped with an informational line when absent.
+- Transformation and Regeneration spells form separate exclusive families: higher spell
+  level wins; a new casting replaces an equal-level member. These rules work without EEex.
+- With EEex installed, Pierce Magic reduces current Magic Resistance by half, rounded down
+  and limited to 10-40 percentage points, for 5 rounds. Its other effects stay unchanged.
+  Without EEex at installation, its existing resistance effect is retained.
+- Added offline installer and LuaJIT/Lua 5.3 tests, plus the disposable-lab `bonus` group.
+  Live acceptance remains pending. HP and extra-attack type comparisons remain deferred.
 - Spirit Armor: a new casting replaces the old one, so its save bonus and its expiry
   damage no longer stack with themselves.
 - Minor Spell Deflection stops only spells up to level 4 (was 7).
