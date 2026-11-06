@@ -11,3 +11,104 @@
 // Minor Spell Deflection: "This spell will only affect up to 7th-level spells".
 @9111 = ~up to 7th-level spells~
 @9112 = ~up to 4th-level spells~
+
+// SCS batch description updates (@30000+).
+@30001 = ~Each orb will do damage to the target against which there is no save\(.*\n?\)*~
+@30002 = ~Each orb will do damage to the target against which there is no save and an effect against which the target must save vs. Spell:
+ 1st Level: 1d4 magic damage and blinds the target for 1 round.
+ 2nd Level: 1d6 fire damage and inflicts pain (-1 penalty to AC and THAC0) for 1 round.
+ 3rd Level: 1d8 magic damage and burns the target for an additional 1d3 fire damage.
+ 4th Level: 1d10 magic damage and blinds the target for 4 rounds.
+ 5th Level: 1d12 magic damage and stuns the target for 3 rounds.
+ 7th Level: 2d8 magic damage and paralyzes the target for 13 rounds.~
+
+@30003 = ~1d6 per level of the caster~
+@30004 = ~1d6 per level of the caster (to a maximum of 12d6)~
+
+@30005 = ~10% \+ 1% per level~
+@30006 = ~30% + 1% per level~
+@30007 = ~25%~
+@30008 = ~45%~
+@30009 = ~leave the creature with 10%~
+@30010 = ~leave the creature with 0%~
+
+@30011 = ~(Conjuration/Summoning)~
+@30012 = ~(Enchantment/Charm)~
+
+@30013 = ~current number of Hit Points is used to determine this spell's effects\.~
+@30014 = ~current number of Hit Points is used to determine this spell's effects. Free Action protects against this spell.~
+
+@30015 = ~\+2 or lower~
+@30016 = ~+3 or lower~
+
+@30017 = ~\+3 or lower~
+@30018 = ~+4 or lower~
+
+@30019 = ~except for those of greater than \+5 enchantment~
+@30020 = ~up to +6 enchantment~
+
+@30021 = ~Area of Effect: 4-ft\. radius~
+@30022 = ~Area of Effect: 1 creature~
+@30023 = ~one or more creatures within the area of effect become sightless\. The spellcaster selects one creature as the target center, and the effect spreads outward from the center, affecting all within a 4-ft\. radius\.~
+@30024 = ~one creature of the spellcaster's choice becomes sightless.~
+@30025 = ~apply to the victims~
+@30026 = ~apply to the victim~
+
+@30027 = ~until someone comes too close~
+@30028 = ~until an opponent comes too close~
+@30029 = ~causing all those within~
+@30030 = ~causing all enemies within~
+
+@30031 = ~every 3 levels of the caster\.~
+@30032 = ~every 3 levels of the caster. Free Action protects against this effect.~
+
+@30033 = ~teleports in a powerful fiend~
+@30034 = ~teleports in a powerful fiend (a bone fiend for lawful casters, a nabassu for chaotic casters, or either for neutral casters)~
+
+@30035 = ~summons a frenzied demon or devil~
+@30036 = ~summons a frenzied cornugon (for lawful casters), glabrezu (for chaotic casters), or either (for neutral casters)~
+
+@30037 = ~calls an outer-planar creature[^t]*to attack~
+@30038 = ~calls an outer-planar creature (a pit fiend for lawful casters, a balor for chaotic casters, or either for neutral casters) to attack~
+
+@30039 = ~Casting Time: 9~
+@30040 = ~Casting Time: 6~
+@30041 = ~Any creature attempting~
+@30042 = ~Any enemy attempting~
+@30043 = ~negate the damage~
+@30044 = ~take half damage~
+
+@30045 = ~If this is successful, the blades are avoided and no damage is suffered\.~
+@30046 = ~If this is successful, the damage is halved.~
+
+@30047 = ~1 round/4 levels~
+@30048 = ~1 round/level (maximum 11 rounds)~
+@30049 = ~1 round every 4 levels of the caster~
+@30050 = ~1 round per level of the caster (to a maximum of 11 rounds)~
+@30051 = ~two bolts~
+@30052 = ~eight bolts~
+
+@30053 = ~\+2 bonus to <PRO_HISHER> Armor Class~
+@30054 = ~+4 bonus to <PRO_HISHER> Armor Class~
+
+@30055 = ~Casting Time: 9~
+@30056 = ~Casting Time: 5~
+@30057 = ~Saving Throw: Neg\.~
+@30058 = ~Saving Throw: 1/2~
+@30059 = ~escape the effects of the glyph~
+@30060 = ~take half damage from the glyph~
+
+@30061 = ~1d4 points of damage to whomever it hits~
+@30062 = ~3d4 points of crushing damage to whomever it hits (6d4 to undead)~
+
+@30063 = ~making it very difficult to cast spells (50% chance of spell failure)\.~
+@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 50% chance of spell failure. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+
+@30065 = ~Spellcasting within the swarm is impossible (100% chance of spell failure)\.~
+@30066 = ~Each round, creatures within the swarm must make a Saving Throw vs. Breath Weapon at -4 or be unable to cast spells (100% chance of spell failure). Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+
+@30067 = ~suffer 2 points of damage each second and a spell failure rate of 100%\.~
+@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -6 each round or suffer a spell failure rate of 100%. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+
+@30069 = ~die of longing for the denied illusion\. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled)\.~
+@30070 = ~be permanently blinded (and slain instantly if humanoid). If the Saving Throw is successful, viewers are blinded for 3 rounds.~
