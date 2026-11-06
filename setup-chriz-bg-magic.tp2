@@ -53,13 +53,11 @@ LAF cbmagic_vanilla_animal_summoning_3_druid END
 LAF cbmagic_vanilla_conjure_animals_druid END
 LAF cbmagic_vanilla_flame_strike_ct END
 LAF cbmagic_vanilla_heal_ct END
-LAF cbmagic_vanilla_blade_barrier_ct END
 LAF cbmagic_vanilla_bolt_of_glory_ct END
 LAF cbmagic_vanilla_magic_resistance_ct END
 LAF cbmagic_vanilla_righteous_magic_ct END
 LAF cbmagic_vanilla_true_seeing_priest_ct END
 LAF cbmagic_vanilla_true_sight_wizard_ct END
-LAF cbmagic_vanilla_glyph_of_warding_ct END
 LAF cbmagic_vanilla_invisibility_purge_ct END
 LAF cbmagic_vanilla_strength_ct END
 LAF cbmagic_vanilla_fire_seeds_ct END

@@ -895,12 +895,6 @@ BEGIN
     STR_VAR symbol = ~CLERIC_HEAL~ label = ~Heal~ END
 END
 
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_blade_barrier_ct
-BEGIN
-  LAF cbmagic_apply_casting_time INT_VAR target_ct = 6 old_tra = 20020 new_tra = 20022
-    STR_VAR symbol = ~CLERIC_BLADE_BARRIER~ label = ~Blade Barrier~ END
-END
-
 DEFINE_ACTION_FUNCTION cbmagic_vanilla_bolt_of_glory_ct
 BEGIN
   LAF cbmagic_apply_casting_time INT_VAR target_ct = 6 old_tra = 20020 new_tra = 20022
@@ -929,12 +923,6 @@ DEFINE_ACTION_FUNCTION cbmagic_vanilla_true_sight_wizard_ct
 BEGIN
   LAF cbmagic_apply_casting_time INT_VAR target_ct = 6 old_tra = 20021 new_tra = 20022
     STR_VAR symbol = ~WIZARD_TRUE_SIGHT~ label = ~True Sight~ END
-END
-
-DEFINE_ACTION_FUNCTION cbmagic_vanilla_glyph_of_warding_ct
-BEGIN
-  LAF cbmagic_apply_casting_time INT_VAR target_ct = 5 old_tra = 20020 new_tra = 20023
-    STR_VAR symbol = ~CLERIC_GLYPH_OF_WARDING~ label = ~Glyph of Warding~ END
 END
 
 DEFINE_ACTION_FUNCTION cbmagic_vanilla_invisibility_purge_ct
