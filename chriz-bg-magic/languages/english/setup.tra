@@ -35,19 +35,19 @@
 @40020 = ~30-ft. radius~
 @40021 = ~Illusion/Phantasm spells of 5th level and lower~
 @40022 = ~Illusion/Phantasm spells of 9th level and lower~
-@40023 = ~Any enemy entering the sphere must save vs\. Spell or suffer one of the following random effects:[^|]*hasted\.~
-@40024 = ~Any enemy entering the sphere must save vs. Spell at -4 or suffer one of the following random effects for 1 round:
- - feebleminded;
- - confused;
- - panicked;
- - asleep (wakes on damage);
- - held.~
+@40023 = ~All enemies within the area of effect[^|]*target is hasted~
+@40024 = ~All enemies within the area of effect must save vs. Spell at -4 or suffer one of the following random effects for 1 round:
+ - target is feebleminded
+ - target is confused
+ - target is panicked
+ - target is put to sleep (wakes on damage)
+ - target is held~
 @40025 = ~Casting Time: 5~
 @40026 = ~Casting Time: 6~
 @40027 = ~Casting Time: 4~
 @40028 = ~that of a Fighter of the same level,~
 @40029 = ~that of a Fighter of the same level (including base attacks per round at levels 7 and 13),~
-@40030 = ~receives a -2 penalty to all rolls, including THAC0 and Saving Throws\. There is no saving throw for this spell~
+@40030 = ~receives a -2 penalty to all\([^|]*\)rolls, including THAC0 and Saving Throws\. There is no [Ss]aving [Tt]hrow for this spell~
 @40031 = ~receives a -2 penalty to THAC0, damage rolls, and Saving Throws unless the target makes a Saving Throw vs. Spell (with an additional -1 penalty at 3rd, 5th, 7th, and 9th level, up to -4)~
 @40032 = ~Faerie Fire~
 @40033 = ~Faerie Fire
@@ -80,14 +80,14 @@ Saving Throw: None
 
 When cast, this spell grants the druid and all party members within sight steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
 @40040 = ~Duration: Instant~
-@40041 = ~eliminates all toxins, and also heals 10 Hit Points of damage\. Moreover, any diseases, blindness, or deafness that the creature may be suffering from will also be cured\.~
-@40042 = ~eliminates all toxins and makes the creature immune to poison for 1 turn per level of the caster.~
-@40043 = ~Range: 0~
+@40041 = ~When this spell is cast upon a poisoned individual,[^|]*as well as blindness and deafness\.~
+@40042 = ~When this spell is cast upon an individual, it immediately neutralizes any poison and renders the target immune to poison for 1 turn per level of the caster.~
+@40043 = ~Range: Special~
 @40044 = ~Range: Caster~
 @40045 = ~Duration: 3 rounds + 1 round/2 levels (maximum 10 rounds)~
-@40046 = ~Area of Effect: Entire area~
+@40046 = ~Area of Effect: Special~
 @40047 = ~Area of Effect: The caster~
-@40048 = ~Clairvoyance empowers the wizard.*location of any creatures\.~
+@40048 = ~The Clairvoyance spell empowers the wizard[^|]*cannot reveal creatures or their movements\.~
 @40049 = ~Clairvoyance grants the caster foresight of incoming danger, making the caster immune to backstab attacks for the duration of the spell. The spell lasts for 3 rounds at 5th level, plus 1 additional round every 2 levels thereafter, to a maximum of 10 rounds at 19th level.~
 @40050 = ~Each creature in the area~
 @40051 = ~Each enemy creature in the area~
@@ -114,3 +114,9 @@ When cast, this spell grants the druid and all party members within sight steady
 @40072 = ~It fully heals the target and cures any diseases or poisons\.~
 @40073 = ~It fully heals the target and cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep.~
 @40074 = ~Duration: 5 rounds~
+@40075 = ~Invisibility Sphere~
+@40076 = ~Invisibility,? 10' Radius~
+@40077 = ~Range: 40 ft\.~
+@40078 = ~Range: 30 ft.~
+@40079 = ~Improved Invisibility, and Shadow Door\.~
+@40080 = ~Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility.~
