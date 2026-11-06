@@ -1596,4 +1596,369 @@ BEGIN
   END
 END
 
+// Helper: create a standalone EFF V2.0 that casts `subspell` via opcode 146 (instant).
+DEFINE_ACTION_FUNCTION cbmagic_write_cast_eff
+  STR_VAR eff = ~~
+          subspell = ~~
+BEGIN
+  ACTION_IF !(FILE_EXISTS ~override/%eff%.eff~) BEGIN
+    <<<<<<<< .../chriz-bg-magic-inlined/empty_cast_eff
+>>>>>>>>
+    COPY ~.../chriz-bg-magic-inlined/empty_cast_eff~ ~override/%eff%.eff~
+      INSERT_BYTES 0 0x110
+      WRITE_ASCII 0x00 ~EFF V2.0~ #8
+      WRITE_ASCII 0x08 ~EFF V2.0~ #8
+      WRITE_LONG 0x10 146
+      WRITE_LONG 0x14 2
+      WRITE_LONG 0x18 0
+      WRITE_LONG 0x1c 0
+      WRITE_LONG 0x20 1
+      WRITE_LONG 0x24 1
+      WRITE_LONG 0x28 0
+      WRITE_SHORT 0x2c 100
+      WRITE_SHORT 0x2e 0
+      WRITE_ASCIIE 0x30 ~%subspell%~ #8
+      WRITE_LONG 0x5c 2
+  END
+END
+
+// Helper: create a minimal 1-ability SPL V1 file in override (`override/%res%.spl`).
+DEFINE_ACTION_FUNCTION cbmagic_create_blank_subspell
+  STR_VAR res = ~~
+BEGIN
+  <<<<<<<< .../chriz-bg-magic-inlined/blank_spl
+>>>>>>>>
+  COPY ~.../chriz-bg-magic-inlined/blank_spl~ ~override/%res%.spl~
+    INSERT_BYTES 0 (0x72 + 0x28)
+    WRITE_ASCII 0x00 ~SPL V1  ~ #8
+    WRITE_LONG 0x08 (0 - 1)
+    WRITE_LONG 0x0c (0 - 1)
+    WRITE_SHORT 0x1c 2
+    WRITE_BYTE 0x25 0
+    WRITE_BYTE 0x27 0
+    WRITE_LONG 0x34 1
+    WRITE_LONG 0x50 (0 - 1)
+    WRITE_LONG 0x64 0x72
+    WRITE_SHORT 0x68 1
+    WRITE_LONG 0x6a (0x72 + 0x28)
+    WRITE_SHORT 0x6e 0
+    WRITE_SHORT 0x70 0
+    WRITE_BYTE (0x72 + 0x00) 1
+    WRITE_BYTE (0x72 + 0x0c) 1
+    WRITE_SHORT (0x72 + 0x0e) 300
+    WRITE_SHORT (0x72 + 0x10) 1
+    WRITE_SHORT (0x72 + 0x26) 1
+END
+
+// Helper: patch one insect spell (Summon Insects, Insect Plague, Creeping Doom).
+DEFINE_ACTION_FUNCTION cbmagic_patch_insect_spell
+  INT_VAR duration = 6
+          overall_save = 0
+          overall_bonus = 0
+          dmg_tick = 2
+          sf_pct = 100
+          sf_bonus = 0
+          fear = 0
+          undead_row = 1
+          fs_row = 0
+          pfnw_row = 0
+          stoneskin_row = 0
+          insect_stat = 120
+  STR_VAR symbol = ~~
+          dmg_eff = ~ipdam1~
+          find = ~~
+          replace = ~~
+  RET spell found
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %symbol% is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + 0x1e) fx_cnt
+        READ_SHORT (ab_off + 0x20) fx_idx
+        PATCH_IF (fx_cnt = 1) BEGIN
+          READ_SHORT (fx_off + fx_idx * 0x30) op0
+          READ_ASCII (fx_off + fx_idx * 0x30 + 0x14) res0 (8) NULL
+          PATCH_IF (op0 = 146) AND (~%res0%~ STRING_EQUAL_CASE ~%spell%a~) BEGIN
+            SET already = 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF !already BEGIN
+      LAF cbmagic_write_cast_eff STR_VAR eff = EVAL ~%spell%b~ subspell = EVAL ~%spell%b~ END
+      LAF cbmagic_write_cast_eff STR_VAR eff = EVAL ~%spell%c~ subspell = EVAL ~%spell%c~ END
+
+      // Stage A: delivery subspell (%spell%a.spl)
+      LAF cbmagic_create_blank_subspell STR_VAR res = EVAL ~%spell%a~ END
+      COPY_EXISTING ~%spell%a.spl~ ~override~
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = undead_row STR_VAR resource = EVAL ~%spell%a~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = fs_row STR_VAR resource = EVAL ~%spell%a~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = pfnw_row STR_VAR resource = EVAL ~%spell%a~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 233 target = 2 timing = 0 duration = (duration * 6) parameter1 = 1 parameter2 = insect_stat resist_dispel = 2 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 215 target = 2 timing = 0 duration = (duration * 6) parameter2 = 1 resist_dispel = 2 STR_VAR resource = ~icinhit~ END
+        FOR (r = 0; r < duration; ++r) BEGIN
+          SET tm = (r = 0) ? 1 : 4
+          LPF ADD_SPELL_EFFECT INT_VAR opcode = 177 target = 2 timing = tm duration = (r * 6) parameter2 = 2 resist_dispel = 2 STR_VAR resource = EVAL ~%spell%b~ END
+        END
+      BUT_ONLY
+
+      // Stage B: per-round damage + Stoneskin check (%spell%b.spl)
+      LAF cbmagic_create_blank_subspell STR_VAR res = EVAL ~%spell%b~ END
+      COPY_EXISTING ~%spell%b.spl~ ~override~
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = fs_row STR_VAR resource = EVAL ~%spell%b~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = pfnw_row STR_VAR resource = EVAL ~%spell%b~ END
+        SET ticks = 6 / dmg_tick
+        FOR (t = 0; t < ticks; ++t) BEGIN
+          SET tm = (t = 0) ? 1 : 4
+          LPF ADD_SPELL_EFFECT INT_VAR opcode = 177 target = 2 timing = tm duration = (t * dmg_tick) parameter2 = 2 resist_dispel = 2 STR_VAR resource = EVAL ~%dmg_eff%~ END
+        END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 2 timing = 0 duration = 1 parameter2 = stoneskin_row STR_VAR resource = EVAL ~%spell%c~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 177 target = 2 timing = 1 duration = 0 parameter2 = 2 resist_dispel = 2 STR_VAR resource = EVAL ~%spell%c~ END
+      BUT_ONLY
+
+      // Stage C: per-round AC/THAC0 penalty, spell failure (save vs. breath), and fear (%spell%c.spl)
+      LAF cbmagic_create_blank_subspell STR_VAR res = EVAL ~%spell%c~ END
+      COPY_EXISTING ~%spell%c.spl~ ~override~
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 0 target = 2 timing = 0 duration = 6 parameter1 = (0 - 2) resist_dispel = 2 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 54 target = 2 timing = 0 duration = 6 parameter1 = (0 - 2) resist_dispel = 2 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 60 target = 2 timing = 0 duration = 6 parameter1 = sf_pct parameter2 = 0 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 60 target = 2 timing = 0 duration = 6 parameter1 = sf_pct parameter2 = 1 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 timing = 0 duration = 6 parameter2 = 83 resist_dispel = 2 savingthrow = 2 savebonus = sf_bonus END
+        PATCH_IF fear BEGIN
+          LPF ADD_SPELL_EFFECT INT_VAR opcode = 24 target = 2 timing = 0 duration = 6 resist_dispel = 2 savingthrow = 1 savebonus = (0 - 2) END
+          LPF ADD_SPELL_EFFECT INT_VAR opcode = 139 target = 2 timing = 1 duration = 0 parameter1 = 14007 resist_dispel = 2 savingthrow = 1 savebonus = (0 - 2) END
+          LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 2 timing = 0 duration = 6 parameter2 = 36 resist_dispel = 2 savingthrow = 1 savebonus = (0 - 2) END
+        END
+      BUT_ONLY
+
+      // Replace main spell effects with op146 -> %spell%a
+      COPY_EXISTING ~%spell%.spl~ ~override~
+        LPF cbmagic_spl_valid RET valid reason END
+        READ_SHORT 0x68 ab_cnt
+        PATCH_IF valid AND (ab_cnt > 0) BEGIN
+          LPF DELETE_EFFECT INT_VAR check_globals = 0 END
+          SET st = overall_save ? 2 : 0
+          LPF ADD_SPELL_EFFECT
+            INT_VAR opcode = 146 target = 2 power = 0 parameter2 = 1 timing = 1 resist_dispel = 2
+                    savingthrow = st savebonus = overall_bonus
+            STR_VAR resource = EVAL ~%spell%a~
+          END
+          SET changed = 1
+        END
+      BUT_ONLY
+      ACTION_IF (changed > 0) BEGIN
+        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
+      END
+    END
+    PRINT ~chriz-bg-magic: %symbol% (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// Helper: add op321 removals of insect plague subspells to a protection spell (Fire Shield).
+DEFINE_ACTION_FUNCTION cbmagic_add_insect_removal_to_shield
+  STR_VAR shield_sym = ~~
+          insects = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = EVAL ~%shield_sym%~ RET shield = resref found END
+  ACTION_IF found BEGIN
+    COPY_EXISTING ~%shield%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        SPRINT list ~%insects%~
+        WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+          INNER_PATCH_SAVE ins ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+          INNER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+          PATCH_FOR_EACH suf IN a b c BEGIN
+            SPRINT sub ~%ins%%suf%~
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            READ_SHORT (ab_off + 0x1e) fx_cnt
+            READ_SHORT (ab_off + 0x20) fx_idx
+            SET has_rem = 0
+            FOR (i = 0; i < fx_cnt; ++i) BEGIN
+              SET e = fx_off + (fx_idx + i) * 0x30
+              READ_SHORT e op
+              READ_ASCII (e + 0x14) res (8) NULL
+              PATCH_IF (op = 321) AND (~%res%~ STRING_EQUAL_CASE ~%sub%~) BEGIN
+                SET has_rem = 1
+              END
+            END
+            PATCH_IF !has_rem BEGIN
+              LPF ADD_SPELL_EFFECT INT_VAR insert_point = 0 opcode = 321 target = 1 timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%sub%~ END
+            END
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// 27. Summon Insects, Insect Plague, Creeping Doom: per-round save vs. breath against spell
+// failure, Fire Shields remove and block, Stoneskin holds off effects while skins remain,
+// immunity to nonmagical weapons protects, undead are immune, MR and Dispel Magic do not help.
+DEFINE_ACTION_FUNCTION cbmagic_scs_insect_plague
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_SUMMON_INSECTS~ RET f1 = found END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_INSECT_PLAGUE~ RET f2 = found END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CREEPING_DOOM~ RET f3 = found END
+  ACTION_IF !(f1 OR f2 OR f3) BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_SUMMON_INSECTS, CLERIC_INSECT_PLAGUE, and CLERIC_CREEPING_DOOM are not in SPELL.IDS or have no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x10b value = 4 relation = 1 RET undead_row = row END
+    OUTER_SET fs_stat = IDS_OF_SYMBOL (~stats~ ~WIZARD_FIRE_SHIELD~)
+    ACTION_IF (fs_stat < 0) BEGIN OUTER_SET fs_stat = 125 END
+    OUTER_SET pfnw_stat = IDS_OF_SYMBOL (~stats~ ~WIZARD_PROTECTION_FROM_NORMAL_WEAPONS~)
+    ACTION_IF (pfnw_stat < 0) BEGIN OUTER_SET pfnw_stat = 181 END
+    OUTER_SET ss_stat = IDS_OF_SYMBOL (~stats~ ~STONESKINS~)
+    ACTION_IF (ss_stat < 0) BEGIN OUTER_SET ss_stat = 88 END
+    OUTER_SET ins_stat = IDS_OF_SYMBOL (~stats~ ~CLERIC_INSECT_PLAGUE~)
+    ACTION_IF (ins_stat < 0) BEGIN OUTER_SET ins_stat = 120 END
+
+    LAF cbmagic_splprot_row INT_VAR stat = fs_stat value = 1 relation = 4 RET fs_row = row END
+    LAF cbmagic_splprot_row INT_VAR stat = pfnw_stat value = 1 relation = 4 RET pfnw_row = row END
+    LAF cbmagic_splprot_row INT_VAR stat = ss_stat value = 1 relation = 4 RET stoneskin_row = row END
+
+    OUTER_SPRINT patched_insects ~~
+
+    OUTER_SPRINT find @30063
+    OUTER_SPRINT replace @30064
+    LAF cbmagic_patch_insect_spell
+      INT_VAR duration = 7 overall_save = 1 overall_bonus = (0 - 4) dmg_tick = 2 sf_pct = 50 sf_bonus = 0 fear = 0
+              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+      STR_VAR symbol = ~CLERIC_SUMMON_INSECTS~ dmg_eff = ~ipdam1~ find replace
+      RET s1 = spell f1 = found
+    END
+    ACTION_IF f1 BEGIN OUTER_SPRINT patched_insects ~%patched_insects%%s1% ~ END
+
+    OUTER_SPRINT find @30065
+    OUTER_SPRINT replace @30066
+    LAF cbmagic_patch_insect_spell
+      INT_VAR duration = 6 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
+              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+      STR_VAR symbol = ~CLERIC_INSECT_PLAGUE~ dmg_eff = ~ipdam1~ find replace
+      RET s2 = spell f2 = found
+    END
+    ACTION_IF f2 BEGIN OUTER_SPRINT patched_insects ~%patched_insects%%s2% ~ END
+
+    OUTER_SPRINT find @30067
+    OUTER_SPRINT replace @30068
+    LAF cbmagic_patch_insect_spell
+      INT_VAR duration = 3 overall_save = 0 overall_bonus = 0 dmg_tick = 1 sf_pct = 100 sf_bonus = (0 - 2) fear = 1
+              undead_row fs_row pfnw_row stoneskin_row insect_stat = ins_stat
+      STR_VAR symbol = ~CLERIC_CREEPING_DOOM~ dmg_eff = ~ipdam2~ find replace
+      RET s3 = spell f3 = found
+    END
+    ACTION_IF f3 BEGIN OUTER_SPRINT patched_insects ~%patched_insects%%s3% ~ END
+
+    OUTER_PATCH_SAVE patched_insects ~%patched_insects%~ BEGIN REPLACE_TEXTUALLY ~ +$~ ~~ END
+    ACTION_IF !(~%patched_insects%~ STRING_EQUAL ~~) BEGIN
+      ACTION_FOR_EACH sh IN WIZARD_FIRE_SHIELD_BLUE WIZARD_FIRE_SHIELD_RED CLERIC_AURA_OF_FLAMING_DEATH BEGIN
+        LAF cbmagic_add_insect_removal_to_shield STR_VAR shield_sym = EVAL ~%sh%~ insects = EVAL ~%patched_insects%~ END
+      END
+    END
+  END
+END
+
+// 30. Nature's Beauty (CLERIC_NATURE_BEAUTY): blindness moved to schoolless subspell so True
+// Sight does not dispel it, and gated on the save (failed save = humanoids die + permanent
+// blindness; successful save = blind for 3 rounds).
+DEFINE_ACTION_FUNCTION cbmagic_scs_natures_beauty
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_NATURE_BEAUTY~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_NATURE_BEAUTY is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        READ_SHORT (ab_off + 0x1e) fx_cnt
+        READ_SHORT (ab_off + 0x20) fx_idx
+        FOR (i = 0; i < fx_cnt; ++i) BEGIN
+          SET e = fx_off + (fx_idx + i) * 0x30
+          READ_SHORT e op
+          READ_ASCII (e + 0x14) res (8) NULL
+          PATCH_IF (op = 146) AND (~%res%~ STRING_EQUAL_CASE ~cbmgnb1~) BEGIN
+            SET already = 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF !already BEGIN
+      OUTER_SPRINT nb_tpl ~%spell%~
+      ACTION_IF FILE_EXISTS_IN_GAME ~dw#nbsub.spl~ BEGIN
+        OUTER_SPRINT nb_tpl ~dw#nbsub~
+      END
+      // Subspell 1 (failed save): permanent blindness, school = 0, plus op318 blocking CBMGNB2
+      COPY_EXISTING ~%nb_tpl%.spl~ ~override/cbmgnb1.spl~
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x0c (0 - 1)
+        WRITE_BYTE 0x25 0
+        READ_LONG 0x64 ab_off
+        WRITE_BYTE (ab_off + 0x0c) 1
+        WRITE_SHORT (ab_off + 0x26) 1
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 55 END
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 215 match_target = 1 END
+        LPF ALTER_EFFECT INT_VAR check_globals = 0 silent = 1 savingthrow = 0 savebonus = 0 END
+        LPF ALTER_EFFECT INT_VAR check_globals = 0 silent = 1 match_opcode = 74 timing = 1 duration = 0 END
+        LPF ADD_SPELL_EFFECT
+          INT_VAR insert_point = 0 opcode = 318 target = 2 power = 7 timing = 0 duration = 1 resist_dispel = 1
+          STR_VAR resource = ~cbmgnb2~
+        END
+
+      // Subspell 2 (successful save): 3-round blindness (duration 18), school = 0
+      COPY_EXISTING ~%nb_tpl%.spl~ ~override/cbmgnb2.spl~
+        WRITE_LONG 0x08 (0 - 1)
+        WRITE_LONG 0x0c (0 - 1)
+        WRITE_BYTE 0x25 0
+        READ_LONG 0x64 ab_off
+        WRITE_BYTE (ab_off + 0x0c) 1
+        WRITE_SHORT (ab_off + 0x26) 1
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 55 END
+        LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = 215 match_target = 1 END
+        LPF ALTER_EFFECT INT_VAR check_globals = 0 silent = 1 savingthrow = 0 savebonus = 0 END
+        LPF ALTER_EFFECT INT_VAR check_globals = 0 silent = 1 match_opcode = 74 timing = 0 duration = 18 END
+        LPF ALTER_EFFECT INT_VAR check_globals = 0 silent = 1 match_opcode = 142 timing = 0 duration = 18 END
+
+      // Main spell: keep op55 (Slay humanoids on failed save +3) and caster visuals,
+      // replace blindness effects with op146 -> CBMGNB1 (save vs. spell +3) and op146 -> CBMGNB2 (no save).
+      COPY_EXISTING ~%spell%.spl~ ~override~
+        PATCH_FOR_EACH del_op IN 74 139 141 61 142 174 146 BEGIN
+          LPF DELETE_EFFECT INT_VAR check_globals = 0 match_opcode = del_op END
+        END
+        LPF ADD_SPELL_EFFECT
+          INT_VAR opcode = 146 target = 2 power = 7 parameter2 = 1 timing = 1 resist_dispel = 1
+                  savingthrow = 1 savebonus = 3
+          STR_VAR resource = ~cbmgnb1~
+        END
+        LPF ADD_SPELL_EFFECT
+          INT_VAR opcode = 146 target = 2 power = 7 parameter2 = 1 timing = 1 resist_dispel = 1
+                  savingthrow = 0 savebonus = 0
+          STR_VAR resource = ~cbmgnb2~
+        END
+        SET changed = 1
+      BUT_ONLY
+      OUTER_SPRINT find @30069
+      OUTER_SPRINT replace @30070
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_NATURE_BEAUTY~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_NATURE_BEAUTY (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+
 

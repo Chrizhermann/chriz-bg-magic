@@ -693,3 +693,226 @@ def scs_batch3_fiends_and_divine(work, weidu):
     assert fg.tree() == snap
 
 
+@test
+def scs_batch4_insects_and_natures_beauty(work, weidu):
+    """Verify Batch 4: Summon Insects, Insect Plague, Creeping Doom (+ Fire Shield removal),
+    and Nature's Beauty (schoolless subspells for failed vs. successful save)."""
+    tlk = make_tlk([
+        "",
+        # 1: Summon Insects
+        "Summon Insects\nThe swarm will repeatedly bite the target, making it very difficult to cast spells (50% chance of spell failure).",
+        # 2: Insect Plague
+        "Insect Plague\nSpellcasting within the swarm is impossible (100% chance of spell failure).",
+        # 3: Creeping Doom
+        "Creeping Doom\nThose trapped by the insects suffer 2 points of damage each second and a spell failure rate of 100%.",
+        # 4: Nature's Beauty
+        "Nature's Beauty\nAs with a nymph, anyone viewing the disguised caster must make a Saving Throw vs. Spell with +3 bonus or die of longing for the denied illusion. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled).",
+    ])
+    sum_ins = make_spl(
+        spell_type=2, level=3, school=2, desc=1,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 227, "effects": [
+            {"opcode": 60, "power": 3, "p1": 50, "p2": 0, "duration": 42, "save": SAVE_BREATH, "bonus": -4},
+        ]}],
+    )
+    ins_plg = make_spl(
+        spell_type=2, level=5, school=2, desc=2,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
+            {"opcode": 60, "power": 5, "p1": 100, "p2": 0, "duration": 36},
+        ]}],
+    )
+    crp_doom = make_spl(
+        spell_type=2, level=7, school=2, desc=3,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
+            {"opcode": 60, "power": 7, "p1": 100, "p2": 0, "duration": 18},
+        ]}],
+    )
+    fshield_red = make_spl(
+        spell_type=1, level=4, school=6,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 233, "target": 1, "power": 4, "p1": 1, "p2": 125, "duration": 60, "dispel": 3},
+        ]}],
+    )
+    nat_bty = make_spl(
+        spell_type=2, level=7, school=5, desc=4,
+        abilities=[{"min_level": 1, "target": 5, "projectile": 159, "effects": [
+            {"opcode": 55, "power": 7, "p1": 1, "p2": 3, "timing": 1, "save": SAVE_SPELL, "bonus": 3, "dispel": 1},
+            {"opcode": 74, "power": 7, "p1": 0, "p2": 0, "timing": 1, "dispel": 1},
+            {"opcode": 142, "power": 7, "p2": 8, "timing": 1, "dispel": 1},
+            {"opcode": 215, "target": 1, "power": 7, "p2": 1, "duration": 2, "resource": "icclkfr2", "dispel": 1},
+        ]}],
+    )
+    biff = {
+        "SPELL.IDS": make_ids([
+            (1319, "CLERIC_SUMMON_INSECTS"),
+            (1517, "CLERIC_INSECT_PLAGUE"),
+            (1717, "CLERIC_CREEPING_DOOM"),
+            (2418, "WIZARD_FIRE_SHIELD_RED"),
+            (1704, "CLERIC_NATURE_BEAUTY"),
+        ]),
+        "STATS.IDS": make_ids([
+            (88, "STONESKINS"),
+            (120, "CLERIC_INSECT_PLAGUE"),
+            (125, "WIZARD_FIRE_SHIELD"),
+            (181, "WIZARD_PROTECTION_FROM_NORMAL_WEAPONS"),
+        ]),
+        "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
+        "SPPR319.SPL": sum_ins,
+        "SPPR517.SPL": ins_plg,
+        "SPPR717.SPL": crp_doom,
+        "SPWI418.SPL": fshield_red,
+        "SPPR704.SPL": nat_bty,
+        "DUMMY.ITM": make_itm([[]]),
+    }
+    fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
+    out = fg.install()
+    assert installed_ok(out), out
+
+    # Insects: main spells cast %spell%A; Stage A has undead + Fire Shield + PfNW op318 immunities;
+    # Stage B has damage ticks + Stoneskin op318 before %spell%C; Stage C has save vs. breath spell failure.
+    for res, ov_save, ov_bonus, sf_pct, sf_bonus, has_fear in (
+        ("SPPR319", SAVE_BREATH, -4, 50, 0, False),
+        ("SPPR517", 0, 0, 100, -2, True),
+        ("SPPR717", 0, 0, 100, -2, True),
+    ):
+        main = fg.spl(res)
+        m_fx = main["abilities"][0]["effects"]
+        assert len(m_fx) == 1
+        assert m_fx[0]["opcode"] == 146 and m_fx[0]["resource"].upper() == f"{res}A"
+        assert m_fx[0]["save"] == ov_save and m_fx[0]["bonus"] == ov_bonus
+
+        st_a = fg.spl(f"{res}A")
+        a_fx = st_a["abilities"][0]["effects"]
+        assert [e["opcode"] for e in a_fx[:3]] == [318, 318, 318]
+
+        st_b = fg.spl(f"{res}B")
+        b_fx = st_b["abilities"][0]["effects"]
+        assert b_fx[-2]["opcode"] == 318 and b_fx[-2]["resource"].upper() == f"{res}C"
+        assert b_fx[-1]["opcode"] == 177 and b_fx[-1]["resource"].upper() == f"{res}C"
+
+        st_c = fg.spl(f"{res}C")
+        c_fx = st_c["abilities"][0]["effects"]
+        sf_fxs = [e for e in c_fx if e["opcode"] == 60]
+        assert len(sf_fxs) == 2
+        assert all(e["p1"] == sf_pct and e["save"] == SAVE_BREATH and e["bonus"] == sf_bonus for e in sf_fxs)
+        assert any(e["opcode"] == 24 for e in c_fx) == has_fear
+
+    assert "Saving Throw vs. Breath Weapon each round" in fg.tlk(fg.spl("SPPR319")["desc"])
+    assert "Saving Throw vs. Breath Weapon at -2" in fg.tlk(fg.spl("SPPR517")["desc"])
+    assert "Saving Throw vs. Breath Weapon at -2" in fg.tlk(fg.spl("SPPR717")["desc"])
+
+    # Fire Shield Red removes all 9 insect subspells via leading op321
+    fs = fg.spl("SPWI418")
+    removed_subs = {e["resource"].upper() for e in fs["abilities"][0]["effects"] if e["opcode"] == 321}
+    assert {
+        "SPPR319A", "SPPR319B", "SPPR319C",
+        "SPPR517A", "SPPR517B", "SPPR517C",
+        "SPPR717A", "SPPR717B", "SPPR717C",
+    }.issubset(removed_subs)
+
+    # Nature's Beauty: keeps op55 (save vs. spell +3) and caster op215; casts CBMGNB1 (save vs. spell +3)
+    # and CBMGNB2 (no save). Both subspells have school = 0; CBMGNB1 has permanent blindness (timing=1)
+    # and blocks CBMGNB2 via op318; CBMGNB2 has 3-round blindness (timing=0, duration=18).
+    nb = fg.spl("SPPR704")
+    nb_fx = nb["abilities"][0]["effects"]
+    assert [(e["opcode"], e["resource"].lower(), e["save"], e["bonus"]) for e in nb_fx] == [
+        (55, "", SAVE_SPELL, 3),
+        (215, "icclkfr2", 0, 0),
+        (146, "cbmgnb1", SAVE_SPELL, 3),
+        (146, "cbmgnb2", 0, 0),
+    ]
+    nb1_raw = fg.file("override/CBMGNB1.SPL")
+    nb2_raw = fg.file("override/CBMGNB2.SPL")
+    assert nb1_raw[0x25] == 0 and nb2_raw[0x25] == 0
+    nb1 = fg.spl("CBMGNB1")
+    nb1_fx = nb1["abilities"][0]["effects"]
+    assert nb1_fx[0]["opcode"] == 318 and nb1_fx[0]["resource"].lower() == "cbmgnb2"
+    assert any(e["opcode"] == 74 and e["timing"] == 1 for e in nb1_fx)
+    nb2 = fg.spl("CBMGNB2")
+    nb2_fx = nb2["abilities"][0]["effects"]
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb2_fx)
+    assert "blinded for 3 rounds" in fg.tlk(nb["desc"])
+
+    # Idempotence check
+    snap = fg.tree()
+    out2 = fg.install()
+    assert installed_ok(out2), out2
+    assert fg.tree() == snap
+
+
+@test
+def scs_mod_variations_and_scs_coexistence(work, weidu):
+    """Verify compatibility with pre-existing SCS patches and unrelated mod effects
+    (casting features, extra ability effects, pre-patched SCS Nature's Beauty / Insects)."""
+    tlk = make_tlk([""])
+    # Mantle with casting feature + extra mod effect (op142 icon)
+    mantle_mod = make_spl(
+        level=7, school=1,
+        casting=[{"opcode": 215, "target": 1, "duration": 2, "resource": "MODVFX"}],
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 120, "target": 1, "power": 7, "p1": 2, "p2": 0, "duration": 24, "dispel": 3},
+            {"opcode": 142, "target": 1, "power": 7, "p2": 70, "duration": 24, "dispel": 3},
+        ]}],
+    )
+    # SCS-patched Nature's Beauty (op74 already moved to dw#nbsub.spl with duration=999999)
+    nb_scs = make_spl(
+        spell_type=2, level=7, school=5,
+        abilities=[{"min_level": 1, "target": 5, "projectile": 159, "effects": [
+            {"opcode": 55, "power": 7, "p1": 1, "p2": 3, "timing": 1, "save": SAVE_SPELL, "bonus": 3, "dispel": 1},
+            {"opcode": 146, "target": 1, "power": 7, "p2": 1, "timing": 1, "resource": "dw#nbsub"},
+        ]}],
+    )
+    nb_scs_sub = make_spl(
+        spell_type=2, level=7, school=0,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 1, "effects": [
+            {"opcode": 74, "power": 7, "timing": 0, "duration": 999999, "dispel": 1},
+            {"opcode": 142, "power": 7, "p2": 8, "timing": 0, "duration": 999999, "dispel": 1},
+        ]}],
+    )
+    # SCS-patched Insect Plague (already has single op146 -> SPPR517A)
+    ins_scs = make_spl(
+        spell_type=2, level=5, school=2,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 228, "effects": [
+            {"opcode": 146, "target": 2, "p2": 1, "timing": 1, "resource": "sppr517a"},
+        ]}],
+    )
+    biff = {
+        "SPELL.IDS": make_ids([
+            (2708, "WIZARD_MANTLE"),
+            (1704, "CLERIC_NATURE_BEAUTY"),
+            (1517, "CLERIC_INSECT_PLAGUE"),
+        ]),
+        "STATS.IDS": make_ids([
+            (88, "STONESKINS"),
+            (120, "CLERIC_INSECT_PLAGUE"),
+            (125, "WIZARD_FIRE_SHIELD"),
+            (181, "WIZARD_PROTECTION_FROM_NORMAL_WEAPONS"),
+        ]),
+        "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
+        "SPWI708.SPL": mantle_mod,
+        "SPPR704.SPL": nb_scs,
+        "DW#NBSUB.SPL": nb_scs_sub,
+        "SPPR517.SPL": ins_scs,
+        "DUMMY.ITM": make_itm([[]]),
+    }
+    fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
+    out = fg.install()
+    assert installed_ok(out), out
+
+    # Mantle kept its casting feature and extra op142 effect while gaining +3 weapon immunity
+    m = fg.spl("SPWI708")
+    assert len(m["casting"]) == 1 and m["casting"][0]["resource"] == "MODVFX"
+    m_ops = [(e["opcode"], e["p1"], e["p2"]) for e in m["abilities"][0]["effects"]]
+    assert (120, 3, 0) in m_ops and (142, 0, 70) in m_ops
+
+    # SCS Nature's Beauty upgraded to CBMGNB1 (permanent timing=1) + CBMGNB2 (18s)
+    nb1 = fg.spl("CBMGNB1")
+    assert any(e["opcode"] == 74 and e["timing"] == 1 and e["duration"] == 0 for e in nb1["abilities"][0]["effects"])
+    nb2 = fg.spl("CBMGNB2")
+    assert any(e["opcode"] == 74 and e["timing"] == 0 and e["duration"] == 18 for e in nb2["abilities"][0]["effects"])
+
+    # Pre-patched Insect Plague recognized as already done
+    assert "CLERIC_INSECT_PLAGUE (SPPR517): changed 0, already 1." in out
+
+
+
+

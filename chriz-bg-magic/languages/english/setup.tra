@@ -102,13 +102,13 @@
 @30062 = ~3d4 points of crushing damage to whomever it hits (6d4 to undead)~
 
 @30063 = ~making it very difficult to cast spells (50% chance of spell failure)\.~
-@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 50% chance of spell failure. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
 
 @30065 = ~Spellcasting within the swarm is impossible (100% chance of spell failure)\.~
-@30066 = ~Each round, creatures within the swarm must make a Saving Throw vs. Breath Weapon at -4 or be unable to cast spells (100% chance of spell failure). Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30066 = ~Each round, creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 or be unable to cast spells (100% chance of spell failure). Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
 
 @30067 = ~suffer 2 points of damage each second and a spell failure rate of 100%\.~
-@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -6 each round or suffer a spell failure rate of 100%. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
+@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a spell failure rate of 100%. Creatures with Stoneskin, Fire Shield, or immunity to normal weapons are unaffected while those protections last, and undead are immune.~
 
 @30069 = ~die of longing for the denied illusion\. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled)\.~
 @30070 = ~be permanently blinded (and slain instantly if humanoid). If the Saving Throw is successful, viewers are blinded for 3 rounds.~

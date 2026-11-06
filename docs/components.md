@@ -112,6 +112,34 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   far off: webs that can catch fire.
 - Radius and school come later.
 
+## SCS-style spell changes (`chriz-bg-magic/lib/cbmagic_scs.tpa`)
+
+Every decided SCS-style spell change is implemented in our own library (`cbmagic_scs.tpa`), resolved through `SPELL.IDS`, and checks whether the target behaviour is already present so it works with or without SCS installed:
+
+- **Chromatic Orb (`cbmagic_scs_chromatic_orb`):** uses the IWD/SCS level progression without the +6 saving throw bonus:
+  - Level 1: 1d4 magic damage + blind for 1 round (save vs. spell negates the secondary effect).
+  - Level 2: 1d6 fire damage + pain (-1 AC and THAC0) for 1 round.
+  - Level 3: 1d8 magic damage + 1d3 fire damage.
+  - Level 4: 1d10 magic damage + blind for 4 rounds.
+  - Level 5: 1d12 magic damage + stun for 3 rounds.
+  - Level 7+: 2d8 magic damage + hold for 13 rounds (Free Action protects).
+- **Melf's Minute Meteors (`cbmagic_scs_melfs_minute_meteors`):** the created meteor weapon (`MELFMET.ITM`) strikes as a +2 weapon instead of +5.
+- **Skull Trap (`cbmagic_scs_skull_trap`):** damage is capped at 12d6 (abilities above caster level 12 are removed; level 12 deals 12d6).
+- **Lower Resistance (`cbmagic_scs_lower_resistance`):** lowers magic resistance by 30% + 1% per caster level (was 10% + 1% per level) and sets power level to 5 on its resistance-lowering effects so spell protections block it normally.
+- **Power Word: Silence, Stun, Blind, Kill (`cbmagic_scs_power_word_silence`, `cbmagic_scs_power_word_stun`, `cbmagic_scs_power_word_blind`, `cbmagic_scs_power_word_kill`):** moved from Conjuration to Enchantment (Invoker exclusion instead of Diviner) on the spells and their scrolls. Power Word: Stun is blocked by Free Action; Power Word: Blind targets a single creature instead of an area.
+- **Mantle, Improved Mantle, Absolute Immunity (`cbmagic_scs_mantle`, `cbmagic_scs_improved_mantle`, `cbmagic_scs_absolute_immunity`):** protect against weapons up to +3, +4, and +6 enchantment respectively (up from +2, +3, and +5).
+- **Project Image and Simulacrum (`cbmagic_scs_project_image`, `cbmagic_scs_simulacrum`):** `PROJIMAG.SPL` disables quick-slot items (buttons 9, 11, 12) and innate abilities (button 13); `SIMULACR.SPL` disables quick-slot items (buttons 9, 11, 12) while keeping innate abilities enabled (level-based innate filtering requires EEex and is tracked for later).
+- **Abi-Dalzim's Horrid Wilting (`cbmagic_scs_abi_dalzim`):** undead, golems, animated swords, and air/earth/fire elementals are immune.
+- **Wizard and Priest Symbols (`cbmagic_scs_wizard_symbol_death`, `cbmagic_scs_wizard_symbol_stun`, `cbmagic_scs_wizard_symbol_fear`, `cbmagic_scs_cleric_symbol_death`, `cbmagic_scs_cleric_symbol_stun`, `cbmagic_scs_cleric_symbol_fear`):** use the party-friendly symbol explosion projectile so they affect only enemies; Symbol, Stun is also blocked by Free Action.
+- **Cacofiend, Summon Fiend, Wizard Gate, Priest Gate (`cbmagic_scs_cacofiend`, `cbmagic_scs_summon_fiend`, `cbmagic_scs_wizard_gate`, `cbmagic_scs_cleric_gate`):** summon a fiend matching the caster's law/chaos alignment (Bone Fiend / Cornugon / Pit Fiend for lawful casters; Nabassu / Glabrezu / Balor for chaotic casters; 50/50 for neutral casters).
+- **Blade Barrier and Globe of Blades (`cbmagic_scs_blade_barrier`, `cbmagic_scs_globe_of_blades`):** payload spells affect only hostile creatures, and a successful save vs. spell halves the damage instead of negating it. Blade Barrier's casting time is reduced from 9 to 6.
+- **Call Lightning (`cbmagic_scs_call_lightning`):** lasts 1 round per caster level up to 11 rounds/bolts (projectiles 85..91).
+- **Defensive Harmony (`cbmagic_scs_defensive_harmony`):** restricted to clerics/paladins (`0x20 = 0x8000`) and grants +4 AC (was +2).
+- **Glyph of Warding (`cbmagic_scs_glyph_of_warding`):** casting time reduced from 9 to 5, and a successful save halves the damage instead of negating it.
+- **Magical Stone (`cbmagic_scs_magical_stone`):** deals 3d4 crushing damage (6d4 against undead) instead of 1d4.
+- **Summon Insects, Insect Plague, Creeping Doom (`cbmagic_scs_insect_plague`):** spell failure allows a per-round save vs. breath (at 0, -2, and -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them; Stoneskin holds off the secondary effects while skins remain (each damage tick strips a skin); immunity to normal weapons protects; undead are immune; magic resistance and Dispel Magic do not help.
+- **Nature's Beauty (`cbmagic_scs_natures_beauty`):** blindness is moved to schoolless subspells (so True Sight does not dispel it via school removal) and depends on the save vs. spell (+3): on a failed save, humanoids die and targets suffer permanent blindness; on a successful save, targets are blinded for 3 rounds.
+
 ## Descriptions
 
 Changed texts are added as new strings and the spell (and its scrolls) point to them; the
