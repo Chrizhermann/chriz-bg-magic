@@ -29,9 +29,9 @@ BEGIN
   END
 END
 
-// Move an arcane spell from Conjuration (school 2, Diviner exclusion 0x0100)
-// to Enchantment (school 4, Invoker exclusion 0x0080), including its scrolls
-// and description.
+// Move a spell from Conjuration (school 2; on wizard spells, Diviner exclusion 0x0100)
+// to Enchantment (school 4; on wizard spells, Invoker exclusion 0x0800), including its
+// scrolls (ITM kit usability byte 0x2d: Diviner 0x01 -> Invoker 0x08) and description.
 DEFINE_ACTION_FUNCTION cbmagic_conjuration_to_enchantment
   STR_VAR
     spell = ~~
@@ -47,18 +47,31 @@ BEGIN
     PATCH_IF !valid BEGIN
       PATCH_WARN ~chriz-bg-magic: %label% (%spell%) skipped: %reason%.~
     END ELSE BEGIN
+      READ_SHORT 0x1c spell_type
       READ_BYTE 0x25 school
       READ_LONG 0x1e excl
       READ_SHORT 0x22 cast_gfx
-      PATCH_IF (school = 4) AND ((excl BAND 0x0180) = 0x0080) BEGIN
-        SET already = 1
-      END ELSE BEGIN
-        WRITE_BYTE 0x25 4
-        WRITE_LONG 0x1e ((excl BAND (BNOT 0x0100)) BOR 0x0080)
-        PATCH_IF (cast_gfx = 14) BEGIN
-          WRITE_SHORT 0x22 11
+      PATCH_IF (spell_type = 1) BEGIN
+        PATCH_IF (school = 4) AND ((excl BAND 0x0900) = 0x0800) BEGIN
+          SET already = 1
+        END ELSE BEGIN
+          WRITE_BYTE 0x25 4
+          WRITE_LONG 0x1e ((excl BAND (BNOT 0x0100)) BOR 0x0800)
+          PATCH_IF (cast_gfx = 14) BEGIN
+            WRITE_SHORT 0x22 11
+          END
+          SET changed = 1
         END
-        SET changed = 1
+      END ELSE BEGIN
+        PATCH_IF (school = 4) BEGIN
+          SET already = 1
+        END ELSE BEGIN
+          WRITE_BYTE 0x25 4
+          PATCH_IF (cast_gfx = 14) BEGIN
+            WRITE_SHORT 0x22 11
+          END
+          SET changed = 1
+        END
       END
     END
   BUT_ONLY
@@ -69,9 +82,9 @@ BEGIN
     OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
     COPY_EXISTING ~%scroll%.itm~ ~override~
       PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
-        READ_LONG 0x1e usab
-        PATCH_IF ((usab BAND 0x0180) != 0x0080) BEGIN
-          WRITE_LONG 0x1e ((usab BAND (BNOT 0x0100)) BOR 0x0080)
+        READ_BYTE 0x2d kit_usab3
+        PATCH_IF ((kit_usab3 BAND 0x09) != 0x08) BEGIN
+          WRITE_BYTE 0x2d ((kit_usab3 BAND (BNOT 0x01)) BOR 0x08)
         END
       END
     BUT_ONLY
@@ -219,24 +232,24 @@ BEGIN
         SET changed += 1
       END
     END
-    READ_LONG 0x64 ab_off
-    READ_LONG 0x6a fx_off
-    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-    READ_SHORT (ab_off + a * 0x28 + 0x20) first
-    SET has_13 = 0
-    SET pos_13 = n
-    FOR (i = 0; i < n; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_LONG (fx + 0x08) p2
-      PATCH_IF (op = 144) BEGIN
-        SET pos_13 = i + 1
-        PATCH_IF (p2 = 13) BEGIN
-          SET has_13 = 1
+    PATCH_IF disable_innates BEGIN
+      READ_LONG 0x64 ab_off
+      READ_LONG 0x6a fx_off
+      READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+      READ_SHORT (ab_off + a * 0x28 + 0x20) first
+      SET has_13 = 0
+      SET pos_13 = n
+      FOR (i = 0; i < n; ++i) BEGIN
+        SET fx = fx_off + (first + i) * 0x30
+        READ_SHORT fx op
+        READ_LONG (fx + 0x08) p2
+        PATCH_IF (op = 144) BEGIN
+          SET pos_13 = i + 1
+          PATCH_IF (p2 = 13) BEGIN
+            SET has_13 = 1
+          END
         END
       END
-    END
-    PATCH_IF disable_innates BEGIN
       PATCH_IF has_13 BEGIN
         SET already += 1
       END ELSE BEGIN
@@ -250,26 +263,6 @@ BEGIN
             timing     = 9
         END
         SET changed += 1
-      END
-    END ELSE BEGIN
-      // Simulacrum keeps innates enabled; remove button-13 lock if present.
-      SET removed_13 = 1
-      WHILE removed_13 BEGIN
-        SET removed_13 = 0
-        READ_LONG 0x64 ab_off
-        READ_LONG 0x6a fx_off
-        READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-        READ_SHORT (ab_off + a * 0x28 + 0x20) first
-        FOR (i = 0; (i < n) AND !removed_13; ++i) BEGIN
-          SET fx = fx_off + (first + i) * 0x30
-          READ_SHORT fx op
-          READ_LONG (fx + 0x08) p2
-          PATCH_IF (op = 144) AND (p2 = 13) BEGIN
-            LPF cbmagic_delete_effect INT_VAR index = (first + i) END
-            SET changed += 1
-            SET removed_13 = 1
-          END
-        END
       END
     END
   END
@@ -411,18 +404,18 @@ BEGIN
   END
 END
 
-// 2. Melf's Minute Meteors (WIZARD_MELFS_MINUTE_METEORS): meteor weapon enchantment +6 -> +2.
+// 2. Melf's Minute Meteors (WIZARD_MELF_METEOR): meteor weapon enchantment +6 -> +2.
 DEFINE_ACTION_FUNCTION cbmagic_scs_melfs_minute_meteors
 BEGIN
-  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_MELFS_MINUTE_METEORS~ RET spell = resref found END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_MELF_METEOR~ RET spell = resref found END
   ACTION_IF !found BEGIN
-    PRINT ~chriz-bg-magic: WIZARD_MELFS_MINUTE_METEORS is not in SPELL.IDS or has no .spl file — skipping.~
+    PRINT ~chriz-bg-magic: WIZARD_MELF_METEOR is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
     OUTER_SPRINT weapons ~~
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
       PATCH_IF !valid BEGIN
-        PATCH_WARN ~chriz-bg-magic: WIZARD_MELFS_MINUTE_METEORS (%spell%) skipped: %reason%.~
+        PATCH_WARN ~chriz-bg-magic: WIZARD_MELF_METEOR (%spell%) skipped: %reason%.~
       END ELSE BEGIN
         READ_LONG 0x64 ab_off
         READ_SHORT 0x68 ab_cnt
@@ -467,7 +460,7 @@ BEGIN
         BUT_ONLY
       END
     END
-    PRINT ~chriz-bg-magic: WIZARD_MELFS_MINUTE_METEORS (%spell%): weapons [%weapons%] changed %changed%, already %already%.~
+    PRINT ~chriz-bg-magic: WIZARD_MELF_METEOR (%spell%): weapons [%weapons%] changed %changed%, already %already%.~
   END
 END
 
@@ -732,7 +725,7 @@ BEGIN
   END
 END
 
-// Make a Symbol spell affect only enemies and optionally add Free Action immunity.
+// Make a Symbol spell school Enchantment, affect only enemies, and optionally add Free Action immunity.
 DEFINE_ACTION_FUNCTION cbmagic_patch_symbol_spell
   INT_VAR
     free_action = 0
@@ -743,6 +736,7 @@ DEFINE_ACTION_FUNCTION cbmagic_patch_symbol_spell
   ACTION_IF !found BEGIN
     PRINT ~chriz-bg-magic: %symbol% is not in SPELL.IDS or has no .spl file — skipping.~
   END ELSE BEGIN
+    LAF cbmagic_conjuration_to_enchantment STR_VAR spell label = EVAL ~%symbol%~ RET sch_changed = changed sch_already = already END
     LAF cbmagic_symbol_enemy_projectile RET target_proj END
     ACTION_IF free_action BEGIN
       LAF cbmagic_free_action_splprot_rows RET splstate_row splstate_val stat_row END
@@ -787,7 +781,7 @@ DEFINE_ACTION_FUNCTION cbmagic_patch_symbol_spell
       OUTER_SPRINT replace @30032
       LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
     END
-    PRINT ~chriz-bg-magic: %symbol% (%spell%): projectile %proj_changed%/%proj_already%, free action %fa_added%/%fa_present%.~
+    PRINT ~chriz-bg-magic: %symbol% (%spell%): school %sch_changed%/%sch_already%, projectile %proj_changed%/%proj_already%, free action %fa_added%/%fa_present%.~
   END
 END
 

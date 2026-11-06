@@ -6,17 +6,21 @@ from harness import test
 from ie import SAVE_BREATH, SAVE_SPELL, make_2da, make_ids, make_itm, make_spl, make_tlk
 
 
-def _spl_with_excl(data, excl=0, cast_gfx=0, priest_type=0):
+def _spl_with_excl(data, excl=0, cast_gfx=0, priest_type=0, spell_type=None):
     b = bytearray(data)
+    if spell_type is not None:
+        struct.pack_into("<H", b, 0x1C, spell_type)
     struct.pack_into("<I", b, 0x1E, excl)
-    struct.pack_into("<H", b, 0x20, priest_type)
+    if priest_type:
+        struct.pack_into("<H", b, 0x20, priest_type)
     struct.pack_into("<H", b, 0x22, cast_gfx)
     return bytes(b)
 
 
-def _itm_with_fields(data, usab=0, ench=0):
+def _itm_with_fields(data, usab=0, ench=0, kit3=0):
     b = bytearray(data)
     struct.pack_into("<I", b, 0x1E, usab)
+    b[0x2D] = kit3
     struct.pack_into("<I", b, 0x60, ench)
     return bytes(b)
 
@@ -129,7 +133,7 @@ def scs_batch1_arcane_spells(work, weidu):
     biff = {
         "SPELL.IDS": make_ids([
             (2118, "WIZARD_CHROMATIC_ORB"),
-            (2325, "WIZARD_MELFS_MINUTE_METEORS"),
+            (2325, "WIZARD_MELF_METEOR"),
             (2313, "WIZARD_SKULL_TRAP"),
             (2514, "WIZARD_LOWER_RESISTANCE"),
             (2612, "WIZARD_POWER_WORD_SILENCE"),
@@ -155,7 +159,8 @@ def scs_batch1_arcane_spells(work, weidu):
                 {"opcode": 146, "resource": "SPWI612"},
                 {"opcode": 147, "resource": "SPWI612"},
             ]], desc=4),
-            usab=0x0100,
+            usab=0x2f7f5e80,
+            kit3=0x01,
         ),
     }
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
@@ -189,18 +194,19 @@ def scs_batch1_arcane_spells(work, weidu):
     assert drops == [-39, -40, -45, -50]
     assert "30% + 1% per level" in fg.tlk(lr["desc"])
 
-    # 5. Power Word, Silence: school 4, excl 0x0080, scroll usab 0x0080
+    # 5. Power Word, Silence: school 4, excl 0x0800 (Invoker), scroll kit3 0x08 and general usab preserved
     pws_raw = fg.file("override/SPWI612.SPL")
     assert pws_raw[0x25] == 4
-    assert struct.unpack_from("<I", pws_raw, 0x1E)[0] == 0x0080
+    assert struct.unpack_from("<I", pws_raw, 0x1E)[0] == 0x0800
     scrl_raw = fg.file("override/SCRL7P.ITM")
-    assert struct.unpack_from("<I", scrl_raw, 0x1E)[0] == 0x0080
+    assert struct.unpack_from("<I", scrl_raw, 0x1E)[0] == 0x2f7f5e80
+    assert scrl_raw[0x2D] == 0x08
     assert "(Enchantment/Charm)" in fg.tlk(fg.itm_descs("SCRL7P")[1])
 
-    # 6. Power Word, Stun: school 4, excl 0x0080, leading op324 Free Action immunities
+    # 6. Power Word, Stun: school 4, excl 0x0800, leading op324 Free Action immunities
     pwst_raw = fg.file("override/SPWI715.SPL")
     assert pwst_raw[0x25] == 4
-    assert struct.unpack_from("<I", pwst_raw, 0x1E)[0] == 0x0080
+    assert struct.unpack_from("<I", pwst_raw, 0x1E)[0] == 0x0800
     pwst = fg.spl("SPWI715")
     lead_ops = [e["opcode"] for e in pwst["abilities"][0]["effects"][:2]]
     assert lead_ops == [324, 324]
@@ -250,11 +256,11 @@ def scs_batch2_arcane_and_symbols(work, weidu):
         # 4: Power Word, Kill
         "Power Word, Kill\n(Conjuration/Summoning)\nLevel: 9",
         # 5: Symbol, Death
-        "Symbol, Death\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Death or die.",
+        "Symbol, Death\n(Conjuration/Summoning)\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Death or die.",
         # 6: Symbol, Stun
-        "Symbol, Stun\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be stunned for 2 rounds + 1 round for every 3 levels of the caster.",
+        "Symbol, Stun\n(Conjuration/Summoning)\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be stunned for 2 rounds + 1 round for every 3 levels of the caster.",
         # 7: Symbol, Fear
-        "Symbol, Fear\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be affected by fear for 2 rounds + 1 round for every 3 levels of the caster.",
+        "Symbol, Fear\n(Conjuration/Summoning)\nThe symbol will remain there until someone comes too close, at which point it will explode, causing all those within the area to make a Save vs. Spell at a -4 penalty or be affected by fear for 2 rounds + 1 round for every 3 levels of the caster.",
     ])
     abi_dalzim = make_spl(
         level=8, school=7,
@@ -286,7 +292,6 @@ def scs_batch2_arcane_and_symbols(work, weidu):
         abilities=[{"min_level": 1, "target": 5, "effects": [
             {"opcode": 144, "target": 1, "p2": 14, "timing": 9},
             {"opcode": 144, "target": 1, "p2": 0, "timing": 9},
-            {"opcode": 144, "target": 1, "p2": 13, "timing": 9},  # e.g. from SCS; should be removed for Simulacrum
         ]}],
     )
     abs_imm = make_spl(
@@ -307,24 +312,27 @@ def scs_batch2_arcane_and_symbols(work, weidu):
             {"opcode": 13, "power": 8, "p2": 4, "timing": 1, "save": 4},
         ]}],
     )
-    sym_death = make_spl(
+    wiz_sym_death = _spl_with_excl(make_spl(
         level=8, school=2, desc=5,
         abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
             {"opcode": 13, "power": 8, "p2": 4, "timing": 1, "save": 4},
         ]}],
-    )
-    sym_stun = make_spl(
+    ), excl=0x0100, cast_gfx=14)
+    wiz_sym_stun = _spl_with_excl(make_spl(
         level=8, school=2, desc=6,
         abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
             {"opcode": 45, "power": 8, "duration": 18, "save": SAVE_SPELL, "bonus": -4},
         ]}],
-    )
-    sym_fear = make_spl(
+    ), excl=0x0100, cast_gfx=14)
+    wiz_sym_fear = _spl_with_excl(make_spl(
         level=8, school=2, desc=7,
         abilities=[{"min_level": 1, "target": 4, "projectile": 225, "effects": [
             {"opcode": 24, "power": 8, "duration": 18, "save": SAVE_SPELL, "bonus": -4},
         ]}],
-    )
+    ), excl=0x0100, cast_gfx=14)
+    pri_sym_death = _spl_with_excl(wiz_sym_death, excl=0x80000000, cast_gfx=14, spell_type=2)
+    pri_sym_stun = _spl_with_excl(wiz_sym_stun, excl=0x80000000, cast_gfx=14, spell_type=2)
+    pri_sym_fear = _spl_with_excl(wiz_sym_fear, excl=0x80000000, cast_gfx=14, spell_type=2)
     biff = {
         "SPELL.IDS": make_ids([
             (2812, "WIZARD_ABI_DALZIMS_HORRID_WILTING"),
@@ -352,20 +360,29 @@ def scs_batch2_arcane_and_symbols(work, weidu):
         "SPWI804.SPL": simul_spl,
         "SIMULACR.SPL": simul_payload,
         "SPWI897.SPL": npc_sym_death,
-        "SPWI817.SPL": sym_death,
-        "SPWI816.SPL": sym_stun,
-        "SPWI811.SPL": sym_fear,
+        "SPWI817.SPL": wiz_sym_death,
+        "SPWI816.SPL": wiz_sym_stun,
+        "SPWI811.SPL": wiz_sym_fear,
         "SPWI907.SPL": abs_imm,
         "SPWI912.SPL": pw_kill,
-        "SPPR719.SPL": sym_death,
-        "SPPR718.SPL": sym_stun,
-        "SPPR706.SPL": sym_fear,
+        "SPPR719.SPL": pri_sym_death,
+        "SPPR718.SPL": pri_sym_stun,
+        "SPPR706.SPL": pri_sym_fear,
         "SCRL9U.ITM": _itm_with_fields(
             make_itm([[
                 {"opcode": 146, "resource": "SPWI912"},
                 {"opcode": 147, "resource": "SPWI912"},
             ]], desc=4),
-            usab=0x0100,
+            usab=0x2f7f5e80,
+            kit3=0x01,
+        ),
+        "SCRLAO.ITM": _itm_with_fields(
+            make_itm([[
+                {"opcode": 146, "resource": "SPWI817"},
+                {"opcode": 147, "resource": "SPWI817"},
+            ]], desc=5),
+            usab=0x2f7f5e80,
+            kit3=0x01,
         ),
     }
     fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
@@ -386,19 +403,22 @@ def scs_batch2_arcane_and_symbols(work, weidu):
     assert any(e["opcode"] == 120 and e["p1"] == 6 and e["p2"] == 0 for e in ai["abilities"][0]["effects"])
     assert "up to +6 enchantment" in fg.tlk(ai["desc"])
 
-    # Power Word, Blind: school 4, excl 0x0080, projectile 1
+    # Power Word, Blind: school 4, excl 0x0800, projectile 1
     pwb_raw = fg.file("override/SPWI815.SPL")
     assert pwb_raw[0x25] == 4
-    assert struct.unpack_from("<I", pwb_raw, 0x1E)[0] == 0x0080
+    assert struct.unpack_from("<I", pwb_raw, 0x1E)[0] == 0x0800
     assert _ab_projectiles(pwb_raw) == [1]
     pwb = fg.spl("SPWI815")
     assert "Area of Effect: 1 creature" in fg.tlk(pwb["desc"])
     assert "(Enchantment/Charm)" in fg.tlk(pwb["desc"])
 
-    # Power Word, Kill: school 4, excl 0x0080
+    # Power Word, Kill: school 4, excl 0x0800
     pwk_raw = fg.file("override/SPWI912.SPL")
     assert pwk_raw[0x25] == 4
-    assert struct.unpack_from("<I", pwk_raw, 0x1E)[0] == 0x0080
+    assert struct.unpack_from("<I", pwk_raw, 0x1E)[0] == 0x0800
+    scrl9u = fg.file("override/SCRL9U.ITM")
+    assert struct.unpack_from("<I", scrl9u, 0x1E)[0] == 0x2f7f5e80
+    assert scrl9u[0x2D] == 0x08
 
     # Simulacrum: buttons 9, 11, 12 disabled, button 13 NOT disabled
     sim = fg.spl("SIMULACR")
@@ -406,13 +426,23 @@ def scs_batch2_arcane_and_symbols(work, weidu):
     assert {0, 9, 11, 12, 14}.issubset(sim_btns)
     assert 13 not in sim_btns
 
-    # All 6 Symbols: projectile 326, enemy-only description, and Symbol Stun has Free Action immunity
+    # All 6 Symbols: school 4, projectile 326, enemy-only + Enchantment description, wizard excl 0x0800, priest excl preserved
     for res in ("SPWI817", "SPWI816", "SPWI811", "SPPR719", "SPPR718", "SPPR706"):
         raw = fg.file(f"override/{res}.SPL")
         assert _ab_projectiles(raw) == [326], res
+        assert raw[0x25] == 4, res
+        if res.startswith("SPWI"):
+            assert struct.unpack_from("<I", raw, 0x1E)[0] == 0x0800, res
+        else:
+            assert struct.unpack_from("<I", raw, 0x1E)[0] == 0x80000000, res
         parsed = fg.spl(res)
+        assert "(Enchantment/Charm)" in fg.tlk(parsed["desc"])
         assert "until an opponent comes too close" in fg.tlk(parsed["desc"])
         assert "causing all enemies within" in fg.tlk(parsed["desc"])
+    scrlao = fg.file("override/SCRLAO.ITM")
+    assert struct.unpack_from("<I", scrlao, 0x1E)[0] == 0x2f7f5e80
+    assert scrlao[0x2D] == 0x08
+    assert "(Enchantment/Charm)" in fg.tlk(fg.itm_descs("SCRLAO")[1])
     for stun_res in ("SPWI816", "SPPR718"):
         parsed = fg.spl(stun_res)
         assert [e["opcode"] for e in parsed["abilities"][0]["effects"][:2]] == [324, 324]
