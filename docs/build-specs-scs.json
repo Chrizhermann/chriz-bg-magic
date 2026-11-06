@@ -17,7 +17,7 @@
    "resrefs": ["SPWI313"],
    "parts": [
     {"spec": "Save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"},
-    {"spec": "Damage capped at 12d6 (abilities above level 12 removed when a 12d6 level 12 ability exists, or dice capped at 12 in place).", "status": "done"}
+    {"spec": "Damage capped at 12d6 in place across all abilities (preserving higher-level abilities and any unrelated effects on them).", "status": "done"}
    ]
   },
   "arcane.level4.polymorph_self": {
@@ -120,7 +120,7 @@
   "arcane.level9.gate": {
    "resrefs": ["SPWI905"],
    "parts": [
-    {"spec": "The gated fiend matches caster alignment: Pit Fiend (baatezu) for lawful casters, and Balor (tanar'ri, with species combat script CBMGBALR.BCS) for neutral and chaotic casters.", "status": "done"}
+    {"spec": "The gated fiend matches caster alignment: Pit Fiend (baatezu) for lawful casters, and Balor (tanar'ri, with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "done"}
    ]
   },
   "arcane.level9.power_word_kill": {
@@ -167,9 +167,10 @@
    ]
   },
   "divine.lesser_restoration": {
-   "resrefs": ["SPPR417", "SPPR713"],
+   "resrefs": ["SPPR417"],
    "parts": [
-    {"spec": "Stays cleric-only as in vanilla (0x20 = 0x8000); extracts negative ability-score drain from spells and items into cbmagic_ability_drain-tagged subspells (CBDRN*.SPL) and removes that secondary type in Lesser Restoration (SPPR417) and Greater Restoration (SPPR713) without touching positive attribute buffs.", "status": "done"}
+    {"spec": "Stays cleric-only as in vanilla (0x20 = 0x8000) and otherwise vanilla for now.", "status": "done"},
+    {"spec": "later: remove attribute drain through EEex (opcode 402 reading the timed effect list), no file rewriting", "status": "later"}
    ]
   },
   "divine.magical_stone": {
@@ -181,7 +182,7 @@
   "divine.summon_death_knight": {
    "resrefs": ["SPPR703"],
    "parts": [
-    {"spec": "Gate stays in the slot; the gated fiend matches caster alignment: Pit Fiend for lawful casters, and Balor (with species combat script CBMGBALR.BCS) for neutral and chaotic casters.", "status": "done"},
+    {"spec": "Gate stays in the slot; the gated fiend matches caster alignment: Pit Fiend for lawful casters, and Balor (with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "done"},
     {"spec": "Later: good (and possibly neutral) priests may receive a separate summon.", "status": "later"}
    ]
   },
@@ -206,14 +207,14 @@
   "divine.insects_and_gust_of_wind": {
    "resrefs": ["SPPR319", "SPPR517", "SPPR717", "SPWI605"],
    "parts": [
-    {"spec": "Summon Insects, Insect Plague, and Creeping Doom: per-round save vs. breath against spell failure (at 0 / -2 / -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them via op206; Stoneskin holds off the secondary effects while skins remain; items and spells granting immunity to normal weapons (op120 p2=2) block and remove them; Death Spell (SPWI605) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help. Zone of Sweet Air stays vanilla.", "status": "done"},
+    {"spec": "Summon Insects, Insect Plague, and Creeping Doom deliver all repeating damage and secondary effects through their subspells (removing opcode 272 and FLPR717A from the main spells): per-round save vs. breath against spell failure (at 0 / -2 / -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them via op206; Stoneskin holds off the secondary effects while skins remain; items and spells granting immunity to normal weapons (op120 p2=2) block and remove them; Death Spell (SPWI605) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help. Zone of Sweet Air stays vanilla.", "status": "done"},
     {"spec": "Later: additional logical counters (e.g. wind spells).", "status": "later"}
    ]
   },
   "divine.natures_beauty": {
    "resrefs": ["SPPR704"],
    "parts": [
-    {"spec": "Blindness is moved to a single schoolless area subspell (CBMGNB1.SPL, target 5, projectile 159 INAREANP, so True Sight's school-based illusion removal does not dispel it) and depends on the save vs. spell (+3): on a failed save, humanoids die and targets suffer permanent blindness (timing 0, duration 999999) and skip the 3-round blindness via op318; on a successful save, targets are blinded for 3 rounds.", "status": "done"}
+    {"spec": "Both humanoid slay (opcode 55, save vs. spell +3) and blindness are moved into a single schoolless area subspell (CBMGNB1.SPL, target 5, projectile 159 INAREANP, so True Sight's school-based illusion removal does not dispel it and a single effect list decides both death and blindness): on a failed save vs. spell (+3), humanoids die and all targets suffer permanent blindness (timing 0, duration 999999) and skip the 3-round blindness via op318; on a successful save, targets are blinded for 3 rounds.", "status": "done"}
    ]
   }
  }

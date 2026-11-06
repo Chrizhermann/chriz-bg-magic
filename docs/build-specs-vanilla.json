@@ -4,7 +4,7 @@
   "arcane.level1.find_familiar": {
    "resrefs": ["SPWI123"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared so all specialist mages can cast it; description updated.", "status": "done"},
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls so all specialist mages can learn and cast it; description updated.", "status": "done"},
     {"spec": "EET: the familiar list comes from the GAM, BG1 versions exist as FAM*_ with half the HP; needs its own design.", "status": "todo"}
    ]
   },
@@ -59,7 +59,7 @@
   "arcane.level2.power_word_sleep": {
    "resrefs": ["SPWI220"],
    "parts": [
-    {"spec": "School set to Enchantment (4, Invoker exclusion 0x0800), elves and half-elves resist as in Sleep (SPWI116: SPLPROT rows 15 at 0-90 and 19 at 0-30), and undead (row 1), dragons and elementals are immune; keeps the 20 HP gate and wake-on-damage; description updated.", "status": "done"}
+    {"spec": "School set to Enchantment (4, Invoker exclusion 0x0800 on the spell and kit usability byte 0x2d bit 0x08 on its scrolls), elves and half-elves resist as in Sleep (SPWI116: SPLPROT rows 15 at 0-90 and 19 at 0-30), and undead (row 1), dragons and elementals are immune; keeps the 20 HP gate and wake-on-damage; description updated.", "status": "done"}
    ]
   },
   "arcane.level2.resist_fear": {
@@ -77,13 +77,13 @@
   "arcane.level2.stinking_cloud": {
    "resrefs": ["SPWI213"],
    "parts": [
-    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100) like Cloudkill, and non-breathing creatures (undead on SPLPROT row 1, plus races GOLEM, ELEMENTAL, SLIME) are immune; description updated.", "status": "done"}
+    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like Cloudkill, and non-breathing creatures (undead on SPLPROT row 1, plus races GOLEM, ELEMENTAL, SLIME) are immune; description updated.", "status": "done"}
    ]
   },
   "arcane.level2.web": {
    "resrefs": ["SPWI215"],
    "parts": [
-    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100) like Cloudkill; description updated.", "status": "done"}
+    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like Cloudkill; description updated.", "status": "done"}
    ]
   },
   "arcane.level3.monster_summoning_iii": {
@@ -101,7 +101,7 @@
   "arcane.level4.minor_sequencer": {
    "resrefs": ["SPWI420"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared; description updated.", "status": "done"}
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls; description updated.", "status": "done"}
    ]
   },
   "arcane.level4.vitriolic_sphere": {
@@ -113,7 +113,7 @@
   "arcane.level5.cloudkill": {
    "resrefs": ["SPWI502"],
    "parts": [
-    {"spec": "Stays vanilla except school is set to Conjuration (Diviner exclusion) like all cloud spells; description updated.", "status": "done"}
+    {"spec": "Stays vanilla except school is set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like all cloud spells; description updated.", "status": "done"}
    ]
   },
   "arcane.level5.conjure_lesser_air_elemental": {
@@ -155,7 +155,7 @@
   "arcane.level6.acid_fog": {
    "resrefs": ["SPWI614"],
    "parts": [
-    {"spec": "Spell Revisions' Acid Fog replacement is dropped; Death Fog stays as Death Fog with its school set to Conjuration (Diviner exclusion) and description updated.", "status": "done"}
+    {"spec": "Spell Revisions' Acid Fog replacement is dropped; Death Fog stays as Death Fog with its school set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) and description updated.", "status": "done"}
    ]
   },
   "arcane.level6.conjure_air_elemental": {
@@ -179,7 +179,7 @@
   "arcane.level6.contingency": {
    "resrefs": ["SPWI617"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared; description updated.", "status": "done"}
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls; description updated.", "status": "done"}
    ]
   },
   "arcane.level6.disintegrate": {
@@ -215,19 +215,19 @@
   "arcane.level7.spell_sequencer": {
    "resrefs": ["SPWI710"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared; description updated.", "status": "done"}
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls; description updated.", "status": "done"}
    ]
   },
   "arcane.level8.incendiary_cloud": {
    "resrefs": ["SPWI810"],
    "parts": [
-    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100) like Cloudkill; description updated.", "status": "done"}
+    {"spec": "School set to Conjuration (2, Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like Cloudkill; description updated.", "status": "done"}
    ]
   },
   "arcane.level8.spell_trigger": {
    "resrefs": ["SPWI809"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared; description updated.", "status": "done"}
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls; description updated.", "status": "done"}
    ]
   },
   "arcane.level9.black_blade_of_disaster": {
@@ -239,13 +239,13 @@
   "arcane.level9.chain_contingency": {
    "resrefs": ["SPWI908"],
    "parts": [
-    {"spec": "School set to Universal (0) with specialist exclusions cleared; description updated.", "status": "done"}
+    {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls; description updated.", "status": "done"}
    ]
   },
   "arcane.level9.wish": {
    "resrefs": ["SPWI919"],
    "parts": [
-    {"spec": "Stays vanilla except school is set to Universal (0) with specialist exclusions cleared.", "status": "done"}
+    {"spec": "Stays vanilla except school is set to Universal (0) with specialist exclusions cleared on the spell and its scrolls.", "status": "done"}
    ]
   },
   "arcane.summon_nishruu_relocation": {
