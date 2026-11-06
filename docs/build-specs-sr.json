@@ -1,0 +1,199 @@
+{
+ "about": "English specs and build status of the Spell Revisions batch decisions (cbmagic_sr.tpa), by decision-page row. A part is todo when blocked or pending an unbuilt system, done when built in this batch, and later when deferred.",
+ "rows": {
+  "arcane.level2.invisibility": {
+   "resrefs": ["SPWI206"],
+   "parts": [
+    {"spec": "Duration is 8 hours (2400 seconds) instead of 24 hours (7200 seconds). Its description and scroll say so.", "status": "done"}
+   ]
+  },
+  "arcane.level2.luck": {
+   "resrefs": ["SPWI209"],
+   "parts": [
+    {"spec": "Keeps vanilla's +1 bonus to luck and skill checks, lasts 15 rounds (90 seconds) instead of 3 rounds, and replaces an earlier casting on the same target.", "status": "done"}
+   ]
+  },
+  "arcane.level3.clairvoyance": {
+   "resrefs": ["SPWI301"],
+   "parts": [
+    {"spec": "Usable indoors and outdoors; grants the caster dispellable immunity to backstab for 3 rounds at level 5 plus 1 round per 2 caster levels up to 10 rounds at level 19 instead of revealing the outdoor map.", "status": "done"}
+   ]
+  },
+  "arcane.level3.invisibility_sphere": {
+   "resrefs": ["SPWI307"],
+   "parts": [
+    {"spec": "Renamed Invisibility Sphere in spell and scroll names and descriptions, casting time is 1 (from 9), duration is 1 turn (60 seconds, from 24 hours), and uses an ally-only radius-110 projectile (cbminv10.pro via ADD_PROJECTILE).", "status": "done"}
+   ]
+  },
+  "arcane.level4.confusion": {
+   "resrefs": ["SPWI401"],
+   "parts": [
+    {"spec": "Duration is 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6 rounds (36s) at level 20+, preserving existing ability breakpoints. Save vs. Spell at -2 and everything else stay vanilla.", "status": "done"}
+   ]
+  },
+  "arcane.level4.simbuls_spell_matrix": {
+   "resrefs": ["SPWI420"],
+   "parts": [
+    {"spec": "Minor Sequencer belongs to the Universal school, so all specialist mages (including Diviners) can learn and cast it.", "status": "done"}
+   ]
+  },
+  "arcane.level4.teleport_field": {
+   "resrefs": ["SPWI421"],
+   "parts": [
+    {"spec": "Range is 30 ft. (from 40 ft.) and allows a Save vs. Spell at -4 to avoid being teleported (vanilla: no save). Its description and scroll say so.", "status": "done"}
+   ]
+  },
+  "arcane.level5.oracle": {
+   "resrefs": ["SPWI515"],
+   "parts": [
+    {"spec": "Dispels illusion spells up to 9th level (from 5th) in a 30-ft (radius 450) enemy-only area centered on the caster (range 1, projectile cbmoracl.pro via ADD_PROJECTILE), and lists the affected high-level illusions in its description.", "status": "done"}
+   ]
+  },
+  "arcane.level6.contingency": {
+   "resrefs": ["SPWI617"],
+   "parts": [
+    {"spec": "Contingency belongs to the Universal school, so all specialist mages can learn and cast it.", "status": "done"}
+   ]
+  },
+  "arcane.level7.chaos": {
+   "resrefs": ["SPWI711"],
+   "parts": [
+    {"spec": "Sphere of Chaos keeps its name, level 7, point targeting within range 40 ft., and 10-round enemy-only field. Each round, enemies in the area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6s): feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).", "status": "done"}
+   ]
+  },
+  "arcane.level7.simbuls_spell_sequencer": {
+   "resrefs": ["SPWI710"],
+   "parts": [
+    {"spec": "Spell Sequencer belongs to the Universal school, so all specialist mages can learn and cast it.", "status": "done"}
+   ]
+  },
+  "arcane.level8.simbuls_spell_trigger": {
+   "resrefs": ["SPWI809"],
+   "parts": [
+    {"spec": "Spell Trigger belongs to the Universal school, so all specialist mages can learn and cast it.", "status": "done"}
+   ]
+  },
+  "arcane.level9.chain_contingency": {
+   "resrefs": ["SPWI908"],
+   "parts": [
+    {"spec": "Chain Contingency belongs to the Universal school, so all specialist mages can learn and cast it.", "status": "done"}
+   ]
+  },
+  "arcane.level9.time_stop": {
+   "resrefs": ["SPWI909"],
+   "parts": [
+    {"spec": "Stays vanilla; base game already matches the decided mechanics and duration.", "status": "done"}
+   ]
+  },
+  "divine.aid": {
+   "resrefs": ["SPPR201"],
+   "parts": [
+    {"spec": "Replaces the opcode-129 Aid payload with a hit-point-only bonus (opcode 18, min(L,10) + 1d8 with L = max(ability level, 3)), lasting 1 turn per level (60*L seconds), refreshing on recast, and displaying its own portrait icon via STATDESC.2DA (BAM SPPR150D).", "status": "done"}
+   ]
+  },
+  "divine.bless": {
+   "resrefs": ["SPPR101"],
+   "parts": [
+    {"spec": "Casting time is 5 (from 9), duration is 30 seconds + 1 round per caster level across 20 abilities (levels 1-20, 36-150 seconds), usable by clerics and druids as in vanilla. Its description says so.", "status": "done"},
+    {"spec": "Gunst bonus-type stacking rule comes later in the EEex stacking module.", "status": "todo"}
+   ]
+  },
+  "divine.chaos": {
+   "resrefs": ["SPPR709"],
+   "parts": [
+    {"spec": "Blocked: SPPR709 is priest Confusion in the base game; the row note asks for minimal changes as decided earlier while the general overview lists Sphere of Chaos at Arcane 7 and Priest 7. Needs confirmation whether SPPR709 stays priest Confusion or becomes priest Sphere of Chaos.", "status": "todo"}
+   ]
+  },
+  "divine.chaotic_commands": {
+   "resrefs": ["SPPR508"],
+   "parts": [
+    {"spec": "Stays vanilla; base game SPPR508 is already usable by both clerics and druids and already protects against Maze.", "status": "done"}
+   ]
+  },
+  "divine.divine_power": {
+   "resrefs": ["SPPR412"],
+   "parts": [
+    {"spec": "Renamed Divine Power in name and description, casting time 4 (from 6), and grants single/multi-class non-fighter clerics dispellable fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+).", "status": "done"}
+   ]
+  },
+  "divine.doom": {
+   "resrefs": ["SPPR113"],
+   "parts": [
+    {"spec": "Casting time is 1 (from 9), imposes -2 to THAC0, damage rolls, and all saving throws (no AC penalty), and allows a Save vs. Spell to negate, with the save penalty scaling from 0 at level 1 to -4 at level 9 (steps at levels 1, 3, 5, 7, and 9).", "status": "done"}
+   ]
+  },
+  "divine.faerie_fire": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "New level-1 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_FAERIE_FIRE), using base-game icons SPPR309C/SPPR309B and ability location 2. Hostile 5-ft (radius 75) enemy-only area (cbmffir.pro via ADD_PROJECTILE), casting time 1, range 20, duration 4 rounds (24s), Save vs. Spell negates: -2 AC penalty, cures and prevents invisibility, and outlines targets in a violet glow.", "status": "done"}
+   ]
+  },
+  "divine.free_action": {
+   "resrefs": ["SPPR403"],
+   "parts": [
+    {"spec": "Usable by druids and rangers as well as clerics, lasts 1 turn/level (60s/level across all timed protections and companion state/stat/visual effects), protects against Stun, and no longer blocks Haste or movement bonuses.", "status": "done"}
+   ]
+  },
+  "divine.mass_regenerate": {
+   "resrefs": [],
+   "parts": [
+    {"spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE), using base-game icons SPPR711C/SPPR711B and ability location 2. Sight-range party-only area centered on the caster (projectile cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), and replaces an earlier casting of itself.", "status": "done"}
+   ]
+  },
+  "divine.neutralize_poison": {
+   "resrefs": ["SPPR404"],
+   "parts": [
+    {"spec": "Cures poison and grants immunity to poison for 1 turn/level (420-1200s across levels 7-20); no longer heals 10 HP or cures disease, paralysis, blindness, or deafness (removing non-self opcode 321 disease/paralysis resource removals).", "status": "done"}
+   ]
+  },
+  "divine.summon_deva": {
+   "resrefs": ["SPPR726"],
+   "parts": [
+    {"spec": "Deferred to the summons component.", "status": "later"}
+   ]
+  },
+  "divine.summon_fallen_deva": {
+   "resrefs": ["SPPR727"],
+   "parts": [
+    {"spec": "Deferred to the summons component.", "status": "later"}
+   ]
+  },
+  "divine.silence": {
+   "resrefs": ["SPPR211"],
+   "parts": [
+    {"spec": "Silence 15' Radius affects enemies only (projectile SPARBLNP instead of all-creatures SPKLARBL). Its description says so.", "status": "done"}
+   ]
+  },
+  "divine.stoneskin": {
+   "resrefs": ["SPPR506"],
+   "parts": [
+    {"spec": "Iron Skins is named Stoneskin, has casting time 1 (from 9), and keeps vanilla's skin progression and duration.", "status": "done"}
+   ]
+  },
+  "divine.shillelagh": {
+   "resrefs": ["SPPR110"],
+   "parts": [
+    {"spec": "Keeps vanilla mechanics and is restricted to druids (cleric/paladin usability excluded).", "status": "done"}
+   ]
+  },
+  "divine.regeneration": {
+   "resrefs": ["SPPR711"],
+   "parts": [
+    {"spec": "Restricted to druids, stays level 7, heals 2 HP per second (from 3) for 1 round per level (from 1 round per 2 levels), and replaces an earlier casting on the same target.", "status": "done"}
+   ]
+  },
+  "divine.greater_restoration": {
+   "resrefs": ["SPPR713"],
+   "parts": [
+    {"spec": "Keeps vanilla cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun, Sleep, Petrification (before the full heal), Polymorph, curses, Blindness, and Deafness.", "status": "done"}
+   ]
+  },
+  "divine.negative_plane_protection": {
+   "resrefs": ["SPPR413"],
+   "parts": [
+    {"spec": "Lasts 1 turn per level (420-1200 seconds across levels 7-20), usable by both clerics and druids, otherwise vanilla.", "status": "done"}
+   ]
+  }
+ },
+ "chat": []
+}

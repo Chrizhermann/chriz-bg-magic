@@ -60,7 +60,9 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
             for e, f in zip(a["effects"], b["effects"]):
                 if f["opcode"] == 12:
                     check(e["save"] == (f["save"] & ~1) | 2, f"{res}: save {e['save']:#x} from {f['save']:#x}")
-                    check({**e, "save": 0} == {**f, "save": 0}, f"{res}: damage effect changed beyond its save")
+                    exp_spec = (f["special"] | 0x100) if res == "SPPR304" else f["special"]
+                    exp_dice = min(f["dice"], 12) if res == "SPWI313" else f["dice"]
+                    check({**e, "save": 0} == {**f, "save": 0, "special": exp_spec, "dice": exp_dice}, f"{res}: damage effect changed beyond its save")
                 else:
                     check(e == f, f"{res}: other effect changed")
     for untouched in ("SPWI523", "SPWI900", "SPWI615", "SPWI911", "SPPR705", "SPWI220"):
