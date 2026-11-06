@@ -8,6 +8,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_vanilla.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_scs.tpa~
 END
 
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
@@ -101,3 +102,36 @@ LAF cbmagic_kept_iron_skins END
 LAF cbmagic_kept_mass_regenerate END
 LAF cbmagic_kept_regeneration END
 LAF cbmagic_kept_greater_restoration END
+LAF cbmagic_scs_chromatic_orb END
+LAF cbmagic_scs_melfs_minute_meteors END
+LAF cbmagic_scs_skull_trap END
+LAF cbmagic_scs_lower_resistance END
+LAF cbmagic_scs_power_word_silence END
+LAF cbmagic_scs_power_word_stun END
+LAF cbmagic_scs_mantle END
+LAF cbmagic_scs_project_image END
+LAF cbmagic_scs_abi_dalzim END
+LAF cbmagic_scs_improved_mantle END
+LAF cbmagic_scs_power_word_blind END
+LAF cbmagic_scs_simulacrum END
+LAF cbmagic_scs_wizard_symbol_death END
+LAF cbmagic_scs_wizard_symbol_stun END
+LAF cbmagic_scs_wizard_symbol_fear END
+LAF cbmagic_scs_absolute_immunity END
+LAF cbmagic_scs_power_word_kill END
+LAF cbmagic_scs_cleric_symbol_death END
+LAF cbmagic_scs_cleric_symbol_stun END
+LAF cbmagic_scs_cleric_symbol_fear END
+LAF cbmagic_scs_cacofiend END
+LAF cbmagic_scs_summon_fiend END
+LAF cbmagic_scs_wizard_gate END
+LAF cbmagic_scs_cleric_gate END
+LAF cbmagic_scs_blade_barrier END
+LAF cbmagic_scs_call_lightning END
+LAF cbmagic_scs_defensive_harmony END
+LAF cbmagic_scs_globe_of_blades END
+LAF cbmagic_scs_glyph_of_warding END
+LAF cbmagic_scs_magical_stone END
+LAF cbmagic_scs_insect_plague END
+LAF cbmagic_scs_natures_beauty END
+LAF cbmagic_scs_lesser_restoration END
