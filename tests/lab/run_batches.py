@@ -20,7 +20,7 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "bonus", "smoke")
 
 
 def lua_list(values):
@@ -86,6 +86,42 @@ def curse(c, check):
     time.sleep(3)
     both = c.p("cu-2", f'stats("{who}")')["thac0"]
     check("Doom on top of Unholy Blight: only the worst counts", both == blight, values=[base, blight, both])
+
+
+def haste(c, check):
+    # Haste and Slow cancel each other; Improved Haste works on the slowed, ends Slow, keeps it out.
+    state = lambda d: sorted({e["op"] for e in d or []})  # noqa: E731
+    c.p("ha-saves", "set_saves(0, {spell = 20, breath = 20, death = 20}, 300)")
+    c.p("ha-slow", 'apply_spell(1, "SPWI312", "Player1")')
+    time.sleep(3)
+    slowed = c.p("ha-1", "ops(0, {16, 40})")
+    check("Slow lands", 40 in state(slowed), effects=slowed)
+    c.p("ha-haste", 'apply_spell(1, "SPWI305", "Player1")')
+    time.sleep(3)
+    after = c.p("ha-2", "ops(0, {16, 40})")
+    check("Haste on a slowed target: both gone", not after, effects=after)
+    c.p("ha-haste2", 'apply_spell(1, "SPWI305", "Player1")')
+    time.sleep(3)
+    hasted = c.p("ha-3", "ops(0, {16, 40})")
+    check("Haste lands on a free target", 16 in state(hasted), effects=hasted)
+    c.p("ha-slow2", 'apply_spell(1, "SPWI312", "Player1")')
+    time.sleep(3)
+    after = c.p("ha-4", "ops(0, {16, 40})")
+    check("Slow on a hasted target: both gone", not after, effects=after)
+    c.p("ha-slow3", 'apply_spell(1, "SPWI312", "Player1")')
+    time.sleep(3)
+    before = c.p("ha-5", "stats(0)")
+    c.p("ha-ih", 'apply_spell(1, "SPWI613", "Player1")')
+    time.sleep(3)
+    improved = c.p("ha-6", "ops(0, {16, 40, 1, 176})")
+    stats = c.p("ha-7", "stats(0)")
+    check("Improved Haste ends Slow, without the Haste opcode", 40 not in state(improved) and 16 not in state(improved)
+          and 1 in state(improved), effects=improved, before=before, after=stats)
+    c.p("ha-slow4", 'apply_spell(1, "SPWI312", "Player1")')
+    time.sleep(3)
+    held = c.p("ha-8", "ops(0, {40})")
+    check("Improved Haste keeps Slow out", not held, effects=held)
+    c.p("ha-end", 'clear(0, {"SPWI613", "SPWI312", "SPWI305"})')
 
 
 def strength(c, check):
