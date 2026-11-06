@@ -49,3 +49,13 @@ LAF cbmagic_scs_power_word_kill END
 LAF cbmagic_scs_cleric_symbol_death END
 LAF cbmagic_scs_cleric_symbol_stun END
 LAF cbmagic_scs_cleric_symbol_fear END
+LAF cbmagic_scs_cacofiend END
+LAF cbmagic_scs_summon_fiend END
+LAF cbmagic_scs_wizard_gate END
+LAF cbmagic_scs_cleric_gate END
+LAF cbmagic_scs_blade_barrier END
+LAF cbmagic_scs_call_lightning END
+LAF cbmagic_scs_defensive_harmony END
+LAF cbmagic_scs_globe_of_blades END
+LAF cbmagic_scs_glyph_of_warding END
+LAF cbmagic_scs_magical_stone END

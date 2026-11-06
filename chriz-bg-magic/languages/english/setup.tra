@@ -68,7 +68,7 @@
 @30035 = ~summons a frenzied demon or devil~
 @30036 = ~summons a frenzied cornugon (for lawful casters), glabrezu (for chaotic casters), or either (for neutral casters)~
 
-@30037 = ~calls an outer-planar creature[^t]*to attack~
+@30037 = ~calls an outer-planar creature.+the pit fiend.+to attack~
 @30038 = ~calls an outer-planar creature (a pit fiend for lawful casters, a balor for chaotic casters, or either for neutral casters) to attack~
 
 @30039 = ~Casting Time: 9~

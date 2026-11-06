@@ -229,6 +229,12 @@ def _ab_projectiles(spl_bytes):
     return [struct.unpack_from("<H", spl_bytes, ab_off + a * 0x28 + 0x26)[0] for a in range(ab_cnt)]
 
 
+def _ab_cast_times(spl_bytes):
+    ab_off, = struct.unpack_from("<I", spl_bytes, 0x64)
+    ab_cnt, = struct.unpack_from("<H", spl_bytes, 0x68)
+    return [struct.unpack_from("<H", spl_bytes, ab_off + a * 0x28 + 0x12)[0] for a in range(ab_cnt)]
+
+
 @test
 def scs_batch2_arcane_and_symbols(work, weidu):
     """Abi-Dalzim's Horrid Wilting, Improved Mantle, Power Word Blind/Kill, Simulacrum,
@@ -417,4 +423,273 @@ def scs_batch2_arcane_and_symbols(work, weidu):
     out2 = fg.install()
     assert installed_ok(out2), out2
     assert fg.tree() == snap
+
+
+def _make_cre(xp=20000, ea=128, gender=4, ovr="GORBAT") -> bytes:
+    buf = bytearray(0x2D4)
+    buf[0:8] = b"CRE V1.0"
+    struct.pack_into("<I", buf, 0x14, xp)
+    buf[0x248:0x250] = ovr.encode("ascii").ljust(8, b"\x00")[:8]
+    buf[0x250:0x258] = b"dembal01"
+    buf[0x270] = ea
+    buf[0x275] = gender
+    return bytes(buf)
+
+
+def _make_summon_eff(cre_res: str, power: int = 7) -> bytes:
+    buf = bytearray(0x110)
+    buf[0:8] = b"EFF V2.0"
+    buf[8:16] = b"EFF V2.0"
+    struct.pack_into("<I", buf, 0x10, 67)
+    struct.pack_into("<I", buf, 0x14, 1)
+    struct.pack_into("<I", buf, 0x18, power)
+    struct.pack_into("<I", buf, 0x20, 2)
+    struct.pack_into("<I", buf, 0x24, 1)
+    struct.pack_into("<I", buf, 0x28, 2400)
+    struct.pack_into("<H", buf, 0x2C, 100)
+    buf[0x30:0x38] = cre_res.encode("ascii").ljust(8, b"\x00")[:8]
+    return bytes(buf)
+
+
+@test
+def scs_batch3_fiends_and_divine(work, weidu):
+    """Verify Batch 3: Fiend summoning (Cacofiend, Summon Fiend, Wizard/Cleric Gate),
+    Blade Barrier, Globe of Blades, Call Lightning, Defensive Harmony, Glyph of Warding, Magical Stone."""
+    tlk = make_tlk([
+        "",
+        # 1: Cacofiend
+        "Cacofiend\nWhen this spell is cast, it teleports in a powerful fiend that will go on a rampage.",
+        # 2: Summon Fiend
+        "Summon Fiend\nCasting this spell summons a frenzied demon or devil.",
+        # 3: Gate
+        "Gate\nBy means of this spell, the caster calls an outer-planar creature--the pit fiend--to attack <PRO_HISHER> foes.",
+        # 4: Blade Barrier
+        "Blade Barrier\nCasting Time: 9\nAny creature attempting to pass through the Blade Barrier suffers 8d8 points of damage. Creatures within the area of the barrier when it is invoked are entitled to a Saving Throw vs. Spell to negate the damage.",
+        # 5: Globe of Blades
+        "Globe of Blades\nAny creature attempting to pass through the blade barrier suffers 10d10 points of damage. Creatures within the area of the barrier when it is invoked are entitled to a Saving Throw vs. Spell at -2. If this is successful, the blades are avoided and no damage is suffered.",
+        # 6: Call Lightning
+        "Call Lightning\nDuration: 1 round/4 levels\nThe spell has a duration of 1 round every 4 levels of the caster. Thus, an 8th-level caster will call down two bolts.",
+        # 7: Defensive Harmony
+        "Defensive Harmony\nWhile the spell is in effect, each affected creature gains a +2 bonus to <PRO_HISHER> Armor Class.",
+        # 8: Glyph of Warding
+        "Glyph of Warding\nCasting Time: 9\nSaving Throw: Neg.\nAny creature violating the warded area is subject to the magic it stores, although a successful Saving Throw vs. Spell enables the creature to escape the effects of the glyph.",
+        # 9: Magical Stone
+        "Magical Stone\nThe stone deals 1d4 points of damage to whomever it hits.",
+    ])
+    caco_spl = make_spl(
+        level=7, school=2, desc=1,
+        abilities=[{"min_level": 1, "target": 4, "effects": [
+            {"opcode": 177, "target": 1, "p1": 0, "p2": 2, "duration": 90, "dispel": 2, "resource": "SPCACO"},
+        ]}],
+    )
+    fiend_spl = make_spl(
+        level=8, school=2, desc=2,
+        abilities=[{"min_level": 1, "target": 4, "effects": [
+            {"opcode": 177, "target": 1, "p1": 0, "p2": 2, "duration": 90, "dispel": 2, "resource": "SPFIEND"},
+        ]}],
+    )
+    wgate_spl = make_spl(
+        level=9, school=2, desc=3,
+        abilities=[{"min_level": 1, "target": 4, "effects": [
+            {"opcode": 177, "target": 1, "p1": 0, "p2": 2, "duration": 198, "resource": "SPGATE"},
+        ]}],
+    )
+    cgate_spl = make_spl(
+        spell_type=2, level=7, school=2, desc=3,
+        abilities=[{"min_level": 1, "target": 4, "effects": [
+            {"opcode": 177, "target": 1, "p1": 0, "p2": 2, "duration": 200, "resource": "SPGATE"},
+        ]}],
+    )
+    bbar_spl = make_spl(
+        spell_type=2, level=6, school=6, desc=4,
+        abilities=[{"min_level": 1, "target": 5, "casting_time": 9, "effects": [
+            {"opcode": 177, "target": 1, "power": 6, "p2": 2, "duration": 62, "dispel": 3, "resource": "SPPR603D"},
+        ]}],
+    )
+    bbar_pay = make_spl(
+        spell_type=2, level=6, school=6,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 216, "effects": [
+            {"opcode": 12, "p2": 0x1000000, "timing": 1, "dice": 8, "sides": 8, "save": SAVE_SPELL, "special": 0},
+        ]}],
+    )
+    bbar_npc_pay = make_spl(
+        spell_type=2, level=6, school=6,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 218, "effects": [
+            {"opcode": 12, "p2": 0x1000000, "timing": 1, "dice": 6, "sides": 8, "save": SAVE_SPELL, "special": 0},
+        ]}],
+    )
+    gblades_spl = make_spl(
+        spell_type=2, level=7, school=6, desc=5,
+        abilities=[{"min_level": 1, "target": 5, "casting_time": 9, "effects": [
+            {"opcode": 177, "target": 1, "power": 7, "p2": 2, "duration": 60, "dispel": 3, "resource": "SPPR725D"},
+        ]}],
+    )
+    gblades_pay = make_spl(
+        spell_type=2, level=7, school=6,
+        abilities=[{"min_level": 1, "target": 1, "projectile": 216, "effects": [
+            {"opcode": 12, "p2": 0x1000000, "timing": 1, "dice": 10, "sides": 10, "save": SAVE_SPELL, "bonus": -2, "special": 0},
+        ]}],
+    )
+    call_lgt = make_spl(
+        spell_type=2, level=3, school=8, desc=6,
+        abilities=[
+            {"min_level": 1, "projectile": 81, "effects": [{"opcode": 12, "p2": 0x40000, "dice": 7, "sides": 8, "save": SAVE_SPELL, "special": 0x100}]},
+            {"min_level": 6, "projectile": 81, "effects": [{"opcode": 12, "p2": 0x40000, "dice": 8, "sides": 8, "save": SAVE_SPELL, "special": 0x100}]},
+            {"min_level": 10, "projectile": 82, "effects": [{"opcode": 12, "p2": 0x40000, "dice": 12, "sides": 8, "save": SAVE_SPELL, "special": 0x100}]},
+            {"min_level": 12, "projectile": 83, "effects": [{"opcode": 12, "p2": 0x40000, "dice": 14, "sides": 8, "save": SAVE_SPELL, "special": 0x100}]},
+        ],
+    )
+    def_harm = make_spl(
+        spell_type=2, level=4, school=4, desc=7,
+        abilities=[{"min_level": 1, "target": 5, "effects": [
+            {"opcode": 0, "power": 4, "p1": 2, "p2": 0, "duration": 36, "dispel": 3},
+        ]}],
+    )
+    glyph_spl = make_spl(
+        spell_type=2, level=3, school=1, desc=8,
+        abilities=[
+            {"min_level": 1, "target": 4, "casting_time": 9, "effects": [
+                {"opcode": 12, "power": 3, "p2": 0x40000, "timing": 1, "dice": 5, "sides": 4, "save": SAVE_SPELL, "special": 0},
+            ]},
+            {"min_level": 18, "target": 4, "casting_time": 9, "effects": [
+                {"opcode": 12, "power": 3, "p2": 0x40000, "timing": 1, "dice": 18, "sides": 4, "save": SAVE_SPELL, "special": 0},
+            ]},
+        ],
+    )
+    mstone_spl = make_spl(
+        spell_type=2, level=1, school=4, desc=9,
+        abilities=[{"min_level": 1, "target": 1, "effects": [
+            {"opcode": 12, "power": 1, "p2": 0x400000, "timing": 1, "dice": 1, "sides": 4, "dispel": 1},
+        ]}],
+    )
+    biff = {
+        "SPELL.IDS": make_ids([
+            (2707, "WIZARD_CACOFIEND"),
+            (2807, "WIZARD_SUMMON_FIEND"),
+            (2905, "WIZARD_GATE"),
+            (1703, "CLERIC_GATE"),
+            (1603, "CLERIC_BLADE_BARRIER"),
+            (1725, "CLERIC_GLOBE_OF_BLADES"),
+            (1302, "CLERIC_CALL_LIGHTNING"),
+            (1406, "CLERIC_DEFENSIVE_HARMONY"),
+            (1304, "CLERIC_GLYPH_OF_WARDING"),
+            (1106, "CLERIC_MAGIC_STONE"),
+        ]),
+        "SPLPROT.2DA": make_2da(["STAT", "VALUE", "RELATION"], SPLPROT_BASE),
+        "GORBAT5.CRE": _make_cre(),
+        "GORBAT3.CRE": _make_cre(),
+        "DEMBAL01.CRE": _make_cre(),
+        "SPCACO.EFF": _make_summon_eff("demnabsu", 7),
+        "SPFIEND.EFF": _make_summon_eff("demglasu", 8),
+        "SPGATE.EFF": _make_summon_eff("dempitsu", 8),
+        "SPWI707.SPL": caco_spl,
+        "SPWI807.SPL": fiend_spl,
+        "SPWI905.SPL": wgate_spl,
+        "SPPR703.SPL": cgate_spl,
+        "SPPR603.SPL": bbar_spl,
+        "SPPR603D.SPL": bbar_pay,
+        "SPPR698D.SPL": bbar_npc_pay,
+        "SPPR725.SPL": gblades_spl,
+        "SPPR725D.SPL": gblades_pay,
+        "SPPR302.SPL": call_lgt,
+        "SPPR406.SPL": def_harm,
+        "SPPR304.SPL": glyph_spl,
+        "SPPR106.SPL": mstone_spl,
+        "SCRL9N.ITM": make_itm([[
+            {"opcode": 146, "resource": "SPWI905"},
+            {"opcode": 147, "resource": "SPWI905"},
+        ]], desc=3),
+    }
+    fg = FakeGame(work, weidu, tlk=tlk, biff=biff)
+    out = fg.install()
+    assert installed_ok(out), out
+
+    # Summoned CREs and EFFs created and configured
+    for cre_name in ("CBMGBONF", "CBMGCORN", "CBMGBALR"):
+        cre = fg.file(f"override/{cre_name}.CRE")
+        assert cre is not None
+        assert struct.unpack_from("<I", cre, 0x14)[0] == 0
+        assert cre[0x270] == 28  # GOODBUTRED
+        assert cre[0x275] == 9   # SUMMONED_DEMON
+        assert cre[0x250:0x258] == b"\x00" * 8
+    for eff_name, exp_cre in (("CBMGCACO", "cbmgbonf"), ("CBMGFIEN", "cbmgcorn"), ("CBMGGATE", "cbmgbalr")):
+        eff = fg.file(f"override/{eff_name}.EFF")
+        assert eff is not None
+        assert eff[0x30:0x38].rstrip(b"\x00").decode("ascii").lower() == exp_cre
+
+    # Fiend spells: 4 op177 effects (Lawful=16, Chaotic=48, Neutral=32 50/50) and ability target=5
+    for res, eff_l, eff_c in (
+        ("SPWI707", "cbmgcaco", "spcaco"),
+        ("SPWI807", "cbmgfien", "spfiend"),
+        ("SPWI905", "spgate", "cbmggate"),
+        ("SPPR703", "spgate", "cbmggate"),
+    ):
+        raw = fg.file(f"override/{res}.SPL")
+        ab_off = struct.unpack_from("<I", raw, 0x64)[0]
+        assert raw[ab_off + 0x0C] == 5
+        parsed = fg.spl(res)
+        fxs = parsed["abilities"][0]["effects"]
+        assert [(e["opcode"], e["p1"], e["p2"], e["resource"].lower(), e["prob2"], e["prob1"]) for e in fxs] == [
+            (177, 16, 8, eff_l, 0, 100),
+            (177, 48, 8, eff_c, 0, 100),
+            (177, 32, 8, eff_l, 0, 49),
+            (177, 32, 8, eff_c, 50, 100),
+        ]
+    # Gate scroll cast header target updated to 5
+    scrl_raw = fg.file("override/SCRL9N.ITM")
+    i_ab_off = struct.unpack_from("<I", scrl_raw, 0x64)[0]
+    assert scrl_raw[i_ab_off + 0x0C] == 5
+
+    # Blade Barrier & Globe of Blades
+    assert _ab_cast_times(fg.file("override/SPPR603.SPL")) == [6]
+    assert _ab_projectiles(fg.file("override/SPPR698D.SPL")) == [216]
+    for pay_res in ("SPPR603D", "SPPR698D", "SPPR725D"):
+        pay = fg.spl(pay_res)
+        fxs = pay["abilities"][0]["effects"]
+        assert fxs[0]["opcode"] == 318
+        assert fxs[1]["opcode"] == 12 and (fxs[1]["special"] & 0x100) != 0
+    assert "Any enemy attempting" in fg.tlk(fg.spl("SPPR603")["desc"])
+    assert "Any enemy attempting" in fg.tlk(fg.spl("SPPR725")["desc"])
+
+    # Call Lightning projectiles: 85, 86, 90, 91
+    assert _ab_projectiles(fg.file("override/SPPR302.SPL")) == [85, 86, 90, 91]
+    assert "1 round/level (maximum 11 rounds)" in fg.tlk(fg.spl("SPPR302")["desc"])
+
+    # Defensive Harmony: cleric-only (0x20 = 0x8000) and +4 AC
+    dh_raw = fg.file("override/SPPR406.SPL")
+    assert struct.unpack_from("<H", dh_raw, 0x20)[0] == 0x8000
+    dh = fg.spl("SPPR406")
+    assert dh["abilities"][0]["effects"][0]["p1"] == 4
+    assert "+4 bonus" in fg.tlk(dh["desc"])
+
+    # Glyph of Warding: casting time 5, save vs breath (from cbmagic_fix_breath_saves) + save for half (0x100)
+    assert _ab_cast_times(fg.file("override/SPPR304.SPL")) == [5, 5]
+    gw = fg.spl("SPPR304")
+    for ab in gw["abilities"]:
+        assert ab["effects"][0]["save"] == SAVE_BREATH
+        assert (ab["effects"][0]["special"] & 0x100) != 0
+    assert "take half damage from the glyph" in fg.tlk(gw["desc"])
+
+    # Magical Stone: CBMGMST1.EFF (3d4) & CBMGMST2.EFF (6d4), 5 op177 effects on SPPR106
+    mst1 = fg.file("override/CBMGMST1.EFF")
+    mst2 = fg.file("override/CBMGMST2.EFF")
+    assert struct.unpack_from("<II", mst1, 0x38) == (3, 4)
+    assert struct.unpack_from("<II", mst2, 0x38) == (6, 4)
+    ms = fg.spl("SPPR106")
+    ms_fx = ms["abilities"][0]["effects"]
+    assert [(e["opcode"], e["p1"], e["p2"], e["resource"].lower()) for e in ms_fx] == [
+        (177, 4, 3, "cbmgmst2"),
+        (177, 1, 3, "cbmgmst1"),
+        (177, 2, 3, "cbmgmst1"),
+        (177, 5, 3, "cbmgmst1"),
+        (177, 255, 3, "cbmgmst1"),
+    ]
+    assert "3d4 points of crushing damage" in fg.tlk(ms["desc"])
+
+    # Idempotence check
+    snap = fg.tree()
+    out2 = fg.install()
+    assert installed_ok(out2), out2
+    assert fg.tree() == snap
+
 

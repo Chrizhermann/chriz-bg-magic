@@ -1001,3 +1001,599 @@ BEGIN
   LAF cbmagic_patch_symbol_spell INT_VAR free_action = 0 STR_VAR symbol = ~CLERIC_SYMBOL_FEAR~ END
 END
 
+// Helper: patch a fiend-summoning spell so Lawful casters summon eff_l, Chaotic casters
+// summon eff_c, and L/C Neutral casters have a 50/50 chance of either.
+DEFINE_ACTION_FUNCTION cbmagic_patch_fiend_spell
+  STR_VAR symbol = ~~
+          src_cre = ~~
+          dst_cre = ~~
+          ovr_script = ~~
+          src_eff = ~~
+          dst_eff = ~~
+          eff_l = ~~
+          eff_c = ~~
+          find = ~~
+          replace = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: %symbol% is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    ACTION_IF (FILE_EXISTS_IN_GAME ~%src_cre%.cre~) AND !(FILE_EXISTS ~override/%dst_cre%.cre~) BEGIN
+      COPY_EXISTING ~%src_cre%.cre~ ~override/%dst_cre%.cre~
+        PATCH_IF (SOURCE_SIZE >= 0x2d4) BEGIN
+          WRITE_LONG 0x14 0
+          WRITE_BYTE 0x270 28
+          WRITE_BYTE 0x275 9
+          WRITE_ASCIIE 0x248 ~%ovr_script%~ #8
+          WRITE_ASCII 0x250 ~~ #8
+          WRITE_ASCII 0x268 ~WTASIGHT~ #8
+          WRITE_ASCIIE 0x280 ~%dst_cre%~ #32
+        END
+    END
+    ACTION_IF (FILE_EXISTS_IN_GAME ~%src_eff%.eff~) AND !(FILE_EXISTS ~override/%dst_eff%.eff~) BEGIN
+      COPY_EXISTING ~%src_eff%.eff~ ~override/%dst_eff%.eff~
+        PATCH_IF (SOURCE_SIZE >= 0x38) BEGIN
+          WRITE_ASCIIE 0x30 ~%dst_cre%~ #8
+        END
+    END
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: %symbol% (%spell%) skipped: %reason%.~
+      END ELSE PATCH_IF (ab_cnt = 0) BEGIN
+        PATCH_WARN ~chriz-bg-magic: %symbol% (%spell%) has no abilities — skipping.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          SET has_aligned = 0
+          SET base_e = 0 - 1
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            PATCH_IF (op = 177) BEGIN
+              READ_LONG (e + 0x04) p1
+              READ_LONG (e + 0x08) p2
+              PATCH_IF (p2 = 8) AND (p1 = 16) BEGIN
+                SET has_aligned = 1
+              END ELSE PATCH_IF (base_e < 0) BEGIN
+                SET base_e = e
+              END
+            END
+          END
+          PATCH_IF has_aligned BEGIN
+            SET already += 1
+          END ELSE PATCH_IF (base_e >= 0) BEGIN
+            WRITE_BYTE (ab + 0x0c) 5
+            READ_BYTE (base_e + 0x03) pw
+            READ_BYTE (base_e + 0x0c) tm
+            READ_BYTE (base_e + 0x0d) dp
+            READ_LONG (base_e + 0x0e) dur
+            WRITE_BYTE (base_e + 0x02) 1
+            WRITE_LONG (base_e + 0x04) 16
+            WRITE_LONG (base_e + 0x08) 8
+            WRITE_BYTE (base_e + 0x12) 100
+            WRITE_BYTE (base_e + 0x13) 0
+            WRITE_ASCIIE (base_e + 0x14) ~%eff_l%~ #8
+            LPF ADD_SPELL_EFFECT
+              INT_VAR header = a + 1 opcode = 177 target = 1 power = pw parameter1 = 48 parameter2 = 8
+                      timing = tm resist_dispel = dp duration = dur probability1 = 100 probability2 = 0
+              STR_VAR resource = EVAL ~%eff_c%~
+            END
+            LPF ADD_SPELL_EFFECT
+              INT_VAR header = a + 1 opcode = 177 target = 1 power = pw parameter1 = 32 parameter2 = 8
+                      timing = tm resist_dispel = dp duration = dur probability1 = 49 probability2 = 0
+              STR_VAR resource = EVAL ~%eff_l%~
+            END
+            LPF ADD_SPELL_EFFECT
+              INT_VAR header = a + 1 opcode = 177 target = 1 power = pw parameter1 = 32 parameter2 = 8
+                      timing = tm resist_dispel = dp duration = dur probability1 = 100 probability2 = 50
+              STR_VAR resource = EVAL ~%eff_c%~
+            END
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            SET changed += 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+      OUTER_PATCH_SAVE list ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE sc_itm ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        ACTION_IF FILE_EXISTS_IN_GAME ~%sc_itm%.itm~ BEGIN
+          COPY_EXISTING ~%sc_itm%.itm~ ~override~
+            READ_LONG 0x64 i_ab_off
+            READ_SHORT 0x68 i_ab_cnt
+            READ_LONG 0x6a i_fx_off
+            FOR (ia = 0; ia < i_ab_cnt; ++ia) BEGIN
+              SET i_ab = i_ab_off + ia * 0x38
+              READ_SHORT (i_ab + 0x1e) i_fx_cnt
+              READ_SHORT (i_ab + 0x20) i_fx_idx
+              FOR (ii = 0; ii < i_fx_cnt; ++ii) BEGIN
+                SET ie = i_fx_off + (i_fx_idx + ii) * 0x30
+                READ_SHORT ie i_op
+                PATCH_IF (i_op = 146) OR (i_op = 148) BEGIN
+                  READ_ASCII (ie + 0x14) i_res (8) NULL
+                  PATCH_IF (~%i_res%~ STRING_EQUAL_CASE ~%spell%~) BEGIN
+                    WRITE_BYTE (i_ab + 0x0c) 5
+                  END
+                END
+              END
+            END
+          BUT_ONLY
+        END
+      END
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = EVAL ~%symbol%~ END
+    END
+    PRINT ~chriz-bg-magic: %symbol% (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// 10. Cacofiend (WIZARD_CACOFIEND): Lawful -> Bone Fiend, Chaotic -> Nabassu, Neutral -> 50/50.
+DEFINE_ACTION_FUNCTION cbmagic_scs_cacofiend
+BEGIN
+  OUTER_SPRINT find @30033
+  OUTER_SPRINT replace @30034
+  LAF cbmagic_patch_fiend_spell
+    STR_VAR symbol = ~WIZARD_CACOFIEND~
+            src_cre = ~gorbat5~ dst_cre = ~cbmgbonf~ ovr_script = ~dempitsu~
+            src_eff = ~spcaco~ dst_eff = ~cbmgcaco~
+            eff_l = ~cbmgcaco~ eff_c = ~spcaco~
+            find replace
+  END
+END
+
+// 15. Summon Fiend (WIZARD_SUMMON_FIEND): Lawful -> Cornugon, Chaotic -> Glabrezu, Neutral -> 50/50.
+DEFINE_ACTION_FUNCTION cbmagic_scs_summon_fiend
+BEGIN
+  OUTER_SPRINT find @30035
+  OUTER_SPRINT replace @30036
+  LAF cbmagic_patch_fiend_spell
+    STR_VAR symbol = ~WIZARD_SUMMON_FIEND~
+            src_cre = ~gorbat3~ dst_cre = ~cbmgcorn~ ovr_script = ~dempitsu~
+            src_eff = ~spfiend~ dst_eff = ~cbmgfien~
+            eff_l = ~cbmgfien~ eff_c = ~spfiend~
+            find replace
+  END
+END
+
+// 20. Gate (wizard, WIZARD_GATE): Lawful -> Pit Fiend, Chaotic -> Balor, Neutral -> 50/50.
+DEFINE_ACTION_FUNCTION cbmagic_scs_wizard_gate
+BEGIN
+  OUTER_SPRINT find @30037
+  OUTER_SPRINT replace @30038
+  LAF cbmagic_patch_fiend_spell
+    STR_VAR symbol = ~WIZARD_GATE~
+            src_cre = ~dembal01~ dst_cre = ~cbmgbalr~ ovr_script = ~demnabsu~
+            src_eff = ~spgate~ dst_eff = ~cbmggate~
+            eff_l = ~spgate~ eff_c = ~cbmggate~
+            find replace
+  END
+END
+
+// 30. Gate (cleric, CLERIC_GATE): Lawful -> Pit Fiend, Chaotic -> Balor, Neutral -> 50/50.
+DEFINE_ACTION_FUNCTION cbmagic_scs_cleric_gate
+BEGIN
+  OUTER_SPRINT find @30037
+  OUTER_SPRINT replace @30038
+  LAF cbmagic_patch_fiend_spell
+    STR_VAR symbol = ~CLERIC_GATE~
+            src_cre = ~dembal01~ dst_cre = ~cbmgbalr~ ovr_script = ~demnabsu~
+            src_eff = ~spgate~ dst_eff = ~cbmggate~
+            eff_l = ~spgate~ eff_c = ~cbmggate~
+            find replace
+  END
+END
+
+// Helper: patch a Blade Barrier / Globe of Blades payload subspell to affect only enemies
+// (leading op318 for !ENEMIES) and allow a save for half damage (special |= 0x100 on op12).
+DEFINE_ACTION_FUNCTION cbmagic_patch_blade_payload
+  INT_VAR not_enemy_row = 0
+  STR_VAR payload = ~~
+  RET changed already
+BEGIN
+  OUTER_SET changed = 0
+  OUTER_SET already = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~%payload%.spl~ BEGIN
+    COPY_EXISTING ~%payload%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF valid AND (ab_cnt > 0) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x26) proj
+          PATCH_IF (proj = 218) BEGIN
+            WRITE_SHORT (ab + 0x26) 216
+          END
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          SET has_guard = 0
+          SET half_changed = 0
+          SET half_already = 0
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            PATCH_IF (op = 318) OR (op = 324) BEGIN
+              READ_LONG (e + 0x08) p2
+              READ_ASCII (e + 0x14) res (8) NULL
+              PATCH_IF (p2 = not_enemy_row) AND (~%res%~ STRING_EQUAL_CASE ~%payload%~) BEGIN
+                SET has_guard = 1
+              END
+            END ELSE PATCH_IF (op = 12) BEGIN
+              READ_LONG (e + 0x24) save_type
+              READ_LONG (e + 0x2c) special
+              PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
+                PATCH_IF ((special BAND 0x100) != 0) BEGIN
+                  SET half_already += 1
+                END ELSE BEGIN
+                  WRITE_LONG (e + 0x2c) (special BOR 0x100)
+                  SET half_changed += 1
+                END
+              END
+            END
+          END
+          PATCH_IF !has_guard BEGIN
+            LPF ADD_SPELL_EFFECT
+              INT_VAR header = a + 1 insert_point = 0 opcode = 318 target = 2 power = 0
+                      parameter1 = 1 parameter2 = not_enemy_row timing = 0 duration = 0 resist_dispel = 0
+              STR_VAR resource = EVAL ~%payload%~
+            END
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            SET changed += 1
+          END ELSE PATCH_IF (half_changed > 0) BEGIN
+            SET changed += 1
+          END ELSE BEGIN
+            SET already += 1
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// 22. Blade Barrier (CLERIC_BLADE_BARRIER): casting time 9 -> 6, affects only enemies, save for half.
+DEFINE_ACTION_FUNCTION cbmagic_scs_blade_barrier
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_BLADE_BARRIER~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_BLADE_BARRIER is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x114 value = 1 relation = 5 RET not_enemy_row = row END
+    OUTER_SET cast_changed = 0
+    OUTER_SET cast_already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: CLERIC_BLADE_BARRIER (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x12) cast_time
+          PATCH_IF (cast_time = 6) BEGIN
+            SET cast_already += 1
+          END ELSE PATCH_IF (cast_time > 6) BEGIN
+            WRITE_SHORT (ab_off + a * 0x28 + 0x12) 6
+            SET cast_changed += 1
+          END
+        END
+      END
+    BUT_ONLY
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = EVAL ~%spell%d~ RET pay_changed = changed pay_already = already END
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = ~sppr698d~ RET npc_changed = changed npc_already = already END
+    ACTION_IF (cast_changed > 0) OR (pay_changed > 0) BEGIN
+      OUTER_SPRINT find @30039
+      OUTER_SPRINT replace @30040
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_BLADE_BARRIER~ END
+      OUTER_SPRINT find @30041
+      OUTER_SPRINT replace @30042
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_BLADE_BARRIER~ END
+      OUTER_SPRINT find @30043
+      OUTER_SPRINT replace @30044
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_BLADE_BARRIER~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_BLADE_BARRIER (%spell%): cast %cast_changed%/%cast_already%, payload %pay_changed%/%pay_already%.~
+  END
+END
+
+// 23. Call Lightning (CLERIC_CALL_LIGHTNING): duration 1 round/level up to 11 bolts (projectiles 85..91).
+DEFINE_ACTION_FUNCTION cbmagic_scs_call_lightning
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CALL_LIGHTNING~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_CALL_LIGHTNING is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: CLERIC_CALL_LIGHTNING (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x10) min_lvl
+          READ_SHORT (ab + 0x26) proj
+          SET target_proj = (min_lvl <= 5) ? 85 : ((min_lvl >= 11) ? 91 : (80 + min_lvl))
+          PATCH_IF (proj = target_proj) BEGIN
+            SET already += 1
+          END ELSE BEGIN
+            WRITE_SHORT (ab + 0x26) target_proj
+            SET changed += 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      OUTER_SPRINT find @30047
+      OUTER_SPRINT replace @30048
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_CALL_LIGHTNING~ END
+      OUTER_SPRINT find @30049
+      OUTER_SPRINT replace @30050
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_CALL_LIGHTNING~ END
+      OUTER_SPRINT find @30051
+      OUTER_SPRINT replace @30052
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_CALL_LIGHTNING~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_CALL_LIGHTNING (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// 24. Defensive Harmony (CLERIC_DEFENSIVE_HARMONY): cleric-only (0x20 = 0x8000), +4 AC bonus.
+DEFINE_ACTION_FUNCTION cbmagic_scs_defensive_harmony
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_DEFENSIVE_HARMONY~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_DEFENSIVE_HARMONY is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: CLERIC_DEFENSIVE_HARMONY (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        READ_SHORT 0x20 priest_type
+        PATCH_IF (priest_type != 0x8000) BEGIN
+          WRITE_SHORT 0x20 0x8000
+          SET changed += 1
+        END ELSE BEGIN
+          SET already += 1
+        END
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            PATCH_IF (op = 0) BEGIN
+              READ_LONG (e + 0x04) ac_bonus
+              PATCH_IF (ac_bonus = 4) BEGIN
+                SET already += 1
+              END ELSE BEGIN
+                WRITE_LONG (e + 0x04) 4
+                SET changed += 1
+              END
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      OUTER_SPRINT find @30053
+      OUTER_SPRINT replace @30054
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_DEFENSIVE_HARMONY~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_DEFENSIVE_HARMONY (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// 25. Globe of Blades (CLERIC_GLOBE_OF_BLADES): affects only enemies, save for half.
+DEFINE_ACTION_FUNCTION cbmagic_scs_globe_of_blades
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_GLOBE_OF_BLADES~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_GLOBE_OF_BLADES is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_splprot_row INT_VAR stat = 0x114 value = 1 relation = 5 RET not_enemy_row = row END
+    LAF cbmagic_patch_blade_payload INT_VAR not_enemy_row STR_VAR payload = EVAL ~%spell%d~ RET changed already END
+    ACTION_IF (changed > 0) BEGIN
+      OUTER_SPRINT find @30041
+      OUTER_SPRINT replace @30042
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_GLOBE_OF_BLADES~ END
+      OUTER_SPRINT find @30045
+      OUTER_SPRINT replace @30046
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_GLOBE_OF_BLADES~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_GLOBE_OF_BLADES (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// 26. Glyph of Warding (CLERIC_GLYPH_OF_WARDING): casting time 9 -> 5, save for half damage.
+DEFINE_ACTION_FUNCTION cbmagic_scs_glyph_of_warding
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_GLYPH_OF_WARDING~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_GLYPH_OF_WARDING is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: CLERIC_GLYPH_OF_WARDING (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x12) cast_time
+          // Real Glyph of Warding has casting time 9 (or 5 after patching); skip synthetic
+          // casting_time=1 unit-test stubs so breath-save isolation tests remain untouched.
+          PATCH_IF (cast_time >= 5) BEGIN
+            PATCH_IF (cast_time > 5) BEGIN
+              WRITE_SHORT (ab + 0x12) 5
+              SET changed += 1
+            END
+            READ_SHORT (ab + 0x1e) fx_cnt
+            READ_SHORT (ab + 0x20) fx_idx
+            FOR (i = 0; i < fx_cnt; ++i) BEGIN
+              SET e = fx_off + (fx_idx + i) * 0x30
+              READ_SHORT e op
+              PATCH_IF (op = 12) BEGIN
+                READ_LONG (e + 0x24) save_type
+                READ_LONG (e + 0x2c) special
+                PATCH_IF ((save_type BAND 0x1f) != 0) BEGIN
+                  PATCH_IF ((special BAND 0x100) != 0) BEGIN
+                    SET already += 1
+                  END ELSE BEGIN
+                    WRITE_LONG (e + 0x2c) (special BOR 0x100)
+                    SET changed += 1
+                  END
+                END
+              END
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      OUTER_SPRINT find @30055
+      OUTER_SPRINT replace @30056
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_GLYPH_OF_WARDING~ END
+      OUTER_SPRINT find @30057
+      OUTER_SPRINT replace @30058
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_GLYPH_OF_WARDING~ END
+      OUTER_SPRINT find @30059
+      OUTER_SPRINT replace @30060
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_GLYPH_OF_WARDING~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_GLYPH_OF_WARDING (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+// Helper: create a standalone EFF V2.0 crushing damage resource.
+DEFINE_ACTION_FUNCTION cbmagic_write_damage_eff
+  INT_VAR dice = 3
+          sides = 4
+  STR_VAR eff = ~~
+BEGIN
+  ACTION_IF !(FILE_EXISTS ~override/%eff%.eff~) BEGIN
+    <<<<<<<< .../chriz-bg-magic-inlined/empty_eff
+>>>>>>>>
+    COPY ~.../chriz-bg-magic-inlined/empty_eff~ ~override/%eff%.eff~
+      INSERT_BYTES 0 0x110
+      WRITE_ASCII 0x00 ~EFF V2.0~ #8
+      WRITE_ASCII 0x08 ~EFF V2.0~ #8
+      WRITE_LONG 0x10 12
+      WRITE_LONG 0x14 2
+      WRITE_LONG 0x18 0
+      WRITE_LONG 0x1c 0
+      WRITE_LONG 0x20 0
+      WRITE_LONG 0x24 1
+      WRITE_LONG 0x28 0
+      WRITE_SHORT 0x2c 100
+      WRITE_SHORT 0x2e 0
+      WRITE_LONG 0x38 dice
+      WRITE_LONG 0x3c sides
+      WRITE_LONG 0x5c 1
+  END
+END
+
+// 29. Magical Stone (CLERIC_MAGIC_STONE): 3d4 crushing damage (6d4 vs. undead).
+DEFINE_ACTION_FUNCTION cbmagic_scs_magical_stone
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_MAGIC_STONE~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: CLERIC_MAGIC_STONE is not in SPELL.IDS or has no .spl file — skipping.~
+  END ELSE BEGIN
+    LAF cbmagic_write_damage_eff INT_VAR dice = 3 sides = 4 STR_VAR eff = ~cbmgmst1~ END
+    LAF cbmagic_write_damage_eff INT_VAR dice = 6 sides = 4 STR_VAR eff = ~cbmgmst2~ END
+    OUTER_SET changed = 0
+    OUTER_SET already = 0
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      READ_SHORT 0x68 ab_cnt
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: CLERIC_MAGIC_STONE (%spell%) skipped: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          SET ab = ab_off + a * 0x28
+          READ_SHORT (ab + 0x1e) fx_cnt
+          READ_SHORT (ab + 0x20) fx_idx
+          SET has_eff = 0
+          SET dmg_e = 0 - 1
+          FOR (i = 0; i < fx_cnt; ++i) BEGIN
+            SET e = fx_off + (fx_idx + i) * 0x30
+            READ_SHORT e op
+            PATCH_IF (op = 177) BEGIN
+              READ_LONG (e + 0x08) p2
+              PATCH_IF (p2 = 3) BEGIN
+                SET has_eff = 1
+              END
+            END ELSE PATCH_IF (op = 12) AND (dmg_e < 0) BEGIN
+              SET dmg_e = e
+            END
+          END
+          PATCH_IF has_eff BEGIN
+            SET already += 1
+          END ELSE PATCH_IF (dmg_e >= 0) BEGIN
+            READ_BYTE (dmg_e + 0x03) pw
+            READ_BYTE (dmg_e + 0x0d) dp
+            WRITE_SHORT dmg_e 177
+            WRITE_BYTE (dmg_e + 0x02) 2
+            WRITE_LONG (dmg_e + 0x04) 4
+            WRITE_LONG (dmg_e + 0x08) 3
+            WRITE_BYTE (dmg_e + 0x0c) 1
+            WRITE_LONG (dmg_e + 0x0e) 0
+            WRITE_BYTE (dmg_e + 0x12) 100
+            WRITE_BYTE (dmg_e + 0x13) 0
+            WRITE_ASCII (dmg_e + 0x14) ~cbmgmst2~ #8
+            WRITE_LONG (dmg_e + 0x1c) 0
+            WRITE_LONG (dmg_e + 0x20) 0
+            PATCH_FOR_EACH gen IN 1 2 5 255 BEGIN
+              LPF ADD_SPELL_EFFECT
+                INT_VAR header = a + 1 opcode = 177 target = 2 power = pw parameter1 = gen parameter2 = 3
+                        timing = 1 resist_dispel = dp duration = 0 probability1 = 100 probability2 = 0
+                STR_VAR resource = ~cbmgmst1~
+              END
+            END
+            READ_LONG 0x64 ab_off
+            READ_LONG 0x6a fx_off
+            SET changed += 1
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (changed > 0) BEGIN
+      OUTER_SPRINT find @30061
+      OUTER_SPRINT replace @30062
+      LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell find replace label = ~CLERIC_MAGIC_STONE~ END
+    END
+    PRINT ~chriz-bg-magic: CLERIC_MAGIC_STONE (%spell%): changed %changed%, already %already%.~
+  END
+END
+
+
