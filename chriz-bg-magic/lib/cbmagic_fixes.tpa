@@ -173,7 +173,7 @@ BEGIN
 END
 
 // --- Save vs. Breath for dodgeable explosions and area damage (decision page overview,
-// "Save-Art nach Logik", and the rows of these spells) -----------------------------------
+// save types by logic, and the rows of these spells) ----------------------------------------
 // Their damage now allows a save vs. breath instead of vs. spell, with the same bonus and
 // the same damage. Meteor Swarm and Fire Storm have no save at all in the base game and
 // stay that way for now. Chain Lightning, mind and
