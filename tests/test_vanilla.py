@@ -7,6 +7,8 @@ import fixtures as fx
 import ie
 from harness import check, test
 
+ie.TYPES.setdefault("PRO", 0x3FD)
+
 # --- Synthetic descriptions matching vanilla English sentences ----------------------------
 
 FIND_FAMILIAR_DESC = (
@@ -108,6 +110,68 @@ PRI_EARTH_ELEM_DESC = (
     "elemental appears, and a 5% chance that a 24-Hit-Dice elemental appears."
 )
 
+GREASE_DESC = (
+    "Grease\n"
+    "(Conjuration)\n\n"
+    "Level: 1\n\n"
+    "Any creature entering the area or caught in it when the spell is cast must save vs. Spell at +2 or slip."
+)
+
+STINKING_CLOUD_VANILLA_DESC = (
+    "Stinking Cloud\n"
+    "(Evocation)\n\n"
+    "Level: 2\n\n"
+    "Any creature caught within the cloud must roll a successful Save vs. Poison at +2 or be rendered unconscious."
+)
+
+WEB_VANILLA_DESC = (
+    "Web\n"
+    "(Evocation)\n\n"
+    "Level: 2\n\n"
+    "Anyone caught within the webs must make a Save vs. Spell at -2 or be held fast."
+)
+
+INCENDIARY_CLOUD_VANILLA_DESC = (
+    "Incendiary Cloud\n"
+    "(Evocation)\n\n"
+    "Level: 8\n\n"
+    "Deals 1d4 fire damage per level (Save vs. Spell for half)."
+)
+
+PW_SLEEP_DESC = (
+    "Power Word, Sleep\n"
+    "(Conjuration/Summoning)\n\n"
+    "Level: 2\n\n"
+    "Puts a creature with 20 or fewer hit points to sleep."
+)
+
+MAGIC_RES_FULL_DESC = (
+    "Magic Resistance\n"
+    "(Abjuration)\n\n"
+    "Level: 5\n"
+    "Casting Time: 9\n"
+    "Duration: 3 rounds + 1 round/level\n\n"
+    "Upon casting this spell, the recipient receives a resistance to all magic of 2% per level of the priest "
+    "(for example, 30% at 15th level) up to a maximum of 40% at 20th level. This resistance is set so that "
+    "if the target already has more Magic Resistance than the priest would confer, it will actually lower it "
+    "to the set value. This effect lasts for the duration of the spell or until dispelled."
+)
+
+STRENGTH_OF_ONE_DESC = (
+    "Strength of One\n"
+    "(Alteration)\n\n"
+    "Level: 3\n\n"
+    "When this spell is cast, the party receives a boon to their physical power, effectively setting "
+    "everyone's Strength score to 18/75. If a party member has a Strength score higher than this "
+    "(either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75."
+)
+
+MINOR_SEQ_DESC = "Minor Sequencer\n(Invocation/Evocation)\n\nLevel: 4\n"
+CONTINGENCY_DESC = "Contingency\n(Evocation)\n\nLevel: 6\n"
+SPELL_SEQ_DESC = "Spell Sequencer\n(Invocation/Evocation)\n\nLevel: 7\n"
+SPELL_TRIG_DESC = "Spell Trigger\n(Invocation/Evocation)\n\nLevel: 8\n"
+CHAIN_CONT_DESC = "Chain Contingency\n(Evocation)\n\nLevel: 9\n"
+
 
 def _ct_desc(name, ct):
     return f"{name}\n\nLevel: 5\nCasting Time: {ct}\nDuration: 1 turn\n"
@@ -131,13 +195,25 @@ VANILLA_TEXTS = [
     _ct_desc("Heal", 9),
     _ct_desc("Blade Barrier", 9),
     _ct_desc("Bolt of Glory", 9),
-    _ct_desc("Magic Resistance", 9),
+    MAGIC_RES_FULL_DESC,
     _ct_desc("Righteous Magic", 9),
     _ct_desc("True Seeing", 8),
     _ct_desc("True Sight", 8),
     _ct_desc("Glyph of Warding", 9) + "\nA successful Saving Throw vs. Spell enables the creature to escape.",
     _ct_desc("Invisibility Purge", 8),
     _ct_desc("Strength", 9),
+    _ct_desc("Fire Seeds", 9),
+    GREASE_DESC,
+    STINKING_CLOUD_VANILLA_DESC,
+    WEB_VANILLA_DESC,
+    INCENDIARY_CLOUD_VANILLA_DESC,
+    PW_SLEEP_DESC,
+    STRENGTH_OF_ONE_DESC,
+    MINOR_SEQ_DESC,
+    CONTINGENCY_DESC,
+    SPELL_SEQ_DESC,
+    SPELL_TRIG_DESC,
+    CHAIN_CONT_DESC,
 ]
 (
     FF_DESC,
@@ -163,6 +239,18 @@ VANILLA_TEXTS = [
     GLYPH_CT_DESC,
     IP_DESC,
     STR_DESC,
+    FSEEDS_DESC,
+    GR_DESC,
+    SC_VAN_DESC,
+    WEB_VAN_DESC,
+    IC_VAN_DESC,
+    PWS_DESC,
+    SOO_DESC,
+    MSEQ_DESC,
+    CONT_DESC,
+    SSEQ_DESC,
+    STRIG_DESC,
+    CCONT_DESC,
 ) = range(len(fx.TEXTS), len(VANILLA_TEXTS))
 
 VANILLA_SPELL_SYMBOLS = [
@@ -171,7 +259,9 @@ VANILLA_SPELL_SYMBOLS = [
     (1105, "CLERIC_ENTANGLE"),
     (1202, "CLERIC_BARKSKIN"),
     (1206, "CLERIC_FLAME_BLADE"),
+    (1303, "CLERIC_DISPEL_MAGIC"),
     (1309, "CLERIC_INVISIBILITY_PURGE"),
+    (1312, "CLERIC_STRENGTH_OF_ONE"),
     (1402, "CLERIC_ANIMAL_SUMMONING_1"),
     (1501, "CLERIC_ANIMAL_SUMMONING_2"),
     (1505, "CLERIC_TRUE_SIGHT"),
@@ -181,25 +271,41 @@ VANILLA_SPELL_SYMBOLS = [
     (1603, "CLERIC_BLADE_BARRIER"),
     (1604, "CLERIC_CONJURE_ANIMALS"),
     (1605, "CLERIC_CONJURE_FIRE_ELEMENTAL"),
+    (1606, "CLERIC_FIRE_SEEDS"),
     (1607, "CLERIC_HEAL"),
     (1612, "CLERIC_BOLT_OF_GLORY"),
     (1702, "CLERIC_CONJURE_EARTH_ELEMENTAL"),
     (1708, "CLERIC_FINGER_OF_DEATH"),
+    (2101, "WIZARD_GREASE"),
     (2106, "WIZARD_BLINDNESS"),
+    (2120, "WIZARD_REFLECTED_IMAGE"),
     (2123, "WIZARD_FIND_FAMILIAR"),
+    (2125, "WIZARD_SPOOK"),
+    (2205, "WIZARD_HORROR"),
+    (2212, "WIZARD_MIRROR_IMAGE"),
     (2214, "WIZARD_STRENGTH"),
+    (2220, "WIZARD_POWER_WORD_SLEEP"),
+    (2298, "CONTINGENCY_MIRROR_IMAGE"),
+    (2302, "WIZARD_REMOVE_MAGIC"),
+    (2326, "WIZARD_TRUE_DISPEL_MAGIC"),
+    (2420, "WIZARD_MINOR_SEQUENCER"),
     (2502, "WIZARD_CLOUDKILL"),
     (2609, "WIZARD_TRUE_SIGHT"),
     (2614, "WIZARD_DEATH_FOG"),
     (2616, "WIZARD_DISINTEGRATE"),
+    (2617, "WIZARD_CONTINGENCY"),
     (2620, "WIZARD_CONJURE_FIRE_ELEMENTAL"),
     (2621, "WIZARD_CONJURE_AIR_ELEMENTAL"),
     (2622, "WIZARD_CONJURE_EARTH_ELEMENTAL"),
+    (2710, "WIZARD_SPELL_SEQUENCER"),
     (2713, "WIZARD_FINGER_OF_DEATH"),
+    (2809, "WIZARD_SPELL_TRIGGER"),
+    (2908, "WIZARD_CHAIN_CONTINGENCY"),
     (2919, "WIZARD_WISH"),
+    (4231, "INQUIS_DISPEL_MAGIC"),
 ]
 
-VANILLA_RACES = [*fx.RACES, (145, "ELEMENTAL"), (201, "SWORD")]
+VANILLA_RACES = [*fx.RACES, (144, "GOLEM"), (145, "ELEMENTAL"), (201, "SWORD")]
 
 
 def _spl_with_hdr(
@@ -251,11 +357,36 @@ def _make_fblade_itm(*, flags=0x28, enchantment=0):
     return bytes(raw)
 
 
+def _make_pro(pro_type: int) -> bytes:
+    buf = bytearray(0x200)
+    buf[0:8] = b"PRO V1.0"
+    struct.pack_into("<H", buf, 0x08, pro_type)
+    return bytes(buf)
+
+
+def _spl_with_pro(*, school=6, excl_1e=0x0040, level=1, pro=1, effects=()):
+    raw = bytearray(_spl_with_hdr(school=school, excl_1e=excl_1e, level=level, abilities=[dict(min_level=1, effects=effects)]))
+    ab_off = struct.unpack_from("<I", raw, 0x64)[0]
+    struct.pack_into("<H", raw, ab_off + 0x26, pro)
+    return bytes(raw)
+
+
+def _itm_with_pro(*, pro=1, ab_flags_26=0, effects=()):
+    raw = bytearray(ie.make_itm(abilities=[effects]))
+    ab_off = struct.unpack_from("<I", raw, 0x64)[0]
+    struct.pack_into("<H", raw, ab_off + 0x26, ab_flags_26)
+    struct.pack_into("<H", raw, ab_off + 0x2A, pro)
+    return bytes(raw)
+
+
 def _vanilla_biff(**replace):
     files = {
         **fx.game(),
         "SPELL.IDS": ie.make_ids(VANILLA_SPELL_SYMBOLS),
         "RACE.IDS": ie.make_ids(VANILLA_RACES),
+        "PROJECTL.IDS": ie.make_ids([(39, "AOETEST"), (40, "RAYTEST")]),
+        "AOETEST.PRO": _make_pro(3),
+        "RAYTEST.PRO": _make_pro(2),
         # 1. Find Familiar (SPWI123) + scroll
         "SPWI123.SPL": _spl_with_hdr(
             school=2,
@@ -428,6 +559,249 @@ def _vanilla_biff(**replace):
         "SPPR604.SPL": _spl_with_hdr(
             spell_type=2, level=6, abilities=[dict(min_level=1, casting_time=9, effects=[dict(opcode=177, target=1)])]
         ),
+        # Row A. Grease (SPWI101) + scroll
+        "SPWI101.SPL": _spl_with_hdr(
+            school=2,
+            excl_1e=0x0100,
+            level=1,
+            desc=GR_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=1,
+                    effects=[
+                        dict(opcode=158, target=2, duration=6, save=1, bonus=2),
+                        dict(opcode=126, target=2, duration=6, save=1, bonus=2),
+                        dict(opcode=142, target=2, duration=6, p2=145, save=1, bonus=2),
+                    ],
+                )
+            ],
+        ),
+        "SCRL66.ITM": fx.scroll("SPWI101", GR_DESC),
+        # Row B. Stinking Cloud (SPWI213) + scroll (with real school=6 so vanilla batch patches it)
+        "SPWI213.SPL": _spl_with_hdr(
+            school=6,
+            excl_1e=0x0040,
+            level=2,
+            desc=SC_VAN_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=2,
+                    effects=[
+                        dict(opcode=39, target=2, power=2, p2=1, duration=12, save=4, bonus=2),
+                        dict(opcode=142, target=2, power=2, p2=126, duration=12, save=4, bonus=2),
+                    ],
+                )
+            ],
+        ),
+        "SCRL97.ITM": fx.scroll("SPWI213", SC_VAN_DESC),
+        # Row C1. Web (SPWI215) + scroll (with real school=6)
+        "SPWI215.SPL": _spl_with_hdr(
+            school=6,
+            excl_1e=0x0040,
+            level=2,
+            desc=WEB_VAN_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=2,
+                    effects=[
+                        dict(opcode=157, target=2, power=2, duration=6, save=1, bonus=-2),
+                        dict(opcode=109, target=2, power=2, p2=2, duration=6, save=1, bonus=-2),
+                    ],
+                )
+            ],
+        ),
+        "SCRL99.ITM": fx.scroll("SPWI215", WEB_VAN_DESC),
+        # Row C2. Incendiary Cloud (SPWI810) + scroll (with real school=6)
+        "SPWI810.SPL": _spl_with_hdr(
+            school=6,
+            excl_1e=0x0040,
+            level=8,
+            desc=IC_VAN_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=8,
+                    effects=[fx.damage(fx.FIRE, 4)],
+                )
+            ],
+        ),
+        "SCRL9E.ITM": fx.scroll("SPWI810", IC_VAN_DESC),
+        # Row D. Power Word, Sleep (SPWI220) (with real school=2)
+        "SPWI220.SPL": _spl_with_hdr(
+            school=2,
+            excl_1e=0x0100,
+            level=2,
+            desc=PWS_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=1,
+                    effects=[
+                        dict(opcode=324, target=2, power=2, p1=20, p2=144, resource="SPWI220"),
+                        dict(opcode=217, target=2, power=2, p2=1, duration=30),
+                        dict(opcode=142, target=2, power=2, p2=14, duration=30),
+                    ],
+                )
+            ],
+        ),
+        # Row E. Spook (SPWI125)
+        "SPWI125.SPL": _spl_with_hdr(
+            school=5,
+            excl_1e=0x0400,
+            level=1,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=1,
+                    effects=[dict(opcode=24, target=2, power=1, duration=18, save=1)],
+                )
+            ],
+        ),
+        # Row F. Horror (SPWI205)
+        "SPWI205.SPL": _spl_with_hdr(
+            school=7,
+            excl_1e=0x0800,
+            level=2,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=2,
+                    effects=[dict(opcode=24, target=2, power=2, duration=60, save=1)],
+                )
+            ],
+        ),
+        # Row G. Reflected Image (SPWI120), Mirror Image (SPWI212), Contingency Mirror Image (SPWI298)
+        "SPWI120.SPL": _spl_with_hdr(
+            school=5,
+            excl_1e=0x0400,
+            level=1,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=1,
+                    effects=[dict(opcode=119, target=1, power=1, duration=24, resist_dispel=3)],
+                )
+            ],
+        ),
+        "SPWI212.SPL": _spl_with_hdr(
+            school=5,
+            excl_1e=0x0400,
+            level=2,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=2,
+                    effects=[dict(opcode=119, target=1, power=2, duration=36, resist_dispel=3)],
+                ),
+                dict(
+                    min_level=6,
+                    casting_time=2,
+                    effects=[dict(opcode=119, target=1, power=2, duration=54, resist_dispel=3)],
+                ),
+            ],
+        ),
+        "SPWI298.SPL": _spl_with_hdr(
+            school=5,
+            excl_1e=0x0400,
+            level=2,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=0,
+                    effects=[dict(opcode=119, target=1, power=2, duration=120, resist_dispel=3)],
+                )
+            ],
+        ),
+        # Row H. AoE damage vs Mirror Image test fixtures (pro 40 = AOETEST, pro 41 = RAYTEST)
+        "SPPR609.SPL": _spl_with_pro(
+            pro=40,
+            effects=[dict(opcode=12, target=2, dice=6, sides=6, save=0)],
+        ),
+        "SPPR411.SPL": _spl_with_pro(
+            pro=41,
+            effects=[dict(opcode=12, target=2, dice=4, sides=6, save=0)],
+        ),
+        "WAND05.ITM": _itm_with_pro(
+            pro=40,
+            effects=[dict(opcode=12, target=2, dice=6, sides=6, save=1)],
+        ),
+        "SW1H51.ITM": _itm_with_pro(
+            pro=1,
+            ab_flags_26=40,  # ability flags at 0x26 must not be mistaken for projectile index
+            effects=[dict(opcode=12, target=2, dice=1, sides=10, save=0)],
+        ),
+        # Row I. Dispel Magic test fixtures (SPWI302, SPWI326, SPPR303, SPCL231)
+        "SPWI302.SPL": _spl_with_hdr(
+            school=1,
+            level=3,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=3,
+                    effects=[
+                        dict(opcode=58, target=2, p1=0, p2=1),
+                        dict(opcode=112, target=2),
+                    ],
+                )
+            ],
+        ),
+        "SPWI326.SPL": _spl_with_hdr(
+            school=1,
+            level=3,
+            abilities=[dict(min_level=1, casting_time=3, effects=[dict(opcode=58, target=2, p1=0, p2=0x20001)])],
+        ),
+        "SPPR303.SPL": _spl_with_hdr(
+            spell_type=2,
+            school=1,
+            level=3,
+            abilities=[dict(min_level=1, casting_time=3, effects=[dict(opcode=58, target=2, p1=0, p2=0x20001)])],
+        ),
+        "SPCL231.SPL": _spl_with_hdr(
+            spell_type=4,
+            school=1,
+            level=3,
+            abilities=[dict(min_level=1, casting_time=1, effects=[dict(opcode=58, target=2, p1=0, p2=0x20002)])],
+        ),
+        # Row K. Strength of One (SPPR312)
+        "SPPR312.SPL": _spl_with_hdr(
+            spell_type=2,
+            school=8,
+            level=3,
+            desc=SOO_DESC,
+            abilities=[
+                dict(
+                    min_level=1,
+                    casting_time=3,
+                    effects=[
+                        dict(opcode=44, target=2, power=3, p1=18, p2=1, duration=72, resist_dispel=3),
+                        dict(opcode=97, target=2, power=3, p1=75, p2=1, duration=72, resist_dispel=3),
+                        dict(opcode=141, target=2, power=3, p2=16, timing=1, resist_dispel=3),
+                        dict(opcode=142, target=2, power=3, p2=21, duration=72, resist_dispel=3),
+                        dict(opcode=174, target=2, power=3, timing=4, duration=72, resist_dispel=3, resource="EFF_M08"),
+                        dict(opcode=139, target=2, power=3, p1=14041, timing=1, resist_dispel=3),
+                    ],
+                )
+            ],
+        ),
+        # Row L. Sequencers and Contingencies (SPWI420, SPWI617, SPWI710, SPWI809, SPWI908)
+        "SPWI420.SPL": _spl_with_hdr(
+            school=6, excl_1e=0x0040, level=4, desc=MSEQ_DESC, abilities=[dict(min_level=1, effects=[dict(opcode=256, target=1)])]
+        ),
+        "SPWI617.SPL": _spl_with_hdr(
+            school=6, excl_1e=0x0040, level=6, desc=CONT_DESC, abilities=[dict(min_level=1, effects=[dict(opcode=232, target=1)])]
+        ),
+        "SPWI710.SPL": _spl_with_hdr(
+            school=6, excl_1e=0x0040, level=7, desc=SSEQ_DESC, abilities=[dict(min_level=1, effects=[dict(opcode=256, target=1)])]
+        ),
+        "SPWI809.SPL": _spl_with_hdr(
+            school=6, excl_1e=0x0040, level=8, desc=STRIG_DESC, abilities=[dict(min_level=1, effects=[dict(opcode=256, target=1)])]
+        ),
+        "SPWI908.SPL": _spl_with_hdr(
+            school=6, excl_1e=0x0040, level=9, desc=CCONT_DESC, abilities=[dict(min_level=1, effects=[dict(opcode=232, target=1)])]
+        ),
     }
 
     ct_fixtures = [
@@ -436,13 +810,14 @@ def _vanilla_biff(**replace):
         ("SPPR607", 2, 6, 9, HEAL_DESC, [dict(opcode=17, target=2)]),
         ("SPPR603", 2, 6, 9, BBARRIER_DESC, [dict(opcode=177, target=1)]),
         ("SPPR612", 2, 6, 9, BGLORY_DESC, [dict(opcode=12, target=2)]),
-        ("SPPR509", 2, 5, 9, MR_DESC, [dict(opcode=166, target=2)]),
+        ("SPPR509", 2, 5, 9, MR_DESC, [dict(opcode=166, target=2, p1=20, p2=1, duration=150)]),
         ("SPPR513", 2, 5, 9, RM_DESC, [dict(opcode=132, target=1)]),
         ("SPPR505", 2, 5, 8, PTS_DESC, [dict(opcode=193, target=1)]),
         ("SPWI609", 1, 6, 8, WTS_DESC, [dict(opcode=193, target=1)]),
         ("SPPR304", 2, 3, 9, GLYPH_CT_DESC, [fx.damage(fx.ELEC, 3)]),
         ("SPPR309", 2, 3, 8, IP_DESC, [dict(opcode=116, target=2)]),
         ("SPWI214", 1, 2, 9, STR_DESC, [dict(opcode=44, target=2)]),
+        ("SPPR606", 2, 6, 9, FSEEDS_DESC, [dict(opcode=122, target=1)]),
     ]
     for res, stype, lvl, ct, dref, fxs in ct_fixtures:
         files[f"{res}.SPL"] = _spl_with_hdr(
@@ -571,9 +946,9 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
 
     # 11-13. Wizard Elemental Summoning (SPWI620, SPWI621, SPWI622)
     expected_wiz = {
-        12: [(0, 64), (65, 99), (100, 100)],
-        16: [(0, 60), (61, 95), (96, 100)],
-        20: [(0, 56), (57, 91), (92, 100)],
+        12: [(0, 63), (64, 98), (99, 100)],
+        16: [(0, 59), (60, 94), (95, 100)],
+        20: [(0, 55), (56, 90), (91, 100)],
     }
     for res in ("SPWI620", "SPWI621", "SPWI622"):
         s = _read_spl_ext(g, res)
@@ -593,10 +968,10 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
 
     # 14-15. Priest Elemental Summoning (SPPR605, SPPR702)
     expected_pri = {
-        0: [(0, 64), (65, 99), (100, 100)],  # L11: 64/35/1
-        1: [(0, 61), (62, 98), (99, 100)],   # L12: 61/37/2
-        4: [(0, 52), (53, 94), (95, 100)],   # L15: 52/42/6
-        9: [(0, 37), (38, 88), (89, 100)],   # L20: 37/51/12
+        0: [(0, 63), (64, 98), (99, 100)],  # L11: 64/35/1
+        1: [(0, 60), (61, 97), (98, 100)],  # L12: 61/37/2
+        4: [(0, 51), (52, 93), (94, 100)],  # L15: 52/42/6
+        9: [(0, 36), (37, 87), (88, 100)],  # L20: 37/51/12
     }
     for res in ("SPPR605", "SPPR702"):
         s = _read_spl_ext(g, res)
@@ -615,7 +990,7 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
         s = _read_spl_ext(g, res)
         check(s["priest_20"] == 0x4000, f"{res} priest_20: {hex(s['priest_20'])}")
 
-    # 21-32. Casting times and descriptions
+    # 21-33. Casting times and descriptions (including Invisibility Purge=3 and Fire Seeds=6)
     expected_cts = [
         ("SPPR101", 5),
         ("SPPR503", 5),
@@ -627,13 +1002,138 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
         ("SPPR505", 6),
         ("SPWI609", 6),
         ("SPPR304", 5),
-        ("SPPR309", 4),
+        ("SPPR309", 3),
         ("SPWI214", 5),
+        ("SPPR606", 6),
     ]
     for res, target_ct in expected_cts:
         s = _read_spl_ext(g, res)
         check([a["casting_time"] for a in s["abilities"]] == [target_ct, target_ct], f"{res} ct: {s['abilities']}")
         check(f"Casting Time: {target_ct}" in g.tlk(s["desc"]), f"{res} desc: {g.tlk(s['desc'])}")
+
+    race_num = dict((sym, num) for num, sym in VANILLA_RACES)
+
+    # Row A. Grease (SPWI101): save vs. Breath (2) with +2 bonus kept, 8 race immunities, text + scroll
+    s = _read_spl_ext(g, "SPWI101")
+    effs = s["abilities"][0]["effects"]
+    gr_fxs = [f for f in effs if f["opcode"] in (158, 126, 142)]
+    check(all(f["save"] == 2 and f["bonus"] == 2 for f in gr_fxs), f"SPWI101 saves: {gr_fxs}")
+    imm_races = [f["p1"] for f in effs if f["opcode"] == 324 and f["p2"] == 4]
+    expected_gr_races = [race_num[r] for r in ("WYVERN", "BEHOLDER", "MEPHIT", "SPECTRE", "WRAITH", "SHADOW", "MIST", "DRAGON")]
+    check(imm_races == list(reversed(expected_gr_races)), f"SPWI101 immunities: {imm_races}")
+    check("save vs. Breath at +2" in g.tlk(s["desc"]), f"SPWI101 desc: {g.tlk(s['desc'])}")
+    _, scrl_id = g.itm_descs("SCRL66")
+    check("save vs. Breath at +2" in g.tlk(scrl_id), f"SCRL66 desc: {g.tlk(scrl_id)}")
+
+    # Row B. Stinking Cloud (SPWI213): school Conjuration (2, excl 0x0100), undead (row 1) + GOLEM/ELEMENTAL/SLIME immune, text + scroll
+    s = _read_spl_ext(g, "SPWI213")
+    check(s["school"] == 2 and s["excl_1e"] == 0x0100, f"SPWI213 school/excl: {s}")
+    effs = s["abilities"][0]["effects"]
+    check(any(f["opcode"] == 324 and f["p2"] == 1 and f["p1"] == 0 for f in effs), f"SPWI213 undead imm: {effs}")
+    sc_races = {f["p1"] for f in effs if f["opcode"] == 324 and f["p2"] == 4}
+    check({race_num["GOLEM"], race_num["ELEMENTAL"], race_num["SLIME"]}.issubset(sc_races), f"SPWI213 races: {sc_races}")
+    check("(Conjuration/Summoning)" in g.tlk(s["desc"]), f"SPWI213 desc: {g.tlk(s['desc'])}")
+    _, scrl_id = g.itm_descs("SCRL97")
+    check("(Conjuration/Summoning)" in g.tlk(scrl_id), f"SCRL97 desc: {g.tlk(scrl_id)}")
+
+    # Row C. Web (SPWI215) and Incendiary Cloud (SPWI810): school Conjuration (2, excl 0x0100), text + scroll
+    for res, scrl in [("SPWI215", "SCRL99"), ("SPWI810", "SCRL9E")]:
+        s = _read_spl_ext(g, res)
+        check(s["school"] == 2 and s["excl_1e"] == 0x0100, f"{res} school/excl: {s}")
+        check("(Conjuration/Summoning)" in g.tlk(s["desc"]), f"{res} desc: {g.tlk(s['desc'])}")
+        _, scrl_id = g.itm_descs(scrl)
+        check("(Conjuration/Summoning)" in g.tlk(scrl_id), f"{scrl} desc: {g.tlk(scrl_id)}")
+
+    # Row D. Power Word, Sleep (SPWI220): school Enchantment (4, excl 0x0800), elf (row 15, 0-90),
+    # half-elf (row 19, 0-30), undead (row 1), DRAGON, ELEMENTAL, 20 HP gate + wake-on-damage kept
+    s = _read_spl_ext(g, "SPWI220")
+    check(s["school"] == 4 and s["excl_1e"] == 0x0800, f"SPWI220 school/excl: {s}")
+    effs = s["abilities"][0]["effects"]
+    check(
+        (effs[0]["opcode"], effs[0]["p2"], effs[0]["prob2"], effs[0]["prob1"]) == (324, 15, 0, 90),
+        f"SPWI220 elf 90%: {effs[0]}",
+    )
+    check(
+        (effs[1]["opcode"], effs[1]["p2"], effs[1]["prob2"], effs[1]["prob1"]) == (324, 19, 0, 30),
+        f"SPWI220 half-elf 30%: {effs[1]}",
+    )
+    check(any(f["opcode"] == 324 and f["p2"] == 1 and f["p1"] == 0 for f in effs), f"SPWI220 undead: {effs}")
+    pws_races = {f["p1"] for f in effs if f["opcode"] == 324 and f["p2"] == 4}
+    check({race_num["DRAGON"], race_num["ELEMENTAL"]}.issubset(pws_races), f"SPWI220 races: {pws_races}")
+    check(any(f["opcode"] == 324 and f["p1"] == 20 and f["p2"] == 144 for f in effs), "SPWI220 20 HP gate preserved")
+    check(any(f["opcode"] == 217 and f["p2"] == 0 for f in effs), "SPWI220 wake-on-damage preserved")
+    check("(Enchantment/Charm)" in g.tlk(s["desc"]), f"SPWI220 desc: {g.tlk(s['desc'])}")
+
+    # Row E. Spook (SPWI125): undead (row 1) and True Seeing (stat 118 > 0) immune
+    s = _read_spl_ext(g, "SPWI125")
+    effs = s["abilities"][0]["effects"]
+    spook_rows = {f["p2"] for f in effs if f["opcode"] == 324}
+    check(1 in spook_rows and len(spook_rows) == 2, f"SPWI125 op324 rows: {spook_rows}")
+
+    # Row F. Horror (SPWI205): undead (row 1) immune
+    s = _read_spl_ext(g, "SPWI205")
+    effs = s["abilities"][0]["effects"]
+    check(any(f["opcode"] == 324 and f["p2"] == 1 and f["p1"] == 0 for f in effs), f"SPWI205 undead: {effs}")
+
+    # Row G. Mirror Image (SPWI212, SPWI298) and Reflected Image (SPWI120) do not stack
+    s_refl = _read_spl_ext(g, "SPWI120")
+    refl_effs = s_refl["abilities"][0]["effects"]
+    check(refl_effs[0]["opcode"] == 321 and refl_effs[0]["resource"] == "SPWI120", f"SPWI120 refresh: {refl_effs}")
+    for res, expected_durs in [("SPWI212", [36, 54]), ("SPWI298", [120])]:
+        s_mirr = _read_spl_ext(g, res)
+        for ab, dur in zip(s_mirr["abilities"], expected_durs):
+            ab_effs = ab["effects"]
+            op321_res = {f["resource"] for f in ab_effs if f["opcode"] == 321}
+            check(op321_res == {"SPWI212", "SPWI298", "SPWI120"}, f"{res} op321: {op321_res}")
+            op206 = [f for f in ab_effs if f["opcode"] == 206]
+            check(
+                len(op206) == 1 and op206[0]["resource"] == "SPWI120" and op206[0]["duration"] == dur,
+                f"{res} op206: {op206}",
+            )
+
+    # Row H. AoE damage bypasses Mirror Image (bit 24 = 0x1000000 on AoE SPL/ITM, untouched on ray SPL and melee ITM)
+    s_aoe = _read_spl_ext(g, "SPPR609")
+    check((s_aoe["abilities"][0]["effects"][0]["save"] & 0x1000000) == 0x1000000, f"SPPR609 save: {s_aoe}")
+    check(g.file("override/SPPR411.SPL") is None, "single-target ray SPPR411 must not be touched")
+    wand_raw = g.file("override/WAND05.ITM")
+    wand_fx = ie.unpack_fx(wand_raw, struct.unpack_from("<I", wand_raw, 0x6A)[0])
+    check((wand_fx["save"] & 0x1000000) == 0x1000000, f"WAND05 save: {wand_fx}")
+    check(g.file("override/SW1H51.ITM") is None, "melee weapon SW1H51 with ab_flags=40 at 0x26 must not be touched")
+
+    # Row I. Dispel Magic vs magically created weapons (high word at fx+0x0a set to 2, op112 deleted)
+    s_disp = _read_spl_ext(g, "SPWI302")
+    disp_effs = s_disp["abilities"][0]["effects"]
+    check(len(disp_effs) == 1 and disp_effs[0]["opcode"] == 58 and disp_effs[0]["p2"] == 0x20001, f"SPWI302: {disp_effs}")
+
+    # Row J. Magic Resistance (SPPR509): op166 p2=0 (add), self-refresh op321, description updated
+    s_mr = _read_spl_ext(g, "SPPR509")
+    for ab in s_mr["abilities"]:
+        ab_effs = ab["effects"]
+        check(ab_effs[0]["opcode"] == 321 and ab_effs[0]["resource"] == "SPPR509", f"SPPR509 op321: {ab_effs}")
+        op166 = [f for f in ab_effs if f["opcode"] == 166][0]
+        check(op166["p2"] == 0, f"SPPR509 op166 p2: {op166}")
+    check("added to any Magic Resistance the target already has" in g.tlk(s_mr["desc"]), f"SPPR509 desc: {g.tlk(s_mr['desc'])}")
+
+    # Row K. Strength of One (SPPR312 + SPPR312A): sub-spell payload + STR > 18 / STREXTRA >= 75 op318 guards
+    s_soo = _read_spl_ext(g, "SPPR312")
+    soo_effs = s_soo["abilities"][0]["effects"]
+    soo_ops = [f["opcode"] for f in soo_effs]
+    check(44 not in soo_ops and 97 not in soo_ops and 142 not in soo_ops, f"SPPR312 ops: {soo_ops}")
+    check(141 in soo_ops and 174 in soo_ops and 139 in soo_ops, f"SPPR312 visuals kept: {soo_ops}")
+    op318_soo = [f for f in soo_effs if f["opcode"] == 318 and f["resource"] == "SPPR312A"]
+    check(len(op318_soo) == 2 and {f["p1"] for f in op318_soo} == {18, 75}, f"SPPR312 op318: {op318_soo}")
+    op146_soo = [f for f in soo_effs if f["opcode"] == 146 and f["resource"] == "SPPR312A"]
+    check(len(op146_soo) == 1 and op146_soo[0]["p2"] == 1, f"SPPR312 op146: {op146_soo}")
+    s_sub = _read_spl_ext(g, "SPPR312A")
+    sub_ops = [f["opcode"] for f in s_sub["abilities"][0]["effects"]]
+    check(sub_ops == [44, 97, 142], f"SPPR312A ops: {sub_ops}")
+    check("Strength is not lowered" in g.tlk(s_soo["desc"]), f"SPPR312 desc: {g.tlk(s_soo['desc'])}")
+
+    # Row L. Sequencers and Contingencies (SPWI420, SPWI617, SPWI710, SPWI809, SPWI908): Universal school + text
+    for res in ("SPWI420", "SPWI617", "SPWI710", "SPWI809", "SPWI908"):
+        s = _read_spl_ext(g, res)
+        check(s["school"] == 0 and s["excl_1e"] == 0, f"{res} school/excl: {s}")
+        check("(Universal)" in g.tlk(s["desc"]), f"{res} desc: {g.tlk(s['desc'])}")
 
     # Uninstall restores the game tree
     out = g.uninstall()
