@@ -6,8 +6,9 @@ move to the Chriz script engine later. Values not named here stay as in the base
 ## Layout
 
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`); any of them can move to a
-component of its own without changes. The user-facing layout is Christopher's decision.
+decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`); any of
+them can move to a component of its own without changes. The user-facing layout is
+Christopher's decision.
 
 None of the changes below needs EEex. They work on BG2:EE and EET (built and checked on
 2.7.3.0).
@@ -111,6 +112,163 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   stays for now, although Web may be too strong in the base game. An idea on the same list,
   far off: webs that can catch fire.
 - Radius and school come later.
+
+## Schools (`cbmagic_vanilla_find_familiar_universal`, `cbmagic_vanilla_wish_universal`, `cbmagic_vanilla_minor_sequencer_universal`, `cbmagic_vanilla_contingency_universal`, `cbmagic_vanilla_spell_sequencer_universal`, `cbmagic_vanilla_spell_trigger_universal`, `cbmagic_vanilla_chain_contingency_universal`, `cbmagic_vanilla_cloudkill_school`, `cbmagic_vanilla_death_fog_school`, `cbmagic_vanilla_web_school`, `cbmagic_vanilla_incendiary_cloud_school`)
+
+- Find Familiar, Wish, Minor Sequencer, Contingency, Spell Sequencer, Spell Trigger and
+  Chain Contingency belong to the Universal school (`0`) with no specialist mage
+  exclusions, so every specialist can learn and cast them. Their descriptions and scrolls
+  say `(Universal)`.
+- Cloudkill, Death Fog, Stinking Cloud, Web and Incendiary Cloud belong to Conjuration (`2`,
+  Diviner exclusion). Their descriptions and scrolls say `(Conjuration/Summoning)`.
+- Power Word: Sleep belongs to Enchantment (`4`, Invoker exclusion), and its description
+  and scroll say `(Enchantment/Charm)`.
+
+## Grease (`cbmagic_vanilla_grease`)
+
+- Save vs. breath instead of vs. spell, keeping the base game's +2 bonus on the grease
+  effect (opcode 158) and every effect that shares its roll. Its description and scroll
+  say so.
+- Flying, incorporeal and dragon creatures are immune by race (`WYVERN`, `BEHOLDER`,
+  `MEPHIT`, `SPECTRE`, `WRAITH`, `SHADOW`, `MIST`, `DRAGON`).
+
+## Stinking Cloud (`cbmagic_vanilla_stinking_cloud`)
+
+- School set to Conjuration (`2`, Diviner exclusion); description and scroll updated.
+- Creatures that do not breathe are immune: undead (`GENERAL = UNDEAD`, SPLPROT row 1) and
+  races `GOLEM`, `ELEMENTAL` and `SLIME`.
+
+## Power Word: Sleep (`cbmagic_vanilla_power_word_sleep`)
+
+- School set to Enchantment (`4`, Invoker exclusion); description and scroll updated.
+- Elves and half-elves resist with the same probability windows as Sleep (`SPWI116`):
+  SPLPROT row 15 (`RACE = ELF`) at 0-90 and row 19 (`RACE = HALF_ELF`) at 0-30.
+- Undead (`GENERAL = UNDEAD`, row 1), dragons (`DRAGON`) and elementals (`ELEMENTAL`) are
+  immune. The existing 20 HP gate and wake-on-damage stay in place.
+
+## Spook and Horror (`cbmagic_vanilla_spook`, `cbmagic_vanilla_horror`)
+
+- Undead (`GENERAL = UNDEAD`, SPLPROT row 1) are immune to both Spook and Horror.
+- Creatures protected by True Seeing (`stat 118 TRUE_SIGHT > 0`) are also immune to Spook.
+
+## Mirror Image and Reflected Image (`cbmagic_vanilla_mirror_reflected_image`)
+
+Mirror Image and Reflected Image no longer stack with each other or with themselves:
+
+- Reflected Image (`SPWI120`, level 1) refreshes itself on recast via leading opcode 321.
+- Mirror Image (`SPWI212` and Contingency `SPWI298`, level 2) refreshes both `SPWI212` and
+  `SPWI298`, removes any active Reflected Image (`SPWI120`) via leading opcode 321, and
+  blocks `SPWI120` for its duration via opcode 206.
+
+## Area damage ignores Mirror Images (`cbmagic_vanilla_aoe_bypass_mirror_image`)
+
+Damage effects (opcode 12) on spells and items whose ability uses an area-of-effect
+projectile (`.PRO` type 3) get the "bypass Mirror Image" save flag (bit 24). Single-target
+projectiles and melee abilities stay untouched.
+
+## Dispel Magic vs. magically created weapons (`cbmagic_vanilla_dispel_magic_items`)
+
+Level-checked Dispel/Remove Magic spells (`WIZARD_REMOVE_MAGIC`, `WIZARD_TRUE_DISPEL_MAGIC`,
+`CLERIC_DISPEL_MAGIC`, `INQUIS_DISPEL_MAGIC`) set the high word of opcode 58's second
+parameter to `2` when a caster-level check is used, so magically created weapons are
+dispelled by the same level check as other effects rather than unconditionally.
+
+## Magic Resistance (`cbmagic_vanilla_magic_resistance`)
+
+Priest Magic Resistance (`SPPR509`) adds its resistance bonus to the target's existing
+Magic Resistance (opcode 166 parameter 2 = 0) instead of setting it (parameter 2 = 1), so
+it never lowers a higher value. Because it now adds, a leading self-refresh (opcode 321)
+replaces any previous casting of `SPPR509` on the same target. Its description is updated.
+
+## Strength of One (`cbmagic_vanilla_strength_of_one`)
+
+Strength of One (`SPPR312`) no longer lowers a party member's Strength if they already have
+18/75 or higher:
+
+- How: the Strength and portrait icon effects (`opcode 44`, `opcode 97`, `opcode 142`) move
+  into a sub-spell (`SPPR312A.SPL`) cast instantly at caster level via `opcode 146`
+  (`parameter 2 = 1`). Before casting `SPPR312A`, two `opcode 318` guards on `SPLPROT.2DA`
+  rows block `SPPR312A` on targets with `STR > 18` (`stat 36 > 18`) or `STREXTRA >= 75`
+  (`stat 37 >= 75`). Visuals, sound and status text remain in `SPPR312.SPL`, and its
+  description is updated.
+
+## Blindness (`cbmagic_vanilla_blindness_duration`)
+
+Blindness lasts 1 round per 2 caster levels, at least 2 rounds and at most 5 rounds (12 s
+at levels 1-5, 18 s at 6-7, 24 s at 8-9, 30 s at 10+), instead of the base game's 2 hours.
+
+- How: a single-ability Blindness spell is expanded to four level-gated abilities (levels
+  1, 6, 8 and 10), or an already level-scaled spell has its blindness effect durations
+  updated in place; instant companion effects (such as the status string) keep their zero
+  duration. Its description and scroll state `1 round/2 levels (2 to 5 rounds)`.
+
+## Finger of Death (`cbmagic_vanilla_wizard_finger_of_death_save`, `cbmagic_vanilla_priest_finger_of_death_save`)
+
+Both wizard and priest Finger of Death allow a save vs. death with no penalty on the slay
+effect (and effects that share its save roll), instead of the base game's save vs. spell
+at -2. The damage on a successful save stays as in the base game; descriptions and the
+wizard scroll are updated.
+
+## Disintegrate vs. Mordenkainen's Sword (`cbmagic_vanilla_mordenkainens_sword_disintegrate`)
+
+Disintegrate destroys Mordenkainen's Sword (`RACE = SWORD`) outright without a saving
+throw, while keeping its normal save-or-die behaviour against other targets.
+
+- How: before the disintegrate effect in each ability, an external effect (`DESTSELF.EFF`
+  targeting `RACE = SWORD`, no save) and a self-immunity block for `RACE = SWORD` are
+  inserted so the sword is destroyed cleanly without running the normal disintegrate roll.
+
+## Entangle (`cbmagic_vanilla_entangle`)
+
+- Save vs. breath instead of vs. spell, keeping the base game's +3 bonus on the entangle
+  effect and every effect that shares its roll. Its description says so.
+- Flying, incorporeal, elemental, giant and dragon creatures are immune by race (`WYVERN`,
+  `BEHOLDER`, `MEPHIT`, `SPECTRE`, `WRAITH`, `SHADOW`, `MIST`, `ELEMENTAL`, `GIANT`,
+  `ETTIN`, `DRAGON`).
+
+## Flame Blade (`cbmagic_vanilla_flame_blade`)
+
+- Restricted to druids and rangers.
+- The created blade (`FBLADE.ITM`) is flagged as a magical weapon with enchantment +1 (if
+  unenchanted), so it can hit creatures that require a magical weapon. Existing higher
+  enchantments from other mods are preserved. Its description is updated.
+
+## Elemental summoning scaling (`cbmagic_vanilla_conjure_fire_elemental_wiz`, `cbmagic_vanilla_conjure_air_elemental_wiz`, `cbmagic_vanilla_conjure_earth_elemental_wiz`, `cbmagic_vanilla_conjure_fire_elemental_priest`, `cbmagic_vanilla_conjure_earth_elemental_priest`)
+
+The three probability windows (`[0, c12-1]`, `[c12, c12+c16-1]`, `[c12+c16, 100]` for 12,
+16 and 24 Hit Dice elementals) scale per ability level while keeping each spell's other
+effects (including mental combat on the wizard spells):
+
+- Wizard Conjure Fire, Air and Earth Elemental: 64%/35%/1% at level 12, shifting 1% per
+  level from 12 HD to 24 HD (60%/35%/5% at level 16, 56%/35%/9% at level 20+).
+- Druid Conjure Fire and Earth Elemental: 64%/35%/1% at level 11, 61%/37%/2% at level 12,
+  52%/42%/6% at level 15, and 37%/51%/12% at level 20+ (interpolated evenly across levels
+  11-20 with sums at 100%).
+
+## Druid-only priest spells (`cbmagic_vanilla_barkskin_druid`, `cbmagic_vanilla_animal_summoning_1_druid`, `cbmagic_vanilla_animal_summoning_2_druid`, `cbmagic_vanilla_animal_summoning_3_druid`, `cbmagic_vanilla_conjure_animals_druid`)
+
+Barkskin, Flame Blade, Animal Summoning I-III and Conjure Animals are restricted to druids
+and rangers (cleric/paladin exclusion bit set in the priest class word at SPL offset
+`0x20`, preserving alignment bits).
+
+## Per-spell casting times (`cbmagic_vanilla_*_ct`)
+
+Casting times are lowered on abilities that are slower than the target value (faster
+abilities from other mods are preserved) and descriptions are updated:
+
+- Bless (`cbmagic_vanilla_bless_ct`): 9 to 5.
+- Flame Strike (`cbmagic_vanilla_flame_strike_ct`): 8 to 5.
+- Heal (`cbmagic_vanilla_heal_ct`): 9 to 6.
+- Blade Barrier (`cbmagic_vanilla_blade_barrier_ct`): 9 to 6.
+- Bolt of Glory (`cbmagic_vanilla_bolt_of_glory_ct`): 9 to 6.
+- Magic Resistance (`cbmagic_vanilla_magic_resistance_ct`): 9 to 5.
+- Righteous Magic (`cbmagic_vanilla_righteous_magic_ct`): 9 to 5.
+- True Seeing (`cbmagic_vanilla_true_seeing_priest_ct`) and True Sight
+  (`cbmagic_vanilla_true_sight_wizard_ct`): 8 to 6.
+- Glyph of Warding (`cbmagic_vanilla_glyph_of_warding_ct`): 9 to 5.
+- Invisibility Purge (`cbmagic_vanilla_invisibility_purge_ct`): 8 to 3.
+- Strength (`cbmagic_vanilla_strength_ct`): 9 to 5.
+- Fire Seeds (`cbmagic_vanilla_fire_seeds_ct`): 9 to 6.
 
 ## Descriptions
 

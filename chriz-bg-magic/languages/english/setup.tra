@@ -11,3 +11,33 @@
 // Minor Spell Deflection: "This spell will only affect up to 7th-level spells".
 @9111 = ~up to 7th-level spells~
 @9112 = ~up to 4th-level spells~
+
+// Vanilla batch (@20000+): school, duration, save, item, elemental scaling, casting times.
+@20000 = ~(Conjuration/Summoning)~
+@20001 = ~(Universal)~
+@20002 = ~Duration: 2 hours~
+@20003 = ~Duration: 1 round/2 levels (2 to 5 rounds)~
+@20004 = ~(Evocation)~
+@20005 = ~(Conjuration/Summoning)~
+@20006 = ~Save vs\. Spell is made with a -2 penalty~
+@20007 = ~Save vs. Death is made~
+@20008 = ~saves vs\. Spell with a -2 penalty~
+@20009 = ~saves vs. Death~
+@20010 = ~save vs\. Spell~
+@20011 = ~save vs. Breath~
+@20012 = ~However, it is not a magical weapon in the normal sense of the term, so creatures struck only by magical weapons are not harmed by it\.~
+@20013 = ~However, it is treated as a magical weapon, so creatures struck only by magical weapons can be harmed by it.~
+@20014 = ~There is a 60% chance that a 12-Hit-Dice elemental appears[,;] a 35% chance that a 16-Hit-Dice elemental appears[,;] and a 5% chance that a 24-Hit-Dice elemental appears\.~
+@20015 = ~At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level).~
+@20016 = ~The chance of summoning a 12-, 16-, or 24-Hit-Dice elemental scales with caster level from 64% / 35% / 1% at 11th level (61% / 37% / 2% at 12th, 52% / 42% / 6% at 15th) up to 37% / 51% / 12% at 20th level.~
+@20020 = ~Casting Time: 9~
+@20021 = ~Casting Time: 8~
+@20022 = ~Casting Time: 6~
+@20023 = ~Casting Time: 5~
+@20024 = ~Casting Time: 3~
+@20025 = ~(Enchantment/Charm)~
+@20026 = ~This resistance is set so that if the target already has more Magic Resistance than the priest would confer, it will actually lower it to the set value\.~
+@20027 = ~This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting.~
+@20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
+@20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
+@20030 = ~(Invocation/Evocation)~
