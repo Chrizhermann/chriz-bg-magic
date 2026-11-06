@@ -1994,7 +1994,9 @@ BEGIN
             FOR (i = 0; i < na; ++i) BEGIN
               SET fx = fx_off + (fa + i) * 0x30
               READ_SHORT fx op
-              PATCH_IF (op = 11) BEGIN SET has_11 = 1 END
+              READ_ASCII (fx + 0x14) res (8) NULL
+              // EE Fixpack moves the cure into a sub-spell of its own.
+              PATCH_IF (op = 11) OR ((op = 146) AND (~%res%~ STRING_EQUAL_CASE ~#curepsn~)) BEGIN SET has_11 = 1 END
             END
           END
           PATCH_IF !has_11 BEGIN
@@ -2018,6 +2020,7 @@ BEGIN
                   READ_ASCII (fx + 0x14) res (8) NULL
                   PATCH_IF (op = 17) OR (op = 79) OR (op = 75) OR (op = 81)
                         OR ((op = 240) AND ((p2 = 7) OR (p2 = 8) OR (p2 = 112)))
+                        OR ((op = 146) AND ((~%res%~ STRING_EQUAL_CASE ~#curedis~) OR (~%res%~ STRING_EQUAL_CASE ~#curedef~) OR (~%res%~ STRING_EQUAL_CASE ~#curebld~)))
                         OR ((op = 321) AND ((~%res%~ STRING_EQUAL_CASE ~SPPR419~) OR (~%res%~ STRING_EQUAL_CASE ~SPIN103~))) BEGIN
                     LPF cbmagic_delete_effect INT_VAR index = (fa + i) END
                     SET changed += 1

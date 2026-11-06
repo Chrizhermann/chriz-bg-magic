@@ -875,3 +875,26 @@ def kept_spells_variations_and_broken_inputs(work, weidu):
     mr_num = next(int(ln.split()[0]) for ln in ids_text.splitlines() if "CLERIC_CBMAGIC_MASS_REGENERATE" in ln)
     mr_res = f"SPPR{mr_num - 1000:03d}"
     check(parse_spl_full(g.file(f"override/{mr_res}.SPL"))["abilities"][0]["projectile"] == 337, "Mass Regenerate fallback proj")
+
+
+@test
+def neutralize_poison_with_ee_fixpack_sub_spells(work, weidu):
+    """EE Fixpack moves the cures into op146 sub-spells: #curepsn stays as the cure, the
+    disease, deafness and blindness cures go, and the immunity is added all the same."""
+    layout = ie.make_spl(2, 4, [{"target": 1, "casting_time": 1, "effects": [
+        fx.fx(opcode=146, power=4, p2=2, timing=1, dispel=3, resource="#curepsn"),
+        fx.fx(opcode=17, power=4, p1=10, timing=1, dispel=3),
+        fx.fx(opcode=146, power=4, p2=2, timing=1, dispel=3, resource="#curedis"),
+        fx.fx(opcode=146, power=4, p2=2, timing=1, dispel=2, resource="#curedef"),
+        fx.fx(opcode=146, power=4, p2=2, timing=1, dispel=2, resource="#curebld"),
+        fx.fx(opcode=61, power=4, timing=0, dispel=3, duration=3),
+    ]}], desc=NPOISON_DESC)
+    g = fg.FakeGame(work, weidu, tlk=sr_tlk(), biff=sr_biff({"SPPR404.SPL": layout}))
+    out = g.install()
+    check("Neutralize Poison (SPPR404) left as it is" not in out, out)
+    s = parse_spl_full(g.file("override/SPPR404.SPL"))
+    check(len(s["abilities"]) == 14, f"abilities: {len(s['abilities'])}")
+    for ab in s["abilities"]:
+        subs = {e["resource"].upper() for e in ab["effects"] if e["opcode"] == 146}
+        check(subs == {"#CUREPSN"}, f"sub-spells: {subs}")
+        check(101 in {e["opcode"] for e in ab["effects"]}, "poison immunity missing")
