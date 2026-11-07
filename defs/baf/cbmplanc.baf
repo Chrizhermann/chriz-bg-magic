@@ -1,0 +1,55 @@
+// Only one of this kind on the party's side. A newcomer asks, through a global, so that one out of
+// sight hears it too; one that has arrived answers; a newcomer that gets an answer leaves. Nothing
+// stays behind when a creature goes: a gone creature just does not answer.
+// Variables set in a block are not yet set for the triggers of the blocks after it in the same
+// pass, so every block names all it needs.
+IF
+  Global("CBMARRIVE","LOCALS",0)
+  !Allegiance(Myself,GOODCUTOFF)
+THEN
+  RESPONSE #100
+    SetGlobal("CBMARRIVE","LOCALS",3)
+    Continue()
+END
+
+IF
+  Global("CBMARRIVE","LOCALS",0)
+  Allegiance(Myself,GOODCUTOFF)
+THEN
+  RESPONSE #100
+    SetGlobal("CBMPLANASK","GLOBAL",1)
+    SetGlobalTimer("CBMSETTLE","LOCALS",3)
+    SetGlobal("CBMARRIVE","LOCALS",1)
+    Continue()
+END
+
+IF
+  Global("CBMARRIVE","LOCALS",1)
+  Global("CBMPLANASK","GLOBAL",2)
+THEN
+  RESPONSE #100
+    SetGlobal("CBMPLANASK","GLOBAL",0)
+    DisplayString(Myself,20969)
+    DestroySelf()
+END
+
+IF
+  Global("CBMARRIVE","LOCALS",1)
+  !Global("CBMPLANASK","GLOBAL",2)
+  GlobalTimerExpired("CBMSETTLE","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobal("CBMPLANASK","GLOBAL",0)
+    SetGlobal("CBMARRIVE","LOCALS",2)
+    Continue()
+END
+
+IF
+  Global("CBMARRIVE","LOCALS",2)
+  Global("CBMPLANASK","GLOBAL",1)
+  Allegiance(Myself,GOODCUTOFF)
+THEN
+  RESPONSE #100
+    SetGlobal("CBMPLANASK","GLOBAL",2)
+    Continue()
+END

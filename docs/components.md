@@ -625,3 +625,24 @@ Changed texts are added as new strings and the spell (and its scrolls) point to 
 old strings, which other resources may share, stay. The text patterns exist only in
 English so far: on a game in another language the installer warns that those
 descriptions still describe the old behaviour.
+
+## Celestial summons (`cbmagic_main`)
+
+- Summon Deva, Summon Fallen Deva, Summon Planetar, Summon Dark Planetar and the paladin's two
+  summons take 1 round to cast, reach 30 ft. and last 3 turns (devas) or 2 turns (planetars).
+  The game's own effects `SPDEVA`, `SPDEVA2`, `SPPLAN` and `SPPLAN2` now call `cbmdevag`,
+  `cbmdevae`, `cbmplang` and `cbmplane`, so every spell that uses them reaches these creatures.
+- The creature files in `defs/` hold what the game then adds to: CON 18 gives 36 Hit Points,
+  DEX the Armor Class bonus, STR 19 and the +3 weapon the THAC0, and the fighter levels one more
+  attack. The numbers in the descriptions are the ones in play.
+- No permanent Haste for planetars. The look is an elf cleric (devas) or elf mage (planetars)
+  with the game's own wing animation in the helmet slot.
+- Gender is BOTH, as on the game's celestials: the gender SUMMONED would let Death Spell destroy
+  a creature whose description says it is immune to death magic.
+- Combat stays under the game's `BDSUM00`; which spells it casts is the player's choice.
+- The limit is a small override script, `defs/baf/cbmdevac.baf` for devas and
+  `defs/baf/cbmplanc.baf` for planetars, compiled to `chriz-bg-magic/files/`. The game's own limit
+  in `SUMMLIMT.2DA` does not help: it counts one shared CELESTIAL row by fixed names and animations.
+  A newcomer on the party's side asks through a global; one that has arrived answers, in sight or
+  not; the newcomer then shows the game's summon limit message and leaves. Without an answer in
+  three seconds it stays. Enemy summons neither ask nor answer.

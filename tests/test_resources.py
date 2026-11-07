@@ -332,6 +332,67 @@ def definitions_lean_on_no_other_mod(work, weidu):
 
 
 @test
+def celestials_are_what_was_decided(work, weidu):
+    """Every spell that calls a celestial, the game's own effects, and the creatures they call."""
+    defs = definitions()
+    spells = {"sppr726.spl": ("SPDEVA", 7, 180, 1), "sppr727.spl": ("SPDEVA2", 7, 180, 1), "spcl923.spl": ("SPDEVA", 7, 180, 7),
+              "spcl935.spl": ("SPDEVA2", 7, 180, 7), "spwi923.spl": ("SPPLAN", 9, 120, 1), "spwi924.spl": ("SPPLAN2", 9, 120, 1)}
+    for name, (effect, power, duration, level) in spells.items():
+        header, abilities = defs[name]["header"], defs[name]["abilities"]
+        check((header["type"], header["level"], header["school"], len(abilities)) == (4, level, 2, 1), f"{name}: header")
+        row = abilities[0]
+        check((row["target"], row["range"], row["casting_time"], row["min_level"]) == (4, 30, 9, 1), f"{name}: delivery")
+        check([(e["opcode"], e["target"], e["power"], e["p2"], e["duration"], e["resource"]) for e in row["effects"]] ==
+              [(177, 1, power, 2, duration, effect)], f"{name}: summon")
+        check("text" in header["description"] and "old" in header["description"], f"{name}: complete English description")
+    creatures = {"spdeva.eff": ("CBMDEVAG", 7), "spdeva2.eff": ("CBMDEVAE", 7), "spplan.eff": ("CBMPLANG", 9),
+                 "spplan2.eff": ("CBMPLANE", 9)}
+    for name, (creature, power) in creatures.items():
+        row = defs[name]["effect"]
+        check((row["opcode"], row["target"], row["power"], row["p2"], row["resource"]) == (67, 1, power, 1, creature),
+              f"{name}: calls the mod's creature")
+    # What the files hold; the game adds CON 18's 36 Hit Points, the Armor Class of DEX, and so on.
+    deva = dict(hp=100, ac=-1, thac0=10, attacks=1, levels=[14, 14, 1], attributes=[19, 0, 18, 18, 18, 18, 20])
+    planetar = dict(hp=116, ac=-3, thac0=7, attacks=2, levels=[18, 18, 1], attributes=[19, 0, 18, 21, 19, 18, 22])
+    for name, want, resist, spells, script, alignment, immune in (
+            ("cbmdevag.cre", deva, [50, 100, 100, 0, 70, 50, 100, 10, 10, 10, 10], 29, "CBMDEVAC", 49, "IMMUNE2"),
+            ("cbmdevae.cre", deva, [100, 0, 100, 50, 70, 100, 0, 10, 10, 10, 10], 29, "CBMDEVAC", 51, "IMMUNE2"),
+            ("cbmplang.cre", planetar, [50, 100, 100, 0, 75, 50, 100, 20, 20, 20, 20], 38, "CBMPLANC", 49, "IMMUNE3"),
+            ("cbmplane.cre", planetar, [100, 0, 100, 50, 75, 100, 0, 20, 20, 20, 20], 38, "CBMPLANC", 51, "IMMUNE3")):
+        creature = defs[name]
+        check({key: creature[key] for key in want} == want, f"{name}: values before the game's own bonuses")
+        check(creature["resistances"] == resist and creature["saves"] == [3, 5, 4, 4, 6], f"{name}: resistances and saves")
+        check((creature["gender"], creature["alignment"], creature["class"]) == (5, alignment, 8), f"{name}: not a SUMMONED gender")
+        check(creature["scripts"] == [script, "None", "None", "None", "BDSUM00"], f"{name}: limit and default summon scripts")
+        check(sum(sum(level.values()) for level in creature["spells"]) == spells, f"{name}: spells")
+        check(creature["items"]["ring_left"] == immune, f"{name}: weapon immunity")
+    for script, kind in (("cbmdevac.bcs", b"GLOBALCBMDEVASK"), ("cbmplanc.bcs", b"GLOBALCBMPLANASK")):
+        data = (fg.MOD / "files" / script).read_bytes()
+        check(b"LOCALSCBMARRIVE" in data and kind in data, f"{script}: asks for its own kind")
+
+
+@test
+def creature_files_hold_together(work, weidu):
+    """Every table of every creature lies inside its file and agrees with the others."""
+    files = [*sorted((fg.MOD / "files").glob("*.cre")), *sorted(RES.glob("*.cre"))]
+    check(len(files) > 20, "creatures are missing")
+    for path in files:
+        data = path.read_bytes()
+        known, known_n, info, info_n, spells, spells_n, slots, items, items_n, effects, effects_n = \
+            struct.unpack_from("<IIIIIIIIIII", data, 0x2A0)
+        size = 264 if data[0x33] else 48
+        for what, at, count, width in (("known spells", known, known_n, 12), ("spell levels", info, info_n, 16),
+                                       ("memorised spells", spells, spells_n, 12), ("items", items, items_n, 20),
+                                       ("effects", effects, effects_n, size), ("slots", slots, 1, 80)):
+            check(at + count * width <= len(data), f"{path.name}: {what} run past the end of the file")
+        for row in range(info_n):
+            first, count = struct.unpack_from("<II", data, info + 16 * row + 8)
+            check(first + count <= spells_n, f"{path.name}: spell level {row} points past the memorised spells")
+        held = struct.unpack_from("<38h", data, slots)
+        check(all(i == -1 or 0 <= i < items_n for i in held), f"{path.name}: a slot points past the items")
+
+
+@test
 def find_familiar_keeps_the_game_s_summoning(work, weidu):
     """School and description are written; what calls the familiar stays each game's own."""
     summon = fx.fx(opcode=177, target=1, p2=2, timing=1, resource="K#FAMSUM")

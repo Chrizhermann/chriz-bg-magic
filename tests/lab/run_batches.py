@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons")
 
 
 def lua_list(values):
@@ -829,6 +829,165 @@ def iwdbatch(c, check):
               len(early) == 1 and early[0]["ea"] < 30, early=early)
         check(f"Conjure {name} Elemental: after the contest ally or hostile", len(late) == 1 and late[0]["ea"] in (4, 255),
               late=late)
+
+
+def celestials(c, check):
+    defs = Path(__file__).resolve().parents[2] / "defs"
+    c.p("ce-protect", "protect_party()")
+    p0 = c.p("ce-party", "party()")[0]
+
+    def clear(tag):
+        c.p(f"ce-clear-{tag}", "remove_all_others()")
+        time.sleep(1.5)
+
+    def call(tag, res, dx=90, wait=11):
+        c.p(f"ce-cast-{tag}", f'cast_point(1, "{res}", {p0["x"] + dx}, {p0["y"]})')
+        time.sleep(wait)
+
+    def present(tag):
+        return [o for o in c.p(f"ce-others-{tag}", "others()") or [] if o["ea"] < 30]
+
+    # The numbers the descriptions give, read from the running game.
+    table = (("SPPR726", "Deva", "cbmdevag", 136, -5, 14, [18, 18, 18, 18], 70, 10, [50, 100, 100, 0]),
+             ("SPPR727", "Fallen Deva", "cbmdevae", 136, -5, 14, [18, 18, 18, 18], 70, 10, [100, 0, 100, 50]),
+             ("SPWI923", "Planetar", "cbmplang", 152, -7, 18, [18, 21, 19, 18], 75, 20, [50, 100, 100, 0]),
+             ("SPWI924", "Fallen Planetar", "cbmplane", 152, -7, 18, [18, 21, 19, 18], 75, 20, [100, 0, 100, 50]))
+    for res, name, file, hp, ac, level, abilities, mr, physical, elements in table:
+        clear(res)
+        call(res, res)
+        one = c.p(f"ce-being-{res}", f'being("{name}")')
+        check(f"{name}: arrives on the party's side", one and one["ea"] < 30, being=one)
+        if not one:
+            continue
+        book = json.loads((defs / f"{file}.cre.json").read_text(encoding="utf-8"))["spells"]
+        known = sorted(f"{i}:{spell}" for i, spells in enumerate(book) for spell in spells)
+        check(f"{name}: {hp} Hit Points, AC {ac}", (one["maxhp"], one["ac"]) == (hp, ac), maxhp=one["maxhp"], ac=one["ac"])
+        check(f"{name}: level, attributes, saves", one["level"] == level and one["attributes"][1:5] == abilities and
+              one["saves"] == [3, 5, 4, 4, 6], level=one["level"], attributes=one["attributes"], saves=one["saves"])
+        check(f"{name}: resistances", one["resist"] == [*elements, mr, physical, physical, physical, physical], resist=one["resist"])
+        check(f"{name}: spell book", sorted(one["known"]) == known, known=one["known"])
+        check(f"{name}: no SUMMONED gender; attacks", (one["gender"], one["apr"]) == (5, 2 if level == 14 else 3),
+              gender=one["gender"], apr=one["apr"], thac0=one["thac0"], equipped=one["equipped"])
+
+    # One of each kind: the second of a kind leaves, the first stays, the other kind comes.
+    clear("cap")
+    call("cap", "SPPR726")
+    first = present("cap-first")
+    check("Limit: one deva arrives", len(first) == 1, present=first)
+    call("cap2", "SPPR726")
+    now = present("cap2")
+    check("Limit: a second deva leaves, the first stays", [o["id"] for o in now] == [first[0]["id"]], present=now)
+    call("cap3", "SPPR727")
+    now = present("cap3")
+    check("Limit: a fallen deva leaves beside a deva", [o["id"] for o in now] == [first[0]["id"]], present=now)
+    call("cap4", "SPCL935")
+    now = present("cap4")
+    check("Limit: the paladin's Summon Fallen Deva counts too", [o["id"] for o in now] == [first[0]["id"]], present=now)
+    call("cap5", "SPWI923", dx=-90)
+    now = present("cap5")
+    planetar = [o for o in now if o["name"] == "Planetar"]
+    check("Limit: a planetar comes beside the deva", len(now) == 2 and len(planetar) == 1, present=now)
+    call("cap6", "SPWI924", dx=-90)
+    now = present("cap6")
+    check("Limit: a dark planetar leaves beside a planetar", len(now) == 2 and bool(planetar) and
+          planetar[0]["id"] in [o["id"] for o in now], present=now)
+
+    # The first one gone, a new one may come.
+    clear("again")
+    call("again", "SPPR727")
+    now = present("again")
+    check("Limit: after the first is gone another comes", len(now) == 1 and now[0]["name"] == "Fallen Deva", present=now)
+
+    # The party AI button off, then on again.
+    clear("ai")
+    call("ai1", "SPPR726")
+    off = c.p("ce-ai-off", "party_ai(false)")
+    call("ai2", "SPPR726")
+    during = present("ai2")
+    c.p("ce-ai-on", "party_ai(true)")
+    time.sleep(4)
+    after = present("ai3")
+    check("Limit with the party AI off", len(after) == 1, ai=off, during=during, after=after)
+
+    # A deva out of sight.
+    clear("far")
+    call("far1", "SPPR726")
+    c.p("ce-far", f"""order("Deva", 'JumpToPoint([{p0["x"] + 1400}.{p0["y"]}])')""")
+    time.sleep(2)
+    apart = present("far1")
+    call("far2", "SPPR726")
+    now = present("far2")
+    check("Limit: a second deva leaves while the first is out of sight", len(now) == 1 and now[0]["id"] == apart[0]["id"],
+          apart=apart, present=now)
+
+    # Enemy casters are not limited.
+    clear("foe")
+    call("foe1", "SPPR726")
+    enemy = fresh_foe(c, "cf")
+    call("foe0", "SPPR726")
+    c.p("cf-cast", f"""order("{enemy}", 'ReallyForceSpellPointRES("SPPR726",[{p0["x"] + 200}.{p0["y"]}])')""")
+    time.sleep(11)
+    c.p("cf-cast2", f"""order("{enemy}", 'ReallyForceSpellPointRES("SPPR726",[{p0["x"] + 240}.{p0["y"]}])')""")
+    time.sleep(11)
+    everyone = c.p("cf-others", "others()") or []
+    devas = [o for o in everyone if o["name"] == "Deva"]
+    check("Limit: enemy casters are not limited", sum(o["ea"] >= 200 for o in devas) == 2 and sum(o["ea"] < 30 for o in devas) == 1,
+          devas=devas)
+
+    # Its book and its nature in play.
+    clear("book")
+    call("book", "SPPR726")
+    c.p("cb-spell", """order("Deva", 'Spell(Myself,CLERIC_BLESS)')""")
+    time.sleep(6)
+    blessed = [e for e in (c.p("cb-ops", """ops("Deva", {54, 318, 321})""") or []) if e["src"] == "SPPR101"]
+    check("Deva: it casts from its book", bool(blessed), effects=blessed)
+
+    clear("regen")
+    call("regen", "SPWI923")
+    c.p("cr-hit", 'damage("Planetar", 30)')
+    time.sleep(0.5)
+    hurt = c.p("cr-hurt", 'being("Planetar")')
+    time.sleep(12)
+    healed = c.p("cr-healed", 'being("Planetar")')
+    check("Planetar: regenerates about 2 Hit Points per round", 3 <= healed["hp"] - hurt["hp"] <= 6,
+          hurt=hurt["hp"], healed=healed["hp"])
+
+    clear("end")
+
+
+def celweapons(c, check):
+    # A foe that cannot die, and the celestial called next to it: in this room walls stand between
+    # the party and a foe further out.
+    c.p("cw-protect", "protect_party()")
+    # The fallen deva: 1d8+10 slashing and 1d8 fire, and the bleeding of earlier hits, 1 Hit Point
+    # a pulse, can land in the same quarter second.
+    for res, name, low, high, bleed in (("SPPR726", "Deva", 11, 20, 0), ("SPPR727", "Fallen Deva", 12, 26, 3),
+                                        ("SPWI923", "Planetar", 12, 22, 0)):
+        c.p(f"cw-clear-{res}", "remove_all_others()")
+        time.sleep(1.5)
+        c.p(f"cw-spawn-{res}", 'spawn("SPIDHU01", 100, 0)')
+        time.sleep(2)
+        c.p(f"cw-live-{res}", 'fx("spidhu01", 208, 1, 0, 600)')
+        c.p(f"cw-hp-{res}", 'fx("spidhu01", 18, 900, 0, 600)')
+        at = c.p(f"cw-foe-{res}", 'creature("spidhu01")')
+        c.p(f"cw-cast-{res}", f'cast_point(1, "{res}", {at["x"] - 30}, {at["y"]})')
+        time.sleep(10)
+        # A foe in sight pauses the game when the game's auto-pause says so.
+        paused = c.p(f"cw-unpause-{res}", "unpause()")
+        c.p(f"cw-go-{res}", f"""order("{name}", 'Attack(NearestEnemyOf(Myself))')""")
+        last, drops = c.p(f"cw-at-{res}", 'creature("spidhu01")')["hp"], []
+        for i in range(100):
+            time.sleep(0.25)
+            if i % 8 == 0:
+                c.p(f"cw-unpause-{res}-{i}", "unpause()")
+            hp = c.p(f"cw-{res}-{i}", 'creature("spidhu01")')["hp"]
+            if hp < last:
+                drops.append(last - hp)
+            last = hp
+        hits = [d for d in drops if d > bleed]
+        check(f"{name}: every hit {low} to {high}, twice that on a critical hit", bool(hits) and low <= min(hits) and
+              all(d <= high + bleed or low * 2 <= d <= high * 2 + bleed for d in hits), drops=drops, paused=paused)
+    c.p("cw-tidy", "remove_all_others()")
 
 
 def smoke(c, check):

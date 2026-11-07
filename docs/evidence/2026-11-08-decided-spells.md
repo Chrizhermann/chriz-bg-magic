@@ -23,6 +23,26 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
   top. The install took 30 seconds, without warnings about game data. Ten fights in a hidden EET game,
   five BG1 encounters with engine and SCS at Insane, ran without errors.
 
+## Celestials
+
+- Offline tests: 41 of 41, among them a check that every table of every creature file lies inside
+  the file and agrees with the others.
+- Clean installs in BG2:EE, in BG2:EE with IWDification and in EET; in all three the game's own
+  summon effects now call the mod's creatures.
+- In-game, group `celestials` in `tests/lab/run_batches.py`, BG2:EE:
+  - All four creatures arrive on the party's side with the numbers of their descriptions: 136 or
+    152 Hit Points, AC -5 or -7, 2 or 3 attacks, level 14 or 18, the attributes, saving throws,
+    resistances and spell lists given there, gender BOTH.
+  - Limit: a second deva leaves and the first stays; a fallen deva and the paladin's Summon Fallen
+    Deva leave beside a deva; a planetar comes beside the deva; a dark planetar leaves beside a
+    planetar; once the first is gone another comes; with the party AI button off the second still
+    leaves; a second deva leaves while the first stands out of sight.
+  - Enemy casters are not limited: two devas of an enemy caster stay beside the party's deva.
+  - A deva casts Bless from its book on order; a planetar regenerated 4 Hit Points in 12 seconds.
+- In-game, group `celweapons`, BG2:EE, hits on a foe that cannot die: deva 11 to 20 (1d10+10),
+  planetar 13 to 21 (2d6+10), fallen deva 13 to 26 plus its bleeding in single Hit Points.
+- Both groups again in BG2:EE with IWDification: 39 of 39.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's
@@ -30,3 +50,5 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - Rangers get Icelance too: they share the class setting with druids.
 - The stack run covers BG1's early levels only, and not the later commit.
 - The 15 % of the contest comes from the game's own script and was seen once, not measured.
+- The celestials' look was not seen: a lab game runs hidden and draws no picture. Animation,
+  colors and items are in the files and were read back, not looked at.

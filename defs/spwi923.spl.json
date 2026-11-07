@@ -1,0 +1,72 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 63231,
+  "name_identified": 63231,
+  "sound": "CAS_M03",
+  "flags": 0,
+  "type": 4,
+  "exclusion": 0,
+  "animation": 14,
+  "min_level": 0,
+  "school": 2,
+  "min_strength": 0,
+  "sectype": 0,
+  "unused_28": "000000000000000000000000",
+  "level": 1,
+  "stack": 1,
+  "icon": "SPWI923C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Summon Planetar\n(Conjuration/Summoning)\n\nLevel: 10\nRange: 30 ft.\nDuration: 2 turns\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nA planetar answers the call and fights at the caster's side until the spell ends or it falls in battle. It follows the caster's orders, and the caster chooses which of its spells it casts. The party can have one deva or fallen deva and one planetar or dark planetar at the same time. A second of the same kind leaves as soon as it arrives.\n\nPlanetar: 18 Hit Dice, chaotic good\nSTR 19, DEX 19, CON 18, INT 18, WIS 21, CHA 22\nHit Points 152, AC -7, THAC0 1, saving throws 3/5/4/4/6\n3 attacks per round with a Greatsword +3: 2d6+10 slashing damage. Every hit has a 15% chance to kill unless the target saves vs. Death at -2.\n\nOnly weapons of +3 or better can hit it. It regenerates 2 Hit Points per round. It cannot be affected by charm, confusion, feeblemindedness, level drain, death magic, imprisonment, maze, petrification or poison.\nResistances: cold and electricity 100%, fire 50%, magic 75%, physical damage 20%.\n\nSpells by level:\n1: Bless (x3); Remove Fear (x3)\n2: Aid (x3); Find Traps; Know Alignment; Draw Upon Holy Might\n3: Remove Curse (x2); Holy Smite (x2); Cure Disease (x2)\n4: Cure Serious Wounds (x2); Neutralize Poison (x2); Protection From Evil, 10' Radius (x2); Death Ward (x2)\n5: Raise Dead (x2); True Seeing (x2); Chaotic Commands (x2)\n6: Blade Barrier (x2); Heal; Bolt of Glory\n7: Holy Word; Greater Restoration",
+   "old": 63232
+  },
+  "description_identified": {
+   "text": "Summon Planetar\n(Conjuration/Summoning)\n\nLevel: 10\nRange: 30 ft.\nDuration: 2 turns\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nA planetar answers the call and fights at the caster's side until the spell ends or it falls in battle. It follows the caster's orders, and the caster chooses which of its spells it casts. The party can have one deva or fallen deva and one planetar or dark planetar at the same time. A second of the same kind leaves as soon as it arrives.\n\nPlanetar: 18 Hit Dice, chaotic good\nSTR 19, DEX 19, CON 18, INT 18, WIS 21, CHA 22\nHit Points 152, AC -7, THAC0 1, saving throws 3/5/4/4/6\n3 attacks per round with a Greatsword +3: 2d6+10 slashing damage. Every hit has a 15% chance to kill unless the target saves vs. Death at -2.\n\nOnly weapons of +3 or better can hit it. It regenerates 2 Hit Points per round. It cannot be affected by charm, confusion, feeblemindedness, level drain, death magic, imprisonment, maze, petrification or poison.\nResistances: cold and electricity 100%, fire 50%, magic 75%, physical damage 20%.\n\nSpells by level:\n1: Bless (x3); Remove Fear (x3)\n2: Aid (x3); Find Traps; Know Alignment; Draw Upon Holy Might\n3: Remove Curse (x2); Holy Smite (x2); Cure Disease (x2)\n4: Cure Serious Wounds (x2); Neutralize Poison (x2); Protection From Evil, 10' Radius (x2); Death Ward (x2)\n5: Raise Dead (x2); True Seeing (x2); Chaotic Commands (x2)\n6: Blade Barrier (x2); Heal; Bolt of Glory\n7: Holy Word; Greater Restoration",
+   "old": 63232
+  },
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 1,
+   "ability_flags": 0,
+   "location": 4,
+   "icon": "SPWI923B",
+   "target": 4,
+   "target_count": 0,
+   "range": 30,
+   "min_level": 1,
+   "casting_time": 9,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 1,
+   "effects": [
+    {
+     "opcode": 177,
+     "target": 1,
+     "power": 9,
+     "p1": 0,
+     "p2": 2,
+     "timing": 0,
+     "dispel": 2,
+     "duration": 120,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPLAN",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

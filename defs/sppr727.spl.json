@@ -1,0 +1,72 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 63830,
+  "name_identified": 63830,
+  "sound": "CAS_M03",
+  "flags": 0,
+  "type": 4,
+  "exclusion": 0,
+  "animation": 14,
+  "min_level": 0,
+  "school": 2,
+  "min_strength": 0,
+  "sectype": 6,
+  "unused_28": "000000000000000000000000",
+  "level": 1,
+  "stack": 1,
+  "icon": "SPPR727C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Summon Fallen Deva\n(Conjuration/Summoning)\n\nLevel: Quest\nRange: 30 ft.\nDuration: 3 turns\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nA fallen deva answers the call and fights at the caster's side until the spell ends or it falls in battle. It follows the caster's orders, and the caster chooses which of its spells it casts. The party can have one deva or fallen deva and one planetar or dark planetar at the same time. A second of the same kind leaves as soon as it arrives.\n\nFallen Deva: 14 Hit Dice, chaotic evil\nSTR 19, DEX 18, CON 18, INT 18, WIS 18, CHA 20\nHit Points 136, AC -5, THAC0 4, saving throws 3/5/4/4/6\n2 attacks per round with a Long Sword +3: 1d8+10 slashing and 1d8 fire damage. Every hit also bleeds for 1 Hit Point per round for 5 rounds.\n\nOnly weapons of +2 or better can hit it. It cannot be affected by level drain, death magic, imprisonment, maze, petrification or poison.\nResistances: fire and electricity 100%, acid 50%, magic 70%, physical damage 10%.\n\nSpells by level:\n1: Doom (x3); Remove Fear (x3)\n2: Hold Person (x3); Find Traps; Know Alignment; Silence, 15' Radius\n3: Remove Curse (x2); Rigid Thinking (x2); Unholy Blight (x2)\n4: Cause Serious Wounds (x2); Poison (x2); Cloak of Fear\n5: Flame Strike; True Seeing; Greater Command\n6: Blade Barrier; Harm\n7: Unholy Word",
+   "old": 63831
+  },
+  "description_identified": {
+   "text": "Summon Fallen Deva\n(Conjuration/Summoning)\n\nLevel: Quest\nRange: 30 ft.\nDuration: 3 turns\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nA fallen deva answers the call and fights at the caster's side until the spell ends or it falls in battle. It follows the caster's orders, and the caster chooses which of its spells it casts. The party can have one deva or fallen deva and one planetar or dark planetar at the same time. A second of the same kind leaves as soon as it arrives.\n\nFallen Deva: 14 Hit Dice, chaotic evil\nSTR 19, DEX 18, CON 18, INT 18, WIS 18, CHA 20\nHit Points 136, AC -5, THAC0 4, saving throws 3/5/4/4/6\n2 attacks per round with a Long Sword +3: 1d8+10 slashing and 1d8 fire damage. Every hit also bleeds for 1 Hit Point per round for 5 rounds.\n\nOnly weapons of +2 or better can hit it. It cannot be affected by level drain, death magic, imprisonment, maze, petrification or poison.\nResistances: fire and electricity 100%, acid 50%, magic 70%, physical damage 10%.\n\nSpells by level:\n1: Doom (x3); Remove Fear (x3)\n2: Hold Person (x3); Find Traps; Know Alignment; Silence, 15' Radius\n3: Remove Curse (x2); Rigid Thinking (x2); Unholy Blight (x2)\n4: Cause Serious Wounds (x2); Poison (x2); Cloak of Fear\n5: Flame Strike; True Seeing; Greater Command\n6: Blade Barrier; Harm\n7: Unholy Word",
+   "old": 63831
+  },
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 1,
+   "ability_flags": 0,
+   "location": 4,
+   "icon": "SPPR727B",
+   "target": 4,
+   "target_count": 0,
+   "range": 30,
+   "min_level": 1,
+   "casting_time": 9,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 1,
+   "effects": [
+    {
+     "opcode": 177,
+     "target": 1,
+     "power": 7,
+     "p1": 0,
+     "p2": 2,
+     "timing": 0,
+     "dispel": 2,
+     "duration": 180,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPDEVA2",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,123 @@
+{
+ "format": "cre",
+ "name": 63838,
+ "tooltip": 63839,
+ "flags": 0,
+ "xp": 0,
+ "hp": 100,
+ "animation": 24577,
+ "colors": [
+  105,
+  25,
+  105,
+  10,
+  105,
+  105,
+  17
+ ],
+ "ac": -1,
+ "thac0": 10,
+ "attacks": 1,
+ "saves": [
+  3,
+  5,
+  4,
+  4,
+  6
+ ],
+ "resistances": [
+  50,
+  100,
+  100,
+  0,
+  70,
+  50,
+  100,
+  10,
+  10,
+  10,
+  10
+ ],
+ "lore": 5,
+ "levels": [
+  14,
+  14,
+  1
+ ],
+ "sex": 1,
+ "attributes": [
+  19,
+  0,
+  18,
+  18,
+  18,
+  18,
+  20
+ ],
+ "racial_enemy": 0,
+ "sounds": {
+  "battle_cry1": 61729,
+  "damage": 61730,
+  "dying": 61731,
+  "hurt": 61732,
+  "select1": 61724,
+  "select2": 61725,
+  "select3": 61726
+ },
+ "scripts": [
+  "CBMDEVAC",
+  "None",
+  "None",
+  "None",
+  "BDSUM00"
+ ],
+ "script_name": "cbmdevag",
+ "ea": 4,
+ "general": 1,
+ "race": 158,
+ "class": 8,
+ "specific": 0,
+ "gender": 5,
+ "alignment": 49,
+ "spells": [
+  {
+   "SPPR101": 3,
+   "SPPR108": 3
+  },
+  {
+   "SPPR201": 3,
+   "SPPR205": 1,
+   "SPPR209": 1,
+   "SPPR214": 1
+  },
+  {
+   "SPPR307": 2,
+   "SPPR313": 2,
+   "SPPR317": 2
+  },
+  {
+   "SPPR401": 2,
+   "SPPR404": 2,
+   "SPPR408": 1
+  },
+  {
+   "SPPR504": 1,
+   "SPPR505": 1,
+   "SPPR514": 1
+  },
+  {
+   "SPPR603": 1,
+   "SPPR607": 1
+  },
+  {
+   "SPPR710": 1
+  }
+ ],
+ "items": {
+  "helmet": "CBMCELWG",
+  "armor": "CBMDEVGA",
+  "ring_left": "IMMUNE2",
+  "ring_right": "CBMDEVGR",
+  "weapon": "CBMDEVGW"
+ }
+}

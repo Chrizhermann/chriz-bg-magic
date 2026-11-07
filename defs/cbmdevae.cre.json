@@ -1,0 +1,121 @@
+{
+ "format": "cre",
+ "name": 63840,
+ "tooltip": 63841,
+ "flags": 0,
+ "xp": 0,
+ "hp": 100,
+ "animation": 24593,
+ "colors": [
+  27,
+  27,
+  19,
+  21,
+  14,
+  19,
+  6
+ ],
+ "ac": -1,
+ "thac0": 10,
+ "attacks": 1,
+ "saves": [
+  3,
+  5,
+  4,
+  4,
+  6
+ ],
+ "resistances": [
+  100,
+  0,
+  100,
+  50,
+  70,
+  100,
+  0,
+  10,
+  10,
+  10,
+  10
+ ],
+ "lore": 5,
+ "levels": [
+  14,
+  14,
+  1
+ ],
+ "sex": 2,
+ "attributes": [
+  19,
+  0,
+  18,
+  18,
+  18,
+  18,
+  20
+ ],
+ "racial_enemy": 0,
+ "sounds": {
+  "battle_cry1": 61758,
+  "battle_cry2": 61761,
+  "damage": 55381,
+  "dying": 55382,
+  "select1": 61759
+ },
+ "scripts": [
+  "CBMDEVAC",
+  "None",
+  "None",
+  "None",
+  "BDSUM00"
+ ],
+ "script_name": "cbmdevae",
+ "ea": 4,
+ "general": 1,
+ "race": 159,
+ "class": 8,
+ "specific": 0,
+ "gender": 5,
+ "alignment": 51,
+ "spells": [
+  {
+   "SPPR113": 3,
+   "SPPR108": 3
+  },
+  {
+   "SPPR208": 3,
+   "SPPR205": 1,
+   "SPPR209": 1,
+   "SPPR211": 1
+  },
+  {
+   "SPPR307": 2,
+   "SPPR311": 2,
+   "SPPR314": 2
+  },
+  {
+   "SPPR414": 2,
+   "SPPR411": 2,
+   "SPPR416": 1
+  },
+  {
+   "SPPR503": 1,
+   "SPPR505": 1,
+   "SPPR512": 1
+  },
+  {
+   "SPPR603": 1,
+   "SPPR608": 1
+  },
+  {
+   "SPPR715": 1
+  }
+ ],
+ "items": {
+  "helmet": "CBMCELWG",
+  "armor": "CBMDEVEA",
+  "ring_left": "IMMUNE2",
+  "ring_right": "CBMDEVER",
+  "weapon": "CBMDEVEW"
+ }
+}

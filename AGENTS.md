@@ -24,7 +24,7 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
   matter. No checks of old content: not of descriptions, wording, old values, effect counts or
   order. Game data never stops an install, and a decided change is never skipped because the
   old data looks different.
-- Code layout: `defs/*.json` define every spell, item and effect the mod changes, whole. To
+- Code layout: `defs/*.json` define every spell, item, effect and celestial the mod changes, whole. To
   change one, edit its definition and run `python tools/build_resources.py`; commit what it
   writes (`chriz-bg-magic/res/`, `lib/cbmagic_resources.tpa`, `languages/english/resources.tra`).
   Fields only the install can know are symbols, see `tools/resformat.py`. `lib/cbmagic_iwd.tpa`

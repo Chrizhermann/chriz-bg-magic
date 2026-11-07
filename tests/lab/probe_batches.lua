@@ -55,7 +55,7 @@ function P.others()
     for _, s in ipairs(sprites()) do
         if not members[s.m_id] then
             out[#out + 1] = { name = EEex_Sprite_GetName(s), dv = s.m_scriptName:get(), hp = s.m_baseStats.m_hitPoints,
-                              ea = s.m_typeAI.m_EnemyAlly }
+                              ea = s.m_typeAI.m_EnemyAlly, id = s.m_id, x = s.m_pos.x, y = s.m_pos.y }
         end
     end
     return out
@@ -73,6 +73,49 @@ function P.ops(who, list)
         end
     end)
     return out
+end
+
+-- What a summoned creature is in the game, after everything the game adds to its file.
+function P.being(name)
+    local s = named(name)
+    if not s then return nil end
+    local out, ai = P.stats(name), s.m_typeAI
+    out.id, out.ea, out.gender, out.specific, out.alignment = s.m_id, ai.m_EnemyAlly, ai.m_Gender, ai.m_Specifics, ai.m_Alignment
+    out.level = EEex_Sprite_GetStat(s, 34)
+    local function stats(list)
+        local got = {}
+        for _, id in ipairs(list) do got[#got + 1] = EEex_Sprite_GetStat(s, id) end
+        return got
+    end
+    out.saves = stats({ 9, 10, 11, 12, 13 })
+    out.resist = stats({ 14, 15, 16, 17, 18, 21, 22, 23, 24 })
+    out.attributes = stats({ 36, 38, 39, 40, 41, 42 })
+    out.known = {}
+    for level, _, res in s:getKnownPriestSpellsIterator() do out.known[#out.known + 1] = level .. ":" .. res end
+    out.equipped = {}
+    EEex_Utility_IterateCPtrList(s.m_equipedEffectList, function(e)
+        local key = tostring(e.m_effectId)
+        out.equipped[key] = (out.equipped[key] or 0) + 1
+    end)
+    return out
+end
+
+-- Whether a script trigger holds for this creature.
+function P.holds(name, text)
+    return EEex_Trigger_EvalConditionalStringAsAIBase(text, named(name))
+end
+
+function P.order(name, text)
+    EEex_Action_QueueResponseStringOnAIBase(text, named(name))
+    return true
+end
+
+-- The party AI button. Returns what it says now.
+function P.party_ai(on)
+    local now = game:GetPartyAI()
+    now = now == true or now == 1
+    if now ~= on then game:ToggleAI() end
+    return game:GetPartyAI()
 end
 
 -- A creature applies a spell to itself (no projectile, no casting).

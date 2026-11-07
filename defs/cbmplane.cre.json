@@ -1,0 +1,124 @@
+{
+ "format": "cre",
+ "name": 63511,
+ "tooltip": 63513,
+ "flags": 2,
+ "xp": 0,
+ "hp": 116,
+ "animation": 25105,
+ "colors": [
+  28,
+  47,
+  66,
+  21,
+  66,
+  28,
+  101
+ ],
+ "ac": -3,
+ "thac0": 7,
+ "attacks": 2,
+ "saves": [
+  3,
+  5,
+  4,
+  4,
+  6
+ ],
+ "resistances": [
+  100,
+  0,
+  100,
+  50,
+  75,
+  100,
+  0,
+  20,
+  20,
+  20,
+  20
+ ],
+ "lore": 5,
+ "levels": [
+  18,
+  18,
+  1
+ ],
+ "sex": 2,
+ "attributes": [
+  19,
+  0,
+  18,
+  21,
+  19,
+  18,
+  22
+ ],
+ "racial_enemy": 158,
+ "sounds": {
+  "battle_cry1": 61758,
+  "battle_cry2": 61761,
+  "damage": 55381,
+  "dying": 55382,
+  "select1": 61759
+ },
+ "scripts": [
+  "CBMPLANC",
+  "None",
+  "None",
+  "None",
+  "BDSUM00"
+ ],
+ "script_name": "cbmplane",
+ "ea": 4,
+ "general": 1,
+ "race": 159,
+ "class": 8,
+ "specific": 0,
+ "gender": 5,
+ "alignment": 51,
+ "spells": [
+  {
+   "SPPR113": 3,
+   "SPPR108": 3
+  },
+  {
+   "SPPR208": 3,
+   "SPPR205": 1,
+   "SPPR209": 1,
+   "SPPR211": 1
+  },
+  {
+   "SPPR307": 2,
+   "SPPR311": 2,
+   "SPPR314": 2
+  },
+  {
+   "SPPR405": 2,
+   "SPPR411": 2,
+   "SPPR414": 2,
+   "SPPR416": 2
+  },
+  {
+   "SPPR503": 2,
+   "SPPR505": 2,
+   "SPPR512": 2
+  },
+  {
+   "SPPR603": 2,
+   "SPPR608": 1,
+   "SPPR610": 1
+  },
+  {
+   "SPPR705": 1,
+   "SPPR715": 1
+  }
+ ],
+ "items": {
+  "helmet": "CBMCELWG",
+  "armor": "CBMPLNEA",
+  "ring_left": "IMMUNE3",
+  "ring_right": "CBMPLNER",
+  "weapon": "CBMPLNEW"
+ }
+}

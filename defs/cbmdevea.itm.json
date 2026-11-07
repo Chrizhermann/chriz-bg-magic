@@ -1,0 +1,69 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": -1,
+  "name_identified": -1,
+  "raw_10": "000000000000000028000000020000104c60334100000000000000000000000000000000000000000100494348414e3031000000000000000000000000000000",
+  "description": -1,
+  "description_identified": -1,
+  "raw_58": "000000000000000000000000"
+ },
+ "casting": [
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 0,
+   "p2": 5,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 19,
+   "p2": 4,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 27,
+   "p2": 0,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  }
+ ],
+ "abilities": []
+}
