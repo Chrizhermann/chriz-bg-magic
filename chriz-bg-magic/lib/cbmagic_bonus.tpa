@@ -386,6 +386,12 @@ BEGIN
                 INNER_PATCH ~%rows%~ BEGIN READ_ASCII (r * 0x30) part (0x30) END
                 LPF cbmagic_bonus_insert INT_VAR group = g position = i STR_VAR row = EVAL ~%part%~ END
               END
+              // A guard in this spell that names the old child must follow it to the private copy,
+              // or the condition on the delivery is lost.
+              PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN
+                INNER_PATCH ~%rows%~ BEGIN READ_ASCII 0x14 new_child (8) NULL END
+                LPF cbmagic_bonus_repoint_self STR_VAR old = EVAL ~%res%~ new = EVAL ~%new_child%~ END
+              END
             END
           END
         END

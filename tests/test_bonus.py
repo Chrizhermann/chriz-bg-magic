@@ -254,7 +254,7 @@ def righteous_wrath_and_haste_leave_each_other_alone(work, weidu):
                      effect(206, -1, resource="SPRA301", p2=16), effect(206, -1, resource="SPWI613"),
                      effect(101, p2=16), effect(101, p2=5), effect(169, p2=38), effect(169, p2=13),
                      effect(267, 14667, p2=16), effect(54, 2), effect(1, 1)], level=5)
-    root = spell([effect(146, resource="WRATHA", p2=1, timing=1)], level=5)
+    root = spell([effect(318, resource="WRATHA", p2=42), effect(146, resource="WRATHA", p2=1, timing=1)], level=5)
     improved = spell([effect(1, 1), effect(54, 2)], level=6)
     g = make_game(work, weidu,
                   {"SPPR518.SPL": root, "WRATHA.SPL": payload, "SPWI613.SPL": improved, "SPWI305.SPL": spell([effect(16)])},
@@ -262,6 +262,8 @@ def righteous_wrath_and_haste_leave_each_other_alone(work, weidu):
                   body="LAF cbmagic_more_righteous_wrath END\nLAF cbmagic_bonus END")
     install(g)
     child = next(r for r in rows(g, "SPPR518") if r["opcode"] == 146)["resource"]
+    guard = next(r for r in rows(g, "SPPR518") if r["opcode"] == 318)
+    check(guard["resource"] == child, "the alignment guard no longer names the delivered spell")
     found = rows(g, child)
     kept = {(r["opcode"], r["p2"], r["resource"]) for r in found}
     for gone in ((321, 16, "SPWI305"), (206, 16, "SPRA301"), (206, 0, "SPWI613"), (101, 16, ""), (169, 38, ""), (267, 16, "")):
