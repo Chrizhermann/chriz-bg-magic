@@ -73,7 +73,7 @@ return function(template)
     local function effect(opcode, amount, tag, timing, mode)
         return {
             m_effectId = opcode, m_effectAmount = amount, m_res = ref(tag or ""),
-            m_durationType = timing or 4096, m_dWFlags = mode or 0,
+            m_durationType = timing or 4096, m_dWFlags = mode or 0, m_special = 0,
         }
     end
     local function wrapper(name, timing, done, started)
@@ -122,7 +122,7 @@ return function(template)
                 end
             end
         end
-        local s = { m_timedEffectList = list, writes = 0 }
+        local s = { m_timedEffectList = list, m_equipedEffectList = {}, writes = 0 }
         s.m_derivedStats = setmetatable({}, {
             __index = function(_, key) return data[key] end,
             __newindex = function(_, key, value) s.writes = s.writes + 1; data[key] = value end,
@@ -202,6 +202,49 @@ return function(template)
     s = sprite({ effect(54, 1, "CBTFAVOR"), effect(54, 2, "CBTFAVOR") })
     s.m_timedEffectList.m_pNodeHead.data.m_res = "CBTFAVOR"
     equal(run(s).m_nTHAC0, 8, "string resref binding")
+
+    -- Extra attacks: only one counts, Haste before the tagged ones, the strongest of those.
+    local function attack(amount, current)
+        local e = effect(1, current or amount, "CBTAPR")
+        e.m_special = amount
+        return e
+    end
+    local first, second = attack(1), attack(1)
+    s = sprite({ first, second })
+    run(s)
+    equal(first.m_effectAmount + second.m_effectAmount, 1, "two extra attacks: one counts")
+    equal(s.m_newEffect, 1, "a changed amount asks for a rebuild")
+    s = sprite({ first, second })
+    run(s)
+    equal(s.m_newEffect, nil, "a settled pair changes nothing")
+    first, second = attack(1), attack(2)
+    run(sprite({ first, second }))
+    equal(first.m_effectAmount, 0, "the weaker extra attack goes")
+    equal(second.m_effectAmount, 2, "the stronger extra attack stays")
+    first = attack(1)
+    run(sprite({ first, effect(16, 0) }))
+    equal(first.m_effectAmount, 0, "Haste leaves the tagged one out")
+    first = attack(1)
+    run(sprite({ first, effect(16, 0, "", 4096, 1) }))
+    equal(first.m_effectAmount, 0, "the improved mode of Haste too")
+    first = attack(1)
+    run(sprite({ first, effect(16, 0, "", 4096, 2) }))
+    equal(first.m_effectAmount, 1, "Haste for movement only gives no attack")
+    first = attack(1, 0)
+    s = sprite({ first })
+    run(s)
+    equal(first.m_effectAmount, 1, "the extra attack returns when Haste ends, also after a save")
+    equal(s.m_newEffect, 1, "its return asks for a rebuild")
+    first = attack(1)
+    s = sprite({ first })
+    s.m_equipedEffectList = { m_pNodeHead = { data = effect(16, 0) } }
+    run(s)
+    equal(first.m_effectAmount, 0, "Haste from an item counts")
+    first = attack(1)
+    s = sprite({ first })
+    s.data.m_generalState = 0x8000
+    run(s)
+    equal(first.m_effectAmount, 0, "Haste seen only in the state counts")
 
     -- Native 177 keeps only the wrapper on the sprite. The inline child is
     -- never in this mock's linked list. Supply the observed native stat totals

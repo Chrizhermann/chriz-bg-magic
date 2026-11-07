@@ -6,3 +6,9 @@
 *.py text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+# What the installer copies stays byte for byte.
+chriz-bg-magic/res/** -text
+chriz-bg-magic/files/** -text
+chriz-bg-magic/pro/** -text
+chriz-bg-magic/languages/english/resources.tra -text
+chriz-bg-magic/lib/cbmagic_resources.tpa -text

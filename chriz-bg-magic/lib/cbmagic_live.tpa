@@ -4,14 +4,13 @@
 // Turning show their own name in place of the big spell's row, until the last level is spent.
 // No spell changes: it all happens at runtime.
 
-// A row of its own, with a copy of the STATES.BAM icon of `like`.
+// A row of its own; its icon ships with the mod.
 DEFINE_ACTION_FUNCTION cbmagic_live_row
   INT_VAR desc_ref = 0
           like = 0
   STR_VAR bam = ~~
   RET row
 BEGIN
-  LAF cbmagic_state_icon INT_VAR row = like STR_VAR resref = EVAL ~%bam%~ END
   LAF cbmagic_statdesc_row INT_VAR desc_ref STR_VAR bam = EVAL ~%bam%~ RET row = icon_row END
 END
 
@@ -40,8 +39,5 @@ BEGIN
 
     COPY ~chriz-bg-magic/lua/M_CBMREC.lua~ ~override/M_CBMREC.lua~
       EVALUATE_BUFFER
-      PATCH_IF INDEX_BUFFER (~row = %~) >= 0 BEGIN
-        PATCH_FAIL ~chriz-bg-magic: record row stamping failed.~
-      END
   END
 END

@@ -1,0 +1,69 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 25958,
+  "name_identified": 9999999,
+  "sound": "CAS_M06",
+  "flags": 512,
+  "type": 1,
+  "exclusion": 512,
+  "animation": 15,
+  "min_level": 0,
+  "school": 6,
+  "min_strength": 0,
+  "sectype": 10,
+  "unused_28": "000000000000000000000000",
+  "level": 7,
+  "stack": 1,
+  "icon": "SPWI712C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Delayed Blast Fireball\n(Invocation/Evocation)\n\nLevel: 7\nRange: 40 ft.\nDuration: Special\nCasting Time: 7\nArea of Effect: 11-ft. radius\nSaving Throw: 1/2\n\nThis spell creates a Fireball that hovers at a point determined by the caster. The Fireball will stay in position until someone walks too close to it; at that point, it will explode, dealing 15d6 points of damage. Victims are allowed a Saving Throw vs. Breath for half damage.",
+   "old": 25959
+  },
+  "description_identified": 9999999,
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 2,
+   "ability_flags": 0,
+   "location": 2,
+   "icon": "SPWI712B",
+   "target": 4,
+   "target_count": 0,
+   "range": 40,
+   "min_level": 1,
+   "casting_time": 7,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 244,
+   "effects": [
+    {
+     "opcode": 12,
+     "target": 2,
+     "power": 7,
+     "p1": 0,
+     "p2": 524288,
+     "timing": 1,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 15,
+     "sides": 6,
+     "save": 16777218,
+     "bonus": 0,
+     "special": 256
+    }
+   ]
+  }
+ ]
+}

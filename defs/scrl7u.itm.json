@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34586,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000000000000000000d0070000320053705769363137410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Contingency\n(Universal)\n\nLevel: 6\nRange: Visual range of the caster\nDuration: Permanent until triggered\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nUpon casting this spell, the wizard is allowed to choose a spell out of <PRO_HISHER> repertoire of known spells. One spell level every 3 levels of the caster is allowed—up to 6th-level spells at 18th level. Once the spell is chosen, the caster may choose a condition of some kind from the list provided. The starting condition can be anything from reaching 10% of <PRO_HISHER> Hit Points to an enemy being sighted. Once this starting condition is satisfied, the spell that was chosen will be cast automatically.\n\nFor example, a 12th-level wizard could place the spell Stoneskin in a contingency with the starting condition being \"the wizard reaches 50% of <PRO_HISHER> Hit Points.\" Once the wizard is reduced to 50% of <PRO_HISHER> Hit Points or below, Stoneskin would be immediately cast upon <PRO_HIMHER>. This requires no action by the wizard, but happens automatically and instantaneously.\n\nA limitation of this spell is that the target of the spell placed in the contingency must be the caster: Therefore, it may not be an offensive spell, nor may it target any other party members.",
+   "old": 25943
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005370576936313741050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi617",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005370576936313741050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi617",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

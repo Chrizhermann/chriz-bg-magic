@@ -1,0 +1,44 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 18606,
+  "raw_10": "000000006974656d6c0000000b0040284f00202000000000004009000000000000000000f40100003200495343524c3632000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Flame Strike\n(Evocation)\n\nLevel: 5\nSphere: Combat\nRange: 40 ft.\nDuration: Instant\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: 1/2\n\nWhen the priest calls down a Flame Strike spell, a vertical column of fire roars downward in the exact location called for by the caster. The target must roll a Saving Throw vs. Breath. Failure means the creature sustains 1d8 points of damage per level of the caster; otherwise, the damage is halved.",
+   "old": 12319
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c363200010028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpPr503",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

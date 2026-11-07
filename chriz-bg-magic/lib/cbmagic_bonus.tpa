@@ -22,18 +22,15 @@ BEGIN
         END
       END ~~
     END
-    PATCH_IF (matches > 1) BEGIN PATCH_FAIL ~chriz-bg-magic: duplicate state %symbol%.~ END
-    PATCH_IF (matches = 1) BEGIN
-      PATCH_IF (state < 0 || state > 255) BEGIN PATCH_FAIL ~chriz-bg-magic: state %symbol% outside 0..255.~ END
-      PATCH_IF ($used(~%state%~) != 1) BEGIN PATCH_FAIL ~chriz-bg-magic: state %symbol% shares its value.~ END
-    END ELSE BEGIN
+    // A marker must be ours alone: a value another symbol also uses is given up for a free one.
+    PATCH_IF (matches != 1) || (state < 0) || (state > 255) || ($used(~%state%~) != 1) BEGIN
+      SET matches = 0 SET state = (0 - 1)
       FOR (i = 255; i >= 0 && state < 0; --i) BEGIN
         PATCH_IF ($used(~%i%~) = 0) BEGIN SET state = i END
       END
-      PATCH_IF (state < 0) BEGIN PATCH_FAIL ~chriz-bg-magic: no free SPLSTATE bit.~ END
     END
   BUT_ONLY
-  ACTION_IF (matches = 0) BEGIN APPEND ~splstate.ids~ ~%state% %symbol%~ END
+  ACTION_IF (matches = 0) AND (state >= 0) BEGIN APPEND ~splstate.ids~ ~%state% %symbol%~ END
   CLEAR_IDS_MAP
 END
 
@@ -172,7 +169,9 @@ DEFINE_PATCH_FUNCTION cbmagic_bonus_tag
 BEGIN
   SPRINT tag ~~
   SET saves = (op >= 33 && op <= 37) || op = 325
-  PATCH_IF (~%kind%~ STRING_EQUAL ~MORALE~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+  PATCH_IF ((~%kind%~ STRING_EQUAL ~MORALE~ || ~%kind%~ STRING_EQUAL ~WRATH~) && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+  // Extra attacks are a family of their own: the runtime lets only one of them count.
+  PATCH_IF ((~%kind%~ STRING_EQUAL ~WRATH~ || ~%kind%~ STRING_EQUAL ~APR~) && op = 1) BEGIN SPRINT tag ~CBTAPR~ END
   PATCH_IF (~%kind%~ STRING_EQUAL ~FAVOR~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTFAVOR~ END
   PATCH_IF (~%kind%~ STRING_EQUAL ~CHANT~) BEGIN
     PATCH_IF saves BEGIN SPRINT tag ~CBTFAVOR~ END
@@ -183,8 +182,10 @@ BEGIN
   PATCH_IF ((~%kind%~ STRING_EQUAL ~DEFLECTION~ || ~%kind%~ STRING_EQUAL ~SAVES~) &&
     (saves || (~%kind%~ STRING_EQUAL ~DEFLECTION~ && op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDEFLE~ END
   PATCH_IF (~%kind%~ STRING_EQUAL ~CURSE~ && p1 < 0 && (saves || op = 54 || op = 73 || op = 22)) BEGIN SPRINT tag ~CBTCURSE~ END
+  // Only an added value can be counted by type. Any other mode keeps working, without a type.
   PATCH_IF !(~%tag%~ STRING_EQUAL ~~) && p2 != 0 BEGIN
-    PATCH_FAIL ~chriz-bg-magic: %SOURCE_FILE%: typed opcode %op% has non-additive mode %p2%.~
+    PATCH_PRINT ~chriz-bg-magic: bonus types: %SOURCE_FILE%: opcode %op% does not add a value (mode %p2%); this effect stays without a type.~
+    SPRINT tag ~~
   END
 END
 
@@ -233,25 +234,63 @@ BEGIN
       READ_BYTE 0x0c timing
       // Opcode 177 executes its EFF with the wrapper's timing, not the file's.
       PATCH_IF (inherited_timing >= 0) BEGIN SET timing = inherited_timing END
-      // Permanent base - stat mutations are absent from the timed effect list.
+      // Permanent base - stat mutations are absent from the timed effect list, so the runtime
+      // cannot count them: such an effect keeps working, without a type.
       PATCH_IF (timing = 1 || timing = 4 || timing = 7) BEGIN
-        PATCH_FAIL ~chriz-bg-magic: %SOURCE_FILE%: typed opcode %op% permanently changes base stats (timing %timing%).~
+        PATCH_PRINT ~chriz-bg-magic: bonus types: %SOURCE_FILE%: opcode %op% changes base stats for good (timing %timing%); this effect stays without a type.~
+        SPRINT result ~%original%~
+      END ELSE BEGIN
+        WRITE_ASCIIE 0x14 ~%tag%~ #8
+        // The runtime sets an extra attack that does not count to 0; this keeps its value.
+        PATCH_IF (op = 1) BEGIN WRITE_LONG 0x2c p1 END
+        READ_ASCII 0 result (0x30)
+        SET typed = 1
+        // A companion marker shares every delivery condition, target and lifetime.
+        WRITE_SHORT 0 328 WRITE_LONG 4 1 WRITE_LONG 8 CBM_BONUS_TYPED_STATE
+        WRITE_LONG 0x2c 1 WRITE_ASCII 0x14 ~CBTSTATE~ #8
+        READ_ASCII 0 marker (0x30)
+        SPRINT result ~%result%%marker%~
       END
-      WRITE_ASCIIE 0x14 ~%tag%~ #8
-      READ_ASCII 0 result (0x30)
-      SET typed = 1
-      // A companion marker shares every delivery condition, target and lifetime.
-      WRITE_SHORT 0 328 WRITE_LONG 4 1 WRITE_LONG 8 CBM_BONUS_TYPED_STATE
-      WRITE_LONG 0x2c 1 WRITE_ASCII 0x14 ~CBTSTATE~ #8
-      READ_ASCII 0 marker (0x30)
-      SPRINT result ~%result%%marker%~
     END ELSE BEGIN SPRINT result ~%original%~ END
   END
 END
 
+// Can this node of a delivery graph be read and followed? A spell that casts itself, a very
+// long chain, a missing file or a file that cannot be read ends that branch only.
+DEFINE_ACTION_FUNCTION cbmagic_bonus_reachable
+  INT_VAR depth = 0
+  STR_VAR source = ~~ ext = ~~ path = ~ ~
+  RET ok reason
+BEGIN
+  OUTER_SET ok = 0
+  OUTER_SPRINT reason ~~
+  ACTION_IF (depth > 24) BEGIN
+    OUTER_SPRINT reason ~the chain of spells is too long~
+  END ELSE ACTION_IF (INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) >= 0) BEGIN
+    OUTER_SPRINT reason ~it is reached a second time on the same path~
+  END ELSE ACTION_IF !(FILE_EXISTS_IN_GAME ~%source%.%ext%~) BEGIN
+    OUTER_SPRINT reason ~the file is not in this game~
+  END ELSE BEGIN
+    COPY_EXISTING ~%source%.%ext%~ ~override~
+      PATCH_IF (~%ext%~ STRING_EQUAL_CASE ~EFF~) BEGIN
+        PATCH_IF (BUFFER_LENGTH < 0x110) BEGIN
+          SPRINT reason ~shorter than an EFF file~
+        END ELSE BEGIN
+          READ_ASCII 0 signature (8)
+          PATCH_IF (~%signature%~ STRING_EQUAL ~EFF V2.0~) BEGIN SET ok = 1 END ELSE BEGIN
+            SPRINT reason ~not an EFF V2.0 file~
+          END
+        END
+      END ELSE BEGIN
+        LPF cbmagic_spl_valid RET ok = valid reason END
+      END
+    BUT_ONLY
+  END
+END
+
 // Visit one resource. Recursion follows actual delivery edges, not filename prefixes.
-// A cyclic or unreasonably deep cast graph cannot be refreshed safely and fails with
-// its path. Root resources retain their name; every changed child is private.
+// A branch that cannot be followed stays as it is; the rest of the spell is still changed.
+// Root resources retain their name; every changed child is private.
 DEFINE_ACTION_FUNCTION cbmagic_bonus_visit
   INT_VAR depth = 0 inherited_timing = (0 - 1)
   STR_VAR root = ~~ source = ~~ ext = ~SPL~ kind = ~~ path = ~ ~
@@ -259,13 +298,21 @@ DEFINE_ACTION_FUNCTION cbmagic_bonus_visit
 BEGIN
   OUTER_SPRINT source EVAL ~%source%~ ACTION_TO_UPPER source
   OUTER_SPRINT output ~%source%~ OUTER_SET touched = 0
-  ACTION_IF (depth > 24 || INDEX (CASE_SENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) >= 0) BEGIN
-    FAIL ~chriz-bg-magic: cyclic/deep bonus delivery: %path%%source%.%ext%.~
+  LAF cbmagic_bonus_reachable INT_VAR depth STR_VAR source ext path RET ok reason END
+  ACTION_IF ok BEGIN
+    LAF cbmagic_bonus_visit_node INT_VAR depth inherited_timing STR_VAR root source ext kind path RET output touched END
+  END ELSE BEGIN
+    PRINT ~chriz-bg-magic: bonus types: %root%: %source%.%ext% stays as it is: %reason%.~
   END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_visit_node
+  INT_VAR depth = 0 inherited_timing = (0 - 1)
+  STR_VAR root = ~~ source = ~~ ext = ~SPL~ kind = ~~ path = ~ ~
+  RET output touched
+BEGIN
+  OUTER_SPRINT output ~%source%~ OUTER_SET touched = 0
   OUTER_SPRINT path ~%path%%source%.%ext% ~
-  ACTION_IF !(FILE_EXISTS_IN_GAME ~%source%.%ext%~) BEGIN
-    FAIL ~chriz-bg-magic: missing delivery resource %source%.%ext% in %root%.~
-  END
   OUTER_SPRINT data ~~
   COPY_EXISTING ~%source%.%ext%~ ~override~
     READ_ASCII 0 data (BUFFER_LENGTH)
@@ -274,9 +321,6 @@ BEGIN
     OUTER_SET eff_op = (0 - 1)
     LAF cbmagic_bonus_owned STR_VAR root source ext RET owned END
     OUTER_PATCH ~%data%~ BEGIN
-      PATCH_IF (BUFFER_LENGTH < 0x110) BEGIN PATCH_FAIL ~chriz-bg-magic: truncated EFF %source%.~ END
-      READ_ASCII 0 signature (8)
-      PATCH_IF !(~%signature%~ STRING_EQUAL ~EFF V2.0~) BEGIN PATCH_FAIL ~chriz-bg-magic: unsupported EFF %source%.~ END
       READ_LONG 0x10 eff_op
       // Project the V2 fields without discarding V2 - only fields from output copies.
       LPF cbmagic_bonus_eff_v1 RET row END
@@ -316,8 +360,6 @@ BEGIN
     END
   END ELSE BEGIN
     OUTER_PATCH_SAVE patched ~%data%~ BEGIN
-      LPF cbmagic_spl_valid RET valid reason END
-      PATCH_IF !valid BEGIN PATCH_FAIL ~chriz-bg-magic: %source%.SPL: %reason%.~ END
       READ_SHORT 0x68 groups
       FOR (g = (0 - 1); g < groups; ++g) BEGIN
         READ_LONG 0x64 ao
@@ -343,6 +385,12 @@ BEGIN
               FOR (r = length / 0x30 - 1; r >= 0; --r) BEGIN
                 INNER_PATCH ~%rows%~ BEGIN READ_ASCII (r * 0x30) part (0x30) END
                 LPF cbmagic_bonus_insert INT_VAR group = g position = i STR_VAR row = EVAL ~%part%~ END
+              END
+              // A guard in this spell that names the old child must follow it to the private copy,
+              // or the condition on the delivery is lost.
+              PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN
+                INNER_PATCH ~%rows%~ BEGIN READ_ASCII 0x14 new_child (8) NULL END
+                LPF cbmagic_bonus_repoint_self STR_VAR old = EVAL ~%res%~ new = EVAL ~%new_child%~ END
               END
             END
           END
@@ -566,20 +614,26 @@ DEFINE_ACTION_FUNCTION cbmagic_bonus_nodes
   RET nodes
 BEGIN
   OUTER_SPRINT nodes ~~
-  ACTION_IF (depth > 24 || INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) >= 0) BEGIN
-    FAIL ~chriz-bg-magic: cyclic/deep family delivery at %source%.%ext%.~
+  LAF cbmagic_bonus_reachable INT_VAR depth STR_VAR source ext path RET ok reason END
+  ACTION_IF ok BEGIN
+    LAF cbmagic_bonus_nodes_below INT_VAR depth STR_VAR source ext path RET nodes END
   END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_nodes_below
+  INT_VAR depth = 0
+  STR_VAR source = ~~ ext = ~SPL~ path = ~ ~
+  RET nodes
+BEGIN
+  OUTER_SPRINT nodes ~~
   OUTER_SPRINT path ~%path%%source%.%ext% ~
   OUTER_SPRINT children ~~
   COPY_EXISTING ~%source%.%ext%~ ~override~
     PATCH_IF (~%ext%~ STRING_EQUAL ~EFF~) BEGIN
-      PATCH_IF (BUFFER_LENGTH < 0x110) BEGIN PATCH_FAIL ~chriz-bg-magic: truncated %source%.EFF.~ END
       READ_LONG 0x10 op READ_ASCII 0x30 res (8) NULL
       PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN SPRINT children ~%res%.SPL~ END
       PATCH_IF (op = 177) BEGIN SPRINT children ~%res%.EFF~ END
     END ELSE BEGIN
-      LPF cbmagic_spl_valid RET valid reason END
-      PATCH_IF !valid BEGIN PATCH_FAIL ~chriz-bg-magic: %source%.SPL: %reason%.~ END
       SPRINT nodes ~%source%~
       READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
       FOR (g = (0 - 1); g < ac; ++g) BEGIN
@@ -647,10 +701,14 @@ BEGIN
     END ELSE ACTION_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %spell% ~ ~ %members% ~) < 0 BEGIN
       LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind = ~FAMILY~ RET output touched END
       LAF cbmagic_bonus_nodes STR_VAR source = EVAL ~%spell%~ RET nodes END
-      OUTER_SPRINT $family_nodes(~%spell%~) ~%nodes%~
-      COPY_EXISTING ~%spell%.SPL~ ~override~ READ_LONG 0x34 level BUT_ONLY
-      OUTER_SET $family_level(~%spell%~) = level
-      OUTER_SPRINT members ~%members% %spell%~
+      ACTION_IF (~%nodes%~ STRING_EQUAL ~~) BEGIN
+        PRINT ~chriz-bg-magic: %label% family: %symbol% (%spell%) cannot be read; it stays outside the family.~
+      END ELSE BEGIN
+        OUTER_SPRINT $family_nodes(~%spell%~) ~%nodes%~
+        COPY_EXISTING ~%spell%.SPL~ ~override~ READ_LONG 0x34 level BUT_ONLY
+        OUTER_SET $family_level(~%spell%~) = level
+        OUTER_SPRINT members ~%members% %spell%~
+      END
     END
   END
   ACTION_PHP_EACH family_nodes AS s => snodes BEGIN
@@ -715,14 +773,10 @@ BEGIN
 END
 
 DEFINE_ACTION_FUNCTION cbmagic_bonus_runtime
+  INT_VAR CBM_BONUS_PASS_STATE = 0 CBM_BONUS_TYPED_STATE = 0
 BEGIN
-  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
-  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
   COPY ~chriz-bg-magic/lua/M_CBMBON.lua~ ~override/M_CBMBON.lua~
     EVALUATE_BUFFER
-    PATCH_IF INDEX_BUFFER (~local PASS_STATE = %CBM_BONUS_PASS_STATE%~) < 0 || INDEX_BUFFER (~local TYPED_STATE = %CBM_BONUS_TYPED_STATE%~) < 0 BEGIN
-      PATCH_FAIL ~chriz-bg-magic: listener state stamping failed.~
-    END
 END
 
 DEFINE_PATCH_FUNCTION cbmagic_bonus_term RET term BEGIN
@@ -755,7 +809,8 @@ DEFINE_ACTION_FUNCTION cbmagic_bonus_terms
   RET terms
 BEGIN
   OUTER_SPRINT terms ~~ OUTER_SPRINT children ~~
-  ACTION_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) < 0 BEGIN
+  LAF cbmagic_bonus_reachable STR_VAR source ext path RET ok reason END
+  ACTION_IF ok BEGIN
     OUTER_SPRINT path ~%path%%source%.%ext% ~
     COPY_EXISTING ~%source%.%ext%~ ~override~
       PATCH_IF (~%ext%~ STRING_EQUAL ~EFF~) BEGIN
@@ -840,51 +895,28 @@ DEFINE_ACTION_FUNCTION cbmagic_bonus_text STR_VAR spell = ~~ BEGIN
   END ELSE BEGIN PRINT ~chriz-bg-magic: %spell% bonus descriptions unavailable for language %lang%.~ END
 END
 
-DEFINE_ACTION_FUNCTION cbmagic_bonus_pierce_magic BEGIN
-  // EEex's common bootstrap is installed in override in both supported layouts.
-  // This is an install - time choice; removing EEex later requires reinstalling us.
-  ACTION_IF !(FILE_EXISTS_IN_GAME ~M___EEex.lua~) BEGIN
-    PRINT ~chriz-bg-magic: Pierce Magic keeps its existing resistance effect: EEex bootstrap absent.~
-  END ELSE BEGIN
-    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_PIERCE_MAGIC~ RET spell = resref found END
-    ACTION_IF !found BEGIN PRINT ~chriz-bg-magic: Pierce Magic absent; skipped.~ END ELSE BEGIN
-      LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind = ~PIERCE~ RET output touched END
-      ACTION_IF touched BEGIN
-        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
-          find = ~will be lowered by 1% per level of the caster~
-          replace = ~will be lowered by half its current value, rounded down, with a minimum reduction of 10 and a maximum of 40 percentage points~ END
-        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell label = ~Pierce Magic~
-          find = ~For example, if this spell were cast[^.]+dispelled\. ~ replace = ~~ END
-        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
-          find = ~Magic Resistance remains lowered for 1 round per level of the caster~
-          replace = ~Magic Resistance remains lowered for 5 rounds~ END
-      END ELSE BEGIN PRINT ~chriz-bg-magic: Pierce Magic has no remaining additive MR penalty to replace.~ END
-    END
-  END
-END
-
 DEFINE_ACTION_FUNCTION cbmagic_bonus
 BEGIN
   LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
   LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
-  LAF cbmagic_bonus_runtime END
-  ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
-    WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
-    CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => MORALE CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
-    CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
-    WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
-    CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION
-    WIZARD_SPIRIT_ARMOR => SAVES CLERIC_BARKSKIN => SAVES
-    CLERIC_DOOM => CURSE CLERIC_CURSE => CURSE CLERIC_UNHOLY_BLIGHT => CURSE
-  END
-  ACTION_PHP_EACH typed_spells AS symbol => kind BEGIN
-    LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
-    ACTION_IF !found BEGIN
-      PRINT ~chriz-bg-magic: bonus types: %symbol% absent; skipped.~
-    END ELSE BEGIN
-      COPY_EXISTING ~%spell%.SPL~ ~override~ LPF cbmagic_spl_valid RET valid reason END BUT_ONLY
-      ACTION_IF !valid BEGIN
-        WARN ~chriz-bg-magic: bonus types: %symbol% (%spell%) unchanged: %reason%.~
+  ACTION_IF (CBM_BONUS_PASS_STATE < 0) OR (CBM_BONUS_TYPED_STATE < 0) BEGIN
+    PRINT ~chriz-bg-magic: bonus types left out: this game has no free spell state for them. Spells stack as before.~
+  END ELSE BEGIN
+    LAF cbmagic_bonus_runtime INT_VAR CBM_BONUS_PASS_STATE CBM_BONUS_TYPED_STATE END
+    ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
+      WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
+      CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => WRATH CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
+      WIZARD_IMPROVED_HASTE => APR
+      CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
+      WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
+      CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION
+      WIZARD_SPIRIT_ARMOR => SAVES CLERIC_BARKSKIN => SAVES
+      CLERIC_DOOM => CURSE CLERIC_CURSE => CURSE CLERIC_UNHOLY_BLIGHT => CURSE
+    END
+    ACTION_PHP_EACH typed_spells AS symbol => kind BEGIN
+      LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+      ACTION_IF !found BEGIN
+        PRINT ~chriz-bg-magic: bonus types: %symbol% absent; skipped.~
       END ELSE BEGIN
         LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind RET output touched END
         ACTION_IF touched BEGIN
@@ -899,5 +931,4 @@ BEGIN
     symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
   LAF cbmagic_family STR_VAR label = ~Regeneration~
     symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
-  LAF cbmagic_bonus_pierce_magic END
 END

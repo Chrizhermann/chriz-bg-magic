@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 13036,
+  "raw_10": "000000002c1540006c0000000b00805e7260202000000000004009000010000000000000c80000003200495343524c3930000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Invisibility\n(Illusion/Phantasm)\n\nLevel: 2\nRange: Touch\nDuration: Special\nCasting Time: 2\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell causes the creature touched to vanish from sight and be undetectable by normal vision or even infravision. Of course, the invisible creature is not magically silenced, and certain other conditions can render the creature detectable. Even allies cannot see the invisible creature or its gear, unless these allies can normally see invisible things or employ magic to do so. Items dropped or put down by the invisible creature become visible; items picked up disappear if tucked into the clothing or pouches worn by the creature. The spell remains in effect until it is magically broken or dispelled, until the recipient attacks any creature, or until 8 hours have passed. The caster cannot perform any actions that manipulate the environment around <PRO_HIMHER>, such as opening doors, disarming a trap, or opening a chest. The caster can, however, cast defensive spells on <PRO_HIMHER>self and fellow party members. And if <PRO_HESHE> attacks, <PRO_HESHE> immediately becomes visible, although the invisibility enables <PRO_HIMHER> to attack first.",
+   "old": 2969
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c393000010001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi206",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c393000050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi206",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

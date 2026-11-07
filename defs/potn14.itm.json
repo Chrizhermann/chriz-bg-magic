@@ -1,0 +1,97 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7007,
+  "name_identified": 7008,
+  "raw_10": "00000068864000056c000000090000000020202000000000000000000000000200000000f4010000180049504f544e313400000047504f544e30310001000000",
+  "description": 16264,
+  "description_identified": 17856,
+  "raw_58": "43504f544e31330000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "0300030049504f544e313400050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 324,
+     "target": 1,
+     "power": 0,
+     "p1": 138,
+     "p2": 110,
+     "timing": 0,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "POTN14",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 146,
+     "target": 1,
+     "power": 4,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "POTN14",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 221,
+     "target": 1,
+     "power": 4,
+     "p1": 10,
+     "p2": {
+      "sectype": "cbm_Slow"
+     },
+     "timing": 1,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 139,
+     "target": 1,
+     "power": 0,
+     "p1": 16233,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

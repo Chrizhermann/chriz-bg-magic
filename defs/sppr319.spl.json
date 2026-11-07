@@ -1,0 +1,69 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 45045,
+  "name_identified": -1,
+  "sound": "CAS_P03",
+  "flags": 1536,
+  "type": 2,
+  "exclusion": 1073741824,
+  "animation": 14,
+  "min_level": 0,
+  "school": 2,
+  "min_strength": 0,
+  "sectype": 9,
+  "unused_28": "000000000000000000000000",
+  "level": 3,
+  "stack": 1,
+  "icon": "sppr319c",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Summon Insects\n(Conjuration/Summoning)\n\nLevel: 3\nSphere: Animal\nRange: 90 ft.\nDuration: 7 rounds\nCasting Time: 9\nArea of Effect: 1 creature\nSaving Throw: Neg.\n\nThe Summon Insects spell attracts a cloud or swarm of normal insects to attack one enemy of the caster. This swarm gathers at a point chosen by the caster within the spell's range and attacks any single creature the caster points to. The victim may make a Saving Throw vs. Breath Weapon with a -4 penalty to escape the swarm; otherwise, the victim receives 1 point of damage every 2 seconds for the duration of the spell. Moreover, the victim fights with a -2 penalty to <PRO_HISHER> attack roll and a -2 penalty to <PRO_HISHER> Armor Class. The swarm will repeatedly bite the target, forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.",
+   "old": 45047
+  },
+  "description_identified": -1,
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 2,
+   "ability_flags": 0,
+   "location": 2,
+   "icon": "sppr319b",
+   "target": 1,
+   "target_count": 0,
+   "range": 60,
+   "min_level": 1,
+   "casting_time": 9,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 227,
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR319a",
+     "dice": 0,
+     "sides": 0,
+     "save": 2,
+     "bonus": -4,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

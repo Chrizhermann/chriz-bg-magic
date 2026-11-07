@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 13039,
+  "raw_10": "000000006974656d6c0000000b00805e7260202000000000004009000008000000000000c80000003200495343524c3933000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Luck\n(Enchantment/Charm)\n\nLevel: 2\nRange: 15 ft.\nDuration: 15 rounds\nCasting Time: 2\nArea of Effect: 1 creature\nSaving Throw: None\n\nThe recipient of this spell gains extraordinary luck for the next 15 rounds, receiving a +1 bonus to <PRO_HISHER> Saving Throws, attack rolls, and minimum damage/healing rolls as well as +5% to all thieving skills. Furthermore, damage dice for all effects outside a weapon's base damage is reduced by 1. For example, a 6d6 fireball will do 6d5 damage, and a flaming long sword that deals 1d8+2 slashing plus 1d3 fire damage will deal 1d8+2 slashing plus 1d2 fire damage instead.\n\nTyped spell effects: save vs. spell +1 (Luck); save vs. breath +1 (Luck); save vs. polymorph +1 (Luck); save vs. wands +1 (Luck); save vs. death +1 (Luck); Luck +1 (Luck); Values may depend on caster level and target.",
+   "old": 12171
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c39330001000f000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi209",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c393300050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi209",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

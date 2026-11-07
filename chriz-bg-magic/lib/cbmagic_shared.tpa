@@ -2,14 +2,6 @@
 // own library file; the components in setup-chriz-bg-magic.tp2 only call them, so the
 // component layout can change without touching the changes themselves.
 
-// What the installer does when Spell Revisions is installed. Christopher's decision
-// (2026-11-06): the two do not go together, so it says that plainly and carries on; no
-// work goes into making them fit.
-//   refuse  - stop the install with a message
-//   warn    - install, with a warning in the WeiDU log
-//   coexist - install without a word
-OUTER_SPRINT cbmagic_sr_policy ~warn~
-
 // True when Spell Revisions (the original or our frozen fork, both use the same tp2 name)
 // is installed: its main component in WeiDU.log, or its marker file in the override
 // folder (SR copies dvimhere.mrk there; other mods detect SR by it as well).
@@ -22,17 +14,13 @@ BEGIN
   END
 END
 
+// Christopher's decision (2026-11-06): the two do not go together, so it says that plainly and
+// carries on; no work goes into making them fit.
 DEFINE_ACTION_FUNCTION cbmagic_check_spell_revisions
 BEGIN
   LAF cbmagic_spell_revisions_installed RET sr_installed = installed END
   ACTION_IF sr_installed BEGIN
-    ACTION_IF (~%cbmagic_sr_policy%~ STR_EQ ~refuse~) BEGIN
-      FAIL @9001
-    END ELSE ACTION_IF (~%cbmagic_sr_policy%~ STR_EQ ~warn~) BEGIN
-      WARN @9002
-    END ELSE ACTION_IF !(~%cbmagic_sr_policy%~ STR_EQ ~coexist~) BEGIN
-      FAIL ~chriz-bg-magic: unknown Spell Revisions policy "%cbmagic_sr_policy%".~
-    END
+    WARN @9002
   END
 END
 

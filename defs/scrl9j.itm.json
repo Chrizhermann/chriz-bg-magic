@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34625,
+  "raw_10": "009c8c40000504006c0000000b00805e726020200000000000400900000800000000000088130000320053505749383135410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Power Word, Blind\n(Enchantment/Charm)\n\nLevel: 8\nRange: Visual range of the caster\nDuration: 6 rounds\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen a Power Word, Blind spell is cast, one creature of the spellcaster's choice becomes sightless. This lasts for 6 rounds or until dispelled. All of the effects of blindness apply to the victim, such as a penalty to hit and to AC. The visibility range of the afflicted character is also decreased.",
+   "old": 7784
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574938313541010028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi815",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574938313541050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi815",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

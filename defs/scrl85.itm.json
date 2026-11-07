@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 13031,
+  "raw_10": "000000006974656d6c0000000b00805e7260202000000000004009000010000000000000c80000003200495343524c3835000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Blur\n(Illusion/Phantasm)\n\nLevel: 2\nRange: 0\nDuration: 4 rounds + 2 rounds/level\nCasting Time: 2\nArea of Effect: The caster\nSaving Throw: None\n\nWhen a Blur spell is cast, the wizard causes the outline of <PRO_HISHER> form to become blurred, shifting and wavering. This distortion causes all missile and melee attacks against the caster to be made with a -3 penalty. The wizard also gains a +1 bonus to all of <PRO_HISHER> Saving Throws.\n\nTyped spell effects: AC +3 (Dodge); save vs. death +1 (Dodge); save vs. wands +1 (Dodge); save vs. polymorph +1 (Dodge); save vs. breath +1 (Dodge); save vs. spell +1 (Dodge); Values may depend on caster level and target.",
+   "old": 6619
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c383500050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi201",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c383500050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi201",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

@@ -83,6 +83,21 @@ function P.self_apply(key, res)
     return true
 end
 
+-- Attacks of a party member, the tagged extra attacks on it, and a spell cast on it.
+function P.attacks(who)
+    local s = party(who)
+    local tagged = {}
+    EEex_Utility_IterateCPtrList(s.m_timedEffectList, function(e)
+        if e.m_effectId == 1 and e.m_res:get() == "CBTAPR" then tagged[#tagged + 1] = e.m_effectAmount end
+    end)
+    return { apr = s.m_derivedStats.m_nNumberOfAttacks, tagged = tagged }
+end
+
+function P.on_member(who, res)
+    EEex_Action_QueueResponseStringOnAIBase(string.format('ApplySpellRES("%s",Myself)', res), party(who))
+    return true
+end
+
 function P.remove_all_others()
     local members = {}
     for i = 0, 5 do local s = party(i); if s then members[s.m_id] = true end end

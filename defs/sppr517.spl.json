@@ -1,0 +1,87 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 45050,
+  "name_identified": -1,
+  "sound": "CAS_P06",
+  "flags": 1536,
+  "type": 2,
+  "exclusion": 1073742336,
+  "animation": 14,
+  "min_level": 0,
+  "school": 2,
+  "min_strength": 0,
+  "sectype": 9,
+  "unused_28": "000000000000000000000000",
+  "level": 5,
+  "stack": 1,
+  "icon": "SPPR517C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Insect Plague\n(Conjuration/Summoning)\n\nSphere: Combat\nLevel: 5\nRange: 360 ft.\nDuration: 6 rounds\nCasting Time: 5\nArea of Effect: 15-ft. radius\nSaving Throw: Special\n\nWhen this spell is cast by the priest, a horde of creeping, hopping, and flying insects gather and swarm. This swarm will jump first to the enemy target, then to the nearest allies of the target's, until up to 6 creatures have been affected. Creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 100% chance of spell failure (each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune). Creatures in the insect plague sustain 1 point of damage each second they remain within regardless of their Armor Class, due to the bites and stings of the insects. Invisibility is no protection. Due to the suffocating nature of the writhing insect swarm, each victim must make a Saving Throw vs. Spell at -2 or run away in fear for 1 round.",
+   "old": 45051
+  },
+  "description_identified": -1,
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 2,
+   "ability_flags": 0,
+   "location": 2,
+   "icon": "SPPR517B",
+   "target": 1,
+   "target_count": 0,
+   "range": 40,
+   "min_level": 1,
+   "casting_time": 5,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 228,
+   "effects": [
+    {
+     "opcode": 324,
+     "target": 2,
+     "power": 0,
+     "p1": 129,
+     "p2": 110,
+     "timing": 0,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR517",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR517a",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

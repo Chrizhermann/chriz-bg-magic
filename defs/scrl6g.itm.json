@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 5006,
+  "raw_10": "009c8c40000504006c0000000b00805e72602020000000000040090000200000000000002c010000320053705769333138410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Minor Spell Deflection\n(Abjuration)\n\nLevel: 3\nRange: 0\nDuration: 3 rounds/level\nCasting Time: 3\nArea of Effect: The caster\nSaving Throw: None\n\nThis spell is similar to the 6th-level spell Spell Deflection, which causes the spells cast against the wizard to be absorbed and consumed. This spell affects a total of 4 spell levels, including spells cast from scrolls and innate spell-like abilities, but excludes the following: area effects that are not centered directly upon the wizard, as well as area effects that are stationary, such as Cloudkill and Stinking Cloud. As long as the spell is cast directly at the wizard, it will be absorbed. This spell will only affect up to 4th-level spells, but if it tries to absorb a spell that goes over its limit, the spell will fail and the spell deflection will be canceled. For example, if there is only 1 level left and a 3rd-level spell is cast at the wizard, the spell will be absorbed while canceling the Spell Deflection.",
+   "old": 10862
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005370576933313841050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi318",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005370576933313841050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi318",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

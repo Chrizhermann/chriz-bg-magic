@@ -1,7 +1,6 @@
 """Record entries that follow a state: the rows and the listener."""
 import importlib
 import re
-import struct
 from pathlib import Path
 
 import fakegame as fg
@@ -13,17 +12,16 @@ AUTHOR ~test~
 ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_shared.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_live.tpa~
 END
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
 BEGIN ~probe~ DESIGNATED 0
 LAF cbmagic_record_live END
 """
-ROWS = {"INVISIBLE": ("Invisible", "CBMIINV", 31), "IMPROVED_INVISIBILITY": ("Improved Invisibility", "CBMIIMP", 74),
-        "SANCTUARY": ("Sanctuary", "CBMISAN", 49), "MIRROR_IMAGE": ("Mirror Image", "CBMIMIR", 77),
-        "REFLECTED_IMAGE": ("Reflected Image", "CBMIMIR", 77), "ARCHONS": ("Shield of the Archons", "CBMISOA", 116),
-        "MINOR_DEFLECTION": ("Minor Spell Deflection", "CBMIMSD", 67), "MINOR_TURNING": ("Minor Spell Turning", "CBMIMST", 65)}
+ROWS = {"INVISIBLE": ("Invisible", "CBMIINV"), "IMPROVED_INVISIBILITY": ("Improved Invisibility", "CBMIIMP"),
+        "SANCTUARY": ("Sanctuary", "CBMISAN"), "MIRROR_IMAGE": ("Mirror Image", "CBMIMIR"),
+        "REFLECTED_IMAGE": ("Reflected Image", "CBMIMIR"), "ARCHONS": ("Shield of the Archons", "CBMISOA"),
+        "MINOR_DEFLECTION": ("Minor Spell Deflection", "CBMIMSD"), "MINOR_TURNING": ("Minor Spell Turning", "CBMIMST")}
 
 
 def fx(opcode, **kw):
@@ -36,8 +34,7 @@ def spell(opcode, duration=90):
 
 
 def game(work, weidu, resources, eeex=True):
-    biff = {"STATDESC.2DA": ie.make_2da(["DESCRIPTION", "BAM_FILE"], [("206", ["10554", "SPPR313D"])]),
-            "STATES.BAM": ie.make_states_bam(), **resources}
+    biff = {"STATDESC.2DA": ie.make_2da(["DESCRIPTION", "BAM_FILE"], [("206", ["10554", "SPPR313D"])]), **resources}
     return fg.FakeGame(work, weidu, tp2=TP2, tlk=ie.make_tlk([""]), biff=biff,
                        override={"M___EEex.lua": b"-- synthetic EEex bootstrap\n"} if eeex else {})
 
@@ -58,14 +55,11 @@ def live_rows_and_icons(work, weidu):
     rows = statdesc(g)
     lua = g.file("override/M_CBMREC.lua").decode("latin-1")
     check("%CBM_ROW" not in lua, "every row is stamped")
-    for name, (text, bam, like) in ROWS.items():
+    for name, (text, bam) in ROWS.items():
         found = [row for row, value in rows.items() if value == (text, bam)]
         check(len(found) == 1, f"{text}: one row, found {found}")
         check(f"row = {found[0]}" in lua, f"{text}: row {found[0]} in the listener")
-        states = g.file(f"override/{bam}.BAM")
-        frames = struct.unpack_from("<H", states, 8)[0]
-        cycle_off = struct.unpack_from("<I", states, 0x0C)[0] + frames * 12
-        check(struct.unpack_from("<HH", states, cycle_off) == (like + 66, (like + 65) * 3), f"{bam} shows row {like}")
+        check((fg.MOD / f"files/{bam.lower()}.bam").is_file(), f"{bam}: the icon does not ship with the mod")
     check(not (Path(g.root) / "override/SPPR701.SPL").exists(), "no spell changes")
     # A second install changes nothing.
     check("SUCCESSFULLY INSTALLED" in g.install(), "the second install runs")

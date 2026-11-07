@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34621,
+  "raw_10": "009c8c40000504006c0000000b00805e726020200000000000400900000100000000000088130000320053505749383130410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Incendiary Cloud\n(Conjuration/Summoning)\n\nLevel: 8\nRange: Visual range of the caster\nDuration: 1 turn\nCasting Time: 8\nArea of Effect: 15-ft. radius\nSaving Throw: 1/2\n\nThis spell creates a billowing cloud of roaring flame. Any in the area of the spell must leave the cloud immediately or suffer 1d4 points of fire damage per level of the caster each round while in the area of effect, with a Save vs. Breath for half.",
+   "old": 7664
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574938313041040028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 148,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi810",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574938313041050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi810",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

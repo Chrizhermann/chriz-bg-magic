@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34578,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000020000000000000d0070000320053705769363038410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Pierce Magic\n(Abjuration)\n\nLevel: 6\nRange: 40 ft.\nDuration: Instant\nCasting Time: 6\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen this spell is cast upon a target creature, there will be two major effects: First, the creature's Magic Resistance, if any, will be lowered by half its current value, rounded down, with a minimum reduction of 10 and a maximum of 40 percentage points; second, one spell protection of 8th level or lower affecting the creature, if any, will be canceled. Spells affected by Pierce Magic are Minor Spell Deflection, Minor Spell Turning, Spell Deflection, Spell Turning, Minor Globe of Invulnerability, Spell Immunity, and Globe of Invulnerability. The target's Magic Resistance, if any, does not affect this spell, nor do any of the spell protections. Magic Resistance remains lowered for 5 rounds.",
+   "old": 25935
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005370576936303841010028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi608",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005370576936303841050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi608",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

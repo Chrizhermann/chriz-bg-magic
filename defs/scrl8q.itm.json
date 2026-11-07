@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34607,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000008000000000000b80b0000320053505749373135410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Power Word, Stun\n(Enchantment/Charm)\n\nLevel: 7\nRange: Visual range of the caster\nDuration: Special\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen a Power Word, Stun spell is uttered, any creature of the Mage's choice within visual range is stunned for the duration depending on its current Hit Points:\n 1 to 29 Hit Points: Stunned for 4d4 rounds;\n 30 to 59 Hit Points: Stunned for 2d4 rounds;\n 60 to 89 Hit Points: Stunned for 1d4 rounds;\n 90 or more Hit Points: unaffected.\nNote that if a creature is weakened so that its Hit Points are below its usual maximum, the current number of Hit Points is used to determine this spell's effects. Free Action protects against this spell.",
+   "old": 7782
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574937313541010028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi715",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574937313541050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi715",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

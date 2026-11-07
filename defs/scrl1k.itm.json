@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 15530,
+  "raw_10": "000000006974656d6c0000000b00805e7260202000000000004009000002000000000000840300003200495343524c314b000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Lightning Bolt\n(Evocation)\n\nLevel: 3\nRange: 70 ft.\nDuration: Instant\nCasting Time: 3\nArea of Effect: Path of bolt\nSaving Throw: 1/2\n\nUpon casting this spell, the wizard releases a powerful stroke of electrical energy that inflicts 1d6 points of damage per level of the caster (maximum damage of 10d6) to each creature within its area of effect. A successful Saving Throw vs. Breath reduces this damage to half (round fractions down). If the lightning bolt intersects with a wall, it will bounce until it reaches its full length.",
+   "old": 12179
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c314b00010032000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi308",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c314b00050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi308",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

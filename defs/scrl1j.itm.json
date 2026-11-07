@@ -1,0 +1,73 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": {
+   "text": "Invisibility Sphere",
+   "old": 13056
+  },
+  "raw_10": "000000a08c4000056c0000000b00805e72602020000000000040090000100000000000002c0100003200697363726c316a000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Invisibility Sphere\n(Illusion/Phantasm)\n\nLevel: 3\nRange: 0\nDuration: Special\nCasting Time: 1\nArea of Effect: 10-ft. radius\nSaving Throw: None\n\nThis spell causes all friendly creatures within 10 ft. of the caster to vanish from sight and be undetectable by normal vision or even infravision. Of course, the invisible creature(s) are not magically silenced, and certain other conditions can render the creature(s) detectable. Even allies cannot see the invisible creature(s) or their gear, unless these allies can normally see invisible things or employ magic to do so. Items dropped or put down by the invisible creature(s) become visible; items picked up disappear if tucked into the clothing or pouches worn by the creature(s). The spell remains in effect until it is magically broken or dispelled, until the wizard or recipient cancels it, until the recipient attacks any creature, or until 1 turn has passed. The invisible being(s) cannot open doors, talk, eat, climb stairs, etc. If they attack, they immediately become visible, although the invisibility enables them to attack first.",
+   "old": 32429
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c316a00050023000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi307",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300697363726c316a00050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi307",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}
