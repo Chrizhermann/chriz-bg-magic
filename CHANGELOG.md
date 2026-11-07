@@ -22,6 +22,18 @@
   and skipped with an informational line when absent.
 - Transformation and Regeneration spells form separate exclusive families: higher spell
   level wins; a new casting replaces an equal-level member. These rules work without EEex.
+- Champion's Strength now removes and blocks Draw Upon Divine Might for its duration, while
+  Draw Upon Divine Might remains outside the wider Transformation family. Champion's native
+  caster concentration behavior is unchanged.
+- Command now has its decided one-round, damage-waking sleep with a Save vs. Spell penalty that
+  scales from 0 at level 1 to -4 at level 9.
+- Chaos now lasts 4/5/6 rounds at caster levels 1/15/20, retaining its distinct automatic and
+  saving-throw branches. Sphere of Chaos has equal five-way outcomes, and priest Confusion
+  (level 7) becomes the same spell with the wizard spell's field.
+- Added a level-6 druid Conjure Air Elemental with the decided 12/16/24-Hit-Dice progression and
+  no control contest, plus level-3 druid Icelance: automatic 5d6 cold damage and a separately
+  saveable three-round stun. Icelance also reaches shamans and rangers through the existing druid
+  spell category; no priest scroll was added.
 - With EEex installed, Pierce Magic reduces current Magic Resistance by half, rounded down
   and limited to 10-40 percentage points, for 5 rounds. Its other effects stay unchanged.
   Without EEex at installation, its existing resistance effect is retained.

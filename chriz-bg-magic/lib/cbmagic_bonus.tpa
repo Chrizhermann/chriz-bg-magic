@@ -753,7 +753,18 @@ BEGIN
                       WRITE_SHORT 0 206 WRITE_LONG 4 0 WRITE_LONG 8 0
                       WRITE_ASCIIE 0x14 ~%other%~ #8 WRITE_LONG 0x2c 0
                     END
-                    LPF cbmagic_bonus_unique INT_VAR group = g position = 0 STR_VAR row END
+                    // A spell can stand in two families: the protection goes after the last
+                    // removal of the other family, or a self refresh would erase it.
+                    READ_LONG 0x64 now_ao READ_LONG 0x6a now_fo
+                    PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e now_f READ_SHORT 0x70 now_n END ELSE BEGIN
+                      READ_SHORT (now_ao + g * 0x28 + 0x20) now_f READ_SHORT (now_ao + g * 0x28 + 0x1e) now_n
+                    END
+                    SET protect_at = 0
+                    FOR (q = 0; q < now_n; ++q) BEGIN
+                      READ_SHORT (now_fo + (now_f + q) * 0x30) now_op
+                      PATCH_IF (now_op = 321) BEGIN SET protect_at = q + 1 END
+                    END
+                    LPF cbmagic_bonus_unique INT_VAR group = g position = protect_at STR_VAR row END
                   END
                 END
               END
@@ -929,6 +940,12 @@ BEGIN
   END
   LAF cbmagic_family STR_VAR label = ~Transformation~
     symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
+  // Draw Upon Divine Might stands beside the other transformations; only these two exclude each other.
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_DRAW_UPON_HOLY_MIGHT~ RET found END
+  ACTION_IF found BEGIN
+    LAF cbmagic_family STR_VAR label = ~Champion's Strength and Draw Upon Divine Might~
+      symbols = ~CLERIC_DRAW_UPON_HOLY_MIGHT CLERIC_CHAMPIONS_STRENGTH~ END
+  END
   LAF cbmagic_family STR_VAR label = ~Regeneration~
     symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
 END

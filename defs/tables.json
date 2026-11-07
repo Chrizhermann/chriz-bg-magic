@@ -132,6 +132,16 @@
    "file": "sppr418.spl",
    "type": 1,
    "level": 4
+  },
+  "CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL": {
+   "file": "cbmair.spl",
+   "type": 1,
+   "level": 6
+  },
+  "CLERIC_CBMAGIC_ICELANCE": {
+   "file": "cbmlance.spl",
+   "type": 1,
+   "level": 3
   }
  },
  "projectiles": [

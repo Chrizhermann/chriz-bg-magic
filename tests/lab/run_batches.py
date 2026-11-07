@@ -22,8 +22,9 @@ spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
+AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided")
 
 
 def lua_list(values):
@@ -639,6 +640,152 @@ def attacks(c, check):
     check("Extra attack: beside Improved Haste only one counts", sorted(improved["tagged"]) == [0, 1], improved=improved)
 
 
+def added_spell(game, symbol):
+    """The file an install gave a spell it added."""
+    number = int(re.search(rf"^\s*(\d+)\s+{symbol}\s*$",
+                           (game / "override" / "spell.ids").read_text(encoding="latin-1"), re.M)[1])
+    return f"{'SPPR' if number < 2000 else 'SPWI'}{number % 1000:03d}"
+
+
+def fresh_foe(c, tag, res="SPIDHU01", name="spidhu01", distance=260):
+    c.p(f"{tag}-clear", "remove_all_others()")
+    time.sleep(1)
+    c.p(f"{tag}-spawn", f'spawn("{res}", {distance}, 0)')
+    time.sleep(2)
+    c.p(f"{tag}-pin", f'pin("{name}", 900)')
+    return name
+
+
+def decided(c, check):
+    # Command: one round of sleep, and a hit ends it.
+    foe = fresh_foe(c, "dc")
+    c.p("dc-saves", f'set_saves("{foe}", {{spell = 20}}, 900)')
+    c.p("dc-cmd", f"""cast(2, "SPPR102", '"{foe}"')""")
+    time.sleep(3.5)
+    asleep = c.p("dc-asleep", f'creature("{foe}")')
+    time.sleep(7)
+    over = c.p("dc-over", f'creature("{foe}")')
+    check("Command: the target sleeps for one round", asleep["state"] & 1 and not over["state"] & 1,
+          state=[hex(asleep["state"]), hex(over["state"])])
+    c.p("dc-cmd2", f"""cast(2, "SPPR102", '"{foe}"')""")
+    time.sleep(3.5)
+    asleep = c.p("dc-asleep2", f'creature("{foe}")')
+    c.p("dc-hit", f'damage("{foe}", 1)')
+    time.sleep(1.5)
+    awake = c.p("dc-awake", f'creature("{foe}")')
+    check("Command: a hit wakes the target", asleep["state"] & 1 and not awake["state"] & 1,
+          state=[hex(asleep["state"]), hex(awake["state"])])
+
+    # Chaos: confusion lasts what the caster's level says.
+    foe = fresh_foe(c, "dx")
+    c.p("dx-saves", f'set_saves("{foe}", {{spell = 20}}, 900)')
+    level = c.p("dx-level", "level(1)")
+    expected = 36 if level >= 20 else 30 if level >= 15 else 24
+    c.p("dx-cast", f"""cast(1, "SPWI508", '"{foe}"')""")
+    started = ended = None
+    for _ in range(120):
+        confused = c.p("dx-ops", f'ops("{foe}", {{128}})') or []
+        now = time.time()
+        if confused and started is None:
+            started = now
+        if not confused and started is not None:
+            ended = now
+            break
+        if started is None and now > 0 and _ > 20:
+            break
+        time.sleep(0.5)
+    lasted = round(ended - started, 1) if started and ended else None
+    check(f"Chaos: confusion lasts {expected} seconds at caster level {level}",
+          lasted is not None and abs(lasted - expected) <= 3, lasted=lasted)
+
+    # Priest Sphere of Chaos: the field reaches enemies, not the party.
+    foe = fresh_foe(c, "ds")
+    c.p("ds-saves", f'set_saves("{foe}", {{spell = 20}}, 900)')
+    at = c.p("ds-at", f'creature("{foe}")')
+    c.p("ds-cast", f'cast_point(2, "SPPR709", {at["x"]}, {at["y"]})')
+    effects, touched = [], []
+    for _ in range(16):
+        time.sleep(1)
+        effects = [e for e in (c.p("ds-ops", f'ops("{foe}", {{76, 128, 24, 39, 175}})') or []) if e["src"] == "SPPR709"]
+        if effects:
+            break
+    for i in range(3):
+        touched += [e for e in (c.p(f"ds-p{i}", f"ops({i}, {{76, 128, 24, 39, 175}})") or []) if e["src"] == "SPPR709"]
+    check("Priest Sphere of Chaos affects the enemy", bool(effects), effects=effects)
+    check("Priest Sphere of Chaos spares the party", not touched, touched=touched)
+    c.p("ds-tidy", "remove_all_others()")
+    time.sleep(1)
+
+    # Druid Conjure Air Elemental: an ally at once, and it stays one.
+    p0 = c.p("da-party", "party()")[0]
+    c.p("da-cast", f'cast_point(2, "{AIR}", {p0["x"] + 90}, {p0["y"]})')
+    time.sleep(13)
+    first = [o for o in c.p("da-others", "others()") or [] if "Air" in (o["name"] or "")]
+    time.sleep(20)
+    later = [o for o in c.p("da-others2", "others()") or [] if "Air" in (o["name"] or "")]
+    check("Druid Conjure Air Elemental summons one elemental on the party's side", len(first) == 1 and first[0]["ea"] < 30,
+          first=first)
+    check("Druid Conjure Air Elemental: no control contest, it stays on the party's side after three rounds",
+          len(later) == 1 and later[0]["ea"] < 30, later=later)
+
+    # Icelance: damage always, the save only against the stun, immunity to stun keeps the damage.
+    def lance(tag):
+        before = c.p(f"{tag}-b", f'creature("{foe}")')
+        c.p(f"{tag}-c", f"""cast(2, "{LANCE}", '"{foe}"')""")
+        time.sleep(6)
+        after = c.p(f"{tag}-a", f'creature("{foe}")')
+        return before["hp"] - after["hp"], bool(after["state"] & 8)
+
+    foe = fresh_foe(c, "dl")
+    c.p("dl-hp", f'fx("{foe}", 18, 300, 0, 600)')
+    c.p("dl-pass", f'set_saves("{foe}", {{spell = 1}}, 600)')
+    time.sleep(1)
+    damage, stunned = lance("dl1")
+    check("Icelance: a saved target takes 5d6 and is not stunned", 5 <= damage <= 30 and not stunned, damage=damage, stunned=stunned)
+    c.p("dl-fail", f'set_saves("{foe}", {{spell = 20}}, 600)')
+    c.p("dl-immune", f'fx("{foe}", 101, 0, 45, 600)')
+    time.sleep(1)
+    damage, stunned = lance("dl2")
+    check("Icelance: immunity to stun keeps the damage", 5 <= damage <= 30 and not stunned, damage=damage, stunned=stunned)
+    foe = fresh_foe(c, "dm")
+    c.p("dm-hp", f'fx("{foe}", 18, 300, 0, 600)')
+    c.p("dm-fail", f'set_saves("{foe}", {{spell = 20}}, 600)')
+    time.sleep(1)
+    damage, stunned = lance("dm1")
+    check("Icelance: a failed save stuns and takes 5d6", 5 <= damage <= 30 and stunned, damage=damage, stunned=stunned)
+
+    # Champion's Strength and Draw Upon Divine Might never stand together on one creature.
+    who, duhm, champion, tenser = 0, "SPPR214", "SPPR507", "SPWI603"
+
+    def on(res):
+        return c.p(f"dd-{res}", f'portrait({who}, "{res}")')["effects"]
+
+    def give(res):
+        c.p(f"dd-give-{res}", f'on_member({who}, "{res}")')
+        time.sleep(1.6)
+
+    c.p("dd-clear", f'clear({who}, {{"{duhm}", "{champion}", "{tenser}"}})')
+    time.sleep(1)
+    give(duhm)
+    landed = on(duhm)
+    give(champion)
+    check("Champion's Strength removes Draw Upon Divine Might", landed and on(champion) and not on(duhm),
+          landed=len(landed), champion=len(on(champion)), left=len(on(duhm)))
+    give(duhm)
+    check("Draw Upon Divine Might does not land under Champion's Strength", not on(duhm), left=len(on(duhm)))
+    give(champion)
+    give(duhm)
+    check("A second Champion's Strength keeps the protection", on(champion) and not on(duhm), left=len(on(duhm)))
+    c.p("dd-clear2", f'clear({who}, {{"{champion}"}})')
+    time.sleep(1)
+    give(duhm)
+    check("Draw Upon Divine Might lands again once Champion's Strength is gone", bool(on(duhm)), landed=len(on(duhm)))
+    give(tenser)
+    check("Draw Upon Divine Might stands beside the other transformations", bool(on(duhm)) and bool(on(tenser)),
+          duhm=len(on(duhm)), tenser=len(on(tenser)))
+    c.p("dd-tidy", f'clear({who}, {{"{duhm}", "{champion}", "{tenser}"}})')
+
+
 def smoke(c, check):
     # Every changed spell cast once at a dummy: the game must survive and keep answering.
     c.p("sm-spawn", 'spawn("TASLOI01", 160, 0)')
@@ -1003,6 +1150,11 @@ def main():
         GAME = Path(args[args.index("--game") + 1])
     if "bonus" in selected and "--game" in args:
         BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
+    if "decided" in selected and "--game" in args:
+        global AIR, LANCE
+        game = Path(args[args.index("--game") + 1])
+        AIR = added_spell(game, "CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL")
+        LANCE = added_spell(game, "CLERIC_CBMAGIC_ICELANCE")
     if "attacks" in selected and "--game" in args:
         WRATH = wrath_payload(Path(args[args.index("--game") + 1]))
     if {"record", "live"} & set(selected) and "--game" in args:

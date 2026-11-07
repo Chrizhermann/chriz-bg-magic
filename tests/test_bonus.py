@@ -411,11 +411,17 @@ def bonus_second_direct_pass_is_stable(work, weidu):
 def bonus_families_every_pair_and_linked_payloads(work, weidu):
     specs = [(2950, "WIZARD_TENSERS_TRANSFORMATION", 6), (1950, "CLERIC_HOLY_POWER", 4),
              (1951, "CLERIC_RIGHTEOUS_MAGIC", 5), (1952, "CLERIC_CHAMPIONS_STRENGTH", 5),
-             (1953, "CLERIC_BLOOD_RAGE", 4), (1954, "CLERIC_ANIMAL_RAGE", 5)]
+             (1953, "CLERIC_BLOOD_RAGE", 4), (1954, "CLERIC_ANIMAL_RAGE", 5),
+             (1959, "CLERIC_DRAW_UPON_HOLY_MIGHT", 2)]
+    transformations = {symbol for _, symbol, _ in specs if symbol != "CLERIC_DRAW_UPON_HOLY_MIGHT"}
+    champion_pair = {"CLERIC_CHAMPIONS_STRENGTH", "CLERIC_DRAW_UPON_HOLY_MIGHT"}
     resources = {}
-    for number, _, level in specs:
-        resources[resref(number) + ".SPL"] = spell([effect(44, 18, p2=1, duration=42),
-                                                    effect(206, resource="FOREIGN", duration=19)], level=level)
+    for number, symbol, level in specs:
+        spell_rows = [effect(44, 18, p2=1, duration=42), effect(206, resource="FOREIGN", duration=19)]
+        if symbol == "CLERIC_CHAMPIONS_STRENGTH":
+            spell_rows += [effect(145, target=1, p2=0, duration=42),
+                           effect(145, target=1, p2=1, duration=42)]
+        resources[resref(number) + ".SPL"] = spell(spell_rows, level=level)
     regeneration = [(1955, "CLERIC_REGENERATE", 7), (1956, "CLERIC_CBMAGIC_MASS_REGENERATE", 5),
                     (2951, "WIZARD_TROLLISH_FORTITUDE", 6)]
     for number, _, level in regeneration:
@@ -430,14 +436,20 @@ def bonus_families_every_pair_and_linked_payloads(work, weidu):
               "family removals must precede new protections and buffs")
         foreign = [r for r in result if r["resource"] == "FOREIGN"]
         check(foreign == [effect(206, resource="FOREIGN", duration=19)], "unrelated protection changed")
-        for other, _, other_level in specs:
+        for other, other_symbol, other_level in specs:
             removes = [r for r in result if r["opcode"] == 321 and r["resource"] == resref(other)]
             blocks = [r for r in result if r["opcode"] == 206 and r["resource"] == resref(other)]
-            check(len(removes) == int(other_level <= level), f"remove pair {number}/{other}")
-            check(len(blocks) == int(other_level < level), f"block pair {number}/{other}")
+            symbol = next(symbol for candidate, symbol, _ in specs if candidate == number)
+            shares_family = ({symbol, other_symbol} <= transformations or {symbol, other_symbol} <= champion_pair)
+            check(len(removes) == int(shares_family and other_level <= level), f"remove pair {number}/{other}")
+            check(len(blocks) == int(shares_family and other_level < level), f"block pair {number}/{other}")
             check(all(r["duration"] == 42 and r["dispel"] == 3 for r in blocks), "family lifetime/dispellability")
             check(all(result.index(r) < next(i for i, row in enumerate(result) if row["opcode"] == 44)
                       for r in removes), "family removal occurs after buff")
+        if symbol == "CLERIC_CHAMPIONS_STRENGTH":
+            locks = [r for r in result if r["opcode"] == 145]
+            check(locks == [effect(145, target=1, p2=0, duration=42),
+                            effect(145, target=1, p2=1, duration=42)], "Champion's Strength caster lock changed")
     children = {}
     for number, _, level in regeneration:
         child = next(r["resource"] for r in rows(g, resref(number)) if r["opcode"] == 146)

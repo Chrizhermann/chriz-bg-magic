@@ -58,6 +58,37 @@ BEGIN
   END
 END
 
+// --- Icelance for druids ------------------------------------------------------------------
+// Ships with native art. Where IWDification brought the wizard spell's icons and missile, the
+// druid spell takes them.
+DEFINE_ACTION_FUNCTION cbmagic_iwd_icelance
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_ICELANCE~ RET wizard = resref END
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_ICELANCE~ RET druid = resref END
+  OUTER_SET missile = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~%wizard%.spl~ BEGIN
+    COPY_EXISTING ~%wizard%.SPL~ ~override~
+      READ_LONG 0x64 ao ELSE 0
+      READ_SHORT 0x68 groups ELSE 0
+      PATCH_IF groups > 0 && ao >= 0x72 && (ao + 0x28) <= SOURCE_SIZE BEGIN
+        READ_ASCII 0x3a spell_icon (8) NULL
+        READ_ASCII (ao + 4) ability_icon (8) NULL
+        READ_SHORT (ao + 0x26) missile
+      END
+    BUT_ONLY
+  END
+  ACTION_IF missile > 0 && FILE_EXISTS_IN_GAME ~%druid%.spl~ BEGIN
+    COPY_EXISTING ~%druid%.SPL~ ~override~
+      WRITE_ASCIIE 0x3a ~%spell_icon%~ #8
+      READ_LONG 0x64 ao READ_SHORT 0x68 groups
+      FOR (g = 0; g < groups; ++g) BEGIN
+        WRITE_ASCIIE (ao + g * 0x28 + 4) ~%ability_icon%~ #8
+        WRITE_SHORT (ao + g * 0x28 + 0x26) missile
+      END
+    BUT_ONLY
+  END
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_iwd_spells
 BEGIN
   LAF cbmagic_healing_cure_moderate END
@@ -65,4 +96,5 @@ BEGIN
   LAF cbmagic_fix_wake_on_damage END
   LAF cbmagic_more_righteous_wrath END
   LAF cbmagic_iwd_recitation END
+  LAF cbmagic_iwd_icelance END
 END

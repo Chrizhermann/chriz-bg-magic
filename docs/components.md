@@ -88,6 +88,10 @@ removes its whole spell effect, including linked payloads.
 
 - **Transformation:** Tenser's Transformation, Divine Power, Righteous Magic,
   Champion's Strength, Blood Rage and Animal Rage.
+- **Champion's Strength and Draw Upon Divine Might:** Champion's Strength removes an active
+  Draw Upon Divine Might from its recipient and prevents a new one for its own duration. As the
+  higher-level spell, Champion's Strength wins this pair; Draw Upon Divine Might otherwise remains
+  outside the Transformation family and can coexist with its other members.
 - **Regeneration:** Regenerate, Mass Regenerate and Trollish Fortitude. Both this mod's
   Mass Regenerate and an optional installed spell with that symbol participate.
 
@@ -420,6 +424,20 @@ Barkskin, Flame Blade, Animal Summoning I-III and Conjure Animals are restricted
 and rangers (cleric/paladin exclusion bit set in the priest class word at SPL offset
 `0x20`, preserving alignment bits).
 
+## New druid spells
+
+- **Conjure Air Elemental:** a new level-6 druid spell, using the same druid/ranger class
+  setting as the other druid elementals. It targets a point within 35 feet, lasts one turn per
+  caster level (up to 20 turns), and summons a 12-, 16-, or 24-Hit-Dice air elemental. The
+  chances progress from 64%/35%/1% at level 11 to 37%/51%/12% at level 20, with the decided
+  interpolated values at the intervening levels. The elemental has no control contest.
+- **Icelance:** a new level-3 spell in the druid spell category, therefore available to druids,
+  shamans and rangers without a separate ranger grant. It automatically deals 5d6 cold damage to
+  one creature within 100 feet. A Save vs. Spell negates only the three-round stun; it never
+  negates the damage. There is no priest scroll.
+  It ships with native icons and missile; where IWDification brought the wizard spell's art, it
+  uses that.
+
 ## Per-spell casting times (`cbmagic_vanilla_*_ct`)
 
 Casting times are lowered on abilities that are slower than the target value (faster
@@ -457,6 +475,8 @@ abilities from other mods are preserved) and descriptions are updated:
 - **Confusion (`cbmagic_kept_confusion`)**: lasts 4 rounds at levels 1-14, 5 rounds at
   levels 15-19, and 6 rounds at level 20+, preserving existing ability breakpoints. Save
   vs. Spell at -2 and all other properties stay as in the base game.
+- **Chaos:** lasts 4 rounds at level 1, 5 rounds at level 15, and 6 rounds at level 20. Its
+  automatic low-Hit-Dice branch and its Save vs. Spell at -4 branch remain separate.
 - **Sequencers and Contingencies (`cbmagic_kept_minor_sequencer`,
   `cbmagic_kept_contingency`, `cbmagic_kept_spell_sequencer`,
   `cbmagic_kept_spell_trigger`, `cbmagic_kept_chain_contingency`)**: Minor Sequencer,
@@ -469,11 +489,11 @@ abilities from other mods are preserved) and descriptions are updated:
 - **Oracle (`cbmagic_kept_oracle`)**: dispels illusion spells up to 9th level (from 5th)
   in a 30-ft (radius 450) enemy-only area around the caster (`cbmoracl.pro` via
   `ADD_PROJECTILE`, range 1) and updates the affected-spell list in the description.
-- **Sphere of Chaos (`cbmagic_kept_sphere_of_chaos`)**: keeps its name, level 7, point
-  targeting within range 40 ft., and 10-round enemy-only field. Each round, enemies in the
-  area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6 seconds):
-  feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold
-  (20%).
+- **Sphere of Chaos (`cbmagic_kept_sphere_of_chaos`)**: the wizard spell keeps its name,
+  level 7, point targeting within range 40 ft., and 10-round enemy-only field. Priest
+  Confusion (level 7) becomes the same spell, with the same range and field. Each round, enemies in the area save
+  vs. Spell at -4 or suffer one of 5 equally likely effects for 1 round (6 seconds): feeblemind,
+  confusion, panic, sleep waking on damage, or hold.
 
 ### Divine spells
 
@@ -486,6 +506,9 @@ abilities from other mods are preserved) and descriptions are updated:
   rolls, and all saving throws (without an AC penalty), and allows a Save vs. Spell to
   negate, scaling from no penalty at level 1 to -4 at level 9 (steps at levels 1, 3, 5, 7,
   and 9).
+- **Command:** one creature within 30 feet falls asleep for one round unless it makes a Save
+  vs. Spell. Damage wakes the target. The saving-throw penalty is -1 for each two caster levels
+  after 1st, to a maximum of -4 at 9th level.
 - **Faerie Fire (`cbmagic_kept_faerie_fire`)**: new level-1 druid-only spell added via
   `ADD_SPELL` (`CLERIC_CBMAGIC_FAERIE_FIRE`), using ability location 2 and base-game
   Invisibility Purge icons (`SPPR309C` / `SPPR309B`). In a hostile 5-ft (radius 75)

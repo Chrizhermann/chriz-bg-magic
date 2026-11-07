@@ -1,0 +1,88 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": {
+   "text": "Icelance"
+  },
+  "name_identified": 9999999,
+  "sound": "CAS_P06",
+  "flags": 512,
+  "type": 2,
+  "exclusion": 1073741824,
+  "animation": 11,
+  "min_level": 0,
+  "school": 6,
+  "min_strength": 0,
+  "sectype": 10,
+  "unused_28": "000000000000000000000000",
+  "level": 3,
+  "stack": 1,
+  "icon": "SPWI404C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Icelance\n(Evocation)\n\nLevel: 3\nRange: 100 ft.\nDuration: 3 rounds\nCasting Time: 3\nArea of Effect: 1 creature\nSaving Throw: Spell negates stun\n\nA spear of ice automatically strikes the target for 5d6 cold damage. The target may save vs. Spell to avoid being stunned for 3 rounds; this save does not affect the cold damage."
+  },
+  "description_identified": 9999999,
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 1,
+   "ability_flags": 0,
+   "location": 2,
+   "icon": "SPWI404B",
+   "target": 1,
+   "target_count": 0,
+   "range": 100,
+   "min_level": 1,
+   "casting_time": 3,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 233,
+   "effects": [
+    {
+     "opcode": 45,
+     "target": 2,
+     "power": 3,
+     "p1": 0,
+     "p2": 0,
+     "timing": 0,
+     "dispel": 1,
+     "duration": 18,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 1,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 12,
+     "target": 2,
+     "power": 3,
+     "p1": 0,
+     "p2": 131072,
+     "timing": 1,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 5,
+     "sides": 6,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

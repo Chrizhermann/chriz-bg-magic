@@ -93,6 +93,11 @@ function P.attacks(who)
     return { apr = s.m_derivedStats.m_nNumberOfAttacks, tagged = tagged }
 end
 
+-- Level of a portrait: what a spell of this caster reads, for a single class.
+function P.level(who)
+    return EEex_Sprite_GetStat(party(who), 34)
+end
+
 function P.on_member(who, res)
     EEex_Action_QueueResponseStringOnAIBase(string.format('ApplySpellRES("%s",Myself)', res), party(who))
     return true

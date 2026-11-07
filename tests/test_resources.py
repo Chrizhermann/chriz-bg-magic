@@ -212,6 +212,108 @@ def reading_and_writing_round_trips(work, weidu):
 
 
 @test
+def decided_phase_one_spell_definitions(work, weidu):
+    """The decided spells own their complete data, including new spell slots and class access."""
+    defs = definitions()
+    added = {
+        "CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL": {"file": "cbmair.spl", "type": 1, "level": 6},
+        "CLERIC_CBMAGIC_ICELANCE": {"file": "cbmlance.spl", "type": 1, "level": 3},
+    }
+    for symbol, expected in added.items():
+        check(TABLES["spells"].get(symbol) == expected, f"{symbol}: spell allocation")
+
+    check(defs["sppr606.spl"]["header"]["name"] == 14253, "Fire Seeds keeps its own definition")
+    check("sppr709.spl" not in ADDED, "priest Sphere of Chaos stands in Confusion's place, in no new slot")
+
+    command = defs["sppr102.spl"]
+    check((command["header"]["type"], command["header"]["level"], command["header"]["school"]) == (2, 1, 4),
+          "Command header")
+    check([ability["min_level"] for ability in command["abilities"]] == [1, 3, 5, 7, 9],
+          "Command level breaks")
+    for ability, penalty in zip(command["abilities"], (0, -1, -2, -3, -4)):
+        check((ability["target"], ability["range"], ability["casting_time"], ability["projectile"]) == (1, 30, 1, 1),
+              f"Command level {ability['min_level']}: delivery")
+        payload = [(e["opcode"], e["target"], e["p1"], e["p2"], e["timing"], e["duration"],
+                    e["save"], e["bonus"], e["resource"]) for e in ability["effects"]]
+        check(payload == [(39, 2, 0, 0, 0, 6, 1, penalty, ""),
+                          (174, 2, 0, 0, 4, 6, 1, penalty, "EFF_E05"),
+                          (215, 1, 0, 0, 1, 0, 0, 0, "SPCOMSTT"),
+                          (215, 2, 0, 0, 1, 0, 1, penalty, "SPCOMEND")],
+              f"Command level {ability['min_level']}: payload")
+
+    for name in ("spwi711.spl", "sppr709.spl"):
+        sphere = defs[name]
+        check(len(sphere["abilities"]) == 1, f"{name}: one field ability")
+        ability = sphere["abilities"][0]
+        check((ability["target"], ability["range"], ability["casting_time"], ability["projectile"]) == (4, 40, 7, 238),
+              f"{name}: wizard field footprint")
+        check({(e["prob2"], e["prob1"]) for e in ability["effects"]} ==
+              {(0, 19), (20, 39), (40, 59), (60, 79), (80, 99)}, f"{name}: equal chaos windows")
+    check(defs["spwi711.spl"]["abilities"] == defs["sppr709.spl"]["abilities"], "Sphere of Chaos payloads")
+    check((defs["sppr709.spl"]["header"]["type"], defs["sppr709.spl"]["header"]["level"],
+           defs["sppr709.spl"]["header"]["school"]) == (2, 7, 4), "priest Sphere of Chaos header")
+
+    chaos = defs["spwi508.spl"]
+    check([ability["min_level"] for ability in chaos["abilities"]] == [1, 15, 20], "Chaos level breaks")
+    for ability, duration in zip(chaos["abilities"], (24, 30, 36)):
+        check({e["duration"] for e in ability["effects"] if e["duration"]} == {duration},
+              f"Chaos level {ability['min_level']}: duration")
+        automatic = [e for e in ability["effects"] if e["dice"] == 4 and e["sides"] == 0]
+        saved = [e for e in ability["effects"] if e["opcode"] in (61, 128, 139, 142, 174, 215)
+                 and e["dice"] == 0 and e["sides"] == 5]
+        check({e["opcode"] for e in automatic} == {61, 128, 139, 142, 174, 215} and
+              all(e["save"] == 0 for e in automatic), f"Chaos level {ability['min_level']}: automatic branch")
+        check({e["opcode"] for e in saved} == {61, 128, 139, 142, 174, 215} and
+              all((e["save"], e["bonus"]) == (1, -4) for e in saved),
+              f"Chaos level {ability['min_level']}: saving branch")
+
+    air = defs["cbmair.spl"]
+    check((air["header"]["type"], air["header"]["level"], air["header"]["school"], air["header"]["exclusion"]) ==
+          (2, 6, 2, 1073741824), "Conjure Air Elemental header and druid access")
+    air_rows = [(11, 64, 35, 1), (12, 61, 37, 2), (13, 58, 39, 3), (14, 55, 40, 5),
+                (15, 52, 42, 6), (16, 49, 44, 7), (17, 46, 46, 8), (18, 43, 47, 10),
+                (19, 40, 49, 11), (20, 37, 51, 12)]
+    for ability, (level, low, middle, high) in zip(air["abilities"], air_rows):
+        check((ability["min_level"], ability["target"], ability["range"], ability["casting_time"], ability["projectile"]) ==
+              (level, 4, 35, 9, 1), f"Conjure Air Elemental level {level}: ability")
+        upper_middle = low + middle - 1
+        payload = [(e["opcode"], e["target"], e["p2"], e["timing"], e["dispel"], e["duration"],
+                    e["prob2"], e["prob1"], e["resource"]) for e in ability["effects"]]
+        check(payload == [(177, 1, 2, 0, 2, level * 60, 0, low - 1, "CBMAIR1"),
+                          (177, 1, 2, 0, 2, level * 60, low, upper_middle, "CBMAIR2"),
+                          (177, 1, 2, 0, 2, level * 60, upper_middle + 1, 99, "CBMAIR3")],
+              f"Conjure Air Elemental level {level}: table")
+    for tier in range(1, 4):
+        effect = defs[f"cbmair{tier}.eff"]["effect"]
+        check((effect["opcode"], effect["target"], effect["p1"], effect["p2"], effect["resource"]) ==
+              (67, 1, 0, 0, f"CBMAIR{tier}"), f"air elemental tier {tier}: summon")
+        creature = fg.MOD / "files" / f"cbmair{tier}.cre"
+        check(creature.is_file(), f"air elemental tier {tier}: creature")
+        data = creature.read_bytes()
+        scripts = [data[offset:offset + 8].split(b"\0", 1)[0].decode("ascii")
+                   for offset in range(0x248, 0x270, 8)]
+        check(data[0x234] == (12, 16, 24)[tier - 1], f"air elemental tier {tier}: Hit Dice")
+        check(scripts == ["GENSHT01", "None", "None", "AIRELE01", "WDASIGHT"],
+              f"air elemental tier {tier}: wizard control script")
+
+    icelance = defs["cbmlance.spl"]
+    check((icelance["header"]["type"], icelance["header"]["level"], icelance["header"]["school"],
+           icelance["header"]["exclusion"]) == (2, 3, 6, 1073741824), "Icelance header and druid access")
+    ability = icelance["abilities"]
+    check(len(ability) == 1 and (ability[0]["target"], ability[0]["range"], ability[0]["casting_time"]) == (1, 100, 3),
+          "Icelance delivery")
+    payload = [(e["opcode"], e["target"], e["power"], e["p1"], e["p2"], e["timing"],
+                e["duration"], e["save"], e["dice"], e["sides"]) for e in ability[0]["effects"]]
+    check(payload == [(45, 2, 3, 0, 0, 0, 18, 1, 0, 0),
+                      (12, 2, 3, 0, 131072, 1, 0, 0, 5, 6)], "Icelance stun and cold damage")
+    check(all(e["opcode"] != 139 for e in ability[0]["effects"]), "Icelance has no independent stun message")
+    check((defs["cbmlance.spl"]["header"]["school"], ability[0]["projectile"]) == (6, 233), "Icelance school and missile")
+
+    for name in ("sppr102.spl", "spwi508.spl", "spwi711.spl", "sppr709.spl", "cbmair.spl", "cbmlance.spl"):
+        check("text" in defs[name]["header"]["description"], f"{name}: complete English description")
+
+
+@test
 def overwrite_whatever_stood_there(work, weidu):
     """A hand edit, other text, other effect counts, garbage and nothing at all: each ends as
     defined, and the install runs through without a warning. Second install and uninstall too."""
@@ -364,10 +466,15 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
 
     ids = fx.spell_ids([(1215, "CLERIC_CURE_MODERATE_WOUNDS"), (1219, "CLERIC_CAUSE_MODERATE_WOUNDS"),
                         (1321, "CLERIC_CAUSE_MEDIUM_WOUNDS"), (1450, "CLERIC_CAUSE_SERIOUS_WOUNDS_IWD"),
-                        (1550, "CLERIC_CAUSE_CRITICAL_WOUNDS_IWD"), (1525, "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL")])
+                        (1550, "CLERIC_CAUSE_CRITICAL_WOUNDS_IWD"), (1525, "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL"),
+                        (2323, "WIZARD_ICELANCE")])
+    lance = bytearray(ie.make_spl(1, 3, [{"target": 1, "projectile": 348}]))
+    lance[0x3A:0x42] = b"SPWI323C"
+    lance_ability = struct.unpack_from("<I", lance, 0x64)[0]
+    lance[lance_ability + 4:lance_ability + 12] = b"SPWI323B"
     hopelessness = ie.make_spl(1, 4, [{"target": 4, "effects": [fx.fx(opcode=39, target=2, power=4, p2=1, duration=54)]}])
     biff = fx.game(
-        SPELL_IDS=ids, SPWI411_SPL=hopelessness,
+        SPELL_IDS=ids, SPWI411_SPL=hopelessness, SPWI323_SPL=bytes(lance),
         SPPR215_SPL=ie.make_spl(2, 2, [{"target": 1, "casting_time": 5, "effects": [fx.fx(opcode=17, target=2, p1=11, timing=1)]}]),
         SPPR219_SPL=direct(2), SPPR321_SPL=direct(3), SPPR450_SPL=touch(4, "IWDSER"), SPPR550_SPL=touch(5, "IWDCRI"),
         IWDSER_ITM=ie.make_itm([[damage(4)]], item_type=3), IWDCRI_ITM=ie.make_itm([[damage(5)]], item_type=3),
@@ -380,7 +487,12 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
     g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=biff)
     before = g.tree()
     install(g)
-    check_every_resource(g, derived=("cbb0.spl", "cbb1.spl", "cbmbonus.2da"))
+    check_every_resource(g, derived=("cbb0.spl", "cbb1.spl", "cbmbonus.2da", "cbmlance.spl"))
+
+    druid = g.file(f"override/{installed_name(Numbers(g), 'cbmlance.spl')}")
+    ability = struct.unpack_from("<I", druid, 0x64)[0]
+    check(druid[0x3A:0x42] == b"SPWI323C" and druid[ability + 4:ability + 12] == b"SPWI323B", "druid Icelance icons")
+    check(struct.unpack_from("<H", druid, ability + 0x26)[0] == 348, "druid Icelance missile")
 
     roll = next(e for e in effects_of(g, "SPPR215") if e["opcode"] == 17)
     check((roll["p1"], roll["dice"], roll["sides"]) == (4, 2, 8), f"Cure Moderate: {roll}")
