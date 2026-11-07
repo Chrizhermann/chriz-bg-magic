@@ -381,6 +381,20 @@ When this spell is cast, all allied creatures within a 15-ft. radius are infused
 
 Improved Haste dispels any Slow effects on the recipients and renders them immune to Slow for its duration. Its effects are dispellable and are not cumulative with Haste or other similar magical speed effects.~
 
+@50100 = ~Righteous Wrath of the Faithful
+(Enchantment/Charm)
+
+Level: 5
+Sphere: Combat
+Range: 0
+Duration: 1 round/level
+Casting Time: 8
+Area of Effect: 17-ft. radius
+Saving Throw: None
+
+This spell bestows a form of divine madness upon the priest's allies, improving their combat skills. All the priest's allies in the area of effect gain a +1 to attack rolls and Saving Throws, plus 8 bonus Hit Points for the duration of the spell (these Hit Points can take a target beyond <PRO_HISHER> Hit Point maximum). Allies of the same alignment, however, gain an extra attack every round, a +2 bonus to their attack rolls and Saving Throws, and immunity to charm and hold spells. Anyone affected by Righteous Wrath of the Faithful will suffer fatigue when the spell wears off.
+
+Haste, Improved Haste and this spell can all run on one creature, but only one extra attack counts.~
 @50011 = ~Haste cancelled by Slow~
 @50012 = ~Slow cancelled by Haste~
 

@@ -169,7 +169,9 @@ DEFINE_PATCH_FUNCTION cbmagic_bonus_tag
 BEGIN
   SPRINT tag ~~
   SET saves = (op >= 33 && op <= 37) || op = 325
-  PATCH_IF (~%kind%~ STRING_EQUAL ~MORALE~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+  PATCH_IF ((~%kind%~ STRING_EQUAL ~MORALE~ || ~%kind%~ STRING_EQUAL ~WRATH~) && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+  // Extra attacks are a family of their own: the runtime lets only one of them count.
+  PATCH_IF ((~%kind%~ STRING_EQUAL ~WRATH~ || ~%kind%~ STRING_EQUAL ~APR~) && op = 1) BEGIN SPRINT tag ~CBTAPR~ END
   PATCH_IF (~%kind%~ STRING_EQUAL ~FAVOR~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTFAVOR~ END
   PATCH_IF (~%kind%~ STRING_EQUAL ~CHANT~) BEGIN
     PATCH_IF saves BEGIN SPRINT tag ~CBTFAVOR~ END
@@ -239,6 +241,8 @@ BEGIN
         SPRINT result ~%original%~
       END ELSE BEGIN
         WRITE_ASCIIE 0x14 ~%tag%~ #8
+        // The runtime sets an extra attack that does not count to 0; this keeps its value.
+        PATCH_IF (op = 1) BEGIN WRITE_LONG 0x2c p1 END
         READ_ASCII 0 result (0x30)
         SET typed = 1
         // A companion marker shares every delivery condition, target and lifetime.
@@ -918,7 +922,8 @@ BEGIN
     LAF cbmagic_bonus_runtime INT_VAR CBM_BONUS_PASS_STATE CBM_BONUS_TYPED_STATE END
     ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
       WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
-      CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => MORALE CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
+      CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => WRATH CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
+      WIZARD_IMPROVED_HASTE => APR
       CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
       WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
       CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION

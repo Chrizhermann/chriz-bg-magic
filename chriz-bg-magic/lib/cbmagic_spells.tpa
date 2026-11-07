@@ -512,6 +512,29 @@ BEGIN
   END
 END
 
+// The whole description of a spell and its scrolls: we write the text, whatever stood there.
+// Until translations exist this is for English games; other languages keep theirs.
+DEFINE_ACTION_FUNCTION cbmagic_write_text
+  INT_VAR text = 0
+  STR_VAR spell = ~~
+BEGIN
+  LAF cbmagic_game_language RET lang END
+  ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x54) BEGIN WRITE_LONG 0x50 text END
+    BUT_ONLY
+    LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+    OUTER_PATCH_SAVE remaining ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE scroll ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      COPY_EXISTING ~%scroll%.itm~ ~override~
+        PATCH_IF (BUFFER_LENGTH >= 0x58) BEGIN WRITE_LONG 0x54 text END
+      BUT_ONLY
+    END
+  END
+END
+
 // Scrolls of every spell: for each ITM of type 11 (scroll) whose abilities cast or teach a
 // spell (opcode 146, 147 or 148 naming it), $cbmagic_scrolls(~<SPELL>~) lists the scroll
 // (space-separated, upper case). A macro, so the index stays in the caller's scope: the

@@ -20,6 +20,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_bonus.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_more.tpa~
 END
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
 BEGIN ~bonus probe~ DESIGNATED 0
@@ -161,6 +162,11 @@ def bonus_types_symbols_and_preservation(work, weidu):
                 selected = selected and before["p2"] == 0 and before["p1"] > 0
             selected = selected and (tag != "CBTCURSE" or before["p1"] < 0)
             expected_tag = ("CBTLUCK" if before["opcode"] == 22 else "CBTFAVOR") if tag == "CHANT" else tag
+            if symbol == "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL" and before["opcode"] == 1:
+                # An extra attack: a tag of its own, and its value kept for the runtime.
+                selected, expected_tag = True, "CBTAPR"
+                check(after["special"] == before["p1"], f"{symbol}: extra attack value not kept: {after}")
+                after = {**after, "special": before["special"]}
             check(after["resource"] == (expected_tag if selected else before["resource"]), f"{symbol}: {after}")
             assert_preserved(before, after)
             if selected:
@@ -240,6 +246,36 @@ def bonus_effects_that_cannot_be_counted_stay_untyped(work, weidu):
         check(any(r["opcode"] == op and r["p2"] == mode and r["timing"] == timing and r["resource"] == ""
                   for r in found), f"effect {op}/{mode}/{timing} changed")
         check(any(r["opcode"] == 37 and r["resource"] == "CBTMORAL" for r in found), "its neighbour got no type")
+
+
+@test
+def righteous_wrath_and_haste_leave_each_other_alone(work, weidu):
+    payload = spell([effect(321, resource="SPWI305", p2=16, timing=1), effect(321, resource="OTHERSPL", timing=1),
+                     effect(206, -1, resource="SPRA301", p2=16), effect(206, -1, resource="SPWI613"),
+                     effect(101, p2=16), effect(101, p2=5), effect(169, p2=38), effect(169, p2=13),
+                     effect(267, 14667, p2=16), effect(54, 2), effect(1, 1)], level=5)
+    root = spell([effect(146, resource="WRATHA", p2=1, timing=1)], level=5)
+    improved = spell([effect(1, 1), effect(54, 2)], level=6)
+    g = make_game(work, weidu,
+                  {"SPPR518.SPL": root, "WRATHA.SPL": payload, "SPWI613.SPL": improved, "SPWI305.SPL": spell([effect(16)])},
+                  [(1518, "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL"), (2613, "WIZARD_IMPROVED_HASTE"), (2305, "WIZARD_HASTE")],
+                  body="LAF cbmagic_more_righteous_wrath END\nLAF cbmagic_bonus END")
+    install(g)
+    child = next(r for r in rows(g, "SPPR518") if r["opcode"] == 146)["resource"]
+    found = rows(g, child)
+    kept = {(r["opcode"], r["p2"], r["resource"]) for r in found}
+    for gone in ((321, 16, "SPWI305"), (206, 16, "SPRA301"), (206, 0, "SPWI613"), (101, 16, ""), (169, 38, ""), (267, 16, "")):
+        check(gone not in kept, f"still blocks Haste: {gone}")
+    for stays in ((321, 0, "OTHERSPL"), (101, 5, ""), (169, 13, "")):
+        check(stays in kept, f"unrelated row lost: {stays}")
+    attack = next(r for r in found if r["opcode"] == 1)
+    check((attack["resource"], attack["special"], attack["p1"]) == ("CBTAPR", 1, 1), "extra attack not tagged")
+    check(any(r["opcode"] == 54 and r["resource"] == "CBTMORAL" for r in found), "THAC0 lost its type")
+    haste = rows(g, "SPWI613")
+    check(any(r["opcode"] == 1 and r["resource"] == "CBTAPR" for r in haste), "Improved Haste's attack not tagged")
+    check(any(r["opcode"] == 54 and r["resource"] == "" for r in haste), "Improved Haste's THAC0 got a type")
+    text = g.tlk(g.spl("SPPR518")["desc"])
+    check("only one extra attack counts" in text and "canceling" not in text, "description not written")
 
 
 @test

@@ -19,15 +19,17 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
 ## Engineering rules
 
 - Target BG2:EE and EET 2.7.3.0. EEex (v1.3.1) is a requirement only for changes that need
-  it. Follow the `bg-modding` skill and its compatibility policy: patch the intended
-  behaviour by meaning, preserve unrelated data and other mods' changes, keep only checks
-  with a concrete reason, and say plainly when something is skipped or unclear.
+  it. Follow the `bg-modding` skill and its modding policy.
+- We overwrite. A spell we change becomes what was decided; what stood there before does not
+  matter. No checks of old content: not of descriptions, wording, old values, effect counts or
+  order. Game data never stops an install, and a decided change is never skipped because the
+  old data looks different.
 - Code layout: `chriz-bg-magic/lib/cbmagic_shared.tpa` holds the shared helpers, and every
   decided change is one action function, so the component layout can change without
   touching the fixes. Resolve spells through `SPELL.IDS` symbols, not hard-coded resrefs.
 - Describe every change in `docs/components.md`, in engine-neutral terms.
-- When a change makes a description false, fix the owned sentence (append a new string and
-  repoint the resource; never overwrite a shared strref) and log where it could not.
+- We write the complete description of every spell we change (append a new string and repoint
+  the resource; never overwrite a shared strref). No search and replace in old sentences.
 - Test in made-up game folders (`tests/run_tests.py`) and in disposable labs only, never in
   Christopher's game or a reference install. Game launches go through the quiet lab runner
   and need his OK. No Docker.

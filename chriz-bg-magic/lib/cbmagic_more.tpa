@@ -1857,3 +1857,49 @@ BEGIN
   END
 END
 
+// --- Righteous Wrath of the Faithful ------------------------------------------------------
+// Neither it nor Haste or Improved Haste ends or keeps out the other. While both run, only one
+// extra attack counts: lua/M_CBMBON.lua sees to that, through the tags in lib/cbmagic_bonus.tpa.
+DEFINE_PATCH_FUNCTION cbmagic_more_wrath_rows
+  STR_VAR haste = ~~ improved = ~~
+BEGIN
+  READ_SHORT 0x68 groups
+  FOR (g = (0 - 1); g < groups; ++g) BEGIN
+    READ_LONG 0x64 ao
+    PATCH_IF (g < 0) BEGIN READ_SHORT 0x70 n END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x1e) n END
+    FOR (i = n - 1; i >= 0; --i) BEGIN
+      READ_LONG 0x64 ao READ_LONG 0x6a fo
+      PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x20) f END
+      SET at = fo + (f + i) * 0x30
+      READ_SHORT at op READ_LONG (at + 8) p2 READ_ASCII (at + 0x14) res (8) NULL
+      SET blocks = (op = 101 && p2 = 16) || (op = 169 && p2 = 38)
+      PATCH_IF (op = 206 || op = 267 || op = 321) && p2 = 16 BEGIN SET blocks = 1 END
+      PATCH_IF (op = 206 || op = 321) && (~%res%~ STRING_EQUAL_CASE ~%haste%~ || ~%res%~ STRING_EQUAL_CASE ~%improved%~) BEGIN
+        SET blocks = 1
+      END
+      PATCH_IF blocks BEGIN LPF cbmagic_delete_effect INT_VAR index = f + i END END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_more_righteous_wrath
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL~ RET spell = resref found END
+  ACTION_IF !found BEGIN
+    PRINT ~chriz-bg-magic: Righteous Wrath of the Faithful (IWDification) is not in this game; left out.~
+  END ELSE BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_HASTE~ RET haste = resref END
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_IMPROVED_HASTE~ RET improved = resref END
+    LAF cbmagic_bonus_nodes STR_VAR source = EVAL ~%spell%~ RET nodes END
+    OUTER_WHILE !(~%nodes%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE node ~%nodes%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE nodes ~%nodes%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      COPY_EXISTING ~%node%.spl~ ~override~
+        LPF cbmagic_more_wrath_rows STR_VAR haste improved END
+      BUT_ONLY
+    END
+    OUTER_SET text = RESOLVE_STR_REF (@50100)
+    LAF cbmagic_write_text INT_VAR text STR_VAR spell END
+    PRINT ~chriz-bg-magic: Righteous Wrath of the Faithful (%spell%): no longer ends or blocks Haste; only one extra attack counts.~
+  END
+END

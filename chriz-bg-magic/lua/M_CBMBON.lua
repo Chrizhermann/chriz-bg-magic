@@ -59,6 +59,53 @@ local function collect(group, field, amount)
     if amount < entry.worst then entry.worst = amount end
 end
 
+-- Extra attacks. Righteous Wrath and Improved Haste give theirs through a tagged opcode 1, native
+-- Haste through its state. While more than one runs, only one counts: Haste leaves the tagged
+-- ones out, and of those the strongest stays. Such an effect is set to 0 instead of being taken
+-- back from the stat, because the engine derives hasted attacks from that stat. Its value stays
+-- in the effect's special field, so a save made in between keeps it.
+local function noteAttack(attacks, effect)
+    local opcode = effect.m_effectId
+    if opcode == 16 then
+        -- Mode 2 only speeds movement.
+        if effect.m_dWFlags == 2 then attacks.movementOnly = true else attacks.hasted = true end
+    elseif opcode == 1 and resref(effect.m_res) == "CBTAPR" then
+        attacks.tagged = true
+        if effect.m_special > attacks.best then attacks.best = effect.m_special end
+    end
+end
+
+local function pending(effect)
+    -- Active timed effects use 4096 (low byte zero). Encoded delays 3..5
+    -- and live pending delays 6..8 have not contributed their stat yet.
+    local timing = EEex_BAnd(effect.m_durationType, 0xFF)
+    return timing >= 3 and timing <= 8
+end
+
+local function settleAttacks(sprite, stats, attacks)
+    EEex_Utility_IterateCPtrList(sprite.m_equipedEffectList, function(effect)
+        noteAttack(attacks, effect)
+    end)
+    -- Haste delivered through opcode 177 shows only in the state.
+    local state = EEex_BAnd(stats.m_generalState or 0, 0x8000) ~= 0
+    local counted = attacks.hasted or (state and not attacks.movementOnly)
+    local changed = false
+    EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
+        if effect.m_effectId == 1 and not pending(effect) and resref(effect.m_res) == "CBTAPR" then
+            local amount = 0
+            if not counted and effect.m_special == attacks.best then
+                amount, counted = effect.m_special, true
+            end
+            if effect.m_effectAmount ~= amount then
+                effect.m_effectAmount = amount
+                changed = true
+            end
+        end
+    end)
+    -- The engine applies the new amounts at its next rebuild; ask for it now.
+    if changed then sprite.m_newEffect = 1 end
+end
+
 local function correct(sprite)
     local stats = sprite.m_derivedStats
     if not stats then return end
@@ -109,11 +156,11 @@ local function correct(sprite)
             collect(group, fields[opcode], amount)
         end
     end
+    local attacks = { best = 0 }
     EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
-        -- Active timed effects use 4096 (low byte zero). Encoded delays 3..5
-        -- and live pending delays 6..8 have not contributed their stat yet.
+        if pending(effect) then return end
+        noteAttack(attacks, effect)
         local timing = EEex_BAnd(effect.m_durationType, 0xFF)
-        if timing >= 3 and timing <= 8 then return end
         if effect.m_effectId == 177 then
             -- BG2:EE 2.7.3.0 sets parameter 5 before applying a decoded child;
             -- an IDS or CheckAdd rejection marks the wrapper done, as does a
@@ -123,6 +170,7 @@ local function correct(sprite)
         end
         visit(effect, timing, {}, 0)
     end)
+    if attacks.tagged then settleAttacks(sprite, stats, attacks) end
 
     local corrections = {}
     for _, group in pairs(groups) do

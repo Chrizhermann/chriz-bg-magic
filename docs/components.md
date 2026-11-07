@@ -36,8 +36,12 @@ their existing stacking behavior.
 
 Base AC still uses the game's existing best-value rule. AC penalties, attributes,
 resistances, spell failure, Greater Malison and Slow are outside this system. Temporary
-HP still accumulates between Courage and Righteous Wrath. Extra attacks, including
-Righteous Wrath's interaction with Haste, are deferred.
+HP still accumulates between Courage and Righteous Wrath.
+
+Righteous Wrath of the Faithful, Haste and Improved Haste no longer end or block one another.
+While more than one runs, only one extra attack counts: Haste before the others, otherwise the
+strongest. When the counted one ends, the other works again. This needs EEex; without it the
+extra attacks add up.
 
 Every typed spell refreshes its own effects on recast. Bless, Chant and Luck retain their
 existing amounts and durations when their built-in nonstacking effects are decomposed;

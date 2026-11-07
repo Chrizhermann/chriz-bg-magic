@@ -509,7 +509,7 @@ def more_batch_on_vanilla_shaped_inputs(work, weidu):
         check(all(e["opcode"] != 16 for e in ab["effects"]), ih_ops)
         # Core party buff bonuses for 60s
         check((176, 6, 0, 60, 3, "") in ih_ops, ih_ops)
-        check((1, 1, 0, 60, 3, "") in ih_ops, ih_ops)
+        check((1, 1, 0, 60, 3, "CBTAPR") in ih_ops, ih_ops)
         check((54, 2, 0, 60, 3, "") in ih_ops, ih_ops)
         check((0, 2, 0, 60, 3, "") in ih_ops, ih_ops)
         check((36, 2, 0, 60, 3, "") in ih_ops, ih_ops)
