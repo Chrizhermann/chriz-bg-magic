@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 13068,
+  "raw_10": "00000000301540006c0000000b00805e7260202000000000004009000008000000000000f40100003200495343524c3155000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Confusion\n(Enchantment/Charm)\n\nLevel: 4\nRange: 35 ft.\nDuration: 4 rounds (5 at 15th level, 6 at 20th level)\nCasting Time: 4\nArea of Effect: 15-ft. radius\nSaving Throw: Neg.\n\nThis spell causes confusion in one or more enemy creatures within the area, creating indecision and the inability to take effective action. All enemy creatures within the area of effect are allowed Saving Throw vs. Spell with a -2 penalty. Those successfully saving are unaffected by the spell, whereas those who fail their Saving Throws will either go berserk, stand confused, or wander about for the duration of the spell. Wandering creatures move as far from the caster as possible, according to their most typical mode of movement (characters walk, fish swim, bats fly, etc.). Any confused creature that is attacked perceives the attacker as an enemy and acts according to its basic nature. The spell lasts for 4 rounds (5 rounds at 15th level and 6 rounds at 20th level).",
+   "old": 12166
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c315500040023000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 148,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi401",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c315500050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi401",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

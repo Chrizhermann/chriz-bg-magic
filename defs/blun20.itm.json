@@ -1,0 +1,116 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 6337,
+  "name_identified": 7409,
+  "raw_10": "000000a08c4000056c000000110000104c604d3200000a00000000020000000000650000b80b0000010049424c554e3230002d0047424c554e30360008000000",
+  "description": 6709,
+  "description_identified": 39486,
+  "raw_58": "43424c554e32300001000000"
+ },
+ "casting": [
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 211,
+   "p2": 21,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 253,
+   "p2": 20,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 238,
+   "p2": 16,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  }
+ ],
+ "abilities": [
+  {
+   "raw_00": "0100010049424c554e323000010001000000060001000600010002000200",
+   "raw_22": "0000010001000000",
+   "projectile": 1,
+   "raw_2c": "320032000000000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 3,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "BLUN20",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 221,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": {
+      "sectype": "cbm_Haste"
+     },
+     "timing": 1,
+     "dispel": 1,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

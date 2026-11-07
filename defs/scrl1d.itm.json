@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 13050,
+  "raw_10": "000000002c1540006c0000000b00805e72602020000000000040090000000080000000002c0100003200495343524c3144000000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Clairvoyance\n(Divination)\n\nLevel: 3\nRange: Caster\nDuration: 3 rounds + 1 round/2 levels (maximum 10 rounds)\nCasting Time: 3\nArea of Effect: The caster\nSaving Throw: None\n\nClairvoyance grants the caster foresight of incoming danger, making the caster immune to backstab attacks for the duration of the spell. The spell lasts for 3 rounds at 5th level, plus 1 additional round every 2 levels thereafter, to a maximum of 10 rounds at 19th level.",
+   "old": 12159
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300495343524c314400050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi301",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "03000300495343524c314400050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi301",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

@@ -143,60 +143,6 @@ BEGIN
   END
 END
 
-// The spell's save against its main effect becomes a save vs. breath instead of vs. spell.
-// The anchors are the ability effects with anchor_opcode (12 for damage, 157 for Web)
-// that roll a save vs. spell. Every effect of the same ability that rolls vs. spell with
-// the same save bonus belongs to the same roll (visuals, icons, the damage itself) and
-// switches with it; effects with their own save stay. Only the save type bit changes:
-// bonus, save-for-half and the other flags (bypass Mirror Image, ...) stay.
-// anchors: anchor effects switched; already: anchor effects that roll vs. breath and not
-// vs. spell already; others: effects switched along with the anchors.
-DEFINE_PATCH_FUNCTION cbmagic_save_spell_to_breath
-  INT_VAR anchor_opcode = 12
-  RET anchors already others
-BEGIN
-  SET anchors = 0
-  SET already = 0
-  SET others = 0
-  READ_LONG 0x64 ab_off
-  READ_SHORT 0x68 ab_cnt
-  READ_LONG 0x6a fx_off
-  FOR (a = 0; a < ab_cnt; ++a) BEGIN
-    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-    READ_SHORT (ab_off + a * 0x28 + 0x20) first
-    SPRINT groups ~ ~
-    FOR (i = 0; i < n; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_LONG (fx + 0x24) save
-      READ_SLONG (fx + 0x28) bonus
-      PATCH_IF (op = anchor_opcode) BEGIN
-        PATCH_IF ((save BAND 1) != 0) BEGIN
-          PATCH_IF (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %bonus% ~ ~%groups%~) < 0) BEGIN
-            SPRINT groups ~%groups%%bonus% ~
-          END
-        END ELSE PATCH_IF ((save BAND 2) != 0) BEGIN
-          SET already += 1
-        END
-      END
-    END
-    FOR (i = 0; i < n; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_LONG (fx + 0x24) save
-      READ_SLONG (fx + 0x28) bonus
-      PATCH_IF ((save BAND 1) != 0) AND (INDEX (CASE_SENSITIVE EXACT_MATCH ~ %bonus% ~ ~%groups%~) >= 0) BEGIN
-        WRITE_LONG (fx + 0x24) ((save BAND (BNOT 1)) BOR 2)
-        PATCH_IF (op = anchor_opcode) BEGIN
-          SET anchors += 1
-        END ELSE BEGIN
-          SET others += 1
-        END
-      END
-    END
-  END
-END
-
 // Sleep that ends when the sleeper takes damage. Opcode 39 (unconsciousness) has
 // parameter 2 "wake on damage": 0 wakes, 1 does not (IESDP, EE). Opcode 217 (sleep below
 // 20 HP) hands its parameter 2 to the opcode 39 it applies. Every ability effect with one
@@ -282,181 +228,6 @@ BEGIN
   END
 END
 
-// A new casting replaces the old one: every ability gets, as its first effect, opcode 321
-// (remove the effects of this resource) naming the spell itself, in the form the base
-// game's own refreshing spells use: target 2 on spells cast at a creature, 1 on spells
-// cast on oneself (ability target 5 or 7), power = spell level, timing 1 (instant),
-// dispel/resistance 3 (bypasses magic resistance). Abilities whose first effect already
-// removes the spell itself are left as they are. One that does so further down cancels
-// its own new effects already (IESDP: the removal must come first); it is left as it is
-// and counted in `misplaced`, since a second removal in front would not change that.
-// added: abilities that got the effect; present: abilities that had one.
-DEFINE_PATCH_FUNCTION cbmagic_add_self_refresh
-  RET added present misplaced
-BEGIN
-  SET added = 0
-  SET present = 0
-  SET misplaced = 0
-  SPRINT self ~%SOURCE_RES%~
-  READ_LONG 0x34 level
-  READ_SHORT 0x68 ab_cnt
-  FOR (a = 0; a < ab_cnt; ++a) BEGIN
-    READ_LONG 0x64 ab_off
-    READ_LONG 0x6a fx_off
-    READ_BYTE (ab_off + a * 0x28 + 0x0c) ab_target
-    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-    READ_SHORT (ab_off + a * 0x28 + 0x20) first
-    SET has = 0
-    FOR (i = 0; i < n; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_ASCII (fx + 0x14) res (8) NULL
-      PATCH_IF (op = 321) AND (~%res%~ STRING_EQUAL_CASE ~%self%~) AND (has = 0) BEGIN
-        SET has = (i = 0) ? 1 : 2
-      END
-    END
-    PATCH_IF (has = 1) BEGIN
-      SET present += 1
-    END ELSE PATCH_IF (has = 2) BEGIN
-      SET misplaced += 1
-    END ELSE BEGIN
-      SET fx_target = ((ab_target = 5) OR (ab_target = 7)) ? 1 : 2
-      LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 321 target = fx_target power = level
-        timing = 1 resist_dispel = 3 STR_VAR resource = EVAL ~%self%~ END
-      SET added += 1
-    END
-  END
-END
-
-// Level-based spell deflection (opcode 201 absorbs effects whose power equals its
-// parameter 2) stops only spell levels up to max_level: the opcode 201 effects for higher
-// levels go. The effect that names the spell cast when the deflection runs out keeps its
-// resource on one of the remaining effects. problem says why nothing was changed.
-DEFINE_PATCH_FUNCTION cbmagic_cap_level_deflection
-  INT_VAR max_level = 4
-  RET removed kept problem
-BEGIN
-  SET removed = 0
-  SET kept = 0
-  SPRINT problem ~~
-  READ_LONG 0x64 ab_off
-  READ_SHORT 0x68 ab_cnt
-  READ_LONG 0x6a fx_off
-  // First check every ability, then change: an ability that would keep no deflection at
-  // all is ambiguous, and nothing is changed then.
-  FOR (a = 0; a < ab_cnt; ++a) BEGIN
-    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-    READ_SHORT (ab_off + a * 0x28 + 0x20) first
-    SET low = 0
-    SET high = 0
-    FOR (i = 0; i < n; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_LONG (fx + 0x08) p2
-      PATCH_IF (op = 201) BEGIN
-        PATCH_IF (p2 <= max_level) BEGIN SET low += 1 END ELSE BEGIN SET high += 1 END
-      END
-    END
-    PATCH_IF (high > 0) AND (low = 0) BEGIN
-      SPRINT problem ~ability %a% deflects only spell levels above %max_level%~
-    END
-  END
-  PATCH_IF (~%problem%~ STRING_EQUAL ~~) BEGIN
-    FOR (a = 0; a < ab_cnt; ++a) BEGIN
-      READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-      READ_SHORT (ab_off + a * 0x28 + 0x20) first
-      SPRINT moved ~~
-      SET target_fx = 0 - 1
-      FOR (i = 0; i < n; ++i) BEGIN
-        SET fx = fx_off + (first + i) * 0x30
-        READ_SHORT fx op
-        READ_LONG (fx + 0x08) p2
-        READ_ASCII (fx + 0x14) res (8) NULL
-        PATCH_IF (op = 201) BEGIN
-          PATCH_IF (p2 <= max_level) BEGIN
-            SET kept += 1
-            PATCH_IF (target_fx < 0) BEGIN SET target_fx = fx END
-            PATCH_IF !(~%res%~ STRING_EQUAL ~~) BEGIN SET target_fx = fx  SPRINT moved ~-~ END
-          END ELSE PATCH_IF !(~%res%~ STRING_EQUAL ~~) AND (~%moved%~ STRING_EQUAL ~~) BEGIN
-            SPRINT moved ~%res%~
-          END
-        END
-      END
-      // A kept effect without the resource takes it over from a removed one.
-      PATCH_IF !(~%moved%~ STRING_EQUAL ~~) AND !(~%moved%~ STRING_EQUAL ~-~) BEGIN
-        WRITE_ASCIIE (target_fx + 0x14) ~%moved%~ #8
-      END
-    END
-    // Remove the higher-level effects one at a time; every removal moves the indices.
-    SET found = 1
-    WHILE found BEGIN
-      SET found = 0
-      READ_LONG 0x64 ab_off
-      READ_LONG 0x6a fx_off
-      FOR (a = 0; (a < ab_cnt) AND !found; ++a) BEGIN
-        READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-        READ_SHORT (ab_off + a * 0x28 + 0x20) first
-        FOR (i = 0; (i < n) AND !found; ++i) BEGIN
-          SET fx = fx_off + (first + i) * 0x30
-          READ_SHORT fx op
-          READ_LONG (fx + 0x08) p2
-          PATCH_IF (op = 201) AND (p2 > max_level) BEGIN
-            LPF cbmagic_delete_effect INT_VAR index = (first + i) END
-            SET removed += 1
-            SET found = 1
-          END
-        END
-      END
-    END
-  END
-END
-
-// Immunity for one kind of creature: every ability gets, as its first effect, opcode 324
-// (immunity to this resource, with the game's "unaffected" message) for the creatures
-// matching SPLPROT.2DA row `row` with value `value` (for a row whose VALUE is -1), the
-// way the base game's Sleep keeps elves out. Abilities that already carry this exact
-// immunity among their leading protections (opcodes 206, 318, 321, 324 before any other
-// effect) are left as they are; further down it would let the first application through.
-// target 2, power = spell level, dispel/resistance 2.
-DEFINE_PATCH_FUNCTION cbmagic_add_immunity
-  INT_VAR row = 0 value = 0
-  RET added present
-BEGIN
-  SET added = 0
-  SET present = 0
-  SPRINT self ~%SOURCE_RES%~
-  READ_LONG 0x34 level
-  READ_SHORT 0x68 ab_cnt
-  FOR (a = 0; a < ab_cnt; ++a) BEGIN
-    READ_LONG 0x64 ab_off
-    READ_LONG 0x6a fx_off
-    READ_SHORT (ab_off + a * 0x28 + 0x1e) n
-    READ_SHORT (ab_off + a * 0x28 + 0x20) first
-    SET has = 0
-    SET leading = 1
-    FOR (i = 0; (i < n) AND leading; ++i) BEGIN
-      SET fx = fx_off + (first + i) * 0x30
-      READ_SHORT fx op
-      READ_LONG (fx + 0x04) p1
-      READ_LONG (fx + 0x08) p2
-      READ_ASCII (fx + 0x14) res (8) NULL
-      PATCH_IF (op = 324) AND (p1 = value) AND (p2 = row) AND (~%res%~ STRING_EQUAL_CASE ~%self%~) BEGIN
-        SET has = 1
-      END
-      PATCH_IF (op != 206) AND (op != 318) AND (op != 321) AND (op != 324) BEGIN
-        SET leading = 0
-      END
-    END
-    PATCH_IF has BEGIN
-      SET present += 1
-    END ELSE BEGIN
-      LPF cbmagic_insert_effect INT_VAR ability = a position = 0 opcode = 324 target = 2 power = level
-        parameter1 = value parameter2 = row timing = 0 resist_dispel = 2 STR_VAR resource = EVAL ~%self%~ END
-      SET added += 1
-    END
-  END
-END
-
 // The SPLPROT.2DA row with this STAT, VALUE and RELATION (numbers; hex cells such as 0x10c
 // compare as numbers), the first one when the table has several. Rows with "*" cells
 // count but never match. A missing row is appended. Rows are never changed or renumbered:
@@ -484,31 +255,6 @@ BEGIN
   ACTION_IF (row < 0) BEGIN
     OUTER_SET row = rows
     APPEND ~splprot.2da~ ~%row%_CBMAGIC %stat% %value% %relation%~
-  END
-END
-
-// The description at `offset` (SPL 0x50; ITM 0x50 and 0x54) after REPLACE_TEXTUALLY of
-// `find` with `replace` (regular expressions from the language's setup.tra). A changed
-// text is added as a new string and the resource points to it; the old string, which
-// other resources may share, stays untouched. matched = 0 when the text does not contain
-// `find`: it is left as it is.
-DEFINE_PATCH_FUNCTION cbmagic_update_description
-  INT_VAR offset = 0x50
-  STR_VAR find = ~~ replace = ~~
-  RET matched
-BEGIN
-  SET matched = 0
-  READ_SLONG offset strref
-  PATCH_IF (strref > 0) BEGIN
-    GET_STRREF strref text
-    INNER_PATCH_SAVE changed ~%text%~ BEGIN
-      REPLACE_TEXTUALLY CASE_SENSITIVE ~%find%~ ~%replace%~
-    END
-    PATCH_IF !(~%changed%~ STRING_EQUAL ~%text%~) BEGIN
-      SET matched = 1
-      SET new_ref = RESOLVE_STR_REF (~%changed%~)
-      WRITE_LONG offset new_ref
-    END
   END
 END
 
@@ -595,34 +341,66 @@ BEGIN
   END
 END
 
-// Updates the description of `spell` and of its scrolls (both their descriptions) with
-// find/replace. Warns for every text that should name the change and does not, unless
-// `quiet` (for texts that never name what changed, e.g. a Fireball text that does not
-// say which save it uses).
-DEFINE_ACTION_FUNCTION cbmagic_update_texts
-  INT_VAR quiet = 0
-  STR_VAR spell = ~~ find = ~~ replace = ~~ label = ~~
+// A record row of its own: the row with this text and icon, or a new one.
+DEFINE_ACTION_FUNCTION cbmagic_statdesc_row
+  INT_VAR desc_ref = 0
+  STR_VAR bam = ~SPPR150D~
+  RET icon_row
 BEGIN
-  OUTER_SET done = 0
-  COPY_EXISTING ~%spell%.spl~ ~override~
-    LPF cbmagic_update_description INT_VAR offset = 0x50 STR_VAR find replace RET matched END
-    SET done = matched
-  BUT_ONLY
-  LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
-  OUTER_PATCH_SAVE scrolls ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
-  OUTER_SET scroll_done = 0
-  OUTER_SPRINT list ~%scrolls%~
-  OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
-    OUTER_PATCH_SAVE scroll ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
-    OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
-    COPY_EXISTING ~%scroll%.itm~ ~override~
-      LPF cbmagic_update_description INT_VAR offset = 0x50 STR_VAR find replace RET m1 = matched END
-      LPF cbmagic_update_description INT_VAR offset = 0x54 STR_VAR find replace RET m2 = matched END
-      PATCH_IF m1 OR m2 BEGIN SET scroll_done += 1 END
+  OUTER_SET icon_row = 207
+  ACTION_IF (FILE_EXISTS_IN_GAME ~statdesc.2da~) BEGIN
+    COPY_EXISTING ~statdesc.2da~ ~override~
+      COUNT_2DA_COLS cols
+      PATCH_IF (cols >= 3) BEGIN
+        COUNT_2DA_ROWS 3 rows
+        SET found_row = 0 - 1
+        SET max_id = 0
+        FOR (r = 0; r < rows; ++r) BEGIN
+          READ_2DA_ENTRY r 0 3 row_id
+          READ_2DA_ENTRY r 1 3 row_str
+          READ_2DA_ENTRY r 2 3 row_bam
+          PATCH_IF IS_AN_INT row_id BEGIN
+            PATCH_IF (row_id > max_id) BEGIN
+              SET max_id = row_id
+            END
+            PATCH_IF (~%row_bam%~ STRING_EQUAL_CASE ~%bam%~) AND (IS_AN_INT row_str) AND (row_str = desc_ref) BEGIN
+              SET found_row = row_id
+            END
+          END
+        END
+        PATCH_IF (found_row >= 0) BEGIN
+          SET icon_row = found_row
+        END ELSE BEGIN
+          SET icon_row = max_id + 1
+          INSERT_2DA_ROW rows 3 ~%icon_row% %desc_ref% %bam%~
+        END
+      END
     BUT_ONLY
   END
-  ACTION_IF !done AND !quiet BEGIN
-    WARN ~chriz-bg-magic: the description of %label% (%spell%) was not updated: its text does not contain the expected words.~
+END
+
+// The text of a row that stands in the base game, whatever it says now.
+DEFINE_ACTION_FUNCTION cbmagic_statdesc_text
+  INT_VAR row = 0 text = 0
+BEGIN
+  COPY_EXISTING ~statdesc.2da~ ~override~
+    COUNT_2DA_ROWS 3 rows
+    FOR (r = 0; r < rows; ++r) BEGIN
+      READ_2DA_ENTRY r 0 3 label
+      PATCH_IF (IS_AN_INT label) BEGIN
+        PATCH_IF (label = row) BEGIN SET_2DA_ENTRY r 1 3 ~%text%~ END
+      END
+    END
+  BUT_ONLY
+END
+
+// The value of a spell state, a free one for a state of ours that is not there yet.
+DEFINE_ACTION_FUNCTION cbmagic_state_value
+  STR_VAR symbol = ~~
+  RET state
+BEGIN
+  OUTER_SET state = IDS_OF_SYMBOL (~splstate~ ~%symbol%~)
+  ACTION_IF (state < 0) BEGIN
+    LAF cbmagic_bonus_state STR_VAR symbol RET state END
   END
-  PRINT ~chriz-bg-magic: %label% (%spell%): description %done%, scrolls updated %scroll_done% of [%scrolls%].~
 END

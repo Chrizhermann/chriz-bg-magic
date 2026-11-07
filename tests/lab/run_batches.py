@@ -9,6 +9,7 @@ reads the sprites before and after, and decides in Python. Nothing is saved.
 """
 import importlib.util
 import json
+import re
 import struct
 import sys
 import time
@@ -20,7 +21,9 @@ rp = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rp)
 
 EXTRA = HERE / "probe_batches.lua"
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "smoke")
+WRATH = ""
+GAME = Path(".")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke")
 
 
 def lua_list(values):
@@ -609,6 +612,33 @@ def live(c, check):
     check("No entry for who has no record", not rows, rows=rows)
 
 
+def attacks(c, check):
+    # Needs IWDification: Righteous Wrath of the Faithful is its spell. The same-alignment payload
+    # is what the spell delivers to a party member; its name comes from the installed spell.
+    if not WRATH:
+        check("Extra attack: Righteous Wrath is not in this game", True)
+        return
+    who = 2
+
+    def read():
+        time.sleep(1.6)
+        return c.p("at-read", f"attacks({who})")
+
+    base = read()
+    c.p("at-wrath", f'on_member({who}, "{WRATH}")')
+    wrath = read()
+    check("Extra attack: Righteous Wrath gives one", wrath["tagged"] == [1], base=base, wrath=wrath)
+    c.p("at-haste", f"fx({who}, 16, 0, 0, 6)")
+    both = read()
+    check("Extra attack: under Haste only Haste counts", both["tagged"] == [0] and both["apr"] == base["apr"], both=both)
+    time.sleep(6)
+    after = read()
+    check("Extra attack: when Haste ends, Righteous Wrath works again", after == wrath, after=after)
+    c.p("at-improved", f'on_member({who}, "SPWI613")')
+    improved = read()
+    check("Extra attack: beside Improved Haste only one counts", sorted(improved["tagged"]) == [0, 1], improved=improved)
+
+
 def smoke(c, check):
     # Every changed spell cast once at a dummy: the game must survive and keep answering.
     c.p("sm-spawn", 'spawn("TASLOI01", 160, 0)')
@@ -647,6 +677,40 @@ BONUS_PAYLOAD_OPS = {
     "regenerate": {98}, "mass": {98}, "troll": {98}, "pierce": {166, 402},
 }
 BONUS_TYPED_OPS = {0, 22, 33, 34, 35, 36, 37, 54, 73, 130, 131, 133, 137, 325}
+
+
+def prayer_penalty(root):
+    """The part of Prayer that lands on the caster's enemies: the sub-spell with a negative THAC0."""
+    data = (GAME / "override" / f"{root}.spl").read_bytes()
+    fx_off = struct.unpack_from("<I", data, 0x6A)[0]
+    for at in range(fx_off, len(data) - 0x2F, 0x30):
+        if struct.unpack_from("<H", data, at)[0] != 146:
+            continue
+        name = data[at + 0x14:at + 0x1C].split(b"\0", 1)[0].decode("latin-1")
+        child = (GAME / "override" / f"{name}.spl").read_bytes()
+        child_fx = struct.unpack_from("<I", child, 0x6A)[0]
+        for row in range(child_fx, len(child) - 0x2F, 0x30):
+            if struct.unpack_from("<H", child, row)[0] == 54 and struct.unpack_from("<i", child, row + 4)[0] < 0:
+                return name
+    raise ValueError("Prayer has no part with a THAC0 penalty")
+
+
+def wrath_payload(game):
+    """The spell Righteous Wrath delivers to allies of the caster's alignment, if the game has it."""
+    ids = (game / "override/spell.ids").read_text(encoding="latin-1")
+    found = re.search(r"(?m)^\s*(\d+)\s+CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL\b", ids)
+    if not found:
+        return ""
+    root = game / "override" / f"SPPR{int(found.group(1)) % 1000:03}.spl"
+    data = root.read_bytes()
+    fx_off = struct.unpack_from("<I", data, 0x6A)[0]
+    for at in range(fx_off, len(data) - 0x2F, 0x30):
+        if struct.unpack_from("<H", data, at)[0] == 146:
+            name = data[at + 0x14:at + 0x1C].split(b"\0", 1)[0].decode("latin-1")
+            child = (game / "override" / (name + ".spl"))
+            if child.exists() and b"CBTAPR" in child.read_bytes():
+                return name
+    return ""
 
 
 def bonus_resources(game):
@@ -825,7 +889,8 @@ def bonus(c, check, report):
         base = snap()
         apply(0, "prayer")
         friend = snap()
-        c.p("bo-prayer-enemy", f'bonus_enemy_prayer("Tasloi", 0, "{BONUS["prayer"]["res"]}")')
+        # An enemy's area spell does not reach the party in this arena, so its payload lands directly.
+        c.p("bo-prayer-enemy", f'on_member(0, "{prayer_penalty(BONUS["prayer"]["res"])}")')
         time.sleep(4)
         mixed = snap()
         signs = {1 if e["p1"] > 0 else -1 for e in mixed["effects"] if e["tag"] == "CBTFAVOR" and e["op"] == 54 and e["p1"]}
@@ -875,7 +940,9 @@ def bonus(c, check, report):
             c.p("bo-mr-clear", 'bonus_clear(0, {"CBMQLAB"})')
         clear(0, ("pierce",))
 
-    for family, keys in (("Transformation", ("tenser", "divine", "righteous", "champion", "blood", "animal")),
+    # IWDification's Blood Rage keeps itself off this lab party through its own conditions, so its
+    # place in the family is covered offline only.
+    for family, keys in (("Transformation", ("tenser", "divine", "righteous", "champion", "animal")),
                          ("Regeneration", ("regenerate", "mass", "troll"))):
         present = [k for k in keys if k in BONUS]
         need(*keys)
@@ -920,7 +987,7 @@ SMOKE = []
 
 def main():
     args = sys.argv[1:]
-    global MASS_REGENERATE, BONUS
+    global MASS_REGENERATE, BONUS, WRATH, GAME
     if "--mass-regenerate" in args:
         i = args.index("--mass-regenerate")
         MASS_REGENERATE = args[i + 1]
@@ -932,8 +999,12 @@ def main():
     if "--only" not in args:
         args += ["--only", ",".join(GROUPS)]
     selected = args[args.index("--only") + 1].split(",")
+    if "--game" in args:
+        GAME = Path(args[args.index("--game") + 1])
     if "bonus" in selected and "--game" in args:
         BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
+    if "attacks" in selected and "--game" in args:
+        WRATH = wrath_payload(Path(args[args.index("--game") + 1]))
     if {"record", "live"} & set(selected) and "--game" in args:
         record_rows(Path(args[args.index("--game") + 1]))
     sys.argv = [sys.argv[0], *args]

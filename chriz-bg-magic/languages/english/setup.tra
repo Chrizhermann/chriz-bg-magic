@@ -1,386 +1,12 @@
 @100 = ~Chriz BG Magic~
 
 @9000 = ~Chriz BG Magic is for Baldur's Gate II: Enhanced Edition and the Enhanced Edition Trilogy (EET).~
-@9001 = ~Spell Revisions is installed. Chriz BG Magic replaces it and does not install on top of it.~
 @9002 = ~Spell Revisions is installed. Do not use Chriz BG Magic together with Spell Revisions: the two are not compatible, and its changes were made for the base game's spells.~
 
-// Description updates: regular expressions over the game's English texts.
-// Save vs. Breath (and Web): "Saving Throw vs. Spell", "Save vs. Spell" -> "... vs. Breath".
-@9101 = ~\(Sav[A-Za-z ]+\) vs\. Spells?~
-@9102 = ~\1 vs. Breath~
-// Minor Spell Deflection: "This spell will only affect up to 7th-level spells".
-@9111 = ~up to 7th-level spells~
-@9112 = ~up to 4th-level spells~
+// Healing of IWDification's spells: English search expressions and their replacements. A text
+// worded differently is logged and stays as it is; the spell changes all the same.
 
-// Vanilla batch (@20000+): school, duration, save, item, elemental scaling, casting times.
-@20000 = ~(Conjuration/Summoning)~
-@20001 = ~(Universal)~
-@20002 = ~Duration: 2 hours~
-@20003 = ~Duration: 1 round/2 levels (2 to 5 rounds)~
-@20004 = ~(Evocation)~
-@20005 = ~(Conjuration/Summoning)~
-@20006 = ~Save vs\. Spell is made with a -2 penalty~
-@20007 = ~Save vs. Death is made~
-@20008 = ~saves vs\. Spell with a -2 penalty~
-@20009 = ~saves vs. Death~
-@20010 = ~save vs\. Spell~
-@20011 = ~save vs. Breath~
-@20012 = ~However, it is not a magical weapon in the normal sense of the term, so creatures struck only by magical weapons are not harmed by it\.~
-@20013 = ~However, it is treated as a magical weapon, so creatures struck only by magical weapons can be harmed by it.~
-@20014 = ~There is a 60% chance that a 12-Hit-Dice elemental appears[,;] a 35% chance that a 16-Hit-Dice elemental appears[,;] and a 5% chance that a 24-Hit-Dice elemental appears\.~
-@20015 = ~At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level).~
-@20016 = ~The chance of summoning a 12-, 16-, or 24-Hit-Dice elemental scales with caster level from 64% / 35% / 1% at 11th level (61% / 37% / 2% at 12th, 52% / 42% / 6% at 15th) up to 37% / 51% / 12% at 20th level.~
-@20020 = ~Casting Time: 9~
-@20021 = ~Casting Time: 8~
-@20022 = ~Casting Time: 6~
-@20023 = ~Casting Time: 5~
-@20024 = ~Casting Time: 3~
-@20025 = ~(Enchantment/Charm)~
-@20026 = ~This resistance is set so that if the target already has more Magic Resistance than the priest would confer, it will actually lower it to the set value\.~
-@20027 = ~This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting.~
-@20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
-@20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
-
-// Healing batch.  These are deliberately English search expressions as well as their
-// replacements: a description that no longer says what the mechanic needs to say must
-// stop the install instead of quietly advertising the wrong spell.
-@60000 = ~Casting Time: [0-9]+~
-@60001 = ~Casting Time: 4~
-@60002 = ~Casting Time: 6~
-@60003 = ~Casting Time: 7~
-@60010 = ~causes 8 points of wound or other injury damage to the creature's body to be healed\.~
-@60011 = ~causes 1d8 + 5 points of wound or other injury damage to the creature's body to be healed.~
-@60012 = ~heals 11 ~
-@60013 = ~heals 2d8 + 4 ~
-@60014 = ~heals 14 points of wound or other injury damage from the creature's body\.~
-@60015 = ~heals 2d8 + 7 points of wound or other injury damage from the creature's body.~
-@60016 = ~heals 17 points of wound or other injury damage to the creature's body\.~
-@60017 = ~heals 3d8 + 7 points of wound or other injury damage to the creature's body.~
-@60018 = ~heals 27 points of damage from wounds or other injuries\.~
-@60019 = ~heals 4d8 + 12 points of damage from wounds or other injuries.~
-@60020 = ~8 points~
-@60021 = ~1d8 + 5 points~
-@60022 = ~11 points~
-@60023 = ~2d8 + 4 points~
-@60024 = ~14 points~
-@60025 = ~2d8 + 7 points~
-@60026 = ~17 points~
-@60027 = ~3d8 + 7 points~
-@60028 = ~27 points~
-@60029 = ~4d8 + 12 points~
-@60030 = ~This spell has no effect on undead, constructs, or extraplanar creatures\.~
-@60031 = ~Undead are healed for 1d8 + 5 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60032 = ~There is no Saving Throw\.~
-@60033 = ~There is no Saving Throw. Undead are healed for 1d8 + 5 Hit Points.~
-@60034 = ~Undead are healed for 2d8 + 4 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60035 = ~There is no Saving Throw. Undead are healed for 2d8 + 4 Hit Points.~
-@60036 = ~Undead are healed for 2d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60037 = ~There is no Saving Throw. Undead are healed for 2d8 + 7 Hit Points.~
-@60038 = ~Undead are healed for 3d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60039 = ~There is no Saving Throw. Undead are healed for 3d8 + 7 Hit Points.~
-@60040 = ~Undead are healed for 4d8 + 12 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60041 = ~There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.~
-@60042 = ~Undead are healed for 1d8 + 1/level Hit Points. This spell has no effect on constructs or extraplanar creatures.~
-@60043 = ~reduces the target to 1 Hit Point\.~
-@60044 = ~reduces the target to 1 Hit Point. Undead are healed completely instead.~
-
-// --- Character Record batch strings (@60050+) ------------------------------------------
-
-@60050 = ~Wraithform~
-@60051 = ~Protection From Good~
-@60052 = ~Shadow Form~
-@60053 = ~Defensive Stance~
-@60054 = ~Blur~
-@60055 = ~Divine Favor~
-@60056 = ~Fire Resistance Lowered~
-@60057 = ~Electrical Resistance Lowered~
-@60058 = ~Enhanced Attributes~
-@60059 = ~Stunned~
-@60060 = ~Blinded~
-@60061 = ~Deafened~
-@20030 = ~(Invocation/Evocation)~
-// Kept / decided SR batch strings (@40000+).
-@40000 = ~until 24 hours have passed~
-@40001 = ~until 8 hours have passed~
-@40002 = ~3 rounds~
-@40003 = ~15 rounds~
-@40004 = ~Casting Time: 9~
-@40005 = ~Casting Time: 1~
-@40007 = ~until 1 turn has passed~
-@40008 = ~Duration: 5 rounds \+ 1 round/6 levels~
-@40009 = ~Duration: 4 rounds (5 at 15th level, 6 at 20th level)~
-@40010 = ~The spell lasts for 5 rounds plus 1 round every 6 levels of the caster\.~
-@40011 = ~The spell lasts for 4 rounds (5 rounds at 15th level and 6 rounds at 20th level).~
-@40012 = ~(Invocation/Evocation)~
-@40013 = ~(Evocation)~
-@40014 = ~(Universal)~
-@40015 = ~Saving Throw: None~
-@40016 = ~Saving Throw: Neg.~
-@40017 = ~randomly teleports all enemies in this area for the duration of the spell\.~
-@40018 = ~randomly teleports all enemies in this area for the duration of the spell unless they make a Saving Throw vs. Spell with a -4 penalty.~
-@40019 = ~120-ft\. radius~
-@40020 = ~30-ft. radius~
-@40021 = ~Illusion/Phantasm spells of 5th level and lower~
-@40022 = ~Illusion/Phantasm spells of 9th level and lower~
-@40023 = ~All enemies within the area of effect[^|]*target is hasted~
-@40024 = ~All enemies within the area of effect must save vs. Spell at -4 or suffer one of the following random effects for 1 round:
- - target is feebleminded
- - target is confused
- - target is panicked
- - target is put to sleep (wakes on damage)
- - target is held~
-@40025 = ~Casting Time: 5~
-@40026 = ~Casting Time: 6~
-@40027 = ~Casting Time: 4~
-@40028 = ~that of a Fighter of the same level,~
-@40029 = ~that of a Fighter of the same level (including base attacks per round at levels 7 and 13),~
-@40030 = ~receives a -2 penalty to all\([^|]*\)rolls, including THAC0 and Saving Throws\. There is no [Ss]aving [Tt]hrow for this spell~
-@40031 = ~receives a -2 penalty to THAC0, damage rolls, and Saving Throws unless the target makes a Saving Throw vs. Spell (with an additional -1 penalty at 3rd, 5th, 7th, and 9th level, up to -4)~
-@40032 = ~Faerie Fire~
-@40033 = ~Faerie Fire
-(Evocation)
-
-Level: 1
-Sphere: Combat, Weather
-Range: 40 ft.
-Duration: 4 rounds
-Casting Time: 1
-Area of Effect: 5-ft. radius
-Saving Throw: Neg.
-
-This spell outlines enemies in the area of effect with a pale violet glow. Outlined creatures suffer a -2 penalty to Armor Class and cannot become invisible for 4 rounds unless they make a Saving Throw vs. Spell.~
-@40034 = ~Duration: 1 turn \+ 1 round/level~
-@40035 = ~Duration: 1 turn/level~
-@40036 = ~Web, Hold Person, Grease, and Entangle\.~
-@40037 = ~Web, Hold Person, Grease, Entangle, Slow, and Stun.~
-@40038 = ~Mass Regenerate~
-@40039 = ~Mass Regenerate
-(Alteration)
-
-Level: 5
-Sphere: Healing
-Range: 0
-Duration: 1 turn + 2 rounds/level
-Casting Time: 5
-Area of Effect: Sight
-Saving Throw: None
-
-When cast, this spell grants the druid and all party members within sight steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
-@40040 = ~Duration: Instant~
-@40041 = ~When this spell is cast upon a poisoned individual,[^|]*as well as blindness and deafness\.~
-@40042 = ~When this spell is cast upon an individual, it immediately neutralizes any poison and renders the target immune to poison for 1 turn per level of the caster.~
-@40043 = ~Range: Special~
-@40044 = ~Range: Caster~
-@40045 = ~Duration: 3 rounds + 1 round/2 levels (maximum 10 rounds)~
-@40046 = ~Area of Effect: Special~
-@40047 = ~Area of Effect: The caster~
-@40048 = ~The Clairvoyance spell empowers the wizard[^|]*cannot reveal creatures or their movements\.~
-@40049 = ~Clairvoyance grants the caster foresight of incoming danger, making the caster immune to backstab attacks for the duration of the spell. The spell lasts for 3 rounds at 5th level, plus 1 additional round every 2 levels thereafter, to a maximum of 10 rounds at 19th level.~
-@40050 = ~Each creature in the area~
-@40051 = ~Each enemy creature in the area~
-@40052 = ~Stoneskin~
-@40053 = ~Iron Skins~
-@40054 = ~an outer skin of iron~
-@40055 = ~an outer skin of stone~
-@40056 = ~Duration: 1 round/2 levels~
-@40057 = ~Duration: 1 round/level~
-@40058 = ~3 Hit Points per second\.~
-@40059 = ~2 Hit Points per second, and multiple castings do not stack.~
-@40060 = ~1 round per 2 levels~
-@40061 = ~1 round per level~
-@40062 = ~18 Hit Points per round for 7 rounds~
-@40063 = ~12 Hit Points per round for 14 rounds~
-@40064 = ~Aid~
-@40065 = ~Duration: 6 rounds~
-@40066 = ~Duration: 5 rounds + 1 round/level (maximum 25 rounds)~
-@40067 = ~Duration: 1 round \+ 1 round/level~
-@40068 = ~gains the benefits of a Bless spell ([^)]*) and a special bonus of 1d8 additional Hit Points~
-@40069 = ~gains a special bonus of 1d8 additional Hit Points +1 per level of the caster (up to a maximum of 1d8+10)~
-@40070 = ~Divine Power~
-@40071 = ~Holy Power~
-@40072 = ~It fully heals the target and cures any diseases or poisons\.~
-@40073 = ~It fully heals the target and cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep.~
-@40074 = ~Duration: 5 rounds~
-@40075 = ~Invisibility Sphere~
-@40076 = ~Invisibility,? 10' Radius~
-@40077 = ~Range: 40 ft\.~
-@40078 = ~Range: 30 ft.~
-@40079 = ~Improved Invisibility, and Shadow Door\.~
-@40080 = ~Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility.~
-@40081 = ~Divine Power~
-@40082 = ~Faerie Fire~
-// SCS batch description updates (@30000+).
-@30001 = ~Each orb will do damage to the target against which there is no save\(.*\n?\)*~
-@30002 = ~Each orb will do damage to the target against which there is no save and an effect against which the target must save vs. Spell:
- 1st Level: 1d4 magic damage and blinds the target for 1 round.
- 2nd Level: 1d6 fire damage and inflicts pain (-1 penalty to AC and THAC0) for 1 round.
- 3rd Level: 1d8 magic damage and burns the target for an additional 1d3 fire damage.
- 4th Level: 1d10 magic damage and blinds the target for 4 rounds.
- 5th Level: 1d12 magic damage and stuns the target for 3 rounds.
- 7th Level: 2d8 magic damage and paralyzes the target for 13 rounds.~
-
-@30003 = ~1d6 per level of the caster~
-@30004 = ~1d6 per level of the caster (to a maximum of 12d6)~
-
-@30005 = ~10% \+ 1% per level~
-@30006 = ~30% + 1% per level~
-@30007 = ~25%~
-@30008 = ~45%~
-@30009 = ~leave the creature with 10%~
-@30010 = ~leave the creature with 0%~
-
-@30011 = ~(Conjuration/Summoning)~
-@30012 = ~(Enchantment/Charm)~
-
-@30013 = ~current number of Hit Points is used to determine this spell's effects\.~
-@30014 = ~current number of Hit Points is used to determine this spell's effects. Free Action protects against this spell.~
-
-@30015 = ~\+2 or lower~
-@30016 = ~+3 or lower~
-
-@30017 = ~\+3 or lower~
-@30018 = ~+4 or lower~
-
-@30019 = ~except for those of greater than \+5 enchantment~
-@30020 = ~up to +6 enchantment~
-
-@30021 = ~Area of Effect: 4-ft\. radius~
-@30022 = ~Area of Effect: 1 creature~
-@30023 = ~one or more creatures within the area of effect become sightless\. The spellcaster selects one creature as the target center, and the effect spreads outward from the center, affecting all within a 4-ft\. radius\.~
-@30024 = ~one creature of the spellcaster's choice becomes sightless.~
-@30025 = ~apply to the victims~
-@30026 = ~apply to the victim~
-
-@30027 = ~until someone comes too close~
-@30028 = ~until an opponent comes too close~
-@30029 = ~causing all those within~
-@30030 = ~causing all enemies within~
-
-@30031 = ~every 3 levels of the caster\.~
-@30032 = ~every 3 levels of the caster. Free Action protects against this effect.~
-
-@30033 = ~teleports in a powerful fiend~
-@30034 = ~teleports in a powerful fiend (a bone fiend for lawful casters, or a nabassu for neutral and chaotic casters)~
-
-@30035 = ~summons a frenzied demon or devil~
-@30036 = ~summons a frenzied cornugon (for lawful casters) or glabrezu (for neutral and chaotic casters)~
-
-@30037 = ~calls an outer-planar creature.+the pit fiend.+to attack~
-@30038 = ~calls an outer-planar creature (a pit fiend for lawful casters, or a balor for neutral and chaotic casters) to attack~
-
-@30039 = ~Casting Time: 9~
-@30040 = ~Casting Time: 6~
-@30041 = ~Any creature attempting~
-@30042 = ~Any enemy attempting~
-@30043 = ~negate the damage~
-@30044 = ~take half damage~
-
-@30045 = ~If this is successful, the blades are avoided and no damage is suffered\.~
-@30046 = ~If this is successful, the damage is halved.~
-
-@30047 = ~1 round/4 levels~
-@30048 = ~1 round/level (maximum 11 rounds)~
-@30049 = ~1 round every 4 levels of the caster~
-@30050 = ~1 round per level of the caster (to a maximum of 11 rounds)~
-@30051 = ~two bolts~
-@30052 = ~eight bolts~
-
-@30053 = ~\+2 bonus to <PRO_HISHER> Armor Class~
-@30054 = ~+4 bonus to <PRO_HISHER> Armor Class~
-
-@30055 = ~Casting Time: 9~
-@30056 = ~Casting Time: 5~
-@30057 = ~Saving Throw: Neg\.~
-@30058 = ~Saving Throw: 1/2~
-@30059 = ~escape the effects of the glyph~
-@30060 = ~take half damage from the glyph~
-
-@30061 = ~1d4 points of damage to whomever it hits~
-@30062 = ~3d4 points of crushing damage to whomever it hits (6d4 to undead)~
-
-@30063 = ~making it very difficult to cast spells (50% chance of spell failure)\.~
-@30064 = ~forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.~
-
-@30065 = ~Spellcasting within the swarm is impossible (100% chance of spell failure)~
-@30066 = ~Creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 100% chance of spell failure (each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune)~
-
-@30067 = ~suffer 2 points of damage each second and a spell failure rate of 100%\.~
-@30068 = ~suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a spell failure rate of 100%. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.~
-
-@30069 = ~die of longing for the denied illusion\. Even if the Saving Throw is successful, hapless viewers of the transformed Druid are all instantly smitten with permanent blindness (until dispelled)\.~
-@30070 = ~be permanently blinded (and slain instantly if humanoid). If the Saving Throw is successful, viewers are blinded for 3 rounds.~
-
-@30071 = ~1 point of damage every 2 seconds~
-@30072 = ~1 point of damage each second~
-
-@30073 = ~Saving Throw vs\. Breath Weapon or run away in fear~
-@30074 = ~Saving Throw vs. Spell at -2 or run away in fear~
-@30075 = ~Pain~
-@30076 = ~Insect Swarm~
-
-// --- More batch strings (@50000+) -------------------------------------------------------
-
-@50000 = ~Protection From Cold~
-@50001 = ~Protection From Cold
-(Abjuration)
-
-Level: 3
-Sphere: Protection, Elemental (Water)
-Range: Touch
-Duration: 3 rounds + 1 round/level
-Casting Time: 6
-Area of Effect: 1 creature
-Saving Throw: None
-
-The effects of a Protection From Cold spell last no longer than 3 rounds plus 1 round per level of the caster. When the spell is cast, it confers complete invulnerability to normal cold and to exposure to magical cold (icy dragon breath, winter wolf breath, spells such as Chill Touch, Cone of Cold, Ice Storm, and so on), absorbing 80% of all the damage dealt by such magical sources.~
-
-@50002 = ~Protection From Acid~
-@50003 = ~Protection From Acid
-(Abjuration)
-
-Level: 4
-Sphere: Protection, Elemental (Earth)
-Range: Touch
-Duration: 5 rounds/level
-Casting Time: 7
-Area of Effect: 1 creature
-Saving Throw: None
-
-When the spell is cast, it confers complete invulnerability to all acid-based attacks, whether magical or non-magical, such as Melf's Acid Arrow, acid breath, or a creature's special attacks. The protection will last for the duration of the spell or until successfully dispelled.~
-
-@50004 = ~Dispelling Screen~
-@50005 = ~Dispelling Screen
-(Abjuration)
-
-Level: 5
-Range: 0
-Duration: 5 turns
-Casting Time: 5
-Area of Effect: 15-ft. radius
-Saving Throw: None
-
-This spell wards the caster and nearby allies with a protective screen against magic removal for 5 turns. For each protected creature, the screen absorbs and negates the next Dispel Magic, Remove Magic, or Breach effect that strikes them, then dissipates. Higher-level magic attacks such as Pierce Shield and Spellstrike strip Dispelling Screen along with other protections without being absorbed by it.~
-
-@50006 = ~Dispelling Screen Dissipates~
-
-@50007 = ~Spell Immunity, Globe Of Invulnerability~
-@50008 = ~Dispelling Screen, Globe Of Invulnerability~
-
-@50009 = ~Improved Haste~
-@50010 = ~Improved Haste
-(Alteration)
-
-Level: 6
-Range: 30 ft.
-Duration: 1 turn
-Casting Time: 6
-Area of Effect: 15-ft. radius
-Saving Throw: None
-
-When this spell is cast, all allied creatures within a 15-ft. radius are infused with magical speed for 1 turn. Affected creatures move at twice their normal rate (+6 movement rate), gain 1 extra attack per round, and receive a +2 bonus to THAC0, Armor Class, and Saving Throws vs. Breath. Unlike the 3rd-level Haste spell, Improved Haste does not fatigue the recipients when its duration expires.
-
-Improved Haste dispels any Slow effects on the recipients and renders them immune to Slow for its duration. Its effects are dispellable and are not cumulative with Haste or other similar magical speed effects.~
-
+// Righteous Wrath of the Faithful (IWDification).
 @50100 = ~Righteous Wrath of the Faithful
 (Enchantment/Charm)
 
@@ -395,11 +21,6 @@ Saving Throw: None
 This spell bestows a form of divine madness upon the priest's allies, improving their combat skills. All the priest's allies in the area of effect gain a +1 to attack rolls and Saving Throws, plus 8 bonus Hit Points for the duration of the spell (these Hit Points can take a target beyond <PRO_HISHER> Hit Point maximum). Allies of the same alignment, however, gain an extra attack every round, a +2 bonus to their attack rolls and Saving Throws, and immunity to charm and hold spells. Anyone affected by Righteous Wrath of the Faithful will suffer fatigue when the spell wears off.
 
 Haste, Improved Haste and this spell can all run on one creature, but only one extra attack counts.~
-@50011 = ~Haste cancelled by Slow~
-@50012 = ~Slow cancelled by Haste~
-
-
-
 
 // --- Record entries that follow a state (@61000+) ---
 @61000 = ~Invisible~
@@ -410,3 +31,77 @@ Haste, Improved Haste and this spell can all run on one creature, but only one e
 @61005 = ~Shield of the Archons~
 @61006 = ~Minor Spell Deflection~
 @61007 = ~Minor Spell Turning~
+
+// Whole descriptions of IWDification's spells.
+@60100 = ~Cure Moderate Wounds
+(Necromancy)
+
+Level: 2
+Sphere: Healing
+Range: Touch
+Duration: Permanent
+Casting Time: 4
+Area of Effect: 1 creature
+Saving Throw: None
+
+By casting this spell and laying <PRO_HISHER> hand upon a creature, the priest heals 2d8 + 4 points of wound or other injury damage from the creature's body. This healing cannot affect creatures without corporeal bodies, nor can it cure wounds of creatures not living or of extraplanar origin. Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal, or can be cured, just as any normal injury.~
+@60101 = ~Cause Moderate Wounds
+(Necromancy)
+
+Level: 2
+Sphere: Healing
+Range: Touch
+Duration: Instant
+Casting Time: 4
+Area of Effect: 1 creature
+Saving Throw: 1/2
+
+By casting this spell and touching a creature, the priest deals 2d8 + 4 points of damage (save vs. Spell for half) to the creature's body. Undead are healed for 2d8 + 4 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60102 = ~Cause Medium Wounds
+(Necromancy)
+
+Level: 3
+Sphere: Healing
+Range: Touch
+Duration: Instant
+Casting Time: 4
+Area of Effect: 1 creature
+Saving Throw: 1/2
+
+By casting this spell and touching a creature, the priest deals 2d8 + 7 points of damage (save vs. Spell for half) to the creature's body. Undead are healed for 2d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60103 = ~Cause Serious Wounds
+(Necromancy)
+
+Level: 4
+Sphere: Healing
+Range: Touch
+Duration: Instant
+Casting Time: 4
+Area of Effect: 1 creature
+Saving Throw: 1/2
+
+By casting this spell and touching a creature, the priest deals 3d8 + 7 points of damage (save vs. Spell for half) to the creature's body. Undead are healed for 3d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60104 = ~Cause Critical Wounds
+(Necromancy)
+
+Level: 5
+Sphere: Healing
+Range: Touch
+Duration: Instant
+Casting Time: 7
+Area of Effect: 1 creature
+Saving Throw: 1/2
+
+By casting this spell and touching a creature, the priest deals 4d8 + 12 points of magic damage (save vs. Spell for half) to the creature's body. Undead are healed for 4d8 + 12 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@50101 = ~Recitation
+(Abjuration, Invocation/Evocation)
+
+Level: 4
+Sphere: Combat
+Range: 0
+Duration: 1 round/level
+Casting Time: 7
+Area of Effect: 25-ft. radius
+Saving Throw: None
+
+By reciting a sacred passage or declaration, the priest invokes <PRO_HISHER> deity's blessing upon <PRO_HIMHER>self and <PRO_HISHER> allies while sowing confusion and weakness among <PRO_HISHER> enemies. The priest's allies gain a +2 bonus to their attack rolls and Saving Throws, and the priest's enemies receive a -2 penalty to the same. These values count as Favor: they do not add to those of Prayer or Chant.~

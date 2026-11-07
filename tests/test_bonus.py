@@ -20,7 +20,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_bonus.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_more.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_iwd.tpa~
 END
 LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
 BEGIN ~bonus probe~ DESIGNATED 0
@@ -256,8 +256,10 @@ def righteous_wrath_and_haste_leave_each_other_alone(work, weidu):
                      effect(267, 14667, p2=16), effect(54, 2), effect(1, 1)], level=5)
     root = spell([effect(318, resource="WRATHA", p2=42), effect(146, resource="WRATHA", p2=1, timing=1)], level=5)
     improved = spell([effect(1, 1), effect(54, 2)], level=6)
+    scroll = ie.make_itm([[effect(147, resource="SPPR518")]], desc=0)
     g = make_game(work, weidu,
-                  {"SPPR518.SPL": root, "WRATHA.SPL": payload, "SPWI613.SPL": improved, "SPWI305.SPL": spell([effect(16)])},
+                  {"SPPR518.SPL": root, "WRATHA.SPL": payload, "SPWI613.SPL": improved, "SPWI305.SPL": spell([effect(16)]),
+                   "WRATHSCR.ITM": scroll},
                   [(1518, "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL"), (2613, "WIZARD_IMPROVED_HASTE"), (2305, "WIZARD_HASTE")],
                   body="LAF cbmagic_more_righteous_wrath END\nLAF cbmagic_bonus END")
     install(g)
@@ -278,6 +280,7 @@ def righteous_wrath_and_haste_leave_each_other_alone(work, weidu):
     check(any(r["opcode"] == 54 and r["resource"] == "" for r in haste), "Improved Haste's THAC0 got a type")
     text = g.tlk(g.spl("SPPR518")["desc"])
     check("only one extra attack counts" in text and "canceling" not in text, "description not written")
+    check("only one extra attack counts" in g.tlk(g.itm_descs("WRATHSCR")[1]), "the scroll keeps the old description")
 
 
 @test
@@ -453,42 +456,6 @@ def bonus_families_every_pair_and_linked_payloads(work, weidu):
                 block = [r for r in result if r["opcode"] == 206 and r["resource"] == target]
                 check(bool(block) == (other_level < level), f"family child block {number}/{other}/{target}")
                 check(all(r["duration"] == 54 for r in block), "child family lifetime")
-
-
-@test
-def bonus_pierce_magic_install_choice_and_preservation(work, weidu):
-    mr = effect(166, -15, duration=90, power=6, dispel=2, save=1, bonus=-3, prob1=83, prob2=12)
-    other = [effect(221, 8, resource="PROTECT"), effect(166, 25, p2=1), effect(174, resource="VISUAL")]
-    # The callback and its portrait row are deliberately reordered around an unrelated
-    # effect. A second ability has the same native row but no callback and must stay put.
-    portrait = effect(142, p2=106, target=2, timing=4, duration=99, dispel=2, save=1, bonus=-3)
-    foreign_portrait = effect(142, p2=106, target=1, timing=4, duration=98, dispel=3, save=2, bonus=4)
-    data = ie.make_spl(level=6, abilities=[
-        {"target": 5, "effects": [other[0], portrait, mr, *other[1:]]},
-        {"target": 5, "effects": [foreign_portrait, effect(174, resource="SECOND")]},
-    ], desc=0)
-    resources = {"SPWI950.SPL": data}
-    for enabled in (False, True):
-        g = make_game(work / str(int(enabled)), weidu, resources, [(2950, "WIZARD_PIERCE_MAGIC")],
-                      override={"M___EEex.lua": b"-- synthetic EEex bootstrap\n"} if enabled else {})
-        out = g.install()
-        check(fg.installed_ok(out), out)  # Deliberately varied prose may log an owned-sentence warning.
-        if not enabled:
-            check(resource(g, "SPWI950.SPL") == data, "without EEex Pierce changed")
-            check("EEex bootstrap absent" in out, "install choice not explained")
-        else:
-            result = rows(g, "SPWI950")
-            callbacks = [r for r in result if r["opcode"] == 402]
-            check(len(callbacks) == 1 and callbacks[0]["resource"] == "CBMBPM", "MR callback missing")
-            assert_preserved(mr, callbacks[0], ("opcode", "p1", "p2", "resource", "timing", "duration"))
-            check(callbacks[0]["timing"] == 1 and callbacks[0]["duration"] == 0, "callback must fire once")
-            icons = [r for r in result if r["opcode"] == 142 and r["p2"] == 106]
-            check(len(icons) == 1 and icons[0]["timing"] == 0 and icons[0]["duration"] == 30,
-                  f"Pierce portrait duration: {icons}")
-            check([r for r in result if r["opcode"] not in (402, 142)] == other,
-                  "Pierce unrelated effects changed")
-            check(rows(g, "SPWI950", 1) == [foreign_portrait, effect(174, resource="SECOND")],
-                  "Pierce changed a native portrait row outside its callback group")
 
 
 @test

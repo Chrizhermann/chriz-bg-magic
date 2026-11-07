@@ -24,9 +24,11 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
   matter. No checks of old content: not of descriptions, wording, old values, effect counts or
   order. Game data never stops an install, and a decided change is never skipped because the
   old data looks different.
-- Code layout: `chriz-bg-magic/lib/cbmagic_shared.tpa` holds the shared helpers, and every
-  decided change is one action function, so the component layout can change without
-  touching the fixes. Resolve spells through `SPELL.IDS` symbols, not hard-coded resrefs.
+- Code layout: `defs/*.json` define every spell, item and effect the mod changes, whole. To
+  change one, edit its definition and run `python tools/build_resources.py`; commit what it
+  writes (`chriz-bg-magic/res/`, `lib/cbmagic_resources.tpa`, `languages/english/resources.tra`).
+  Fields only the install can know are symbols, see `tools/resformat.py`. `lib/cbmagic_iwd.tpa`
+  and what it calls patch IWDification's spells until we build them ourselves.
 - Describe every change in `docs/components.md`, in engine-neutral terms.
 - We write the complete description of every spell we change (append a new string and repoint
   the resource; never overwrite a shared strref). No search and replace in old sentences.

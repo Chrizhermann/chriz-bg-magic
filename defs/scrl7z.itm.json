@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34591,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000001000000000000d0070000320053505749363232410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Conjure Earth Elemental\n(Conjuration/Summoning)\n\nLevel: 6\nRange: Visual range of the caster\nDuration: 1 turn/level\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nUpon casting a Conjure Earth Elemental spell, the caster opens a special gate to the Elemental Plane of Earth, and an earth elemental is summoned in the vicinity of the caster. At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level). The elemental will do the bidding of the caster until it is slain or the duration of the spell runs out. All of the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication and no need to know the language of the summoned creature. However, every time this spell is cast, there is a 15% chance that the elemental will escape the instructions of the caster, go berserk, and attack the wizard who dared summoning it. If it can't reach the summoner, it will fight its way toward <PRO_HIMHER>. This berserking elemental will also remain until slain or the spell's duration expires. The elemental is locked into a psychic contest with the caster for 3 rounds after being summoned. At the end of this time, if the caster has won, <PRO_HESHE> has control of the elemental; however, if <PRO_HESHE> has lost, the elemental goes berserk and tries to kill <PRO_HIMHER>. This does not prevent the use of other charm-type spells after the contest was lost. If charm spells are used before the contest is over, they will have no effect on the outcome.",
+   "old": 24842
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574936323241040028000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 148,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi622",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574936323241050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi622",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

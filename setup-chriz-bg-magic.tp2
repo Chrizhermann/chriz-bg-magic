@@ -7,154 +7,28 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_healing.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_vanilla.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_sr.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_scs.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_bonus.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_more.tpa~
-  INCLUDE ~chriz-bg-magic/lib/cbmagic_record.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_iwd.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_live.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_resources.tpa~
 END
 
-LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~
+LANGUAGE ~English~ ~english~ ~chriz-bg-magic/languages/english/setup.tra~ ~chriz-bg-magic/languages/english/resources.tra~
 
 // ============================================================
 // chriz-bg-magic: Christopher's own spell mod for BG2:EE and EET.
 // Only the changes he picked; everything else stays as in the base game.
 //
-// 0  Chriz BG Magic: every decided change, one function each
-//    (chriz-bg-magic/lib/*.tpa; what each does: docs/components.md)
+// 0  Chriz BG Magic. Every spell and item it changes is written whole from
+//    defs/; what stood there before does not matter.
 // ============================================================
 
 BEGIN @100 DESIGNATED 0
 LABEL ~chriz-bg-magic-main~
 REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @9000
 LAF cbmagic_check_spell_revisions END
+LAF cbmagic_write_resources END
 LAM cbmagic_index_scrolls
-LAF cbmagic_fix_spirit_armor END
-LAF cbmagic_fix_minor_spell_deflection END
-LAF cbmagic_fix_breath_saves END
-LAF cbmagic_fix_wake_on_damage END
-LAF cbmagic_fix_web END
-LAF cbmagic_healing_cure_light END
-LAF cbmagic_healing_cure_moderate END
-LAF cbmagic_healing_cure_medium END
-LAF cbmagic_healing_cure_serious END
-LAF cbmagic_healing_cure_critical END
-LAF cbmagic_healing_mass_cure END
-LAF cbmagic_healing_cause_wounds END
-LAF cbmagic_healing_mass_cause_light END
-LAF cbmagic_healing_harm END
-LAF cbmagic_vanilla_find_familiar_universal END
-LAF cbmagic_vanilla_blindness_duration END
-LAF cbmagic_vanilla_cloudkill_school END
-LAF cbmagic_vanilla_death_fog_school END
-LAF cbmagic_vanilla_wizard_finger_of_death_save END
-LAF cbmagic_vanilla_priest_finger_of_death_save END
-LAF cbmagic_vanilla_mordenkainens_sword_disintegrate END
-LAF cbmagic_vanilla_wish_universal END
-LAF cbmagic_vanilla_entangle END
-LAF cbmagic_vanilla_flame_blade END
-LAF cbmagic_vanilla_conjure_fire_elemental_wiz END
-LAF cbmagic_vanilla_conjure_air_elemental_wiz END
-LAF cbmagic_vanilla_conjure_earth_elemental_wiz END
-LAF cbmagic_vanilla_conjure_fire_elemental_priest END
-LAF cbmagic_vanilla_conjure_earth_elemental_priest END
-LAF cbmagic_vanilla_barkskin_druid END
-LAF cbmagic_vanilla_animal_summoning_1_druid END
-LAF cbmagic_vanilla_animal_summoning_2_druid END
-LAF cbmagic_vanilla_animal_summoning_3_druid END
-LAF cbmagic_vanilla_conjure_animals_druid END
-LAF cbmagic_vanilla_flame_strike_ct END
-LAF cbmagic_vanilla_heal_ct END
-LAF cbmagic_vanilla_bolt_of_glory_ct END
-LAF cbmagic_vanilla_magic_resistance_ct END
-LAF cbmagic_vanilla_righteous_magic_ct END
-LAF cbmagic_vanilla_true_seeing_priest_ct END
-LAF cbmagic_vanilla_true_sight_wizard_ct END
-LAF cbmagic_vanilla_invisibility_purge_ct END
-LAF cbmagic_vanilla_strength_ct END
-LAF cbmagic_vanilla_fire_seeds_ct END
-LAF cbmagic_vanilla_grease END
-LAF cbmagic_vanilla_stinking_cloud END
-LAF cbmagic_vanilla_web_school END
-LAF cbmagic_vanilla_incendiary_cloud_school END
-LAF cbmagic_vanilla_power_word_sleep END
-LAF cbmagic_vanilla_spook END
-LAF cbmagic_vanilla_horror END
-LAF cbmagic_vanilla_mirror_reflected_image END
-LAF cbmagic_vanilla_aoe_bypass_mirror_image END
-LAF cbmagic_vanilla_dispel_magic_items END
-LAF cbmagic_vanilla_magic_resistance END
-LAF cbmagic_vanilla_strength_of_one END
-LAF cbmagic_kept_invisibility END
-LAF cbmagic_kept_luck END
-LAF cbmagic_kept_clairvoyance END
-LAF cbmagic_kept_invisibility_sphere END
-LAF cbmagic_kept_confusion END
-LAF cbmagic_kept_minor_sequencer END
-LAF cbmagic_kept_teleport_field END
-LAF cbmagic_kept_oracle END
-LAF cbmagic_kept_contingency END
-LAF cbmagic_kept_sphere_of_chaos END
-LAF cbmagic_kept_spell_sequencer END
-LAF cbmagic_kept_spell_trigger END
-LAF cbmagic_kept_chain_contingency END
-LAF cbmagic_kept_bless END
-LAF cbmagic_kept_shillelagh END
-LAF cbmagic_kept_doom END
-LAF cbmagic_kept_faerie_fire END
-LAF cbmagic_kept_aid END
-LAF cbmagic_kept_silence END
-LAF cbmagic_kept_free_action END
-LAF cbmagic_kept_neutralize_poison END
-LAF cbmagic_kept_divine_power END
-LAF cbmagic_kept_negative_plane_protection END
-LAF cbmagic_kept_iron_skins END
-LAF cbmagic_kept_mass_regenerate END
-LAF cbmagic_kept_regeneration END
-LAF cbmagic_kept_greater_restoration END
-LAF cbmagic_scs_chromatic_orb END
-LAF cbmagic_scs_melfs_minute_meteors END
-LAF cbmagic_scs_skull_trap END
-LAF cbmagic_scs_lower_resistance END
-LAF cbmagic_scs_power_word_silence END
-LAF cbmagic_scs_power_word_stun END
-LAF cbmagic_scs_mantle END
-LAF cbmagic_scs_project_image END
-LAF cbmagic_scs_abi_dalzim END
-LAF cbmagic_scs_improved_mantle END
-LAF cbmagic_scs_power_word_blind END
-LAF cbmagic_scs_simulacrum END
-LAF cbmagic_scs_wizard_symbol_death END
-LAF cbmagic_scs_wizard_symbol_stun END
-LAF cbmagic_scs_wizard_symbol_fear END
-LAF cbmagic_scs_absolute_immunity END
-LAF cbmagic_scs_power_word_kill END
-LAF cbmagic_scs_cleric_symbol_death END
-LAF cbmagic_scs_cleric_symbol_stun END
-LAF cbmagic_scs_cleric_symbol_fear END
-LAF cbmagic_scs_cacofiend END
-LAF cbmagic_scs_summon_fiend END
-LAF cbmagic_scs_wizard_gate END
-LAF cbmagic_scs_cleric_gate END
-LAF cbmagic_scs_blade_barrier END
-LAF cbmagic_scs_call_lightning END
-LAF cbmagic_scs_defensive_harmony END
-LAF cbmagic_scs_globe_of_blades END
-LAF cbmagic_scs_glyph_of_warding END
-LAF cbmagic_scs_magical_stone END
-LAF cbmagic_scs_insect_plague END
-LAF cbmagic_scs_natures_beauty END
-LAF cbmagic_more_protection_from_cold END
-LAF cbmagic_more_protection_from_acid END
-LAF cbmagic_more_dispelling_screen END
-LAF cbmagic_more_nahals_reckless_dweomer END
-LAF cbmagic_more_improved_haste END
-LAF cbmagic_more_haste_cancels_slow END
-LAF cbmagic_more_righteous_wrath END
-
-
+LAF cbmagic_iwd_spells END
 LAF cbmagic_record_live END
 LAF cbmagic_bonus END
-LAF cbmagic_record_base_game END

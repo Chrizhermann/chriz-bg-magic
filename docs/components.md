@@ -5,12 +5,23 @@ move to the Chriz script engine later. Values not named here stay as in the base
 
 ## Layout
 
-One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (the modules in `chriz-bg-magic/lib/`); any of
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`,
-`cbmagic_sr.tpa`, `cbmagic_scs.tpa`, `cbmagic_more.tpa`, `cbmagic_record.tpa`); any of
-them can move to a component of its own without changes. The user-facing layout is
+One component for now, `0` (label `chriz-bg-magic-main`). The user-facing layout is
 Christopher's decision.
+
+The mod overwrites. Every spell, item and effect it changes is defined whole in `defs/` and
+copied over what stands in the game, whatever that is. `tools/build_resources.py` builds the
+files, the install code and the strings from `defs/`; only what depends on the install stays
+open until then: strings, table rows, spell states, projectiles and the slots of new spells.
+So nothing in the install reads old content, and a spell someone edited by hand ends up like
+any other. A definition comes from the reference game, EET with EE Fixpack; plain BG2:EE gets
+the same files.
+
+Still patched at install, because we do not ship their files: IWDification's spells and the two
+it replaces, Emotion: Hopelessness and Chant (`lib/cbmagic_iwd.tpa`, `lib/cbmagic_healing.tpa`,
+`lib/cbmagic_bonus.tpa`). This goes when the IWD spells become our own.
+
+The function names in the headings below name where a change was first built; the result now
+lives in `defs/`.
 
 The target is BG2:EE and EET 2.7.3.0. Comparing typed bonuses and the new Pierce Magic
 resistance rule need EEex v1.3.1. The remaining changes work without EEex. The bonus batch
@@ -83,7 +94,7 @@ removes its whole spell effect, including linked payloads.
 These exclusions last as long as the main buff and retain its dispellability. All
 removals run before the new protections and buff. These families work without EEex.
 
-## Pierce Magic (`cbmagic_bonus_pierce_magic`)
+## Pierce Magic
 
 The resistance reduction is half the target's current Magic Resistance, rounded down,
 with a minimum of 10 and maximum of 40 percentage points, lasting 5 rounds. For example,
@@ -135,8 +146,7 @@ the offline tests.
 
 Chriz BG Magic replaces Spell Revisions and the two do not go together (Christopher,
 2026-11-06). The installer says so plainly in a warning and carries on; no work goes into
-making them fit. The setting is `cbmagic_sr_policy` in `lib/cbmagic_shared.tpa`, so a hard
-refusal is one word away if the two get declared incompatible outright.
+making them fit.
 
 ## Spirit Armor (`cbmagic_fix_spirit_armor`)
 

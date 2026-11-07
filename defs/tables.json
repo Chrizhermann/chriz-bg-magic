@@ -1,0 +1,148 @@
+{
+ "statdesc": {
+  "209": {
+   "text": "Faerie Fire",
+   "bam": "CBMIFAF"
+  },
+  "210": {
+   "text": "Aid",
+   "bam": "SPPR150D"
+  },
+  "211": {
+   "text": "Divine Power",
+   "bam": "CBMIDVP"
+  },
+  "212": {
+   "text": "Pain",
+   "bam": "CBMIPAN"
+  },
+  "213": {
+   "text": "Insect Swarm",
+   "bam": "CBMIINS"
+  },
+  "214": {
+   "text": "Dispelling Screen",
+   "bam": "SPWI510D"
+  },
+  "215": {
+   "text": "Invisible",
+   "bam": "CBMIINV"
+  },
+  "216": {
+   "text": "Improved Invisibility",
+   "bam": "CBMIIMP"
+  },
+  "217": {
+   "text": "Sanctuary",
+   "bam": "CBMISAN"
+  },
+  "218": {
+   "text": "Mirror Image",
+   "bam": "CBMIMIR"
+  },
+  "219": {
+   "text": "Reflected Image",
+   "bam": "CBMIMIR"
+  },
+  "220": {
+   "text": "Shield of the Archons",
+   "bam": "CBMISOA"
+  },
+  "221": {
+   "text": "Minor Spell Deflection",
+   "bam": "CBMIMSD"
+  },
+  "222": {
+   "text": "Minor Spell Turning",
+   "bam": "CBMIMST"
+  },
+  "223": {
+   "text": "Wraithform",
+   "bam": "CBMIWRF"
+  },
+  "224": {
+   "text": "Protection From Good",
+   "bam": "CBMIPFG"
+  },
+  "225": {
+   "text": "Shadow Form",
+   "bam": "CBMISHF"
+  },
+  "226": {
+   "text": "Defensive Stance",
+   "bam": "CBMIDFS"
+  },
+  "227": {
+   "text": "Blur",
+   "bam": "CBMIBLR"
+  },
+  "228": {
+   "text": "Divine Favor",
+   "bam": "CBMIDVF"
+  },
+  "229": {
+   "text": "Fire Resistance Lowered",
+   "bam": "CBMILFR"
+  },
+  "230": {
+   "text": "Electrical Resistance Lowered",
+   "bam": "CBMILER"
+  },
+  "231": {
+   "text": "Selûne's Blessing",
+   "bam": "CBMISEL"
+  },
+  "232": {
+   "text": "Enhanced Attributes",
+   "bam": "CBMIWAT"
+  },
+  "233": {
+   "text": "Hit Points Lowered",
+   "bam": "CBMIHPL"
+  }
+ },
+ "statdesc_changed": {
+  "8": {
+   "text": "Blinded"
+  },
+  "55": {
+   "text": "Stunned"
+  },
+  "112": {
+   "text": "Deafened"
+  }
+ },
+ "spells": {
+  "CLERIC_CBMAGIC_FAERIE_FIRE": {
+   "file": "sppr112.spl",
+   "type": 1,
+   "level": 1
+  },
+  "CLERIC_CBMAGIC_MASS_REGENERATE": {
+   "file": "sppr518.spl",
+   "type": 1,
+   "level": 5
+  },
+  "CLERIC_CBMAGIC_PROTECTION_FROM_COLD": {
+   "file": "sppr316.spl",
+   "type": 1,
+   "level": 3
+  },
+  "CLERIC_CBMAGIC_PROTECTION_FROM_ACID": {
+   "file": "sppr418.spl",
+   "type": 1,
+   "level": 4
+  }
+ },
+ "projectiles": [
+  "cbmffir",
+  "cbminv10",
+  "cbmmreg",
+  "cbmoracl"
+ ],
+ "sectypes": {
+  "cbm_DispelScreen": "Dispelling Screen Dissipates",
+  "cbm_Haste": null,
+  "cbm_Slow": null
+ }
+}

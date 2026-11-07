@@ -1,0 +1,95 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 10348,
+  "name_identified": 10966,
+  "raw_10": "0000000072620000680000001c000000000048360000000000000000000000000000000000000000010000000072620000550000000072620000556e00000000",
+  "description": 10348,
+  "description_identified": -1,
+  "raw_58": "0072620000556e6103000000"
+ },
+ "casting": [
+  {
+   "opcode": 206,
+   "target": 1,
+   "power": 0,
+   "p1": 0,
+   "p2": 0,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "SPPR319a",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 206,
+   "target": 1,
+   "power": 0,
+   "p1": 0,
+   "p2": 0,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "SPPR517a",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 206,
+   "target": 1,
+   "power": 0,
+   "p1": 0,
+   "p2": 0,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "SPPR717a",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 120,
+   "target": 1,
+   "power": 0,
+   "p1": 0,
+   "p2": 2,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  }
+ ],
+ "abilities": [
+  {
+   "raw_00": "010001000000000000776200010001000000010000000600020000000100",
+   "raw_22": "0000010001000000",
+   "projectile": 1,
+   "raw_2c": "320032000000000000000000",
+   "effects": []
+  }
+ ]
+}

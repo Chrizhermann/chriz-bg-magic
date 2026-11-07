@@ -1,0 +1,115 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": -1,
+  "name_identified": 8777,
+  "raw_10": "000000006974656d60000000000000000000464c000000000000000000000000000000000000000001000000006974656d74000000006974656d747900000000",
+  "description": -1,
+  "description_identified": -1,
+  "raw_58": "006974656d74797000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "010001000000000000697465010001000000000006000600010006000200",
+   "raw_22": "0000010001000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 80,
+     "resource": "DWWHIP01",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 221,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": {
+      "sectype": "cbm_Haste"
+     },
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 80,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 142,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 91,
+     "timing": 0,
+     "dispel": 0,
+     "duration": 30,
+     "prob1": 79,
+     "prob2": 60,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 1,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 44,
+     "target": 2,
+     "power": 0,
+     "p1": 3,
+     "p2": 1,
+     "timing": 0,
+     "dispel": 0,
+     "duration": 30,
+     "prob1": 79,
+     "prob2": 60,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 1,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 12,
+     "target": 2,
+     "power": 0,
+     "p1": 20,
+     "p2": 131072,
+     "timing": 9,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 59,
+     "prob2": 40,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 1,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

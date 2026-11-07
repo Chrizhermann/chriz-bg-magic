@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34618,
+  "raw_10": "009c8c40000504006c0000000b00805e726020200000000000400900000100000000000088130000320053505749383037410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Summon Fiend\n(Conjuration/Summoning)\n\nLevel: 8\nRange: Visual range of the caster\nDuration: 15 rounds\nCasting Time: 9\nArea of Effect: Special\nSaving Throw: None\n\nMore powerful than the 7th-level variant, casting this Cacofiend spell summons a frenzied cornugon (for lawful casters) or glabrezu (for neutral and chaotic casters). This fiend will attack everyone in the area who is not protected by a Protection From Evil spell. Only desperate or suicidal wizards use this spell.",
+   "old": 17361
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574938303741050028000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 148,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi807",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574938303741050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi807",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

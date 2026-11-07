@@ -1,0 +1,78 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 39767,
+  "name_identified": 39768,
+  "raw_10": "4d4953433536000068200000180000000000202000000000000000000000000000000000000000005000494d4554454f525300004742554c4c30310000000000",
+  "description": 39769,
+  "description_identified": -1,
+  "raw_58": "4342554c4c30310002000000"
+ },
+ "casting": [
+  {
+   "opcode": 1,
+   "target": 1,
+   "power": 0,
+   "p1": 5,
+   "p2": 1,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  }
+ ],
+ "abilities": [
+  {
+   "raw_00": "02000100494d4554454f525301000e010000000005000406010a03000400",
+   "raw_22": "0100010000040000",
+   "projectile": 258,
+   "raw_2c": "640000000000000000000000",
+   "effects": [
+    {
+     "opcode": 215,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "icfirsdi",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 12,
+     "target": 2,
+     "power": 0,
+     "p1": 3,
+     "p2": 524288,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

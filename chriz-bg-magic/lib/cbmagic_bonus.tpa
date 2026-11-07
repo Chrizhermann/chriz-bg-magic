@@ -895,29 +895,6 @@ DEFINE_ACTION_FUNCTION cbmagic_bonus_text STR_VAR spell = ~~ BEGIN
   END ELSE BEGIN PRINT ~chriz-bg-magic: %spell% bonus descriptions unavailable for language %lang%.~ END
 END
 
-DEFINE_ACTION_FUNCTION cbmagic_bonus_pierce_magic BEGIN
-  // EEex's common bootstrap is installed in override in both supported layouts.
-  // This is an install - time choice; removing EEex later requires reinstalling us.
-  ACTION_IF !(FILE_EXISTS_IN_GAME ~M___EEex.lua~) BEGIN
-    PRINT ~chriz-bg-magic: Pierce Magic keeps its existing resistance effect: EEex bootstrap absent.~
-  END ELSE BEGIN
-    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_PIERCE_MAGIC~ RET spell = resref found END
-    ACTION_IF !found BEGIN PRINT ~chriz-bg-magic: Pierce Magic absent; skipped.~ END ELSE BEGIN
-      LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind = ~PIERCE~ RET output touched END
-      ACTION_IF touched BEGIN
-        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
-          find = ~will be lowered by 1% per level of the caster~
-          replace = ~will be lowered by half its current value, rounded down, with a minimum reduction of 10 and a maximum of 40 percentage points~ END
-        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell label = ~Pierce Magic~
-          find = ~For example, if this spell were cast[^.]+dispelled\. ~ replace = ~~ END
-        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
-          find = ~Magic Resistance remains lowered for 1 round per level of the caster~
-          replace = ~Magic Resistance remains lowered for 5 rounds~ END
-      END ELSE BEGIN PRINT ~chriz-bg-magic: Pierce Magic has no remaining additive MR penalty to replace.~ END
-    END
-  END
-END
-
 DEFINE_ACTION_FUNCTION cbmagic_bonus
 BEGIN
   LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
@@ -954,5 +931,4 @@ BEGIN
     symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
   LAF cbmagic_family STR_VAR label = ~Regeneration~
     symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
-  LAF cbmagic_bonus_pierce_magic END
 END

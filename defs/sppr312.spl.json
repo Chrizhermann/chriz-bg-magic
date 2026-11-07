@@ -1,0 +1,171 @@
+{
+ "format": "spl",
+ "header": {
+  "signature": "SPL V1  ",
+  "name": 12125,
+  "name_identified": -1,
+  "sound": "CAS_P08",
+  "flags": 0,
+  "type": 2,
+  "exclusion": 0,
+  "animation": 10,
+  "min_level": 0,
+  "school": 8,
+  "min_strength": 0,
+  "sectype": 13,
+  "unused_28": "000000000000000000000000",
+  "level": 3,
+  "stack": 1,
+  "icon": "SPPR312C",
+  "lore": 0,
+  "ground_icon": "",
+  "weight": 0,
+  "description": {
+   "text": "Strength of One\n(Alteration)\n\nLevel: 3\nSphere: Law\nRange: 0\nDuration: 1 turn\nCasting Time: 3\nArea of Effect: 15-ft. radius\nSaving Throw: None\n\nWhen this spell is cast, party members within the area of effect are given a Strength score of 18/75. If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered. The spell lasts for 1 turn, whereupon everyone's Strength returns to normal.",
+   "old": 12213
+  },
+  "description_identified": -1,
+  "description_icon": "",
+  "enchantment": 0
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "form": 1,
+   "ability_flags": 0,
+   "location": 2,
+   "icon": "SPPR312B",
+   "target": 5,
+   "target_count": 0,
+   "range": 1,
+   "min_level": 1,
+   "casting_time": 3,
+   "unused_14": "00000600000000000100",
+   "charges": 1,
+   "charge_depletion": 1,
+   "projectile": 160,
+   "effects": [
+    {
+     "opcode": 174,
+     "target": 2,
+     "power": 3,
+     "p1": 0,
+     "p2": 0,
+     "timing": 4,
+     "dispel": 3,
+     "duration": 60,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "EFF_E03",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 215,
+     "target": 2,
+     "power": 3,
+     "p1": 0,
+     "p2": 1,
+     "timing": 0,
+     "dispel": 3,
+     "duration": 2,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "ICSTRONE",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 61,
+     "target": 2,
+     "power": 3,
+     "p1": 2017213440,
+     "p2": 1638400,
+     "timing": 1,
+     "dispel": 3,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 318,
+     "target": 2,
+     "power": 3,
+     "p1": 18,
+     "p2": {
+      "splprot": [
+       "36",
+       "18",
+       "3"
+      ]
+     },
+     "timing": 0,
+     "dispel": 2,
+     "duration": 1,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR312A",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 318,
+     "target": 2,
+     "power": 3,
+     "p1": 75,
+     "p2": {
+      "splprot": [
+       "37",
+       "75",
+       "4"
+      ]
+     },
+     "timing": 0,
+     "dispel": 2,
+     "duration": 1,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR312A",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 3,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 3,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SPPR312A",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

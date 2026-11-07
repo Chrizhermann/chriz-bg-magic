@@ -1,0 +1,134 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 6350,
+  "name_identified": 6726,
+  "raw_10": "4d495343353600006a0000001d0080c74c2053500000050000000002000000000062000001000000010049535045523031000000475350455230310005000000",
+  "description": -1,
+  "description_identified": -1,
+  "raw_58": "435350455230310000000000"
+ },
+ "casting": [
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 27,
+   "p2": 21,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  },
+  {
+   "opcode": 7,
+   "target": 1,
+   "power": 0,
+   "p1": 40,
+   "p2": 20,
+   "timing": 2,
+   "dispel": 0,
+   "duration": 0,
+   "prob1": 100,
+   "prob2": 0,
+   "resource": "",
+   "dice": 0,
+   "sides": 0,
+   "save": 0,
+   "bonus": 0,
+   "special": 0
+  }
+ ],
+ "abilities": [
+  {
+   "raw_00": "010001004953504552303100010002000000060000000600010000000100",
+   "raw_22": "0000020003000000",
+   "projectile": 1,
+   "raw_2c": "210021002200000000000000",
+   "effects": [
+    {
+     "opcode": 158,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 0,
+     "timing": 0,
+     "dispel": 2,
+     "duration": 15,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 1,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 324,
+     "target": 2,
+     "power": 0,
+     "p1": 139,
+     "p2": 110,
+     "timing": 0,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "KUOSPER",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 1,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "KUOSPER",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    },
+    {
+     "opcode": 221,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": {
+      "sectype": "cbm_Haste"
+     },
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

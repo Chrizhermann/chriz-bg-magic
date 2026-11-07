@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 34600,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000020000000000000b80b0000320053505749373038410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Mantle\n(Abjuration)\n\nLevel: 7\nRange: 0\nDuration: 4 rounds\nCasting Time: 1\nArea of Effect: The caster\nSaving Throw: None\n\nWhen the spell is cast, it confers complete invulnerability to all weapons of +3 or lower enchantment. This spell is incredibly powerful, yet has a very short duration and this, combined with its very short casting time, makes Mantle useful only in the thick of intense combat. This spell will not work in conjunction with Protection From Magical Weapons. This effect lasts for the duration of the spell or until dispelled.",
+   "old": 7613
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005350574937303841050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi708",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005350574937303841050001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi708",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 24623,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000000008000000000e8030000320053705769353135410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Oracle\n(Divination)\n\nLevel: 5\nRange: 0\nDuration: Instant\nCasting Time: 5\nArea of Effect: 30-ft. radius\nSaving Throw: None\n\nWhen cast, this spell will cancel all Illusion/Phantasm spells of 9th level and lower within its area of effect. The spells affected are Reflected Image, Invisibility, Mirror Image, Non-Detection, Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility. The caster can control just whom this spell affects. Therefore, it will affect only creatures that are not in the caster's party. The area of effect is roughly a 30-ft. radius around the caster.",
+   "old": 25922
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "03000300537057693531354104002d000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 148,
+     "target": 1,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi515",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005370576935313541040001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi515",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}

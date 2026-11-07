@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- The mod now overwrites: every spell, item and effect it changes is written whole, whatever
+  stood there. A spell another mod or a player changed no longer stops or skews the install,
+  and an install takes seconds. Spells of IWDification are still patched, without any check.
+- Righteous Wrath of the Faithful, Haste and Improved Haste no longer end or block one another;
+  while more than one runs, only one extra attack counts. This needs EEex.
+- Bonus types: a condition on a delivered sub-spell stays attached to it, so Righteous Wrath's
+  alignment rule and similar ones hold.
+- Recitation's description no longer says it adds to Prayer.
+- Remove Paralysis and the matching cure clear "Webbed" in EET too; Mimic Web's record entry is
+  right there.
+- Spell Revisions gets a warning and nothing else; there is no refusing mode any more.
 - Selected spells now use Morale, Favor, Luck, Dodge, Deflection and Curse bonus types.
   EEex compares each statistic separately: a type contributes its strongest bonus and
   strongest penalty, while different types and untyped effects combine. Weaker effects
@@ -15,7 +26,7 @@
   and limited to 10-40 percentage points, for 5 rounds. Its other effects stay unchanged.
   Without EEex at installation, its existing resistance effect is retained.
 - Added offline installer and LuaJIT/Lua 5.3 tests, plus the disposable-lab `bonus` group.
-  Live acceptance remains pending. HP and extra-attack type comparisons remain deferred.
+  HP type comparisons remain deferred.
 - Healing: Cure Light, Moderate (IWD), Medium, Serious and Critical Wounds now use the
   decided dice rolls and casting times; Mass Cure casts in 4. Cause Wounds uses the matching
   rolls and heals undead instead of damaging them while preserving direct and touch-charge

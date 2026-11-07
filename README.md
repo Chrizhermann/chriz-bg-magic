@@ -5,8 +5,7 @@ Christopher Hermann's own spell mod for **Baldur's Gate II: Enhanced Edition** a
 are made, everything else stays as in the base game, and real bugs and logic errors get
 fixed.
 
-**Status:** early work. The installer frame, the list of decided changes and the first
-fixes are here. Nothing is released yet.
+**Status:** early work. Nothing is released yet.
 
 - Target: BG2:EE and EET 2.7.3.0. Where a change needs EEex, it asks for EEex v1.3.1.
 - What each change does, in plain terms: [docs/components.md](docs/components.md).
@@ -33,8 +32,13 @@ spell level wins, and a newer casting wins a tie.
 Comparing bonus types requires EEex v1.3.1. Without EEex, bonuses from different spells
 accumulate normally; self-refresh and the two exclusive families still work. Pierce Magic
 uses its new resistance reduction only when EEex is present at installation. Reinstall
-this component after adding or removing EEex. Hit-point and extra-attack bonuses are not
-compared by type in this build.
+this component after adding or removing EEex. Hit-point bonuses are not compared by type in
+this build. Righteous Wrath of the Faithful, Haste and Improved Haste can all run on one
+creature; with EEex only one extra attack counts.
+
+The mod overwrites what it changes: its spells and items replace what stands in the game,
+whatever another mod or a player did to them. Install it after anything whose version of these
+spells you do not want to keep.
 
 ## Tests
 

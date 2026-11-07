@@ -1,0 +1,70 @@
+{
+ "format": "itm",
+ "header": {
+  "signature": "ITM V1  ",
+  "name": 7222,
+  "name_identified": 17848,
+  "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000020000000000000e8030000320053705769353134410000475343524c30310000000000",
+  "description": -1,
+  "description_identified": {
+   "text": "Lower Resistance\n(Abjuration)\n\nLevel: 5\nRange: 40 ft.\nDuration: 9 rounds + 1 round/level after 9th\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen cast upon a target creature, this spell will lower the Magic Resistance of this creature by 30% + 1% per level of the caster. There is no Saving Throw, and the target's Magic Resistance, if any, does not affect this spell. For example, if a creature has 60% Magic Resistance and this spell is cast on it by a 15th-level Mage, then the target's Magic Resistance would be lowered by 45% automatically. This effect is cumulative for each casting of this spell: If Lower Resistance was cast upon the same creature again, the creature's Magic Resistance would be 60% - 45% (initial casting) - 45% (current casting), which would leave the creature with 0% Magic Resistance. This spell will last until its duration expires and cannot be dispelled.",
+   "old": 29221
+  },
+  "raw_58": "435343524c30310000000000"
+ },
+ "casting": [],
+ "abilities": [
+  {
+   "raw_00": "030003005370576935313441010028000000000000000600000000000100",
+   "raw_22": "0100010000020000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 146,
+     "target": 2,
+     "power": 0,
+     "p1": 10,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi514",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  },
+  {
+   "raw_00": "030003005370576935313441040001000000000000000600000000000100",
+   "raw_22": "0100010000000000",
+   "projectile": 1,
+   "raw_2c": "220021002100000000000000",
+   "effects": [
+    {
+     "opcode": 147,
+     "target": 1,
+     "power": 0,
+     "p1": 1,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 2,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "SpWi514",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
+    }
+   ]
+  }
+ ]
+}
