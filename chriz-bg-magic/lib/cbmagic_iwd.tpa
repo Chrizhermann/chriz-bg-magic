@@ -89,12 +89,99 @@ BEGIN
   END
 END
 
+// --- IWD Hopelessness ---------------------------------------------------------------------
+// Damage ends it. IWDification's spell stays what it is, with its own area and icons; a last row on
+// every ability casts a private helper when the target takes damage, and the helper removes this
+// spell's own effects. Stuns of other spells stay, Hope does not come back. In a game without the
+// IWD version, the base game's Emotion: Hopelessness keeps cbmagic_fix_wake_on_damage.
+DEFINE_ACTION_FUNCTION cbmagic_iwd_hopelessness_spell
+  INT_VAR text = 0 power = 0 duration = 0 bonus = 0
+  STR_VAR symbol = ~~ helper = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF found && FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    COPY_EXISTING ~%helper%.spl~ ~override~
+      READ_LONG 0x6a effects
+      WRITE_ASCIIE (effects + 0x14) ~%spell%~ #8
+    OUTER_PATCH_SAVE row ~~ BEGIN
+      INSERT_BYTES 0 0x30
+      WRITE_SHORT 0 232 WRITE_BYTE 2 2 WRITE_BYTE 3 power WRITE_LONG 8 11 WRITE_BYTE 0xd 1
+      WRITE_LONG 0xe duration WRITE_BYTE 0x12 100 WRITE_ASCIIE 0x14 ~%helper%~ #8
+      WRITE_LONG 0x24 1 WRITE_LONG 0x28 bonus WRITE_LONG 0x2c 12
+    END
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      READ_LONG 0x64 ao ELSE 0 READ_SHORT 0x68 groups ELSE 0
+      PATCH_IF (ao >= 0x72) && (ao + groups * 0x28 <= SOURCE_SIZE) BEGIN
+        FOR (g = 0; g < groups; ++g) BEGIN
+          READ_SHORT (ao + g * 0x28 + 0x1e) count
+          LPF cbmagic_bonus_insert INT_VAR group = g position = count STR_VAR row END
+          READ_LONG 0x64 ao
+        END
+      END ELSE BEGIN
+        PATCH_PRINT ~chriz-bg-magic: %spell% cannot be read as a spell; left as it is.~
+      END
+    BUT_ONLY
+    LAF cbmagic_write_text INT_VAR text STR_VAR spell END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_iwd_hopelessness
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_EMOTION_HOPE~ RET found END
+  ACTION_IF found BEGIN
+    OUTER_SET text = RESOLVE_STR_REF (@60106)
+    LAF cbmagic_iwd_hopelessness_spell INT_VAR text power = 4 duration = 60 STR_VAR
+      symbol = ~WIZARD_EMOTION_HOPELESSNESS~ helper = ~cbmiwhe~ END
+  END
+  OUTER_SET text = RESOLVE_STR_REF (@60107)
+  LAF cbmagic_iwd_hopelessness_spell INT_VAR text power = 7 duration = 120 bonus = (0 - 2) STR_VAR
+    symbol = ~CLERIC_SYMBOL_HOPELESSNESS~ helper = ~cbmiwhs~ END
+END
+
+// --- Water elementals ---------------------------------------------------------------------
+// Only IWDification has these two wizard spells. They become the mod's spell, with the control
+// contest, and keep what shows them in the game: their name and their icons. Other languages keep
+// their own description.
+DEFINE_ACTION_FUNCTION cbmagic_iwd_take_over
+  STR_VAR symbol = ~~ template = ~~
+BEGIN
+  LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+  ACTION_IF found && FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    OUTER_SET name = 0 - 1
+    OUTER_SET text = 0 - 1
+    OUTER_SPRINT icon ~~
+    OUTER_SPRINT ability_icon ~~
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      READ_LONG 0x8 name ELSE (0 - 1)
+      READ_LONG 0x50 text ELSE (0 - 1)
+      READ_LONG 0x64 ao ELSE 0
+      READ_SHORT 0x68 groups ELSE 0
+      PATCH_IF (groups > 0) && (ao >= 0x72) && (ao + 0x28 <= SOURCE_SIZE) BEGIN
+        READ_ASCII 0x3a icon (8) NULL
+        READ_ASCII (ao + 4) ability_icon (8) NULL
+      END
+    BUT_ONLY
+    LAF cbmagic_game_language RET lang END
+    COPY_EXISTING ~%template%.spl~ ~override/%spell%.spl~
+      WRITE_LONG 0x8 name
+      PATCH_IF !(~%lang%~ STRING_EQUAL ~en_us~) BEGIN WRITE_LONG 0x50 text END
+      PATCH_IF !(~%icon%~ STRING_EQUAL ~~) BEGIN
+        WRITE_ASCIIE 0x3a ~%icon%~ #8
+        READ_LONG 0x64 ao READ_SHORT 0x68 groups
+        FOR (g = 0; g < groups; ++g) BEGIN WRITE_ASCIIE (ao + g * 0x28 + 4) ~%ability_icon%~ #8 END
+      END
+  END
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_iwd_spells
 BEGIN
   LAF cbmagic_healing_cure_moderate END
   LAF cbmagic_healing_cause_iwd END
   LAF cbmagic_fix_wake_on_damage END
+  LAF cbmagic_iwd_hopelessness END
   LAF cbmagic_more_righteous_wrath END
   LAF cbmagic_iwd_recitation END
   LAF cbmagic_iwd_icelance END
+  LAF cbmagic_iwd_take_over STR_VAR symbol = ~WIZARD_CONJURE_WATER_ELEMENTAL~ template = ~cbmwater~ END
+  LAF cbmagic_iwd_take_over STR_VAR symbol = ~WIZARD_CONJURE_LESSER_WATER_ELEMENTAL~ template = ~cbmlwat~ END
 END

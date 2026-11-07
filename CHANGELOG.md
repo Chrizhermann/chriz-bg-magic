@@ -5,6 +5,10 @@
 - The mod now overwrites: every spell, item and effect it changes is written whole, whatever
   stood there. A spell another mod or a player changed no longer stops or skews the install,
   and an install takes seconds. Spells of IWDification are still patched, without any check.
+- IWD Emotion: Hopelessness and Symbol: Hopelessness now end their own incapacitation when the
+  target takes damage, without curing unrelated stuns or restoring Hope.
+- Wizard Fire, Air, Earth and Water Elemental summons, including all Lesser forms, now use a
+  three-round control contest with a 15% hostile result. Druid elementals remain uncontested.
 - Righteous Wrath of the Faithful, Haste and Improved Haste no longer end or block one another;
   while more than one runs, only one extra attack counts. This needs EEex.
 - Bonus types: a condition on a delivered sub-spell stays attached to it, so Righteous Wrath's

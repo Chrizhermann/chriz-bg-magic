@@ -169,6 +169,29 @@ Area of Effect: 1 creature
 Saving Throw: 1/2
 
 By casting this spell and touching a creature, the priest deals 4d8 + 12 points of magic damage (save vs. Spell for half) to the creature's body. Undead are healed for 4d8 + 12 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60106 = ~Emotion: Hopelessness
+(Enchantment)
+
+Level: 4
+Range: 50 ft.
+Duration: 60 seconds
+Casting Time: 4
+Area of Effect: 7-ft. radius
+Saving Throw: Spell negates
+
+The caster projects despair into a small area. Enemies that fail their saving throw are stunned and lose hope for 60 seconds. Taking damage ends this spell's hopelessness.~
+@60107 = ~Symbol: Hopelessness
+(Conjuration)
+
+Level: 7
+Sphere: Combat
+Range: 30 ft.
+Duration: 120 seconds
+Casting Time: 3
+Area of Effect: 15-ft. radius
+Saving Throw: Spell negates (-2)
+
+The priest places a hostile magical symbol. When an enemy triggers it, enemies in the symbol's area that fail their saving throws are stunned and lose hope for 120 seconds. Taking damage ends this spell's hopelessness.~
 @50101 = ~Recitation
 (Abjuration, Invocation/Evocation)
 

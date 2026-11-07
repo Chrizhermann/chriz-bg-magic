@@ -209,12 +209,8 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   it on in the base game already, so nothing changes there.
 - A sleep effect with a permanent timing cannot wake whatever the setting says; such an
   effect is left as it is with a warning.
-- Emotion: Hopelessness: only its sleep ends, wherever it sits (EE Fixpack moves it into
-  a spell of its own). Its other effects, the portrait icon among them, run out as before
-  and its text stays; the IWD version replaces this spell later.
 - Only the waking. The other changes decided on these rows (immunities, schools) come
-  later. The IWD spells that put creatures to sleep or knock them out get the same when
-  they are built. Trap and monster copies of these spells stay as they are.
+  later. Trap and monster copies of these spells stay as they are.
 
 ## Web (`cbmagic_fix_web`)
 
@@ -423,6 +419,26 @@ effects (including mental combat on the wizard spells):
 - Druid Conjure Fire and Earth Elemental: 64%/35%/1% at level 11, 61%/37%/2% at level 12,
   52%/42%/6% at level 15, and 37%/51%/12% at level 20+ (interpolated evenly across levels
   11-20 with sums at 100%).
+
+## IWD Hopelessness (`cbmagic_iwd_hopelessness`)
+
+IWDification's Emotion: Hopelessness and Symbol: Hopelessness stay as they are, with their own
+area and icons. A last native TookDamage condition on each invokes a private helper that removes
+only that spell's own effects, including its stun, icon and delayed effects. Actual damage
+therefore ends its hopelessness without curing an unrelated stun or restoring Hope. Both get a
+complete description. A game without the IWD version keeps the base game's spell, whose sleep
+wakes on damage.
+
+## Wizard elemental contests (`cbmagic_iwd_wizard_elementals`)
+
+All wizard Conjure Fire, Air, Earth and Water Elemental spells, and their four Lesser forms, have
+the base game's three-round contest: 15% of the elementals turn hostile. IWDification removes the
+contest from the shared creatures, so the mod ships its own copies of them, with the game's own
+contest scripts. A successful enemy casting stays hostile to the party, as in the base game. Fire,
+Air, Earth and Water use the 64%/35%/1% 12/16/24-Hit-Dice distribution at level 12, moving one
+point per level from the 12-HD tier to the 24-HD tier and reaching 56%/35%/9% at level 20. Each
+Lesser form summons an 8-HD elemental. The two water spells exist only with IWDification; they
+keep its name and icons. Druid elementals have no contest.
 
 ## Druid-only priest spells (`cbmagic_vanilla_barkskin_druid`, `cbmagic_vanilla_animal_summoning_1_druid`, `cbmagic_vanilla_animal_summoning_2_druid`, `cbmagic_vanilla_animal_summoning_3_druid`, `cbmagic_vanilla_conjure_animals_druid`)
 

@@ -293,7 +293,7 @@ def decided_phase_one_spell_definitions(work, weidu):
         scripts = [data[offset:offset + 8].split(b"\0", 1)[0].decode("ascii")
                    for offset in range(0x248, 0x270, 8)]
         check(data[0x234] == (12, 16, 24)[tier - 1], f"air elemental tier {tier}: Hit Dice")
-        check(scripts == ["GENSHT01", "None", "None", "AIRELE01", "WDASIGHT"],
+        check(scripts == ["None", "None", "None", "None", "BDSUM00"],
               f"air elemental tier {tier}: wizard control script")
 
     icelance = defs["cbmlance.spl"]
@@ -482,8 +482,8 @@ def effects_of(g, name):
 
 @test
 def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
-    """With IWDification's spells in the game the install patches them and leaves everything that
-    ships as defined. Chant's private copies come from the game's Chant, so they are the game's."""
+    """The IWD spells are rebuilt from the decision, so their order, omissions and even a corrupt
+    predecessor never choose the result. Chant's private copies come from the game's Chant."""
     def damage(power, kind=0x400000):
         return fx.fx(opcode=12, target=2, power=power, p1=11, p2=kind, timing=1, dispel=1)
 
@@ -500,14 +500,25 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
     ids = fx.spell_ids([(1215, "CLERIC_CURE_MODERATE_WOUNDS"), (1219, "CLERIC_CAUSE_MODERATE_WOUNDS"),
                         (1321, "CLERIC_CAUSE_MEDIUM_WOUNDS"), (1450, "CLERIC_CAUSE_SERIOUS_WOUNDS_IWD"),
                         (1550, "CLERIC_CAUSE_CRITICAL_WOUNDS_IWD"), (1525, "CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL"),
-                        (2323, "WIZARD_ICELANCE")])
+                        (1734, "CLERIC_SYMBOL_HOPELESSNESS"), (2323, "WIZARD_ICELANCE"),
+                        (2427, "WIZARD_EMOTION_HOPE"), (2516, "WIZARD_CONJURE_LESSER_FIRE_ELEMENTAL"),
+                        (2520, "WIZARD_CONJURE_LESSER_AIR_ELEMENTAL"), (2521, "WIZARD_CONJURE_LESSER_EARTH_ELEMENTAL"),
+                        (2526, "WIZARD_CONJURE_LESSER_WATER_ELEMENTAL"), (2620, "WIZARD_CONJURE_FIRE_ELEMENTAL"),
+                        (2621, "WIZARD_CONJURE_AIR_ELEMENTAL"), (2622, "WIZARD_CONJURE_EARTH_ELEMENTAL"),
+                        (2633, "WIZARD_CONJURE_WATER_ELEMENTAL")])
     lance = bytearray(ie.make_spl(1, 3, [{"target": 1, "projectile": 348}]))
     lance[0x3A:0x42] = b"SPWI323C"
     lance_ability = struct.unpack_from("<I", lance, 0x64)[0]
     lance[lance_ability + 4:lance_ability + 12] = b"SPWI323B"
-    hopelessness = ie.make_spl(1, 4, [{"target": 4, "effects": [fx.fx(opcode=39, target=2, power=4, p2=1, duration=54)]}])
+    hopelessness = bytearray(ie.make_spl(1, 4, [{"target": 4, "projectile": 352, "effects": [
+        fx.fx(opcode=39, target=2, power=4, p2=1, duration=54), fx.fx(opcode=45, target=2)]}]))
+    water = bytearray(ie.make_spl(1, 6, [{"effects": []}], name=7))
+    water[0x3A:0x42] = b"SPWI633C"
+    water_ability = struct.unpack_from("<I", water, 0x64)[0]
+    water[water_ability + 4:water_ability + 12] = b"SPWI633B"
     biff = fx.game(
-        SPELL_IDS=ids, SPWI411_SPL=hopelessness, SPWI323_SPL=bytes(lance),
+        SPELL_IDS=ids, SPWI411_SPL=bytes(hopelessness), SPPR734_SPL=bytes(range(256)) * 3, SPWI427_SPL=ie.make_spl(),
+        SPWI323_SPL=bytes(lance), SPWI526_SPL=ie.make_spl(), SPWI633_SPL=bytes(water),
         SPPR215_SPL=ie.make_spl(2, 2, [{"target": 1, "casting_time": 5, "effects": [fx.fx(opcode=17, target=2, p1=11, timing=1)]}]),
         SPPR219_SPL=direct(2), SPPR321_SPL=direct(3), SPPR450_SPL=touch(4, "IWDSER"), SPPR550_SPL=touch(5, "IWDCRI"),
         IWDSER_ITM=ie.make_itm([[damage(4)]], item_type=3), IWDCRI_ITM=ie.make_itm([[damage(5)]], item_type=3),
@@ -520,7 +531,8 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
     g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=biff)
     before = g.tree()
     install(g)
-    check_every_resource(g, derived=("cbb0.spl", "cbb1.spl", "cbmbonus.2da", "cbmlance.spl"))
+    check_every_resource(g, derived=("cbb0.spl", "cbb1.spl", "cbmbonus.2da", "cbmlance.spl",
+                                     "cbmiwhe.spl", "cbmiwhs.spl"))
 
     druid = g.file(f"override/{installed_name(Numbers(g), 'cbmlance.spl')}")
     ability = struct.unpack_from("<I", druid, 0x64)[0]
@@ -545,7 +557,37 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
     check(child != "WRATHA", "Righteous Wrath's payload not isolated")
     check(not any(e["opcode"] == 206 for e in effects_of(g, child)), "Righteous Wrath still blocks Haste")
     check(any(e["opcode"] == 1 and e["resource"] == "CBTAPR" for e in effects_of(g, child)), "extra attack not tagged")
-    check(next(e for e in effects_of(g, "SPWI411") if e["opcode"] == 39)["p2"] == 0, "Hopelessness does not wake")
+    emotion_file = g.file("override/spwi411.spl")
+    ability = struct.unpack_from("<I", emotion_file, 0x64)[0]
+    check(struct.unpack_from("<H", emotion_file, ability + 0x26)[0] == 352, "Emotion lost its own area")
+    emotion = ie.parse_spl(emotion_file)["abilities"][0]
+    rows = emotion["effects"]
+    check([e["opcode"] for e in rows] == [39, 45, 232], f"Emotion rows: {rows}")
+    check(rows[0]["p2"] == 0, "Hopelessness does not wake")
+    check((rows[-1]["p2"], rows[-1]["resource"], rows[-1]["duration"], rows[-1]["save"], rows[-1]["special"]) ==
+          (11, "CBMIWHE", 60, 1, 12), f"Emotion TookDamage condition: {rows[-1]}")
+    check(effects_of(g, "CBMIWHE")[0]["resource"] == "SPWI411", "Emotion helper source")
+
+    for spell, creatures in (("SPWI620", ("CBMWF1", "CBMWF2", "CBMWF3")), ("SPWI621", ("CBMWA1", "CBMWA2", "CBMWA3")),
+                             ("SPWI622", ("CBMWE1", "CBMWE2", "CBMWE3")), ("SPWI633", ("CBMWW1", "CBMWW2", "CBMWW3"))):
+        summoned = {e["resource"].upper() for e in effects_of(g, spell) if e["opcode"] == 177}
+        check(summoned == set(creatures), f"{spell}: private contest creatures {summoned}")
+        for name in creatures:
+            eff = g.file(f"override/{name.lower()}.eff")
+            check((struct.unpack_from("<I", eff, 0x10)[0], struct.unpack_from("<I", eff, 0x20)[0],
+                   eff[0x30:0x38].split(b"\0", 1)[0]) == (67, 2, name.encode()), f"{name} EFF")
+            check(g.file(f"override/{name.lower()}.cre")[0x248:0x250] == b"WIZELSU2", f"{name} script")
+    for spell, name in (("SPWI516", "CBMWLF"), ("SPWI520", "CBMWLA"), ("SPWI521", "CBMWLE"), ("SPWI526", "CBMWLW")):
+        parsed = ie.parse_spl(g.file(f"override/{spell.lower()}.spl"))
+        check(len(parsed["abilities"]) == 12, f"{spell}: duration headers")
+        check(all({e["resource"].upper() for e in a["effects"] if e["opcode"] == 177} == {name} and
+                  {e["opcode"] for e in a["effects"]} == {165, 215, 177, 142} for a in parsed["abilities"]),
+              f"{spell}: summon plus contest")
+        check(g.file(f"override/{name.lower()}.cre")[0x248:0x250] == b"WIZELSUM", f"{name} script")
+    taken = g.file("override/spwi633.spl")
+    ability = struct.unpack_from("<I", taken, 0x64)[0]
+    check(taken[0x3A:0x42] == b"SPWI633C" and taken[ability + 4:ability + 12] == b"SPWI633B", "Water keeps its icons")
+    check(struct.unpack_from("<i", taken, 8)[0] == 7, "Water keeps its name")
     chant = [e["resource"] for e in effects_of(g, "SPPR203") if e["opcode"] == 146]
     check(chant == ["CBB0", "CBB1"], f"Chant's copies: {chant}")
     check(any(e["opcode"] == 22 and e["resource"] == "CBTLUCK" for e in effects_of(g, "CBB0")), "Chant's luck has no type")

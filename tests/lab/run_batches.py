@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch")
 
 
 def lua_list(values):
@@ -784,6 +784,51 @@ def decided(c, check):
     check("Draw Upon Divine Might stands beside the other transformations", bool(on(duhm)) and bool(on(tenser)),
           duhm=len(on(duhm)), tenser=len(on(tenser)))
     c.p("dd-tidy", f'clear({who}, {{"{duhm}", "{champion}", "{tenser}"}})')
+
+
+def iwdbatch(c, check):
+    # Needs IWDification's spells. Emotion: Hopelessness and Symbol: Hopelessness are not cast here
+    # at an area: the stun of each is applied, and a hit must end it, an unrelated stun must stay.
+    foe = fresh_foe(c, "ih")
+    c.p("ih-hp", f'fx("{foe}", 18, 300, 0, 600)')
+    c.p("ih-saves", f'set_saves("{foe}", {{spell = 20}}, 600)')
+    at = c.p("ih-at", f'creature("{foe}")')
+    c.p("ih-cast", f'cast_point(1, "SPWI411", {at["x"]}, {at["y"]})')
+    time.sleep(6)
+    stunned = c.p("ih-stun", f'creature("{foe}")')
+    held = c.p("ih-ops", f'ops("{foe}", {{45, 232}})') or []
+    check("Emotion: Hopelessness stuns through its own area", bool(stunned["state"] & 8), state=hex(stunned["state"]), effects=held)
+    c.p("ih-hit", f'damage("{foe}", 1)')
+    time.sleep(2.5)
+    after = c.p("ih-after", f'creature("{foe}")')
+    left = [e for e in (c.p("ih-left", f'ops("{foe}", {{45, 142}})') or []) if e["src"] == "SPWI411"]
+    check("Emotion: Hopelessness: a hit ends it, its icon too", not after["state"] & 8 and not left,
+          state=hex(after["state"]), left=left)
+    c.p("ih-other", f'fx("{foe}", 45, 0, 0, 30)')
+    time.sleep(0.5)
+    c.p("ih-cast2", f'cast_point(1, "SPWI411", {at["x"]}, {at["y"]})')
+    time.sleep(6)
+    c.p("ih-hit2", f'damage("{foe}", 1)')
+    time.sleep(2.5)
+    other = c.p("ih-after2", f'creature("{foe}")')
+    check("Emotion: Hopelessness: a stun from elsewhere stays after the hit", bool(other["state"] & 8), state=hex(other["state"]))
+
+    # Every wizard elemental: on the party's side during the contest, then an ally or hostile.
+    p0 = c.p("ie-party", "party()")[0]
+    for name, res in (("Fire", "SPWI620"), ("Air", "SPWI621"), ("Earth", "SPWI622"), ("Water", "SPWI633"),
+                      ("Lesser Fire", "SPWI516"), ("Lesser Air", "SPWI520"), ("Lesser Earth", "SPWI521"),
+                      ("Lesser Water", "SPWI526")):
+        c.p(f"ie-clear-{res}", "remove_all_others()")
+        time.sleep(1)
+        c.p(f"ie-cast-{res}", f'cast_point(1, "{res}", {p0["x"] + 90}, {p0["y"]})')
+        time.sleep(11)
+        early = c.p(f"ie-early-{res}", "others()") or []
+        time.sleep(21)
+        late = c.p(f"ie-late-{res}", "others()") or []
+        check(f"Conjure {name} Elemental: one elemental, on the party's side during the contest",
+              len(early) == 1 and early[0]["ea"] < 30, early=early)
+        check(f"Conjure {name} Elemental: after the contest ally or hostile", len(late) == 1 and late[0]["ea"] in (4, 255),
+              late=late)
 
 
 def smoke(c, check):
