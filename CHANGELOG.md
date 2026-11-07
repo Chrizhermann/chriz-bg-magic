@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Simulacrum: the copy keeps the special abilities of its class and kit that its own level gives,
+  no more uses than the caster had left; abilities from items and quests are lost. It cannot use
+  quick-slot items. Needs EEex.
+
 - Lesser Restoration also ends temporary attribute drain, such as Ray of Enfeeblement or a mind
   flayer's hit. Disease, permanent loss and the weakness after Blood Rage stay. Needs EEex.
 

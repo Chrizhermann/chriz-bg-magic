@@ -56,6 +56,17 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - The drains were put on as the spell or weapon leaves them, from a hostile creature; a real Ray
   of Enfeeblement or mind flayer fight was not run.
 
+## Simulacrum
+
+- Offline: the clone helper calls `CBMSIMU`, quick-slot items are blocked, special abilities open;
+  without EEex the game's Simulacrum text stays.
+- In-game, group `simulacrum`, BG2:EE: a spawned Korgan at level 12 (Berserker) with Berserker
+  Rage three times, as his levels give it, plus one ability of a quest and two of an item. His
+  copy came out at level 8 with Berserker Rage twice, as levels 1 and 5 give it, and without the
+  quest and item abilities; Korgan kept everything. After two rages Korgan had two uses left and
+  his copy one.
+- Not run: high-level abilities, multi-class and dual-class casters, a party member as caster.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

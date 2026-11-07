@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum")
 
 
 def lua_list(values):
@@ -993,6 +993,90 @@ def restoration(c, check):
     if RAGE:
         check("Lesser Restoration: Blood Rage's weakness stays", (RAGE, 49, 1) in left, **facts)
     c.p("rs-tidy", "remove_all_others()")
+
+
+def class_abilities(game, table, level):
+    """{resref: times} of the GA_ entries of an ability table up to a level, read from the game."""
+    data = game.get(table, "2DA")
+    if not data:
+        return {}
+    lines = [line.split() for line in data.decode("latin-1").splitlines()[2:] if line.strip()]
+    levels = [int(x) if x.isdigit() else 0 for x in lines[0]]
+    got = {}
+    for row in lines[1:]:
+        for at, value in zip(levels, row[1:]):
+            if 0 < at <= level and value.upper().startswith("GA_"):
+                got[value[3:].upper()] = got.get(value[3:].upper(), 0) + 1
+    return got
+
+
+def simulacrum(c, check):
+    # Korgan at level 12, a Berserker: Berserker Rage at levels 1, 5 and 9, given here as his levels
+    # would (a spawned creature has none). His copy is level 7 and may keep two. An ability of a
+    # quest and one of an item must go.
+    spec = importlib.util.spec_from_file_location("simulacrum_ie", HERE.parent / "ie.py")
+    ie = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ie)
+    game = ie.Game(GAME)
+    c.p("sm-protect", "protect_party()")
+    c.p("sm-clear", "remove_all_others()")
+    time.sleep(1)
+    c.p("sm-spawn", 'spawn("KORGAN15", 120, 0)')
+    time.sleep(2)
+    korgan = [o for o in c.p("sm-others", "others()") or [] if o["dv"].upper() == "KORGAN"]
+    check("Simulacrum: Korgan is there", len(korgan) == 1, korgan=korgan)
+    if len(korgan) != 1:
+        return
+    original = korgan[0]["id"]
+    c.p("sm-rage", 'give_innate("korgan", "SPCL321", 3)')
+    c.p("sm-quest", 'give_innate("korgan", "SPIN101", 1)')
+    c.p("sm-item", 'give_innate("korgan", "SPIN102", 2)')
+    time.sleep(1)
+    before = c.p("sm-before", f"innates({original})")
+    c.p("sm-cast", """order("korgan", 'ReallyForceSpellRES("SPWI804",Myself)')""")
+    time.sleep(13)
+    copies = [o for o in c.p("sm-others2", "others()") or [] if o["name"] == "Korgan" and o["id"] != original]
+    check("Simulacrum: one copy", len(copies) == 1, copies=copies)
+    if len(copies) != 1:
+        return
+    copy = c.p("sm-copy", f'innates({copies[0]["id"]})')
+    after = c.p("sm-after", f"innates({original})")
+    for got in (before, copy, after):
+        got["ready"] = got["ready"] or {}  # an empty table comes back as a list
+    allowed = class_abilities(game, "CLABFI02", copy["levels"][0])
+    facts = dict(allowed=allowed, before=before, copy=copy, after=after)
+    check("Simulacrum: the copy is lower than the caster", 0 < copy["levels"][0] < before["levels"][0], **facts)
+    check("Simulacrum: Berserker Rage stays, as often as its level gives it",
+          "SPCL321" in copy["known"] and
+          copy["ready"].get("SPCL321", 0) == min(allowed.get("SPCL321", 0), before["ready"].get("SPCL321", 0)), **facts)
+    check("Simulacrum: abilities of a quest and an item are gone",
+          "SPIN101" not in copy["known"] and "SPIN102" not in copy["known"], **facts)
+    check("Simulacrum: the caster keeps everything", all(s in after["known"] for s in ("SPCL321", "SPIN101", "SPIN102")),
+          **facts)
+
+    # Spent uses stay spent: Korgan rages twice first, then has one use left; so has his copy.
+    c.p("sm-clear2", "remove_all_others()")
+    time.sleep(1)
+    c.p("sm-spawn2", 'spawn("KORGAN15", 120, 0)')
+    time.sleep(2)
+    original = [o for o in c.p("sm-others3", "others()") or [] if o["name"] == "Korgan"][0]["id"]
+    c.p("sm-rage2", 'give_innate("korgan", "SPCL321", 3)')
+    time.sleep(1)
+    for i in range(2):
+        c.p(f"sm-use-{i}", """order("korgan", 'SpellRES("SPCL321",Myself)')""")
+        time.sleep(4)
+    spent = c.p("sm-spent", f"innates({original})")
+    spent["ready"] = spent["ready"] or {}
+    c.p("sm-cast2", """order("korgan", 'ReallyForceSpellRES("SPWI804",Myself)')""")
+    time.sleep(13)
+    copies = [o for o in c.p("sm-others4", "others()") or [] if o["name"] == "Korgan" and o["id"] != original]
+    copy = c.p("sm-copy2", f'innates({copies[0]["id"]})') if copies else None
+    if copy:
+        copy["ready"] = copy["ready"] or {}
+    check("Simulacrum: no more uses than the caster had left",
+          copy is not None and spent["ready"].get("SPCL321", 0) < 3 and
+          copy["ready"].get("SPCL321", 0) <= spent["ready"].get("SPCL321", 0), spent=spent, copy=copy)
+    c.p("sm-tidy", "remove_all_others()")
 
 
 def celweapons(c, check):

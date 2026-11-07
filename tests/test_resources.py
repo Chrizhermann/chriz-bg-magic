@@ -555,6 +555,22 @@ def lesser_restoration_ends_drain_with_eeex(work, weidu):
     check('local SPARED = { ["SPPR421"] = true }' in lua and "%" not in lua, "Blood Rage is not spared")
 
 
+@test
+def simulacrum_keeps_the_abilities_of_its_level(work, weidu):
+    """The clone helper calls CBMSIMU and the module is there; without EEex the game's text stays,
+    which does not promise the filter."""
+    g = fg.FakeGame(work / "plain", weidu, tlk=fx.tlk(), biff=fx.game())
+    out = install(g)
+    check("spwi804.spl stays as it is: its new rule needs EEex" in out, out)
+    g = fg.FakeGame(work / "eeex", weidu, tlk=fx.tlk(), biff=fx.game(), override=EEEX)
+    install(g)
+    effects = g.spl("SIMULACR")["abilities"][0]["effects"]
+    check(effects[-1]["opcode"] == 402 and effects[-1]["resource"] == "CBMSIMU", "the clone helper does not call CBMSIMU")
+    check([e["p2"] for e in effects if e["opcode"] == 144] == [14, 9, 11, 12], "quick items blocked, abilities open")
+    check(b"function CBMSIMU" in g.file("override/M_CBMSIM.lua"), "the module is missing")
+    check_every_resource(g)
+
+
 def effects_of(g, name):
     return [e for a in ie.parse_spl(ie.Game(g.root).get(name, "SPL"))["abilities"] for e in a["effects"]]
 

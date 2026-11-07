@@ -437,6 +437,24 @@
      "save": 0,
      "bonus": 0,
      "special": 0
+    },
+    {
+     "opcode": 402,
+     "target": 1,
+     "power": 0,
+     "p1": 0,
+     "p2": 0,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "CBMSIMU",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
     }
    ]
   }

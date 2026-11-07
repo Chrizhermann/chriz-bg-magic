@@ -423,6 +423,13 @@ BEGIN
     EVALUATE_BUFFER
 END
 
+// Simulacrum's callback (lua/M_CBMSIM.lua): the copy keeps the abilities of its class and kit at
+// its own level. SIMULACR.SPL calls it.
+DEFINE_ACTION_FUNCTION cbmagic_simulacrum
+BEGIN
+  COPY ~chriz-bg-magic/lua/M_CBMSIM.lua~ ~override/M_CBMSIM.lua~
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_find_familiar
 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN

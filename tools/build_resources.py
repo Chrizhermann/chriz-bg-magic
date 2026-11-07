@@ -19,7 +19,7 @@ MOD = ROOT / "chriz-bg-magic"
 FIRST_STRING = 70000
 # Pierce Magic's and Lesser Restoration's new rules are EEex callbacks, which do nothing without
 # EEex. There the game's spells and scroll stay, and the log says so.
-NEEDS_EEEX = ("spwi608.spl", "scrl7l.itm", "sppr417.spl")
+NEEDS_EEEX = ("spwi608.spl", "scrl7l.itm", "sppr417.spl", "spwi804.spl")
 
 
 class Strings:

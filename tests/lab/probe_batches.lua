@@ -121,6 +121,40 @@ function P.attributes(who)
     return out
 end
 
+-- A sprite's special abilities: known, and how many uses are ready; class, kit and levels.
+function P.innates(who)
+    local s
+    if type(who) == "number" and who < 6 then s = party(who) else
+        local o = EEex_GameObject_Get(who)
+        s = o and EEex_GameObject_CastUserType(o)
+    end
+    if not s then return nil end
+    local out = { known = {}, ready = {}, class = s.m_typeAI.m_Class, kit = EEex_Sprite_GetStat(s, 152),
+                  levels = { EEex_Sprite_GetStat(s, 34), EEex_Sprite_GetStat(s, 68), EEex_Sprite_GetStat(s, 69) },
+                  name = EEex_Sprite_GetName(s) }
+    for _, _, spell in s:getKnownInnateSpellsIterator() do out.known[#out.known + 1] = spell:upper() end
+    local list = s:GetQuickButtons(4, false)
+    EEex_Utility_IterateCPtrList(list, function(button)
+        local spell = button.m_abilityId.m_res:get():upper()
+        out.ready[spell] = (out.ready[spell] or 0) + button.m_count
+    end)
+    EEex_Utility_FreeCPtrList(list)
+    return out
+end
+
+function P.order_party(who, text)
+    EEex_Action_QueueResponseStringOnAIBase(text, party(who))
+    return true
+end
+
+function P.give_innate(who, res, times)
+    local s = type(who) == "number" and party(who) or named(who)
+    for _ = 1, times do
+        EEex_GameObject_ApplyEffect(s, { effectID = 171, res = res, durationType = 1, sourceID = s.m_id, sourceTarget = s.m_id })
+    end
+    return true
+end
+
 -- Whether a script trigger holds for this creature.
 function P.holds(name, text)
     return EEex_Trigger_EvalConditionalStringAsAIBase(text, named(name))

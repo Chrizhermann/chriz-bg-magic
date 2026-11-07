@@ -61,7 +61,7 @@ BEGIN
   LAF cbmagic_state_value STR_VAR symbol = ~STUN_IMMUNITY~ RET cbm_state_STUN_IMMUNITY = state END
   LAF cbmagic_state_value STR_VAR symbol = ~TENSERS_TRANSFORMATION~ RET cbm_state_TENSERS_TRANSFORMATION = state END
   LAF cbmagic_state_value STR_VAR symbol = ~WEB_IMMUNITY~ RET cbm_state_WEB_IMMUNITY = state END
-  ADD_SECTYPE ~cbm_DispelScreen~ @70154
+  ADD_SECTYPE ~cbm_DispelScreen~ @70155
   ADD_SECTYPE ~cbm_Haste~ ~~
   ADD_SECTYPE ~cbm_Slow~ ~~
   ADD_PROJECTILE ~chriz-bg-magic/pro/cbmffir.pro~
@@ -74,59 +74,59 @@ BEGIN
   OUTER_SET cbm_proj_cbmoracl = cbmoracl
   OUTER_SET ref = RESOLVE_STR_REF (@70083)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIFAF~ RET cbm_stat_209 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70155)
+  OUTER_SET ref = RESOLVE_STR_REF (@70156)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPPR150D~ RET cbm_stat_210 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70099)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVP~ RET cbm_stat_211 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70156)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPAN~ RET cbm_stat_212 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70157)
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPAN~ RET cbm_stat_212 = icon_row END
+  OUTER_SET ref = RESOLVE_STR_REF (@70158)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINS~ RET cbm_stat_213 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70032)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPWI510D~ RET cbm_stat_214 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70158)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINV~ RET cbm_stat_215 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70159)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIIMP~ RET cbm_stat_216 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINV~ RET cbm_stat_215 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70160)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISAN~ RET cbm_stat_217 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIIMP~ RET cbm_stat_216 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70161)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_218 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISAN~ RET cbm_stat_217 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70162)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_219 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_218 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70163)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISOA~ RET cbm_stat_220 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_219 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70164)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMSD~ RET cbm_stat_221 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISOA~ RET cbm_stat_220 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70165)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMST~ RET cbm_stat_222 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMSD~ RET cbm_stat_221 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70166)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWRF~ RET cbm_stat_223 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMST~ RET cbm_stat_222 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70167)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPFG~ RET cbm_stat_224 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWRF~ RET cbm_stat_223 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70168)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISHF~ RET cbm_stat_225 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPFG~ RET cbm_stat_224 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70169)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDFS~ RET cbm_stat_226 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISHF~ RET cbm_stat_225 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70170)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIBLR~ RET cbm_stat_227 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDFS~ RET cbm_stat_226 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70171)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVF~ RET cbm_stat_228 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIBLR~ RET cbm_stat_227 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70172)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILFR~ RET cbm_stat_229 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVF~ RET cbm_stat_228 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70173)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILER~ RET cbm_stat_230 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILFR~ RET cbm_stat_229 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70174)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISEL~ RET cbm_stat_231 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILER~ RET cbm_stat_230 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70175)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWAT~ RET cbm_stat_232 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISEL~ RET cbm_stat_231 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70176)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIHPL~ RET cbm_stat_233 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWAT~ RET cbm_stat_232 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70177)
-  LAF cbmagic_statdesc_text INT_VAR row = 8 text = ref END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIHPL~ RET cbm_stat_233 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70178)
-  LAF cbmagic_statdesc_text INT_VAR row = 55 text = ref END
+  LAF cbmagic_statdesc_text INT_VAR row = 8 text = ref END
   OUTER_SET ref = RESOLVE_STR_REF (@70179)
+  LAF cbmagic_statdesc_text INT_VAR row = 55 text = ref END
+  OUTER_SET ref = RESOLVE_STR_REF (@70180)
   LAF cbmagic_statdesc_text INT_VAR row = 112 text = ref END
   APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
   // Spells of our own, in the slot this install has free.
@@ -2659,6 +2659,13 @@ BEGIN
     PATCH_IF cbm_english BEGIN SAY 0x50 @70055 END
     WRITE_LONG 0xd2 cbm_prot_131_1_4
   COPY ~chriz-bg-magic/res/spwi802.spl~ ~override/spwi802.spl~
+  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+  COPY ~chriz-bg-magic/res/spwi804.spl~ ~override/spwi804.spl~
+    WRITE_LONG 0x50 26235
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70152 END
+  END ELSE BEGIN
+    PRINT ~chriz-bg-magic: spwi804.spl stays as it is: its new rule needs EEex.~
+  END
   COPY ~chriz-bg-magic/res/spwi805.spl~ ~override/spwi805.spl~
     WRITE_LONG 0x50 26242
     PATCH_IF cbm_english BEGIN SAY 0x50 @70061 END
@@ -2717,14 +2724,14 @@ BEGIN
     PATCH_IF cbm_english BEGIN SAY 0x50 @70072 END
   COPY ~chriz-bg-magic/res/spwi923.spl~ ~override/spwi923.spl~
     WRITE_LONG 0x50 63232
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70152 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70153 END
     WRITE_LONG 0x54 63232
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70152 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70153 END
   COPY ~chriz-bg-magic/res/spwi924.spl~ ~override/spwi924.spl~
     WRITE_LONG 0x50 63237
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70153 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70154 END
     WRITE_LONG 0x54 63237
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70153 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70154 END
   COPY ~chriz-bg-magic/res/spwi954.spl~ ~override/spwi954.spl~
     WRITE_LONG 0xa2 cbm_state_MAJOR_GLOBE
     WRITE_LONG 0xd2 cbm_state_MINOR_GLOBE
