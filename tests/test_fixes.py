@@ -32,13 +32,17 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
     check("SUCCESSFULLY INSTALLED" in out, f"install:\n{out}")
     orig = {k[:-4]: ie.parse_spl(v) for k, v in fx.game().items() if k.endswith(".SPL")}
 
-    # Spirit Armor: opcode 321 naming itself first, the rest unchanged, its text stays.
+    # Spirit Armor: refresh first; the final bonus pass tags saves and adds its state/text.
     s = g.spl("SPWI414")
     first = s["abilities"][0]["effects"][0]
     check((first["opcode"], first["resource"], first["target"], first["power"], first["timing"], first["dispel"])
           == (321, "SPWI414", 2, 4, 1, 3), f"Spirit Armor refresh: {first}")
-    check(s["abilities"][0]["effects"][1:] == orig["SPWI414"]["abilities"][0]["effects"], "Spirit Armor rest changed")
-    check(s["desc"] == fx.SPIRIT_DESC and g.file("override/SCRL5K.ITM") is None, "Spirit Armor text must stay")
+    check(without(s["abilities"][0]["effects"][1:], 328) ==
+          [{**e, "resource": "CBTDEFLE"} if e["opcode"] == 37 else e
+           for e in orig["SPWI414"]["abilities"][0]["effects"]], "Spirit Armor unrelated fields changed")
+    check("save vs. spell +3 (Deflection)" in g.tlk(s["desc"]), "Spirit Armor type text")
+    check(g.itm_descs("SCRL5K")[1] == s["desc"], "Spirit Armor scroll type text")
+    check(g.tlk(fx.SPIRIT_DESC) == fx.TEXTS[fx.SPIRIT_DESC], "shared Spirit Armor string retained")
 
     # Minor Spell Deflection: levels 1-4 only, the rest kept, the text says so.
     s = g.spl("SPWI318")
@@ -81,9 +85,15 @@ def five_fixes_on_vanilla_shaped_spells(work, weidu):
         for a, b in zip(s["abilities"], o["abilities"]):
             check([e["p2"] for e in a["effects"] if e["opcode"] == 39] == [0] * ops(b["effects"]).count(39),
                   f"{res}: sleep still does not wake")
-            check(without(a["effects"], 39) == without(b["effects"], 39), f"{res}: other effects changed")
-            check([{**e, "p2": 0} for e in a["effects"] if e["opcode"] == 39] ==
-                  [{**e, "p2": 0} for e in b["effects"] if e["opcode"] == 39], f"{res}: sleep changed beyond waking")
+            expected_other = without(b["effects"], 39)
+            if res == "SPWI213":
+                expected_other = [e for e in expected_other if not (e["opcode"] == 142 and e["p2"] == 126)]
+            check(without(a["effects"], 39) == expected_other, f"{res}: other effects changed")
+            expected_sleep = [{**e, "p2": 0,
+                               "special": 126 if res == "SPWI213" else (44 if res == "SPWI411" else e["special"])}
+                              for e in b["effects"] if e["opcode"] == 39]
+            check([{**e, "p2": 0} for e in a["effects"] if e["opcode"] == 39] == expected_sleep,
+                  f"{res}: sleep changed beyond its owned fields")
     check("WIZARD_POWER_WORD_SLEEP (SPWI220): its 1 sleep effects end on damage already" in out, "PWS")
 
     # Web: immunities first, the web's roll vs. breath (the -2 stays), the own save kept.
@@ -149,7 +159,10 @@ def other_layouts_and_mod_variations(work, weidu):
         fx.fx(opcode=142, power=4, p2=37, duration=54),
         fx.fx(opcode=146, power=4, p2=2, timing=1, save=ie.SAVE_SPELL, resource="SPWI411B")]))
     hopeless_sleep = ie.make_spl(1, 4, fx.by_level([1, 8], lambda lvl: [
-        fx.fx(opcode=39, power=4, p2=1, duration=54), fx.fx(opcode=174, power=4, timing=4, duration=54)]))
+        fx.fx(opcode=142, target=2, power=4, p2=44, duration=54),
+        fx.fx(opcode=39, power=4, p2=1, duration=54),
+        fx.fx(opcode=142, target=1, power=4, p2=44, duration=54),
+        fx.fx(opcode=174, power=4, timing=4, duration=54)]))
     pre = fresh(work / "pre", weidu, tp2=PROBE_TP2.replace("%BODY%", r"""
 COPY_EXISTING ~spwi215.spl~ ~override~
   LPF cbmagic_add_immunity INT_VAR row = 4 value = 119 RET added present END
@@ -162,9 +175,9 @@ COPY_EXISTING ~spwi215.spl~ ~override~
     out = g.install()
     check("SUCCESSFULLY INSTALLED" in out, f"install:\n{out}")
     s = g.spl("SPWI414")
-    check(ops(s["abilities"][0]["effects"]) == [321, 174, 37] and s["abilities"][0]["effects"][0]["target"] == 1,
+    check(ops(s["abilities"][0]["effects"]) == [321, 174, 37, 328] and s["abilities"][0]["effects"][0]["target"] == 1,
           f"self-cast ability: {s['abilities'][0]['effects']}")
-    check(ops(s["abilities"][1]["effects"]) == [321, 37], "an ability that already refreshes must stay")
+    check(ops(s["abilities"][1]["effects"]) == [321, 37, 328], "existing refresh and typed save retained")
     check(ops(s["casting"]) == [139], "casting effects changed")
     s = g.spl("SPWI318")
     for a in s["abilities"]:
@@ -180,6 +193,13 @@ COPY_EXISTING ~spwi215.spl~ ~override~
     check(g.file("override/SPWI411.SPL") is None, "the spell that only casts the sleep must stay")
     check([e["p2"] for a in g.spl("SPWI411B")["abilities"] for e in a["effects"] if e["opcode"] == 39] == [0, 0],
           "the sleep in its own spell still does not wake")
+    emotion_fx = [e for a in g.spl("SPWI411B")["abilities"] for e in a["effects"]]
+    check(all(e["special"] == 44 for e in emotion_fx if e["opcode"] == 39),
+          f"Hopelessness sleep row: {emotion_fx}")
+    check(not any(e["opcode"] == 142 and e["target"] == 2 and e["p2"] == 44 for e in emotion_fx),
+          f"Hopelessness target icon survived: {emotion_fx}")
+    check(sum(e["opcode"] == 142 and e["target"] == 1 and e["p2"] == 44 for e in emotion_fx) == 2,
+          f"Hopelessness caster icon was changed: {emotion_fx}")
 
 
 @test
@@ -241,11 +261,13 @@ def other_text_languages_are_named(work, weidu):
 @test
 def late_self_removal_is_named(work, weidu):
     """A Spirit Armor whose self-removal comes after its effects cancels itself already;
-    a second removal in front would not change that, so it is named and left alone."""
+    the early fix names it and the final bonus pass moves the removal ahead of the bonus."""
     late = ie.make_spl(1, 4, [{"target": 1, "effects": [fx.fx(opcode=37, power=4, p1=3, duration=600),
                                                      fx.fx(opcode=321, power=4, timing=1, resource="SPWI414")]}])
     g = fresh(work, weidu, replace={"SPWI414_SPL": late})
     out = g.install()
     check(fg.with_warnings(out) and "1 abilities remove the spell's own effects after applying them" in out,
           f"missing warning:\n{out}")
-    check(g.file("override/SPWI414.SPL") is None, "Spirit Armor must stay untouched")
+    effects = g.spl("SPWI414")["abilities"][0]["effects"]
+    check(ops(effects) == [321, 37, 328], "late refresh must move before the typed save")
+    check(effects[1]["p1"] == 3 and effects[1]["duration"] == 600, "save bonus preserved")

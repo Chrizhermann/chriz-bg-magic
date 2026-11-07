@@ -1,0 +1,903 @@
+// Typed spell bonuses. This module runs after all spell changes in component 0.
+// Linked resources are isolated before editing; the original payloads remain intact.
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_state
+  STR_VAR symbol = ~~
+  RET state
+BEGIN
+  OUTER_SET state = (0 - 1)
+  OUTER_SET matches = 0
+  COPY_EXISTING ~splstate.ids~ ~override~
+    FOR (i = 0; i < 256; ++i) BEGIN SET $used(~%i%~) = 0 END
+    READ_ASCII 0 contents (BUFFER_LENGTH)
+    INNER_PATCH ~%contents%~ BEGIN
+      REPLACE_EVALUATE CASE_INSENSITIVE
+        ~^[ %TAB%]*\([^ %TAB%%WNL%%MNL%%LNL%]+\)[ %TAB%]+\([^ %TAB%%WNL%%MNL%%LNL%]+\)~ BEGIN
+        PATCH_IF IS_AN_INT ~%MATCH1%~ BEGIN
+          SET value = MATCH1
+          PATCH_IF (value >= 0 && value < 256) BEGIN SET $used(~%value%~) += 1 END
+          PATCH_IF (~%MATCH2%~ STRING_EQUAL_CASE ~%symbol%~) BEGIN
+            SET matches += 1 SET state = value
+          END
+        END
+      END ~~
+    END
+    PATCH_IF (matches > 1) BEGIN PATCH_FAIL ~chriz-bg-magic: duplicate state %symbol%.~ END
+    PATCH_IF (matches = 1) BEGIN
+      PATCH_IF (state < 0 || state > 255) BEGIN PATCH_FAIL ~chriz-bg-magic: state %symbol% outside 0..255.~ END
+      PATCH_IF ($used(~%state%~) != 1) BEGIN PATCH_FAIL ~chriz-bg-magic: state %symbol% shares its value.~ END
+    END ELSE BEGIN
+      FOR (i = 255; i >= 0 && state < 0; --i) BEGIN
+        PATCH_IF ($used(~%i%~) = 0) BEGIN SET state = i END
+      END
+      PATCH_IF (state < 0) BEGIN PATCH_FAIL ~chriz-bg-magic: no free SPLSTATE bit.~ END
+    END
+  BUT_ONLY
+  ACTION_IF (matches = 0) BEGIN APPEND ~splstate.ids~ ~%state% %symbol%~ END
+  CLEAR_IDS_MAP
+END
+
+// Byte - preserving insertion into either an ability or the casting slice. Unlike
+// ADD_SPELL_EFFECT, this also relocates casting effects stored after the abilities.
+DEFINE_PATCH_FUNCTION cbmagic_bonus_insert
+  INT_VAR group = 0 position = 0
+  STR_VAR row = ~~
+BEGIN
+  READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
+  PATCH_IF (group < 0) BEGIN
+    SET count_at = 0x70 SET first_at = 0x6e
+  END ELSE BEGIN
+    SET count_at = ao + group * 0x28 + 0x1e SET first_at = count_at + 2
+  END
+  READ_SHORT count_at count READ_SHORT first_at first
+  PATCH_IF (position > count) BEGIN SET position = count END
+  SET idx = first + position SET at = fo + idx * 0x30
+  INSERT_BYTES at 0x30 WRITE_ASCIIE at ~%row%~ (0x30)
+  PATCH_IF (ao >= at) BEGIN
+    SET ao += 0x30 WRITE_LONG 0x64 ao
+    PATCH_IF (group >= 0) BEGIN SET count_at += 0x30 SET first_at += 0x30 END
+  END
+  WRITE_SHORT count_at (count + 1)
+  FOR (j = (0 - 1); j < ac; ++j) BEGIN
+    PATCH_IF (j != group) BEGIN
+      PATCH_IF (j < 0) BEGIN SET ca = 0x70 SET fa = 0x6e END ELSE BEGIN
+        SET ca = ao + j * 0x28 + 0x1e SET fa = ca + 2
+      END
+      READ_SHORT fa f READ_SHORT ca n
+      PATCH_IF (f >= idx && (n > 0 || f > idx)) BEGIN WRITE_SHORT fa (f + 1) END
+    END
+  END
+END
+
+// A manifest makes private names collision - safe and reusable on a second pass.
+// Every changed linked SPL / EFF is cloned, even if no outside user was found.
+DEFINE_ACTION_FUNCTION cbmagic_bonus_private
+  STR_VAR root = ~~ source = ~~ ext = ~~ role = ~~
+  RET private
+BEGIN
+  OUTER_SPRINT private ~~
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~CBMBONUS.2DA~) BEGIN
+    <<<<<<<< cbmagic_bonus_manifest
+2DA V1.0
+*
+       ROOT SOURCE EXT ROLE PRIVATE
+>>>>>>>>
+    COPY ~cbmagic_bonus_manifest~ ~override/CBMBONUS.2DA~
+  END
+  COPY_EXISTING ~CBMBONUS.2DA~ ~override~
+    COUNT_2DA_ROWS 6 rows
+    READ_2DA_ENTRIES_NOW names 6
+    FOR (k = 0; k < names; ++k) BEGIN
+      READ_2DA_ENTRY_FORMER names k 1 r
+      READ_2DA_ENTRY_FORMER names k 2 s
+      READ_2DA_ENTRY_FORMER names k 3 e
+      READ_2DA_ENTRY_FORMER names k 5 p
+      PATCH_IF (~%r%~ STRING_EQUAL_CASE ~%root%~ && ~%e%~ STRING_EQUAL_CASE ~%ext%~ && ~%p%~ STRING_EQUAL_CASE ~%source%~) BEGIN
+        SPRINT source ~%s%~
+      END
+    END
+    FOR (k = 0; k < names; ++k) BEGIN
+      READ_2DA_ENTRY_FORMER names k 1 r
+      READ_2DA_ENTRY_FORMER names k 2 s
+      READ_2DA_ENTRY_FORMER names k 3 e
+      READ_2DA_ENTRY_FORMER names k 4 t
+      READ_2DA_ENTRY_FORMER names k 5 p
+      PATCH_IF (~%r%~ STRING_EQUAL_CASE ~%root%~ && ~%e%~ STRING_EQUAL_CASE ~%ext%~ &&
+        ~%t%~ STRING_EQUAL_CASE ~%role%~ && (~%s%~ STRING_EQUAL_CASE ~%source%~ || ~%p%~ STRING_EQUAL_CASE ~%source%~)) BEGIN
+        SPRINT private ~%p%~
+      END
+    END
+  BUT_ONLY
+  ACTION_IF (~%private%~ STRING_EQUAL ~~) BEGIN
+    OUTER_SET serial = rows
+    OUTER_SET free = 0
+    OUTER_WHILE !free BEGIN
+      OUTER_SPRINT private ~CBB%serial%~
+      ACTION_IF (STRING_LENGTH ~%private%~ > 8) BEGIN FAIL ~chriz-bg-magic: private resource names exhausted.~ END
+      OUTER_SET free = !(FILE_EXISTS_IN_GAME ~%private%.spl~ || FILE_EXISTS_IN_GAME ~%private%.eff~)
+      OUTER_SET serial += 1
+    END
+    APPEND ~CBMBONUS.2DA~ ~%rows% %root% %source% %ext% %role% %private%~
+  END
+END
+
+// Count distinct direct SPL users of an EFF before isolating it. This is diagnostic:
+// private copies also protect indirect users and users in ITM / CRE resources.
+DEFINE_ACTION_FUNCTION cbmagic_bonus_eff_users
+  STR_VAR eff = ~~
+  RET users
+BEGIN
+  OUTER_SET users = 0
+  COPY_EXISTING_REGEXP GLOB ~^.+\.spl$~ ~override~
+    LPF cbmagic_spl_valid RET valid reason END
+    PATCH_IF valid BEGIN
+      READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
+      SET uses = 0
+      FOR (j = (0 - 1); j < ac && !uses; ++j) BEGIN
+        PATCH_IF (j < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+          READ_SHORT (ao + j * 0x28 + 0x20) f READ_SHORT (ao + j * 0x28 + 0x1e) n
+        END
+        FOR (k = 0; k < n; ++k) BEGIN
+          READ_SHORT (fo + (f + k) * 0x30) op READ_ASCII (fo + (f + k) * 0x30 + 0x14) res (8) NULL
+          PATCH_IF ((op = 177 || op = 272) && ~%res%~ STRING_EQUAL_CASE ~%eff%~) BEGIN SET uses = 1 END
+        END
+      END
+      SET users += uses
+    END
+  BUT_ONLY
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_owned
+  STR_VAR root = ~~ source = ~~ ext = ~~
+  RET owned
+BEGIN
+  OUTER_SET owned = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~CBMBONUS.2DA~ BEGIN
+    COPY_EXISTING ~CBMBONUS.2DA~ ~override~
+      READ_2DA_ENTRIES_NOW names 6
+      FOR (k = 0; k < names; ++k) BEGIN
+        READ_2DA_ENTRY_FORMER names k 1 r READ_2DA_ENTRY_FORMER names k 3 e READ_2DA_ENTRY_FORMER names k 5 p
+        PATCH_IF (~%r%~ STRING_EQUAL_CASE ~%root%~ && ~%e%~ STRING_EQUAL_CASE ~%ext%~ && ~%p%~ STRING_EQUAL_CASE ~%source%~) BEGIN SET owned = 1 END
+      END
+    BUT_ONLY
+  END
+END
+
+// Decide only the values owned by the selected type. AC penalties and base AC are
+// deliberately excluded. Spirit Armor and Barkskin own saves only.
+DEFINE_PATCH_FUNCTION cbmagic_bonus_tag
+  INT_VAR op = 0 p1 = 0 p2 = 0
+  STR_VAR kind = ~~
+  RET tag
+BEGIN
+  SPRINT tag ~~
+  SET saves = (op >= 33 && op <= 37) || op = 325
+  PATCH_IF (~%kind%~ STRING_EQUAL ~MORALE~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+  PATCH_IF (~%kind%~ STRING_EQUAL ~FAVOR~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTFAVOR~ END
+  PATCH_IF (~%kind%~ STRING_EQUAL ~CHANT~) BEGIN
+    PATCH_IF saves BEGIN SPRINT tag ~CBTFAVOR~ END
+    PATCH_IF (op = 22) BEGIN SPRINT tag ~CBTLUCK~ END
+  END
+  PATCH_IF (~%kind%~ STRING_EQUAL ~LUCK~ && (saves || op = 22)) BEGIN SPRINT tag ~CBTLUCK~ END
+  PATCH_IF (~%kind%~ STRING_EQUAL ~DODGE~ && (saves || (op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDODGE~ END
+  PATCH_IF ((~%kind%~ STRING_EQUAL ~DEFLECTION~ || ~%kind%~ STRING_EQUAL ~SAVES~) &&
+    (saves || (~%kind%~ STRING_EQUAL ~DEFLECTION~ && op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDEFLE~ END
+  PATCH_IF (~%kind%~ STRING_EQUAL ~CURSE~ && p1 < 0 && (saves || op = 54 || op = 73 || op = 22)) BEGIN SPRINT tag ~CBTCURSE~ END
+  PATCH_IF !(~%tag%~ STRING_EQUAL ~~) && p2 != 0 BEGIN
+    PATCH_FAIL ~chriz-bg-magic: %SOURCE_FILE%: typed opcode %op% has non-additive mode %p2%.~
+  END
+END
+
+// Transform one V1 row, returning complete rows. EFFs use a V1 view for these
+// fields, then overlay only the changed fields onto copies of the original EFF.
+DEFINE_PATCH_FUNCTION cbmagic_bonus_row
+  INT_VAR inherited_timing = (0 - 1)
+  STR_VAR kind = ~~
+  RET result typed
+BEGIN
+  READ_SHORT 0 op READ_SLONG 4 p1 READ_LONG 8 p2
+  READ_ASCII 0x14 existing_tag (8) NULL
+  READ_ASCII 0 original (0x30)
+  SET typed = 0 SPRINT result ~~
+  PATCH_IF (~%kind%~ STRING_EQUAL ~PIERCE~) BEGIN
+    PATCH_IF (op = 166 && p1 < 0 && p2 = 0) BEGIN
+      WRITE_SHORT 0 402 WRITE_LONG 4 0 WRITE_LONG 8 0 WRITE_BYTE 0xc 1 WRITE_LONG 0xe 0
+      WRITE_ASCII 0x14 ~CBMBPM~ #8 SET typed = 1
+    END
+    READ_ASCII 0 result (0x30)
+  END ELSE PATCH_IF (op = 328 && ~%existing_tag%~ STRING_EQUAL ~CBTSTATE~) BEGIN
+    // EFF marker from a prior pass: its typed sibling recreates it.
+    SET typed = 1
+  END ELSE PATCH_IF (op = 130 || op = 131 || op = 133 || op = 137) BEGIN
+    // The native count - once opcodes read a signed byte, not the entire dword.
+    SET amount = p1 BAND 255
+    PATCH_IF (amount >= 128) BEGIN SET amount -= 256 END
+    PATCH_IF (op = 137) BEGIN SET amount = 0 - amount END
+    PATCH_IF (op = 130) BEGIN
+      PATCH_DEFINE_ARRAY convert BEGIN 54 73 23 END
+    END ELSE BEGIN PATCH_DEFINE_ARRAY convert BEGIN 22 END END
+    PATCH_PHP_EACH convert AS _ => replacement BEGIN
+      INNER_PATCH_SAVE row ~%original%~ BEGIN
+        WRITE_SHORT 0 replacement WRITE_LONG 4 amount WRITE_LONG 8 0
+        PATCH_IF (replacement = 23) BEGIN WRITE_LONG 4 5 END
+        WRITE_ASCII 0x14 ~~ #8
+      END
+      INNER_PATCH ~%row%~ BEGIN
+        LPF cbmagic_bonus_row INT_VAR inherited_timing STR_VAR kind RET rows = result count = typed END
+      END
+      SPRINT result ~%result%%rows%~ SET typed += count
+    END
+  END ELSE BEGIN
+    LPF cbmagic_bonus_tag INT_VAR op p1 p2 STR_VAR kind RET tag END
+    PATCH_IF !(~%tag%~ STRING_EQUAL ~~) BEGIN
+      READ_BYTE 0x0c timing
+      // Opcode 177 executes its EFF with the wrapper's timing, not the file's.
+      PATCH_IF (inherited_timing >= 0) BEGIN SET timing = inherited_timing END
+      // Permanent base - stat mutations are absent from the timed effect list.
+      PATCH_IF (timing = 1 || timing = 4 || timing = 7) BEGIN
+        PATCH_FAIL ~chriz-bg-magic: %SOURCE_FILE%: typed opcode %op% permanently changes base stats (timing %timing%).~
+      END
+      WRITE_ASCIIE 0x14 ~%tag%~ #8
+      READ_ASCII 0 result (0x30)
+      SET typed = 1
+      // A companion marker shares every delivery condition, target and lifetime.
+      WRITE_SHORT 0 328 WRITE_LONG 4 1 WRITE_LONG 8 CBM_BONUS_TYPED_STATE
+      WRITE_LONG 0x2c 1 WRITE_ASCII 0x14 ~CBTSTATE~ #8
+      READ_ASCII 0 marker (0x30)
+      SPRINT result ~%result%%marker%~
+    END ELSE BEGIN SPRINT result ~%original%~ END
+  END
+END
+
+// Visit one resource. Recursion follows actual delivery edges, not filename prefixes.
+// A cyclic or unreasonably deep cast graph cannot be refreshed safely and fails with
+// its path. Root resources retain their name; every changed child is private.
+DEFINE_ACTION_FUNCTION cbmagic_bonus_visit
+  INT_VAR depth = 0 inherited_timing = (0 - 1)
+  STR_VAR root = ~~ source = ~~ ext = ~SPL~ kind = ~~ path = ~ ~
+  RET output touched
+BEGIN
+  OUTER_SPRINT source EVAL ~%source%~ ACTION_TO_UPPER source
+  OUTER_SPRINT output ~%source%~ OUTER_SET touched = 0
+  ACTION_IF (depth > 24 || INDEX (CASE_SENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) >= 0) BEGIN
+    FAIL ~chriz-bg-magic: cyclic/deep bonus delivery: %path%%source%.%ext%.~
+  END
+  OUTER_SPRINT path ~%path%%source%.%ext% ~
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~%source%.%ext%~) BEGIN
+    FAIL ~chriz-bg-magic: missing delivery resource %source%.%ext% in %root%.~
+  END
+  OUTER_SPRINT data ~~
+  COPY_EXISTING ~%source%.%ext%~ ~override~
+    READ_ASCII 0 data (BUFFER_LENGTH)
+  BUT_ONLY
+  ACTION_IF (~%ext%~ STRING_EQUAL ~EFF~) BEGIN
+    OUTER_SET eff_op = (0 - 1)
+    LAF cbmagic_bonus_owned STR_VAR root source ext RET owned END
+    OUTER_PATCH ~%data%~ BEGIN
+      PATCH_IF (BUFFER_LENGTH < 0x110) BEGIN PATCH_FAIL ~chriz-bg-magic: truncated EFF %source%.~ END
+      READ_ASCII 0 signature (8)
+      PATCH_IF !(~%signature%~ STRING_EQUAL ~EFF V2.0~) BEGIN PATCH_FAIL ~chriz-bg-magic: unsupported EFF %source%.~ END
+      READ_LONG 0x10 eff_op
+      // Project the V2 fields without discarding V2 - only fields from output copies.
+      LPF cbmagic_bonus_eff_v1 RET row END
+    END
+    OUTER_PATCH ~%row%~ BEGIN
+      READ_SHORT 0 op READ_SLONG 4 p1 READ_LONG 8 p2 READ_ASCII 0x14 tag (8) NULL
+      LPF cbmagic_bonus_tag INT_VAR op p1 p2 STR_VAR kind RET expected = tag END
+      PATCH_IF owned && (!(~%expected%~ STRING_EQUAL ~~) && ~%expected%~ STRING_EQUAL ~%tag%~
+        || (op = 328 && ~%tag%~ STRING_EQUAL ~CBTSTATE~)) BEGIN
+        // A decomposed private EFF is already one leaf. Its sibling marker is a
+        // separate EFF; do not decompose it again or alias its siblings' names.
+        SET touched = 0
+        PATCH_IF (op != 328) BEGIN
+          LPF cbmagic_bonus_row INT_VAR inherited_timing STR_VAR kind RET unused = result ignored = typed END
+        END
+      END ELSE BEGIN
+        LPF cbmagic_bonus_delivery INT_VAR depth inherited_timing STR_VAR root source ext kind path RET rows touched END
+      END
+    END
+    ACTION_IF touched BEGIN
+      LAF cbmagic_bonus_private STR_VAR root source ext role = ~E0~ RET first_private = private END
+      ACTION_IF !(FILE_EXISTS_IN_GAME ~%first_private%.EFF~) BEGIN
+        LAF cbmagic_bonus_eff_users STR_VAR eff = EVAL ~%source%~ RET users END
+        PRINT ~chriz-bg-magic: %source%.EFF has %users% direct spell users; isolating for %root%.~
+      END
+      OUTER_SPRINT output ~~ OUTER_SET length = STRING_LENGTH ~%rows%~
+      OUTER_FOR (r = 0; r < length / 0x30; ++r) BEGIN
+        OUTER_SPRINT role ~E%r%~
+        LAF cbmagic_bonus_private STR_VAR root source ext role RET private END
+        COPY_EXISTING ~%source%.EFF~ ~override/%private%.EFF~
+          INNER_PATCH ~%rows%~ BEGIN READ_ASCII (r * 0x30) part (0x30) END
+          LPF cbmagic_bonus_eff_overlay STR_VAR row = EVAL ~%part%~ END
+        BUT_ONLY
+        OUTER_SPRINT output ~%output% %private%~
+      END
+      OUTER_PATCH_SAVE output ~%output%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    END
+  END ELSE BEGIN
+    OUTER_PATCH_SAVE patched ~%data%~ BEGIN
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN PATCH_FAIL ~chriz-bg-magic: %source%.SPL: %reason%.~ END
+      READ_SHORT 0x68 groups
+      FOR (g = (0 - 1); g < groups; ++g) BEGIN
+        READ_LONG 0x64 ao
+        PATCH_IF (g < 0) BEGIN READ_SHORT 0x70 n END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x1e) n END
+        SET group_typed = 0
+        // Remove only our markers before reconstructing them; second application is stable.
+        FOR (i = n - 1; i >= 0; --i) BEGIN
+          READ_LONG 0x64 ao READ_LONG 0x6a fo
+          PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x20) f END
+          SET at = fo + (f + i) * 0x30
+          READ_SHORT at op READ_ASCII (at + 0x14) res (8) NULL
+          PATCH_IF (op = 328 && ~%res%~ STRING_EQUAL ~CBTSTATE~ && !(~%kind%~ STRING_EQUAL ~FAMILY~)) BEGIN
+            LPF cbmagic_delete_effect INT_VAR index = f + i END
+          END ELSE BEGIN
+            READ_ASCII at row (0x30)
+            INNER_PATCH ~%row%~ BEGIN
+              LPF cbmagic_bonus_delivery INT_VAR depth STR_VAR root source ext kind path RET rows hit = touched END
+            END
+            PATCH_IF hit BEGIN
+              SET touched = 1 SET group_typed = 1
+              LPF cbmagic_delete_effect INT_VAR index = f + i END
+              SET length = STRING_LENGTH ~%rows%~
+              FOR (r = length / 0x30 - 1; r >= 0; --r) BEGIN
+                INNER_PATCH ~%rows%~ BEGIN READ_ASCII (r * 0x30) part (0x30) END
+                LPF cbmagic_bonus_insert INT_VAR group = g position = i STR_VAR row = EVAL ~%part%~ END
+              END
+            END
+          END
+        END
+        PATCH_IF group_typed && !(~%kind%~ STRING_EQUAL ~PIERCE~) BEGIN
+          // Refresh only on recipients of this group, with the actual effect target.
+          LPF cbmagic_bonus_refresh INT_VAR group = g STR_VAR self = EVAL ~%source%~ END
+        END
+        // Pierce Magic's callback is deliberately instant; its native portrait row must
+        // instead last for the callback's fixed 30 seconds. This scans the reconstructed
+        // group, so direct and linked delivery, reordered effects, and already-converted
+        // callbacks all get the same bounded correction without touching other icons.
+        PATCH_IF (~%kind%~ STRING_EQUAL ~PIERCE~) BEGIN
+          READ_LONG 0x64 ao
+          READ_LONG 0x6a fo
+          PATCH_IF (g < 0) BEGIN
+            READ_SHORT 0x70 pn
+            READ_SHORT 0x6e pf
+          END ELSE BEGIN
+            READ_SHORT (ao + g * 0x28 + 0x1e) pn
+            READ_SHORT (ao + g * 0x28 + 0x20) pf
+          END
+          SET has_pierce_callback = 0
+          FOR (i = 0; i < pn; ++i) BEGIN
+            SET at = fo + (pf + i) * 0x30
+            READ_SHORT at op
+            READ_ASCII (at + 0x14) res (8) NULL
+            PATCH_IF (op = 402) AND (~%res%~ STRING_EQUAL_CASE ~CBMBPM~) BEGIN
+              SET has_pierce_callback = 1
+            END
+          END
+          PATCH_IF has_pierce_callback BEGIN
+            FOR (i = 0; i < pn; ++i) BEGIN
+              SET at = fo + (pf + i) * 0x30
+              READ_SHORT at op
+              READ_LONG (at + 0x08) p2
+              READ_BYTE (at + 0x0c) timing
+              READ_LONG (at + 0x0e) duration
+              PATCH_IF (op = 142) AND (p2 = 106) BEGIN
+                PATCH_IF (timing != 0) OR (duration != 30) BEGIN
+                  WRITE_BYTE (at + 0x0c) 0
+                  WRITE_LONG (at + 0x0e) 30
+                  SET touched = 1
+                END
+              END
+            END
+          END
+        END
+        PATCH_IF (~%kind%~ STRING_EQUAL ~FAMILY~) BEGIN
+          LPF cbmagic_bonus_family_anchor INT_VAR group = g RET donor END
+          PATCH_IF !(~%donor%~ STRING_EQUAL ~~) BEGIN SET touched = 1 END
+        END
+      END
+    END
+    ACTION_IF touched BEGIN
+      ACTION_IF (depth > 0) BEGIN
+        LAF cbmagic_bonus_private STR_VAR root source ext role = ~S~ RET private END
+        OUTER_SPRINT output ~%private%~
+        // Retarget self references only; unrelated spell immunities remain untouched.
+        OUTER_PATCH_SAVE patched ~%patched%~ BEGIN
+          LPF cbmagic_bonus_repoint_self STR_VAR old = EVAL ~%source%~ new = EVAL ~%output%~ END
+        END
+      END
+      // A new private payload must exist even when its bytes are unchanged.
+      // An unchanged root (or an existing private node) needs no new override.
+      ACTION_IF !(~%source%~ STRING_EQUAL_CASE ~%output%~)
+        || !(~%data%~ STRING_EQUAL ~%patched%~) BEGIN
+        COPY_EXISTING ~%source%.SPL~ ~override/%output%.SPL~
+          DELETE_BYTES 0 BUFFER_LENGTH INSERT_BYTES 0 (STRING_LENGTH ~%patched%~)
+          WRITE_ASCIIE 0 ~%patched%~ (STRING_LENGTH ~%patched%~)
+      END
+    END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_eff_v1 RET row BEGIN
+  READ_LONG 0x10 op READ_LONG 0x14 target READ_LONG 0x18 power
+  READ_LONG 0x1c p1 READ_LONG 0x20 p2 READ_LONG 0x24 timing READ_LONG 0x28 duration
+  READ_SHORT 0x2c hi READ_SHORT 0x2e lo READ_ASCII 0x30 resource (8)
+  READ_LONG 0x38 dice READ_LONG 0x3c sides READ_LONG 0x40 save READ_LONG 0x44 bonus
+  READ_LONG 0x48 special READ_LONG 0x5c flags
+  INNER_PATCH_SAVE row ~~ BEGIN
+    INSERT_BYTES 0 0x30 WRITE_SHORT 0 op WRITE_BYTE 2 target WRITE_BYTE 3 power
+    WRITE_LONG 4 p1 WRITE_LONG 8 p2 WRITE_BYTE 0xc (timing BAND 255) WRITE_BYTE 0xd (flags BAND 255)
+    WRITE_LONG 0xe duration WRITE_BYTE 0x12 hi WRITE_BYTE 0x13 lo WRITE_ASCIIE 0x14 ~%resource%~ (8)
+    WRITE_LONG 0x1c dice WRITE_LONG 0x20 sides WRITE_LONG 0x24 save WRITE_LONG 0x28 bonus WRITE_LONG 0x2c special
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_eff_overlay STR_VAR row = ~~ BEGIN
+  INNER_PATCH ~%row%~ BEGIN
+    READ_SHORT 0 op READ_LONG 4 p1 READ_LONG 8 p2 READ_ASCII 0x14 resource (8) READ_LONG 0x2c special
+    READ_BYTE 0xc timing READ_LONG 0xe duration
+  END
+  WRITE_LONG 0x10 op WRITE_LONG 0x1c p1 WRITE_LONG 0x20 p2 WRITE_ASCIIE 0x30 ~%resource%~ (8) WRITE_LONG 0x48 special
+  WRITE_BYTE 0x24 timing WRITE_LONG 0x28 duration
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_delivery
+  INT_VAR depth = 0 inherited_timing = (0 - 1)
+  STR_VAR root = ~~ source = ~~ ext = ~~ kind = ~~ path = ~~
+  RET rows touched
+BEGIN
+  READ_SHORT 0 op READ_ASCII 0 original (0x30) READ_ASCII 0x14 child (8) NULL
+  SPRINT rows ~%original%~ SET touched = 0
+  PATCH_IF (op = 146 || op = 148 || op = 326 || op = 177) && !(~%child%~ STRING_EQUAL ~~) BEGIN
+    SET child_timing = (0 - 1)
+    SPRINT child_ext ~SPL~ PATCH_IF (op = 177) BEGIN SPRINT child_ext ~EFF~ END
+    PATCH_IF (op = 177) BEGIN
+      READ_BYTE 0x0c child_timing
+      PATCH_IF (inherited_timing >= 0) BEGIN SET child_timing = inherited_timing END
+    END
+    INNER_ACTION BEGIN
+      LAF cbmagic_bonus_visit INT_VAR depth = depth + 1 inherited_timing = child_timing
+        STR_VAR root source = EVAL ~%child%~ ext = EVAL ~%child_ext%~ kind path
+        RET children = output touched END
+    END
+    PATCH_IF touched BEGIN
+      SPRINT rows ~~
+      WHILE !(~%children%~ STRING_EQUAL ~~) BEGIN
+        INNER_PATCH_SAVE child ~%children%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        INNER_PATCH_SAVE children ~%children%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        WRITE_ASCIIE 0x14 ~%child%~ #8 READ_ASCII 0 row (0x30)
+        SPRINT rows ~%rows%%row%~
+      END
+    END
+  END ELSE PATCH_IF !(~%kind%~ STRING_EQUAL ~FAMILY~) BEGIN
+    LPF cbmagic_bonus_row INT_VAR inherited_timing STR_VAR kind RET rows = result touched = typed END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_repoint_self STR_VAR old = ~~ new = ~~ BEGIN
+  READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
+  FOR (g = (0 - 1); g < ac; ++g) BEGIN
+    PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+      READ_SHORT (ao + g * 0x28 + 0x20) f READ_SHORT (ao + g * 0x28 + 0x1e) n
+    END
+    FOR (i = 0; i < n; ++i) BEGIN
+      SET at = fo + (f + i) * 0x30 READ_SHORT at op READ_ASCII (at + 0x14) res (8) NULL
+      PATCH_IF (op = 206 || op = 318 || op = 321 || op = 324) && ~%res%~ STRING_EQUAL_CASE ~%old%~ BEGIN
+        WRITE_ASCIIE (at + 0x14) ~%new%~ #8
+      END
+    END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_refresh
+  INT_VAR group = 0
+  STR_VAR self = ~~
+BEGIN
+  READ_LONG 0x64 ao READ_LONG 0x6a fo
+  READ_LONG 0x34 level
+  PATCH_IF (group < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+    READ_SHORT (ao + group * 0x28 + 0x20) f READ_SHORT (ao + group * 0x28 + 0x1e) n
+  END
+  // Preserve target - specific deliveries: an area spell can target 2 despite target=5
+  // in its ability header. Move existing self removals ahead of new effects.
+  PATCH_DEFINE_ARRAY targets BEGIN END
+  PATCH_CLEAR_ARRAY refresh_rows
+  FOR (i = n - 1; i >= 0; --i) BEGIN
+    SET at = fo + (f + i) * 0x30 READ_SHORT at op READ_BYTE (at + 2) target READ_ASCII (at + 0x14) res (8) NULL
+    PATCH_IF (op = 328 && ~%res%~ STRING_EQUAL ~CBTSTATE~) || op = 177 || op = 146 || op = 148 || op = 326 BEGIN
+      SET $targets(~%target%~) = 1
+    END
+    PATCH_IF (op = 321 && ~%res%~ STRING_EQUAL_CASE ~%self%~) BEGIN
+      SET $targets(~%target%~) = 1
+      READ_ASCII at $refresh_rows(~%target%~) (0x30)
+      LPF cbmagic_delete_effect INT_VAR index = f + i END
+    END
+  END
+  PATCH_PHP_EACH targets AS target => ignored BEGIN
+    INNER_PATCH_SAVE row ~~ BEGIN
+      INSERT_BYTES 0 0x30 WRITE_SHORT 0 321 WRITE_BYTE 2 target WRITE_BYTE 0xc 1 WRITE_BYTE 0xd 3
+      WRITE_BYTE 3 level WRITE_BYTE 0x12 100 WRITE_ASCIIE 0x14 ~%self%~ #8
+    END
+    PATCH_IF VARIABLE_IS_SET $refresh_rows(~%target%~) BEGIN SPRINT row EVAL ~%refresh_rows_%target%%~ END
+    LPF cbmagic_bonus_insert INT_VAR group position = 0 STR_VAR row END
+  END
+END
+
+// Main timed gameplay records, excluding visuals, expiry damage and fatigue.
+// A 177 wrapper supplies the effective lifetime for its external buff.
+DEFINE_PATCH_FUNCTION cbmagic_bonus_family_anchor
+  INT_VAR group = 0
+  RET donor
+BEGIN
+  SPRINT donor ~~ SET longest = (0 - 1)
+  READ_LONG 0x64 ao READ_LONG 0x6a fo
+  PATCH_IF (group < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+    READ_SHORT (ao + group * 0x28 + 0x20) f READ_SHORT (ao + group * 0x28 + 0x1e) n
+  END
+  FOR (i = 0; i < n; ++i) BEGIN
+    SET at = fo + (f + i) * 0x30 READ_SHORT at op READ_BYTE (at + 0xc) timing READ_LONG (at + 0xe) duration
+    SET anchor = (op = 0 || op = 1 || op = 18 || op = 44 || op = 54 || op = 73 || op = 98 || op = 132)
+    PATCH_IF (op = 177) BEGIN
+      READ_ASCII (at + 0x14) eff (8) NULL
+      INNER_ACTION BEGIN
+        ACTION_IF FILE_EXISTS_IN_GAME ~%eff%.EFF~ BEGIN
+          COPY_EXISTING ~%eff%.EFF~ ~override~
+            PATCH_IF (BUFFER_LENGTH >= 0x110) BEGIN
+              READ_LONG 0x10 eff_op
+              SET anchor = (eff_op = 0 || eff_op = 1 || eff_op = 18 || eff_op = 44 || eff_op = 54 || eff_op = 73 || eff_op = 98 || eff_op = 132)
+            END
+          BUT_ONLY
+        END
+      END
+    END
+    PATCH_IF anchor && (timing = 0 || timing = 10 || timing = 9) BEGIN
+      SET seconds = duration
+      PATCH_IF (timing = 10) BEGIN SET seconds = duration / 15 END
+      PATCH_IF (timing = 9) BEGIN SET seconds = 0x7fffffff END
+      PATCH_IF (seconds > longest) BEGIN READ_ASCII at donor (0x30) SET longest = seconds END
+    END
+  END
+END
+
+// Unique SPL nodes in an already isolated delivery graph, including SPLs behind EFFs.
+DEFINE_ACTION_FUNCTION cbmagic_bonus_nodes
+  INT_VAR depth = 0
+  STR_VAR source = ~~ ext = ~SPL~ path = ~ ~
+  RET nodes
+BEGIN
+  OUTER_SPRINT nodes ~~
+  ACTION_IF (depth > 24 || INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) >= 0) BEGIN
+    FAIL ~chriz-bg-magic: cyclic/deep family delivery at %source%.%ext%.~
+  END
+  OUTER_SPRINT path ~%path%%source%.%ext% ~
+  OUTER_SPRINT children ~~
+  COPY_EXISTING ~%source%.%ext%~ ~override~
+    PATCH_IF (~%ext%~ STRING_EQUAL ~EFF~) BEGIN
+      PATCH_IF (BUFFER_LENGTH < 0x110) BEGIN PATCH_FAIL ~chriz-bg-magic: truncated %source%.EFF.~ END
+      READ_LONG 0x10 op READ_ASCII 0x30 res (8) NULL
+      PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN SPRINT children ~%res%.SPL~ END
+      PATCH_IF (op = 177) BEGIN SPRINT children ~%res%.EFF~ END
+    END ELSE BEGIN
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN PATCH_FAIL ~chriz-bg-magic: %source%.SPL: %reason%.~ END
+      SPRINT nodes ~%source%~
+      READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
+      FOR (g = (0 - 1); g < ac; ++g) BEGIN
+        PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+          READ_SHORT (ao + g * 0x28 + 0x20) f READ_SHORT (ao + g * 0x28 + 0x1e) n
+        END
+        FOR (i = 0; i < n; ++i) BEGIN
+          READ_SHORT (fo + (f + i) * 0x30) op READ_ASCII (fo + (f + i) * 0x30 + 0x14) res (8) NULL
+          SPRINT suffix ~~
+          PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN SPRINT suffix ~SPL~ END
+          PATCH_IF (op = 177) BEGIN SPRINT suffix ~EFF~ END
+          PATCH_IF !(~%suffix%~ STRING_EQUAL ~~) && INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %res%.%suffix% ~ ~ %children% ~) < 0 BEGIN
+            SPRINT children ~%children% %res%.%suffix%~
+          END
+        END
+      END
+    END
+  BUT_ONLY
+  OUTER_PATCH_SAVE children ~%children%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+  OUTER_WHILE !(~%children%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE child ~%children%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE children ~%children%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    OUTER_PATCH_SAVE res ~%child%~ BEGIN REPLACE_TEXTUALLY ~\.[^.]+$~ ~~ END
+    OUTER_PATCH_SAVE suffix ~%child%~ BEGIN REPLACE_TEXTUALLY ~^.*\.~ ~~ END
+    LAF cbmagic_bonus_nodes INT_VAR depth = depth + 1 STR_VAR source = EVAL ~%res%~ ext = EVAL ~%suffix%~ path RET subnodes = nodes END
+    OUTER_WHILE !(~%subnodes%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE res ~%subnodes%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE subnodes ~%subnodes%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      ACTION_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %res% ~ ~ %nodes% ~) < 0 BEGIN OUTER_SPRINT nodes ~%nodes% %res%~ END
+    END
+  END
+  OUTER_PATCH_SAVE nodes ~%nodes%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+END
+
+// Insert only when this exact generated row is absent. This deliberately preserves
+// existing conditional protections whose target / save / duration differ.
+DEFINE_PATCH_FUNCTION cbmagic_bonus_unique
+  INT_VAR group = 0 position = 0
+  STR_VAR row = ~~
+BEGIN
+  READ_LONG 0x64 ao READ_LONG 0x6a fo
+  PATCH_IF (group < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+    READ_SHORT (ao + group * 0x28 + 0x20) f READ_SHORT (ao + group * 0x28 + 0x1e) n
+  END
+  SET exists = 0
+  FOR (i = 0; i < n; ++i) BEGIN
+    READ_ASCII (fo + (f + i) * 0x30) existing (0x30)
+    PATCH_IF (~%existing%~ STRING_EQUAL ~%row%~) BEGIN SET exists = 1 END
+  END
+  PATCH_IF !exists BEGIN LPF cbmagic_bonus_insert INT_VAR group position STR_VAR row END END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_family
+  STR_VAR symbols = ~~ label = ~~
+BEGIN
+  ACTION_CLEAR_ARRAY family_nodes
+  ACTION_CLEAR_ARRAY family_level
+  OUTER_SPRINT members ~~
+  OUTER_WHILE !(~%symbols%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE symbol ~%symbols%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+    OUTER_PATCH_SAVE symbols ~%symbols%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+    LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+    ACTION_IF !found BEGIN
+      PRINT ~chriz-bg-magic: %label% family: %symbol% absent; skipped.~
+    END ELSE ACTION_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %spell% ~ ~ %members% ~) < 0 BEGIN
+      LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind = ~FAMILY~ RET output touched END
+      LAF cbmagic_bonus_nodes STR_VAR source = EVAL ~%spell%~ RET nodes END
+      OUTER_SPRINT $family_nodes(~%spell%~) ~%nodes%~
+      COPY_EXISTING ~%spell%.SPL~ ~override~ READ_LONG 0x34 level BUT_ONLY
+      OUTER_SET $family_level(~%spell%~) = level
+      OUTER_SPRINT members ~%members% %spell%~
+    END
+  END
+  ACTION_PHP_EACH family_nodes AS s => snodes BEGIN
+    OUTER_SPRINT list ~%snodes%~
+    OUTER_WHILE !(~%list%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE node ~%list%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE list ~%list%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      COPY_EXISTING ~%node%.SPL~ ~override~
+        READ_SHORT 0x68 ac
+        FOR (g = (0 - 1); g < ac; ++g) BEGIN
+          LPF cbmagic_bonus_family_anchor INT_VAR group = g RET donor END
+          PATCH_IF !(~%donor%~ STRING_EQUAL ~~) BEGIN
+            READ_LONG 0x64 ao READ_LONG 0x6a fo
+            PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+              READ_SHORT (ao + g * 0x28 + 0x20) f READ_SHORT (ao + g * 0x28 + 0x1e) n
+            END
+            FOR (i = n - 1; i >= 0; --i) BEGIN
+              SET at = fo + (f + i) * 0x30 READ_SHORT at op READ_ASCII (at + 0x14) res (8) NULL
+              PATCH_IF (op = 206 || op = 321) BEGIN
+                SET owned = 0
+                PATCH_PHP_EACH family_nodes AS t => tnodes BEGIN
+                  PATCH_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %res% ~ ~ %tnodes% ~) >= 0 BEGIN SET owned = 1 END
+                END
+                PATCH_IF owned BEGIN LPF cbmagic_delete_effect INT_VAR index = f + i END END
+              END
+            END
+            SPRINT removal_rows ~~
+            PATCH_PHP_EACH family_nodes AS t => tnodes BEGIN
+              PATCH_IF ($family_level(~%t%~) <= $family_level(~%s%~)) BEGIN
+                SPRINT remaining ~%tnodes%~
+                PATCH_IF (~%t%~ STRING_EQUAL ~%s%~) BEGIN SPRINT remaining ~%node%~ END
+                WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+                  INNER_PATCH_SAVE other ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+                  INNER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+                  INNER_PATCH_SAVE row ~%donor%~ BEGIN
+                    WRITE_SHORT 0 321 WRITE_LONG 4 0 WRITE_LONG 8 0 WRITE_BYTE 0xc 1 WRITE_BYTE 0xd 3
+                    WRITE_LONG 0xe 0 WRITE_ASCIIE 0x14 ~%other%~ #8 WRITE_LONG 0x2c 0
+                  END
+                  SPRINT removal_rows ~%removal_rows%%row%~
+                  PATCH_IF ($family_level(~%t%~) < $family_level(~%s%~)) BEGIN
+                    INNER_PATCH_SAVE row ~%donor%~ BEGIN
+                      WRITE_SHORT 0 206 WRITE_LONG 4 0 WRITE_LONG 8 0
+                      WRITE_ASCIIE 0x14 ~%other%~ #8 WRITE_LONG 0x2c 0
+                    END
+                    LPF cbmagic_bonus_unique INT_VAR group = g position = 0 STR_VAR row END
+                  END
+                END
+              END
+            END
+            // All removals must precede newly applied protections. In particular,
+            // self refresh must not erase this casting's lower-level immunities.
+            FOR (r = STRING_LENGTH ~%removal_rows%~ / 0x30 - 1; r >= 0; --r) BEGIN
+              INNER_PATCH ~%removal_rows%~ BEGIN READ_ASCII (r * 0x30) row (0x30) END
+              LPF cbmagic_bonus_unique INT_VAR group = g position = 0 STR_VAR row END
+            END
+          END
+        END
+      BUT_ONLY
+    END
+  END
+  PRINT ~chriz-bg-magic: %label% family installed for [%members% ].~
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_runtime
+BEGIN
+  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
+  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
+  COPY ~chriz-bg-magic/lua/M_CBMBON.lua~ ~override/M_CBMBON.lua~
+    EVALUATE_BUFFER
+    PATCH_IF INDEX_BUFFER (~local PASS_STATE = %CBM_BONUS_PASS_STATE%~) < 0 || INDEX_BUFFER (~local TYPED_STATE = %CBM_BONUS_TYPED_STATE%~) < 0 BEGIN
+      PATCH_FAIL ~chriz-bg-magic: listener state stamping failed.~
+    END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_term RET term BEGIN
+  READ_SHORT 0 op READ_SLONG 4 amount READ_ASCII 0x14 tag (8) NULL
+  SPRINT type ~~ SPRINT value ~~ SPRINT term ~~
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTMORAL~) BEGIN SPRINT type ~Morale~ END
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTFAVOR~) BEGIN SPRINT type ~Favor~ END
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTLUCK~) BEGIN SPRINT type ~Luck~ END
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTDODGE~) BEGIN SPRINT type ~Dodge~ END
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTDEFLE~) BEGIN SPRINT type ~Deflection~ END
+  PATCH_IF (~%tag%~ STRING_EQUAL ~CBTCURSE~) BEGIN SPRINT type ~Curse~ END
+  PATCH_IF (op = 0) BEGIN SPRINT value ~AC~ END
+  PATCH_IF (op = 54) BEGIN SPRINT value ~THAC0~ END
+  PATCH_IF (op = 73) BEGIN SPRINT value ~damage~ END
+  PATCH_IF (op = 22) BEGIN SPRINT value ~Luck~ END
+  PATCH_IF (op = 33) BEGIN SPRINT value ~save vs. death~ END
+  PATCH_IF (op = 34) BEGIN SPRINT value ~save vs. wands~ END
+  PATCH_IF (op = 35) BEGIN SPRINT value ~save vs. polymorph~ END
+  PATCH_IF (op = 36) BEGIN SPRINT value ~save vs. breath~ END
+  PATCH_IF (op = 37) BEGIN SPRINT value ~save vs. spell~ END
+  PATCH_IF (op = 325) BEGIN SPRINT value ~all saves~ END
+  PATCH_IF !(~%type%~ STRING_EQUAL ~~ || ~%value%~ STRING_EQUAL ~~) BEGIN
+    SPRINT sign ~~ PATCH_IF (amount >= 0) BEGIN SPRINT sign ~+~ END
+    SPRINT term ~%value% %sign%%amount% (%type%); ~
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_terms
+  STR_VAR source = ~~ ext = ~SPL~ path = ~ ~
+  RET terms
+BEGIN
+  OUTER_SPRINT terms ~~ OUTER_SPRINT children ~~
+  ACTION_IF INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %source%.%ext% ~ ~%path%~) < 0 BEGIN
+    OUTER_SPRINT path ~%path%%source%.%ext% ~
+    COPY_EXISTING ~%source%.%ext%~ ~override~
+      PATCH_IF (~%ext%~ STRING_EQUAL ~EFF~) BEGIN
+        LPF cbmagic_bonus_eff_v1 RET rows = row END
+      END ELSE BEGIN
+        READ_LONG 0x64 ao READ_SHORT 0x68 ac READ_LONG 0x6a fo
+        SPRINT rows ~~
+        FOR (g = (0 - 1); g < ac; ++g) BEGIN
+          PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f READ_SHORT 0x70 n END ELSE BEGIN
+            READ_SHORT (ao + g * 0x28 + 0x20) f READ_SHORT (ao + g * 0x28 + 0x1e) n
+          END
+          READ_ASCII (fo + f * 0x30) part (n * 0x30) SPRINT rows ~%rows%%part%~
+        END
+      END
+      SET length = STRING_LENGTH ~%rows%~
+      FOR (i = 0; i < length / 0x30; ++i) BEGIN
+        INNER_PATCH ~%rows%~ BEGIN READ_ASCII (i * 0x30) part (0x30) END
+        INNER_PATCH ~%part%~ BEGIN
+          LPF cbmagic_bonus_term RET term END
+          PATCH_IF !(~%term%~ STRING_EQUAL ~~) && INDEX (CASE_SENSITIVE EXACT_MATCH ~%term%~ ~%terms%~) < 0 BEGIN
+            SPRINT terms ~%terms%%term%~
+          END
+          READ_SHORT 0 op READ_ASCII 0x14 res (8) NULL SPRINT suffix ~~
+          PATCH_IF (op = 146 || op = 148 || op = 326) BEGIN SPRINT suffix ~SPL~ END
+          PATCH_IF (op = 177) BEGIN SPRINT suffix ~EFF~ END
+          PATCH_IF !(~%suffix%~ STRING_EQUAL ~~) && INDEX (CASE_INSENSITIVE EXACT_MATCH ~ %res%.%suffix% ~ ~ %children% ~) < 0 BEGIN
+            SPRINT children ~%children% %res%.%suffix%~
+          END
+        END
+      END
+    BUT_ONLY
+    OUTER_PATCH_SAVE children ~%children%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    OUTER_WHILE !(~%children%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE child ~%children%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE children ~%children%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      OUTER_PATCH_SAVE res ~%child%~ BEGIN REPLACE_TEXTUALLY ~\.[^.]+$~ ~~ END
+      OUTER_PATCH_SAVE suffix ~%child%~ BEGIN REPLACE_TEXTUALLY ~^.*\.~ ~~ END
+      LAF cbmagic_bonus_terms STR_VAR source = EVAL ~%res%~ ext = EVAL ~%suffix%~ path RET more = terms END
+      OUTER_WHILE !(~%more%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE term ~%more%~ BEGIN REPLACE_TEXTUALLY ~; .*~ ~; ~ END
+        OUTER_PATCH_SAVE more ~%more%~ BEGIN REPLACE_TEXTUALLY ~^[^;]+; ?~ ~~ END
+        ACTION_IF INDEX (CASE_SENSITIVE EXACT_MATCH ~%term%~ ~%terms%~) < 0 BEGIN OUTER_SPRINT terms ~%terms%%term%~ END
+      END
+    END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_bonus_append_text
+  INT_VAR offset = 0x50
+  STR_VAR terms = ~~
+BEGIN
+  READ_SLONG offset ref
+  PATCH_IF (ref >= 0) BEGIN
+    GET_STRREF ref old
+    INNER_PATCH_SAVE clean ~%old%~ BEGIN
+      REPLACE_TEXTUALLY ~[%LNL%%MNL%]*Typed spell effects: [^%LNL%%MNL%]*~ ~~
+    END
+    SPRINT new ~%clean%%LNL%%LNL%Typed spell effects: %terms%Values may depend on caster level and target.~
+    PATCH_IF !(~%old%~ STRING_EQUAL ~%new%~) BEGIN
+      SET ref = RESOLVE_STR_REF (~%new%~) WRITE_LONG offset ref
+    END
+  END ELSE BEGIN PATCH_PRINT ~chriz-bg-magic: %SOURCE_FILE% has no description at %offset%; bonus types not added there.~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_text STR_VAR spell = ~~ BEGIN
+  LAF cbmagic_game_language RET lang END
+  ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+    LAF cbmagic_bonus_terms STR_VAR source = EVAL ~%spell%~ RET terms END
+    ACTION_IF !(~%terms%~ STRING_EQUAL ~~) BEGIN
+      COPY_EXISTING ~%spell%.SPL~ ~override~ LPF cbmagic_bonus_append_text STR_VAR terms END BUT_ONLY
+      LAF cbmagic_scrolls_of STR_VAR spell RET scrolls END
+      OUTER_PATCH_SAVE scrolls ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+      OUTER_WHILE !(~%scrolls%~ STRING_EQUAL ~~) BEGIN
+        OUTER_PATCH_SAVE scroll ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+        OUTER_PATCH_SAVE scrolls ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+        COPY_EXISTING ~%scroll%.ITM~ ~override~
+          LPF cbmagic_bonus_append_text INT_VAR offset = 0x50 STR_VAR terms END
+          LPF cbmagic_bonus_append_text INT_VAR offset = 0x54 STR_VAR terms END
+        BUT_ONLY
+      END
+    END
+  END ELSE BEGIN PRINT ~chriz-bg-magic: %spell% bonus descriptions unavailable for language %lang%.~ END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus_pierce_magic BEGIN
+  // EEex's common bootstrap is installed in override in both supported layouts.
+  // This is an install - time choice; removing EEex later requires reinstalling us.
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~M___EEex.lua~) BEGIN
+    PRINT ~chriz-bg-magic: Pierce Magic keeps its existing resistance effect: EEex bootstrap absent.~
+  END ELSE BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol = ~WIZARD_PIERCE_MAGIC~ RET spell = resref found END
+    ACTION_IF !found BEGIN PRINT ~chriz-bg-magic: Pierce Magic absent; skipped.~ END ELSE BEGIN
+      LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind = ~PIERCE~ RET output touched END
+      ACTION_IF touched BEGIN
+        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
+          find = ~will be lowered by 1% per level of the caster~
+          replace = ~will be lowered by half its current value, rounded down, with a minimum reduction of 10 and a maximum of 40 percentage points~ END
+        LAF cbmagic_update_texts INT_VAR quiet = 1 STR_VAR spell label = ~Pierce Magic~
+          find = ~For example, if this spell were cast[^.]+dispelled\. ~ replace = ~~ END
+        LAF cbmagic_update_texts STR_VAR spell label = ~Pierce Magic~
+          find = ~Magic Resistance remains lowered for 1 round per level of the caster~
+          replace = ~Magic Resistance remains lowered for 5 rounds~ END
+      END ELSE BEGIN PRINT ~chriz-bg-magic: Pierce Magic has no remaining additive MR penalty to replace.~ END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_bonus
+BEGIN
+  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
+  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
+  LAF cbmagic_bonus_runtime END
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
+    WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
+    CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => MORALE CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
+    CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
+    WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
+    CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION
+    WIZARD_SPIRIT_ARMOR => SAVES CLERIC_BARKSKIN => SAVES
+    CLERIC_DOOM => CURSE CLERIC_CURSE => CURSE CLERIC_UNHOLY_BLIGHT => CURSE
+  END
+  ACTION_PHP_EACH typed_spells AS symbol => kind BEGIN
+    LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+    ACTION_IF !found BEGIN
+      PRINT ~chriz-bg-magic: bonus types: %symbol% absent; skipped.~
+    END ELSE BEGIN
+      COPY_EXISTING ~%spell%.SPL~ ~override~ LPF cbmagic_spl_valid RET valid reason END BUT_ONLY
+      ACTION_IF !valid BEGIN
+        WARN ~chriz-bg-magic: bonus types: %symbol% (%spell%) unchanged: %reason%.~
+      END ELSE BEGIN
+        LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind RET output touched END
+        ACTION_IF touched BEGIN
+          LAF cbmagic_bonus_text STR_VAR spell END
+        END ELSE BEGIN
+          PRINT ~chriz-bg-magic: bonus types: %symbol% (%spell%) has no eligible typed values; unchanged.~
+        END
+      END
+    END
+  END
+  LAF cbmagic_family STR_VAR label = ~Transformation~
+    symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
+  LAF cbmagic_family STR_VAR label = ~Regeneration~
+    symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
+  LAF cbmagic_bonus_pierce_magic END
+END

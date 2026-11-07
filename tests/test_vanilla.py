@@ -783,6 +783,8 @@ def _vanilla_biff(**replace):
                         dict(opcode=142, target=2, power=3, p2=21, duration=72, resist_dispel=3),
                         dict(opcode=174, target=2, power=3, timing=4, duration=72, resist_dispel=3, resource="EFF_M08"),
                         dict(opcode=139, target=2, power=3, p1=14041, timing=1, resist_dispel=3),
+                        dict(opcode=328, target=2, power=3, p2=65, duration=72, resist_dispel=3),
+                        dict(opcode=282, target=2, power=3, p1=4, p2=9, duration=72, resist_dispel=3),
                     ],
                 )
             ],
@@ -1123,15 +1125,17 @@ def vanilla_batch_on_vanilla_shaped_spells(work, weidu):
     s_soo = _read_spl_ext(g, "SPPR312")
     soo_effs = s_soo["abilities"][0]["effects"]
     soo_ops = [f["opcode"] for f in soo_effs]
-    check(44 not in soo_ops and 97 not in soo_ops and 142 not in soo_ops, f"SPPR312 ops: {soo_ops}")
-    check(141 in soo_ops and 174 in soo_ops and 139 in soo_ops, f"SPPR312 visuals kept: {soo_ops}")
+    check(all(op not in soo_ops for op in (44, 97, 139, 142, 282, 328)), f"SPPR312 ops: {soo_ops}")
+    check(141 in soo_ops and 174 in soo_ops, f"SPPR312 visuals kept: {soo_ops}")
     op318_soo = [f for f in soo_effs if f["opcode"] == 318 and f["resource"] == "SPPR312A"]
     check(len(op318_soo) == 2 and {f["p1"] for f in op318_soo} == {18, 75}, f"SPPR312 op318: {op318_soo}")
     op146_soo = [f for f in soo_effs if f["opcode"] == 146 and f["resource"] == "SPPR312A"]
     check(len(op146_soo) == 1 and op146_soo[0]["p2"] == 1, f"SPPR312 op146: {op146_soo}")
     s_sub = _read_spl_ext(g, "SPPR312A")
     sub_ops = [f["opcode"] for f in s_sub["abilities"][0]["effects"]]
-    check(sub_ops == [44, 97, 142], f"SPPR312A ops: {sub_ops}")
+    check(sub_ops == [44, 97, 142, 139, 328, 282], f"SPPR312A ops: {sub_ops}")
+    check(321 not in sub_ops and all(op != 321 for op in soo_ops[:soo_ops.index(318)]),
+          f"SPPR312 gate has a premature self-removal: {soo_ops}")
     check("Strength is not lowered" in g.tlk(s_soo["desc"]), f"SPPR312 desc: {g.tlk(s_soo['desc'])}")
 
     # Row L. Sequencers and Contingencies (SPWI420, SPWI617, SPWI710, SPWI809, SPWI908): Universal school + text
@@ -1223,8 +1227,13 @@ def vanilla_batch_alternate_layouts_and_preservation(work, weidu):
     check((struct.unpack_from("<I", fb_raw, 0x18)[0] & 0x40) == 0x40, "FBLADE magical flag")
     check(struct.unpack_from("<I", fb_raw, 0x60)[0] == 2, "FBLADE enchantment 2 preserved")
 
-    # Verify Heal kept faster casting time 3 (and was not copied to override)
-    check(g.file("override/SPPR607.SPL") is None, "SPPR607 with faster ct=3 should not be overwritten")
+    # Record cleanup adds only its stale-icon removers; the earlier mod's faster casting
+    # time and unrelated opcode remain intact.
+    s = _read_spl_ext(g, "SPPR607")
+    effects = s["abilities"][0]["effects"]
+    check(s["abilities"][0]["casting_time"] == 3, f"SPPR607 casting time: {s}")
+    check(any(f["opcode"] == 132 for f in effects), f"SPPR607 unrelated effect: {effects}")
+    check({f["p2"] for f in effects if f["opcode"] == 240} == {6, 101}, f"SPPR607 record cures: {effects}")
 
 
 @test

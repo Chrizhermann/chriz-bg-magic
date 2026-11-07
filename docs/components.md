@@ -6,12 +6,126 @@ move to the Chriz script engine later. Values not named here stay as in the base
 ## Layout
 
 One component for now, `0` (label `chriz-bg-magic-main`). It calls one function per
-decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`); any of
+decided change (the modules in `chriz-bg-magic/lib/`); any of
+decided change (`chriz-bg-magic/lib/cbmagic_fixes.tpa`, `cbmagic_vanilla.tpa`,
+`cbmagic_sr.tpa`, `cbmagic_scs.tpa`, `cbmagic_more.tpa`, `cbmagic_record.tpa`); any of
 them can move to a component of its own without changes. The user-facing layout is
 Christopher's decision.
 
-None of the changes below needs EEex. They work on BG2:EE and EET (built and checked on
-2.7.3.0).
+The target is BG2:EE and EET 2.7.3.0. Comparing typed bonuses and the new Pierce Magic
+resistance rule need EEex v1.3.1. The remaining changes work without EEex. The bonus batch
+has offline coverage; its in-game acceptance checks are still pending.
+
+## Spell bonus types (`cbmagic_bonus`)
+
+This pass runs last in component 0, using each spell's final values after the other
+changes. For each statistic and type, the largest positive modifier and the most
+negative modifier contribute together. Different types combine. Suppressed modifiers
+remain on the creature, so they can contribute again when the stronger effect ends.
+The same rules apply to party members and enemies. Equipment and untyped effects keep
+their existing stacking behavior.
+
+| Type | Spells | Affected values |
+| --- | --- | --- |
+| Morale | Emotion: Courage, Emotion: Hope, Righteous Wrath of the Faithful, Blood Rage, Animal Rage | THAC0, damage and saving throws |
+| Favor | Bless, Prayer, Recitation; Chant's saving throws | THAC0, damage and saving throws where supplied by the spell; includes penalties |
+| Luck | Luck; Chant's Luck modifier | Luck and Luck's saving throws; includes penalties |
+| Dodge | Blur, Defensive Harmony | Positive AC modifiers and saving throws |
+| Deflection | Entropy Shield, Aura of Flaming Death; Spirit Armor and Barkskin | Positive AC modifiers and saving throws; Spirit Armor and Barkskin contribute only their saves |
+| Curse | Doom, Curse, Unholy Blight | Negative THAC0, damage, saving throw and Luck modifiers |
+
+Base AC still uses the game's existing best-value rule. AC penalties, attributes,
+resistances, spell failure, Greater Malison and Slow are outside this system. Temporary
+HP still accumulates between Courage and Righteous Wrath. Extra attacks, including
+Righteous Wrath's interaction with Haste, are deferred.
+
+Every typed spell refreshes its own effects on recast. Bless, Chant and Luck retain their
+existing amounts and durations when their built-in nonstacking effects are decomposed;
+Bless also retains its +5 morale modifier. Bad Chant retains its Luck penalty. Existing
+save and skill modifiers remain separate. The Champion's Strength effect is retained.
+
+Each typed value is listed with its type in the English spell and scroll descriptions.
+An appended list covers varying caster-level values and conditional payloads without
+replacing unrelated description text. New strings are allocated; shared old strings are
+preserved. Missing descriptions and unsupported languages are reported in the log.
+Optional IWD spells are located by their installed symbols; absence is informational.
+Changed linked payloads use private copies, preserving other users of the original data.
+
+The EEex listener verifies a per-rebuild marker before changing statistics and stops
+after ten errors. Without EEex, correction is inactive and different spells accumulate
+normally; self-refresh still works. This batch has synthetic installer and Lua runtime
+coverage, not completed live acceptance.
+
+External effects need an additional runtime step: the game keeps their delivery wrapper
+on the creature and executes the payload internally. The listener reads the payload only
+after the wrapper reports successful execution, retaining the game's eligibility checks.
+The wrapper also determines the payload's effective lifetime. This path was checked
+against the 2.7.3.0 executable and independent mocks; its live acceptance is pending.
+It reads the installed payload amounts: a separate EEex mutator that changes only the
+transient decoded child's amount is outside this path's verified compatibility.
+
+## Exclusive spell families (`cbmagic_family`)
+
+Within each family, a higher-level spell replaces and temporarily excludes lower-level
+members. At equal level, the new casting replaces the old one. Levels come from the
+installed spells, and recasting a member refreshes it. Removing an old family member
+removes its whole spell effect, including linked payloads.
+
+- **Transformation:** Tenser's Transformation, Divine Power, Righteous Magic,
+  Champion's Strength, Blood Rage and Animal Rage.
+- **Regeneration:** Regenerate, Mass Regenerate and Trollish Fortitude. Both this mod's
+  Mass Regenerate and an optional installed spell with that symbol participate.
+
+These exclusions last as long as the main buff and retain its dispellability. All
+removals run before the new protections and buff. These families work without EEex.
+
+## Pierce Magic (`cbmagic_bonus_pierce_magic`)
+
+The resistance reduction is half the target's current Magic Resistance, rounded down,
+with a minimum of 10 and maximum of 40 percentage points, lasting 5 rounds. For example,
+10, 20, 50 and 100 MR produce reductions of 10, 10, 25 and 40 points. The spell's other
+effects, targeting and protection interactions are preserved.
+
+The installer selects this behavior when the EEex bootstrap resource `M___EEex.lua`
+exists. Without it, Pierce Magic keeps its existing resistance effect and text, and the
+installer logs that choice. Adding or removing EEex requires reinstalling the component.
+The selected implementation uses EEex to read current resistance at impact and applies
+one timed reduction; it does not recalculate the reduction during its duration.
+
+## Bonus acceptance checks
+
+`tests/test_bonus.py` covers the installer with fabricated data shaped like the supported
+spells, including alternate symbol assignments, effect layouts and shared external
+payloads. `tests/bonus_runtime.lua` runs under both LuaJIT and Lua 5.3 through `lupa`.
+The disposable-lab runner `tests/lab/run_batches.py --only bonus` adds installed-spell
+checks using the runner's normal path arguments. It has not been run for this batch.
+
+The report keeps save/reload, rest, area transitions, an actual equipped item, normal
+spellbook casting/projectiles, a character-sheet screenshot and a separate installation
+without EEex as explicit manual checks. Direct spell application and an untyped synthetic
+modifier do not establish those cases. No game or reference installation is modified by
+the offline tests.
+
+## Healing (`cbmagic_healing.tpa`)
+
+- Cure Light Wounds is `1d8 + 5` at casting time 4; optional IWD Cure Moderate Wounds is
+  `2d8 + 4` and one casting-time unit faster; Cure Medium, Serious and Critical Wounds are
+  `2d8 + 7` at 4, `3d8 + 7` at 6, and `4d8 + 12` at 7. Mass Cure keeps its effect and has
+  casting time 4.
+- Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll
+  and their decided faster casting times. Their ordinary targets keep the original direct
+  spell or touch-charge delivery, saving throw and unrelated effects. The optional IWD
+  Mass Cause Light Wounds keeps its native roll, casting time and save rule.
+- Cause Wounds, IWD Mass Cause Light Wounds and Harm heal undead instead of damaging them.
+  The source damage is blocked for undead before it can run (opcode 324, `GENERAL =
+  UNDEAD`); a private healing payload is then cast only for undead through the complementary
+  opcode-318 guard. For touch spells this happens in the created charge item, not in the
+  parent spell. A charge item shared by another spell is privately cloned and only this
+  spell's creation effect is retargeted. Harm retains its effect on non-undead, has casting
+  time 7, and heals undead completely.
+- Optional IWD symbols absent from `SPELL.IDS` log a normal skip. Every changed English
+  spell description and every actual scroll description must match the expected base text;
+  a mismatch stops the install rather than leaving a false description.
 
 ## Spell Revisions installed
 
@@ -139,6 +253,45 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 - School set to Conjuration (`2`, Diviner exclusion); description and scroll updated.
 - Creatures that do not breathe are immune: undead (`GENERAL = UNDEAD`, SPLPROT row 1) and
   races `GOLEM`, `ELEMENTAL` and `SLIME`.
+
+## Character Record entries (`cbmagic_record_base_game`)
+
+The Character Record reflects the conditions actually applied by base-game spells. This
+pass changes only portrait-icon entries and their `STATDESC` labels; it does not alter the
+underlying gameplay effect, target, saving throw, duration, or a condition's cure.
+
+- Mislabelled entries are corrected for Wraithform, Wild-surge Minor Globe, Protection
+  From Good, Shadow Form, Defensive Stance, Mimic Web, and Spell Deflection. Stinking
+  Cloud uses the sleep effect's native entry rather than a separately timed icon, including
+  private payloads belonging to the spell.
+- Missing entries are added beside the existing effects for Blur, Physical Mirror, Divine
+  Favor, lowered fire/electrical resistance, Symbol, Pain, Selune's Blessing, the listed
+  Wish outcomes, Jester/False Dawn confusion where it targets an enemy, and Nahal's
+  Wildmagic. New named entries use private copies of the matching state icon.
+- Death Ward, Enhanced Bard Song, Conjure Fire Elemental, and Dolorous Decay use the
+  lifetime or dispellability of their own status effect. Salt Crystals relies on its native
+  stun entry instead of a duplicate icon.
+- Exaltation, poison cures, Heal, Remove Paralysis, Greater Restoration and the named Wish
+  outcomes remove separately added Record rows when they cure the corresponding condition.
+  Cure markers follow self-only abilities but otherwise target the recipient.
+- The base Record labels for rows 55, 8 and 112 use new strings, `Stunned`, `Blinded`, and
+  `Deafened`; shared dialog strings are never changed. Missing spells are silently skipped.
+
+Every match is by opcode and parameter within an ability. Unrelated effects, additional
+abilities, and other users of a native icon stay intact. A second install recognizes
+matching entries and does not add another one.
+
+## Record entries that follow a state (`cbmagic_record_live`, `lua/M_CBMREC.lua`)
+
+A fixed entry would stay after a state ends early, so these follow the state at runtime. No spell
+changes; EEex is required, without it they are left out.
+
+- Invisible, Improved Invisibility, Sanctuary, Mirror Image and Reflected Image are listed while the
+  state lasts, from any source, also items.
+- Shield of the Archons, Minor Spell Deflection and Minor Spell Turning show their own name in place
+  of the big spell's row, until the last level is spent. With the big spell active at the same time,
+  the big spell's row stays.
+- Only party members: nobody else has a record.
 
 ## Power Word: Sleep (`cbmagic_vanilla_power_word_sleep`)
 
@@ -389,6 +542,23 @@ Every decided SCS-style spell change is implemented in our own library (`cbmagic
 - **Summon Insects, Insect Plague, Creeping Doom (`cbmagic_scs_insect_plague`):** main spells strip their own repeating damage (`opcode 272`) and deliver all damage and effects through their subspells; spell failure allows a per-round save vs. breath (at 0, -2, and -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them (`op206`); Stoneskin holds off the secondary effects while skins remain (each damage tick strips a skin); items and spells granting immunity to normal weapons (`op120 p2=2`) block and remove them; Death Spell (`SPWI605`) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help.
 - **Nature's Beauty (`cbmagic_scs_natures_beauty`):** both humanoid slay (`opcode 55`, save vs. spell +3) and blindness are moved to a schoolless area subspell (`CBMGNB1.SPL`, `target = 5`, `projectile = 159`, so True Sight does not dispel it via school removal and a single effect list decides both death and blindness): on a failed save, humanoids die and targets suffer permanent blindness; on a successful save, targets are blinded for 3 rounds.
 - **Lesser Restoration:** stays cleric-only (`0x20 = 0x8000`) and otherwise vanilla for now; attribute-drain removal is deferred to the EEex module (`opcode 402` reading the timed effect list without rewriting spell/item files).
+
+## Additional decided spell changes (`chriz-bg-magic/lib/cbmagic_more.tpa`)
+
+- **Priest Protection From Cold (`cbmagic_more_protection_from_cold`) and Protection From Acid (`cbmagic_more_protection_from_acid`):**
+  - Two new priest spells for both clerics and druids (`0x20 = 0x0000`) added via `ADD_SPELL`, using ability location `2` (spell book) and base-game graphics.
+  - **Protection From Cold** (`CLERIC_CBMAGIC_PROTECTION_FROM_COLD`, Priest level 3): built with the same duration scaling (`3 rounds + 1 round/level`, levels 1-20, 24-138 seconds), casting time (6), touch range (1), school (Abjuration), secondary type (`SpecificProtections`), self-refresh (`opcode 321`), spell state (`BUFF_PRO_EFFECTS` = 65), visuals (`ICrmpari` + RGB fade `61`), and expiry sound (`EFF_E04`) as Priest level 3 Protection From Fire (`SPPR306`), granting +100% normal cold resistance (`opcode 28`) and +80% magical cold resistance (`opcode 85`), with base-game cold icons (`SPWI320C` / `SPWI320B`), portrait icon `25` (`Protection From Cold`), and status string `7565`.
+  - **Protection From Acid** (`CLERIC_CBMAGIC_PROTECTION_FROM_ACID`, Priest level 4): built with the same duration scaling (`5 rounds/level`, abilities at level 1 and levels 8-18, 210-540 seconds), casting time (7), touch range (1), school (Abjuration), secondary type (`SpecificProtections`), spell state (`BUFF_PRO_EFFECTS` = 65), visuals (`ICrmpari` + RGB fade `61`), and expiry sound (`EFF_E04`) as Priest level 4 Protection From Lightning (`SPPR407`), setting acid resistance to 100% (`opcode 27`, `parameter2 = 1`, which covers both normal and magical acid since the engine has no separate magical acid stat), with base-game acid icons (`SPWI517C` / `SPWI517B`) and portrait icon `24` (`Protection From Acid`).
+- **Dispelling Screen (`cbmagic_more_dispelling_screen`):**
+  - Replaces Spell Immunity (`SPWI510`) on Wizard level 5 (and its scroll `SCRL6S.ITM`, adding `2510 WIZARD_DISPELLING_SCREEN` to `SPELL.IDS` alongside `WIZARD_SPELL_IMMUNITY`) with Spell Revisions' Dispelling Screen: lasts 5 turns (300 seconds), affects the caster and allies in a 15-ft party-only area (`projectile = 158`, `INAREAPA`), and protects each recipient against one Dispel/Remove Magic (`opcode 101` against `opcode 58` plus string suppression for `14056`) or one Breach (`opcode 206` against `SPWI513B`).
+  - Breach (`SPWI513`, and Wish Breach `SPWISH26` / `SPWISH38` if present) is split into `SPWI513B.SPL` (original Breach payload) + `SPWI513C.SPL` (`opcode 221` removing secondary type `cbm_DispelScreen`), and non-self Dispel/Remove Magic abilities on spells and items receive a trailing `opcode 221` for `cbm_DispelScreen`, so one Breach or one Dispel Magic is absorbed and then strips the screen.
+  - Pierce Shield (`SPWI805`) and Spellstrike (`SPWI903`) strip `cbm_DispelScreen` via `opcode 221` without being absorbed, and their descriptions and scrolls (`SCRL9A`, `SCRL9M`) name Dispelling Screen instead of Spell Immunity.
+  - Spell Immunity's school-selection menu (`opcode 214` / `SPWI510.2DA`) is removed, and its 8 hidden school subspells (`SPWI590`..`SPWI597`) are redirected to cast `SPWI510` (`opcode 146`), so any creature or AI script that memorised or casts `SPWI510` or `SPWI590`..`SPWI597` casts Dispelling Screen.
+- **Nahal's Reckless Dweomer (`cbmagic_more_nahals_reckless_dweomer`):**
+  - Stays a very strong spell as in the base game, except it loses Aura Cleansing: ability target is changed from `7` (caster-instant, bypassing `CGameSprite::Spell`'s round aura check) to `5` (caster, normal spell action) across all abilities so casting Nahal's Reckless Dweomer obeys the normal 1-spell-per-round aura timer, and any explicit `opcode 188` (Cleanse Aura) effect is removed while preserving all other effects and ability breakpoints.
+- **Improved Haste (`cbmagic_more_improved_haste`) and Haste / Slow mutual cancellation (`cbmagic_more_haste_cancels_slow`):**
+  - **Improved Haste (`SPWI613`, scroll `SCRL7Q.ITM`)**: becomes the party buff of Spell Revisions, built cleanly without `opcode 16` so there is no second speed clock. Keeps all 9 ability headers (`min_level` 1, 13..20), uses Area target (`4`), range 30 ft., casting time 6, party-friendly 15-ft radius projectile `158` (`INAREAPA`), and lasts 1 turn (60 seconds), dispellable (`sectype = 13` `NON-COMBAT`, `resist_dispel = 3`). Grants +6 movement rate (`opcode 176`), +1 attack per round (`opcode 1`), +2 THAC0 (`opcode 54`), +2 Armor Class (`opcode 0`), and +2 Saving Throws vs. Breath (`opcode 36`), with portrait icon `110` (`Improved Haste`), status string `14023` (`Hasted`), Alteration visual, RGB fade, and sounds `EFF_M28` / `EFF_M29`. Ends any running Slow (`opcode 221` for `cbm_Slow` + `opcode 240` for icon 41) or normal Haste (`opcode 221` for `cbm_Haste` + `opcode 240` for icon 38), makes recipients immune to Slow for its duration (`opcode 101` against `opcode 40`, `opcode 169` for icon 41, `opcode 267` for Slow strings, `opcode 206` against Slow spells, and `HASTE_IMMUNITY` in `SPLSTATE.IDS` blocking extracted Slow subspells), and prevents cumulative stacking with Haste and itself (`opcode 206` + `HASTE_IMMUNITY`).
+  - **Haste and Slow cancel each other (`cbmagic_more_haste_cancels_slow`)**: follows SCS `haste_cancels_slow.tpa` across all spells and items with timed `opcode 16` (Haste) or `opcode 40` (Slow) in their abilities. Haste payloads (including `opcode 93` fatigue and companion icons/strings/sounds) are extracted into `cbm_Haste`-sectype subspells and Slow payloads (including AC/THAC0 penalties and companion icons/strings/sounds) into `cbm_Slow`-sectype subspells. Haste on a slowed target displays `"Slow cancelled by Haste"` (`CBMNEG40.SPL`), blocks the Haste (and its fatigue) from starting, and removes `cbm_Slow`; Slow on a hasted target displays `"Haste cancelled by Slow"` (`CBMNEG16.SPL`), blocks the Slow from starting, and removes `cbm_Haste`. Normal Haste stays vanilla in every other way (bonus, duration, fatigue).
 
 ## Descriptions
 

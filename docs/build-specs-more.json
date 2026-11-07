@@ -1,0 +1,30 @@
+{
+ "about": "English specs and build status of the more-batch decisions (cbmagic_more.tpa), by decision-page row. Same format as docs/build-specs.json.",
+ "rows": {
+  "arcane.haste_slow": {
+   "resrefs": ["SPWI305", "SPWI312", "SPWI613", "SCRL7Q"],
+   "parts": [
+    {"spec": "Haste and Slow cancel each other across spells and items as in SCS (haste_cancels_slow.tpa): Haste on a slowed target displays 'Slow cancelled by Haste', removes the Slow (sectype cbm_Slow), and does not start Haste or its fatigue; Slow on a hasted target displays 'Haste cancelled by Slow', removes the Haste (sectype cbm_Haste), and does not start Slow. Haste stays vanilla in every other way (bonus, duration, fatigue).", "status": "done"},
+    {"spec": "Improved Haste (SPWI613 and scroll SCRL7Q) becomes the party buff of Spell Revisions, built cleanly without opcode 16 so there is no second speed clock: keeps all 9 ability headers (min_level 1, 13..20), Area target (4), range 30, casting time 6, party-friendly 15-ft radius projectile 158 (INAREAPA), duration 1 turn (60s), dispellable (sectype 13 NON-COMBAT, resist_dispel 3), granting +6 movement rate (opcode 176), +1 APR (opcode 1), +2 THAC0 (opcode 54), +2 AC (opcode 0), +2 Saving Throws vs. Breath (opcode 36), curing any active Slow (opcode 221 cbm_Slow + opcode 240 icon 41), granting immunity to Slow for 60s (opcode 101 p2=40, opcode 169 p2=41, opcode 267 strings, opcode 206 against Slow spells, and HASTE_IMMUNITY splstate blocking extracted Slow subspells), and preventing stacking with Haste and itself.", "status": "done"}
+   ]
+  },
+  "arcane.level1.nahals_reckless_dweomer": {
+   "resrefs": ["SPWI124"],
+   "parts": [
+    {"spec": "Stays vanilla except it loses Aura Cleansing: ability target is changed from 7 (Caster, instant, ignore aura and casting time) to 5 (Caster, normal spell action) so casting Nahal's Reckless Dweomer obeys the normal 1-spell-per-round aura timer, and any explicit opcode 188 (Cleanse Aura) effect is removed.", "status": "done"}
+   ]
+  },
+  "arcane.spell_shield_anti_magic": {
+   "resrefs": ["SPWI510", "SPWI590", "SPWI591", "SPWI592", "SPWI593", "SPWI594", "SPWI595", "SPWI596", "SPWI597", "SPWI513", "SPWI513B", "SPWI513C", "SPWI805", "SPWI903", "SCRL6S", "SCRL9A", "SCRL9M"],
+   "parts": [
+    {"spec": "Dispelling Screen replaces Spell Immunity (SPWI510) on Wizard level 5 (and its scroll SCRL6S.ITM): lasts 5 turns (300 seconds), protects the caster and allies in a 15-ft party-only area (projectile 158 INAREAPA) against one Dispel/Remove Magic (opcode 58) or one Breach (SPWI513, split into SPWI513B payload and SPWI513C secondary-type removal), and is removed by Pierce Shield (SPWI805) and Spellstrike (SPWI903) without absorbing them. Spell Immunity's school-selection menu is removed and its 8 school subspells (SPWI590..SPWI597) redirect to SPWI510 so existing scripts and creatures cast Dispelling Screen.", "status": "done"}
+   ]
+  },
+  "divine.elemental_protections": {
+   "resrefs": ["SPPR306", "SPPR407"],
+   "parts": [
+    {"spec": "Base-game priest Protection from Fire (SPPR306, level 3) and Protection from Lightning (SPPR407, level 4) stay at their vanilla levels; two new priest spells for clerics and druids are added via ADD_SPELL: Protection From Cold on level 3 (CLERIC_CBMAGIC_PROTECTION_FROM_COLD, built like SPPR306 with +100% normal cold resistance op 28 and +80% magical cold resistance op 85 for 3 rounds + 1 round/level across levels 1-20, icons SPWI320C/SPWI320B, portrait icon 25, visual ICrmpari) and Protection From Acid on level 4 (CLERIC_CBMAGIC_PROTECTION_FROM_ACID, built like SPPR407 with 100% acid resistance op 27 p2=1 for 5 rounds/level across levels 1 and 8-18, icons SPWI517C/SPWI517B, portrait icon 24, visual ICrmpari).", "status": "done"}
+   ]
+  }
+ }
+}

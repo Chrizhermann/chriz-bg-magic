@@ -103,4 +103,198 @@ function P.clear(i, list)
     return true
 end
 
+-- Bonus probes always resolve a fresh sprite, including after a manual save reload.
+local function bonus_sprite(who)
+    return assert(type(who) == "number" and party(who) or named(who), "bonus probe: missing sprite")
+end
+
+-- Opcode 177 runs its EFF internally; that child is absent from the timed list.
+-- This independent read-only probe inspects the resource, not the bonus listener.
+local function bonus_external_payload(wrapper, row)
+    local effect, seen, chain = wrapper, {}, {}
+    while effect.m_effectId == 177 do
+        local res = effect.m_res:get():upper()
+        assert(res ~= "" and not seen[res], "bonus probe: empty or cyclic external effect")
+        assert(#chain < 32, "bonus probe: external effect chain exceeds 32 links")
+        seen[res] = true
+        chain[#chain + 1] = res
+        -- EFF demand returns CGameEffectBase. Never mutate or retain the userdata.
+        effect = assert(EEex_Resource_Demand(res, "EFF"), "bonus probe: missing EFF " .. res)
+    end
+    return { op = effect.m_effectId, src = row.src, tag = effect.m_res:get():upper(),
+        p1 = effect.m_effectAmount, p2 = effect.m_dWFlags, dur = row.dur, dt = row.dt,
+        external_chain = chain }
+end
+
+function P.bonus_snapshot(who)
+    local s = bonus_sprite(who)
+    local out = P.stats(who)
+    out.saves = {}
+    for _, id in ipairs({9, 10, 11, 12, 13}) do out.saves[#out.saves + 1] = EEex_Sprite_GetStat(s, id) end
+    out.time = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_worldTime.m_gameTime
+    out.effects = {}
+    EEex_Utility_IterateCPtrList(s.m_timedEffectList, function(e)
+        local row = {
+            op = e.m_effectId, src = e.m_sourceRes:get():upper(), tag = e.m_res:get():upper(),
+            p1 = e.m_effectAmount, p2 = e.m_dWFlags, dur = e.m_duration, dt = e.m_durationType,
+        }
+        out.effects[#out.effects + 1] = row
+        if row.op == 177 then
+            row.done, row.initialized = e.m_done, e.m_effectAmount4
+            local active = (row.dt == 4096 and row.dur > out.time)
+                or row.dt == 1 or row.dt == 2 or row.dt == 9
+            -- Failed IDS/CheckAdd matches and finished children mark the wrapper done.
+            if active and row.done == 0 and row.initialized and row.initialized ~= 0 then
+                local ok, payload = pcall(bonus_external_payload, e, row)
+                if ok then row.external = payload else row.external_error = tostring(payload) end
+            end
+        end
+    end)
+    return out
+end
+
+-- Apply the installed spell to a sprite directly. This tests its effects and nested
+-- deliveries; projectile targeting and normal spellbook casting remain separate checks.
+function P.bonus_apply(who, res)
+    assert(res:match("^[%w_#]+$") and #res <= 8, "bonus probe: invalid spell resource")
+    local s = bonus_sprite(who)
+    EEex_Action_QueueResponseStringOnAIBase(string.format('ApplySpellRES("%s",Myself)', res), s)
+    return true
+end
+
+-- The enemy is the caster, so Prayer's ally/enemy filtering uses the other side.
+function P.bonus_enemy_prayer(who, target, res)
+    assert(res:match("^[%w_#]+$") and #res <= 8, "bonus probe: invalid spell resource")
+    local s, t = bonus_sprite(who), bonus_sprite(target)
+    EEex_Action_QueueResponseStringOnAIBase(
+        string.format('ReallyForceSpellPointRES("%s",[%d.%d])', res, t.m_pos.x, t.m_pos.y), s)
+    return true
+end
+
+function P.bonus_clear(who, sources)
+    local s = bonus_sprite(who)
+    for _, res in ipairs(sources) do
+        EEex_GameObject_ApplyEffect(s, { effectID = 321, res = res, durationType = 1,
+            sourceID = s.m_id, sourceTarget = s.m_id })
+    end
+    return true
+end
+
+-- Shorten only already active timed effects for the expiry checks. The engine then
+-- expires them normally; no cast or removal is used when observing the weaker bonus.
+function P.bonus_expire(who, sources, seconds)
+    local s, want, changed = bonus_sprite(who), {}, 0
+    for _, res in ipairs(sources) do want[res:upper()] = true end
+    local deadline = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_worldTime.m_gameTime + seconds * 15
+    EEex_Utility_IterateCPtrList(s.m_timedEffectList, function(e)
+        if want[e.m_sourceRes:get():upper()] and e.m_durationType == 4096 then
+            e.m_duration = deadline
+            changed = changed + 1
+        end
+    end)
+    return changed
+end
+
+function P.bonus_fx(who, op, amount, mode, tag, state, seconds)
+    local s = bonus_sprite(who)
+    EEex_GameObject_ApplyEffect(s, { effectID = op, effectAmount = amount, dwFlags = mode,
+        res = tag, m_sourceRes = "CBMQLAB", durationType = 0, duration = seconds or 180,
+        sourceID = s.m_id, sourceTarget = s.m_id })
+    if state then
+        EEex_GameObject_ApplyEffect(s, { effectID = 328, effectAmount = 1, dwFlags = state, special = 1,
+            m_sourceRes = "CBMQLAB", durationType = 0, duration = seconds or 180,
+            sourceID = s.m_id, sourceTarget = s.m_id })
+    end
+    return true
+end
+
+-- A zero AC modifier requests a real engine rebuild without changing the measured values.
+function P.bonus_rebuild(who)
+    return P.bonus_fx(who, 0, 0, 0, "", nil, 1)
+end
+
+-- The spell book answers no console: only a few menus poll it. The book calls this function
+-- every frame, so polling from it keeps the console alive while the book is open.
+function P.book_console()
+    if not CBMP_MAGE_PAGE then
+        CBMP_MAGE_PAGE = magePageInfo
+        magePageInfo = function()
+            EEexRemote.Poll()
+            return CBMP_MAGE_PAGE()
+        end
+    end
+    return true
+end
+
+-- What the Contingency, Spell Sequencer and Spell Trigger screens list for this spell level.
+function P.book_list(level)
+    local rows, before = {}, currentSpellLevel
+    currentSpellLevel = level
+    for _, v in ipairs(filterContingencyMageSpells()) do
+        rows[#rows + 1] = { res = v.resref, master = v.masterResref, name = Infinity_FetchString(v.name),
+                            icon = v.icon, desc = v.description }
+    end
+    currentSpellLevel = before
+    return { mode = bookMode, screen = contingencyResRef, slots = contingencyMaxSpells, rows = rows }
+end
+
+-- Chooses spells as a click on the list does; each pick is { resref, master resref }.
+function P.book_pick(picks)
+    for _, pick in ipairs(picks) do mageScreen:SequenceSpell(pick[1], pick[2]) end
+    refreshMageBook()
+    return #bottomSpells
+end
+
+function P.book_done()
+    mageScreen:DoneSequencingSpells()
+    e:SelectEngine(worldScreen)
+    return true
+end
+
+function P.force(who, res)
+    EEex_Action_QueueResponseStringOnAIBase(string.format('ReallyForceSpellRES("%s",Myself)', res), party(who))
+    return true
+end
+
+-- The rows the character record lists: one entry per row, however many effects ask for it.
+function P.icons(who)
+    local s = type(who) == "number" and party(who) or named(who)
+    local out = {}
+    EEex_Utility_IterateCPtrList(s.m_portraitIcons, function(v) out[#out + 1] = v.icon end)
+    table.sort(out)
+    return out
+end
+
+-- Leaves `amount` spell levels in every effect of this opcode, so that one spell spends them.
+function P.spend(who, opcode, amount)
+    local n = 0
+    EEex_Utility_IterateCPtrList(party(who).m_timedEffectList, function(e)
+        if e.m_effectId == opcode then e.m_effectAmount = amount n = n + 1 end
+    end)
+    return n
+end
+
+-- The Record of portrait 1: opened, read and closed. Its screen polls no console either.
+function P.record_open()
+    if not CBMP_NEXT_LEVEL then
+        CBMP_NEXT_LEVEL = getNextLevelString
+        getNextLevelString = function()
+            EEexRemote.Poll()
+            return CBMP_NEXT_LEVEL()
+        end
+    end
+    Infinity_OnPortraitLClick(1)
+    e:GetActiveEngine():OnLeftPanelButtonClick(4)
+    return true
+end
+
+function P.record_read()
+    local out = {}
+    for _, v in pairs(characters[currentID].statusEffects) do
+        out[#out + 1] = { text = Infinity_FetchString(v.strRef), bam = v.bam, current = v.current }
+    end
+    e:SelectEngine(worldScreen)
+    return out
+end
+
 return true

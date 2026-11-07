@@ -174,6 +174,8 @@ def game(splprot=SPLPROT_ROWS, **replace):
         "RACE.IDS": ie.make_ids(RACES),
         "SPLPROT.2DA": ie.make_2da(["STAT", "VALUE", "RELATION"], splprot),
         "SPWI414.SPL": spirit_armor(),
+        "SPWI414A.SPL": ie.make_spl(1, 1, [{"effects": [
+            fx(opcode=12, target=1, p2=MAGIC, timing=1, dice=2, sides=4, save=ie.SAVE_SPELL)]}]),
         "SPWI318.SPL": minor_spell_deflection(),
         "SPWI215.SPL": web(),
         "SCRL6G.ITM": scroll("SPWI318", MSD_DESC),

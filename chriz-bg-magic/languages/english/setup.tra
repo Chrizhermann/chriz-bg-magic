@@ -40,6 +40,64 @@
 @20027 = ~This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting.~
 @20028 = ~If a party member has a Strength score higher than this (either naturally, or through a magical item), then <PRO_HISHER> Strength is lowered to 18/75\.~
 @20029 = ~If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered.~
+
+// Healing batch.  These are deliberately English search expressions as well as their
+// replacements: a description that no longer says what the mechanic needs to say must
+// stop the install instead of quietly advertising the wrong spell.
+@60000 = ~Casting Time: [0-9]+~
+@60001 = ~Casting Time: 4~
+@60002 = ~Casting Time: 6~
+@60003 = ~Casting Time: 7~
+@60010 = ~causes 8 points of wound or other injury damage to the creature's body to be healed\.~
+@60011 = ~causes 1d8 + 5 points of wound or other injury damage to the creature's body to be healed.~
+@60012 = ~heals 11 Hit Points~
+@60013 = ~heals 2d8 + 4 Hit Points~
+@60014 = ~heals 14 points of wound or other injury damage from the creature's body\.~
+@60015 = ~heals 2d8 + 7 points of wound or other injury damage from the creature's body.~
+@60016 = ~heals 17 points of wound or other injury damage to the creature's body\.~
+@60017 = ~heals 3d8 + 7 points of wound or other injury damage to the creature's body.~
+@60018 = ~heals 27 points of damage from wounds or other injuries\.~
+@60019 = ~heals 4d8 + 12 points of damage from wounds or other injuries.~
+@60020 = ~8 points~
+@60021 = ~1d8 + 5 points~
+@60022 = ~11 points~
+@60023 = ~2d8 + 4 points~
+@60024 = ~14 points~
+@60025 = ~2d8 + 7 points~
+@60026 = ~17 points~
+@60027 = ~3d8 + 7 points~
+@60028 = ~27 points~
+@60029 = ~4d8 + 12 points~
+@60030 = ~This spell has no effect on undead, constructs, or extraplanar creatures\.~
+@60031 = ~Undead are healed for 1d8 + 5 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60032 = ~There is no Saving Throw\.~
+@60033 = ~There is no Saving Throw. Undead are healed for 1d8 + 5 Hit Points.~
+@60034 = ~Undead are healed for 2d8 + 4 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60035 = ~There is no Saving Throw. Undead are healed for 2d8 + 4 Hit Points.~
+@60036 = ~Undead are healed for 2d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60037 = ~There is no Saving Throw. Undead are healed for 2d8 + 7 Hit Points.~
+@60038 = ~Undead are healed for 3d8 + 7 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60039 = ~There is no Saving Throw. Undead are healed for 3d8 + 7 Hit Points.~
+@60040 = ~Undead are healed for 4d8 + 12 Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60041 = ~There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.~
+@60042 = ~Undead are healed for 1d8 + 1/level Hit Points. This spell has no effect on constructs or extraplanar creatures.~
+@60043 = ~reduces the target to 1 Hit Point\.~
+@60044 = ~reduces the target to 1 Hit Point. Undead are healed completely instead.~
+
+// --- Character Record batch strings (@60050+) ------------------------------------------
+
+@60050 = ~Wraithform~
+@60051 = ~Protection From Good~
+@60052 = ~Shadow Form~
+@60053 = ~Defensive Stance~
+@60054 = ~Blur~
+@60055 = ~Divine Favor~
+@60056 = ~Fire Resistance Lowered~
+@60057 = ~Electrical Resistance Lowered~
+@60058 = ~Enhanced Attributes~
+@60059 = ~Stunned~
+@60060 = ~Blinded~
+@60061 = ~Deafened~
 @20030 = ~(Invocation/Evocation)~
 // Kept / decided SR batch strings (@40000+).
 @40000 = ~until 24 hours have passed~
@@ -149,6 +207,8 @@ When cast, this spell grants the druid and all party members within sight steady
 @40078 = ~Range: 30 ft.~
 @40079 = ~Improved Invisibility, and Shadow Door\.~
 @40080 = ~Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility.~
+@40081 = ~Divine Power~
+@40082 = ~Faerie Fire~
 // SCS batch description updates (@30000+).
 @30001 = ~Each orb will do damage to the target against which there is no save\(.*\n?\)*~
 @30002 = ~Each orb will do damage to the target against which there is no save and an effect against which the target must save vs. Spell:
@@ -255,4 +315,84 @@ When cast, this spell grants the druid and all party members within sight steady
 
 @30073 = ~Saving Throw vs\. Breath Weapon or run away in fear~
 @30074 = ~Saving Throw vs. Spell at -2 or run away in fear~
+@30075 = ~Pain~
+@30076 = ~Insect Swarm~
 
+// --- More batch strings (@50000+) -------------------------------------------------------
+
+@50000 = ~Protection From Cold~
+@50001 = ~Protection From Cold
+(Abjuration)
+
+Level: 3
+Sphere: Protection, Elemental (Water)
+Range: Touch
+Duration: 3 rounds + 1 round/level
+Casting Time: 6
+Area of Effect: 1 creature
+Saving Throw: None
+
+The effects of a Protection From Cold spell last no longer than 3 rounds plus 1 round per level of the caster. When the spell is cast, it confers complete invulnerability to normal cold and to exposure to magical cold (icy dragon breath, winter wolf breath, spells such as Chill Touch, Cone of Cold, Ice Storm, and so on), absorbing 80% of all the damage dealt by such magical sources.~
+
+@50002 = ~Protection From Acid~
+@50003 = ~Protection From Acid
+(Abjuration)
+
+Level: 4
+Sphere: Protection, Elemental (Earth)
+Range: Touch
+Duration: 5 rounds/level
+Casting Time: 7
+Area of Effect: 1 creature
+Saving Throw: None
+
+When the spell is cast, it confers complete invulnerability to all acid-based attacks, whether magical or non-magical, such as Melf's Acid Arrow, acid breath, or a creature's special attacks. The protection will last for the duration of the spell or until successfully dispelled.~
+
+@50004 = ~Dispelling Screen~
+@50005 = ~Dispelling Screen
+(Abjuration)
+
+Level: 5
+Range: 0
+Duration: 5 turns
+Casting Time: 5
+Area of Effect: 15-ft. radius
+Saving Throw: None
+
+This spell wards the caster and nearby allies with a protective screen against magic removal for 5 turns. For each protected creature, the screen absorbs and negates the next Dispel Magic, Remove Magic, or Breach effect that strikes them, then dissipates. Higher-level magic attacks such as Pierce Shield and Spellstrike strip Dispelling Screen along with other protections without being absorbed by it.~
+
+@50006 = ~Dispelling Screen Dissipates~
+
+@50007 = ~Spell Immunity, Globe Of Invulnerability~
+@50008 = ~Dispelling Screen, Globe Of Invulnerability~
+
+@50009 = ~Improved Haste~
+@50010 = ~Improved Haste
+(Alteration)
+
+Level: 6
+Range: 30 ft.
+Duration: 1 turn
+Casting Time: 6
+Area of Effect: 15-ft. radius
+Saving Throw: None
+
+When this spell is cast, all allied creatures within a 15-ft. radius are infused with magical speed for 1 turn. Affected creatures move at twice their normal rate (+6 movement rate), gain 1 extra attack per round, and receive a +2 bonus to THAC0, Armor Class, and Saving Throws vs. Breath. Unlike the 3rd-level Haste spell, Improved Haste does not fatigue the recipients when its duration expires.
+
+Improved Haste dispels any Slow effects on the recipients and renders them immune to Slow for its duration. Its effects are dispellable and are not cumulative with Haste or other similar magical speed effects.~
+
+@50011 = ~Haste cancelled by Slow~
+@50012 = ~Slow cancelled by Haste~
+
+
+
+
+// --- Record entries that follow a state (@61000+) ---
+@61000 = ~Invisible~
+@61001 = ~Improved Invisibility~
+@61002 = ~Sanctuary~
+@61003 = ~Mirror Image~
+@61004 = ~Reflected Image~
+@61005 = ~Shield of the Archons~
+@61006 = ~Minor Spell Deflection~
+@61007 = ~Minor Spell Turning~

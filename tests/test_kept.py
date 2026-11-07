@@ -221,6 +221,7 @@ def sr_biff(extra=None):
     base["SPELL.IDS"] = ie.make_ids(fx.SPELL_SYMBOLS + ARCANE_SYMBOLS + DIVINE_SYMBOLS)
     base["PROJECTL.IDS"] = ie.make_ids([(158, "INAREA"), (159, "SPARBLPA"), (168, "SPARBLNP"), (189, "HOLD"), (337, "ohvrnp")])
     base["STATDESC.2DA"] = ie.make_2da(["DESCRIPTION", "BAM_FILE"], [("206", ["10554", "SPPR313D"])])
+    base["STATES.BAM"] = ie.make_states_bam()
     # SPWI206 Invisibility
     base["SPWI206.SPL"] = ie.make_spl(1, 2, [{"target": 1, "effects": [
         fx.fx(opcode=20, power=2, timing=0, dispel=3, duration=7200),
@@ -386,7 +387,7 @@ def sr_biff(extra=None):
             fx.fx(opcode=44, target=1, power=4, p1=18, p2=1, timing=0, dispel=3, duration=6 * lvl),
             fx.fx(opcode=54, target=1, power=4, p1=21 - lvl, p2=1, timing=0, dispel=3, duration=6 * lvl),
             fx.fx(opcode=18, target=1, power=4, p1=lvl, p2=3, timing=0, dispel=3, duration=6 * lvl),
-            fx.fx(opcode=142, target=1, power=4, p2=84, timing=0, dispel=3, duration=6 * lvl),
+            fx.fx(opcode=142, target=1, power=4, p2=60, timing=0, dispel=3, duration=6 * lvl),
         ]} for ml, lvl in ((1, 7), (12, 12), (13, 13), (20, 20))
     ], name=HPOWER_NAME, desc=HPOWER_DESC)
     # SPPR413 Negative Plane Protection
@@ -452,7 +453,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     s = parse_spl_full(g.file("override/SPWI209.SPL"))
     efx = s["abilities"][0]["effects"]
     check(efx[0]["opcode"] == 321 and efx[0]["resource"] == "SPWI209", f"SPWI209 refresh: {efx[0]}")
-    check([e["duration"] for e in efx[1:]] == [90, 90, 90], f"SPWI209 durations: {efx[1:]}")
+    check([e["duration"] for e in efx[1:]] == [90, 90, 90, 90], f"SPWI209 durations: {efx[1:]}")
     check("Duration: 15 rounds" in g.tlk(s["desc"]) and "next 15 rounds" in g.tlk(s["desc"]), f"SPWI209 text: {g.tlk(s['desc'])}")
 
     # 3. Clairvoyance
@@ -530,6 +531,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         (39, 0, 6, 80, 61, 1, -4),
         (175, 2, 6, 100, 81, 1, -4),
     ], f"SPWI711 outcomes: {outcomes}")
+    check(not any(e["opcode"] == 142 and e["p2"] == 14 for e in efx), f"SPWI711 legacy sleep icon: {efx}")
     check("save vs. Spell at -4 or suffer one of the following random effects for 1 round" in g.tlk(s["desc"]),
           f"SPWI711 text: {g.tlk(s['desc'])}")
 
@@ -541,7 +543,12 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     for idx, ab in enumerate(s["abilities"]):
         exp_dur = 30 + (idx + 1) * 6
         check(ab["casting_time"] == 5, f"SPPR101 ct: {ab['casting_time']}")
-        check([e["duration"] for e in ab["effects"]] == [exp_dur, exp_dur, 3], f"SPPR101 ab {idx}: {ab['effects']}")
+        check([e["opcode"] for e in ab["effects"]] == [321, 54, 328, 73, 328, 23, 174, 215],
+              f"SPPR101 ab {idx} final bonus conversion: {ab['effects']}")
+        check([e["duration"] for e in ab["effects"]] == [0] + [exp_dur] * 6 + [3],
+              f"SPPR101 ab {idx}: {ab['effects']}")
+        check([(e["p1"], e["resource"]) for e in ab["effects"] if e["opcode"] in (54, 73)]
+              == [(1, "CBTFAVOR"), (1, "CBTFAVOR")], f"SPPR101 typed bonuses: {ab['effects']}")
     check("Casting Time: 5" in g.tlk(s["desc"]) and "Duration: 5 rounds + 1 round/level (maximum 25 rounds)" in g.tlk(s["desc"]),
           f"SPPR101 text: {g.tlk(s['desc'])}")
 
@@ -554,7 +561,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     check([a["min_level"] for a in s["abilities"]] == [1, 3, 5, 7, 9], f"SPPR113 levels: {[a['min_level'] for a in s['abilities']]}")
     for step, ab in enumerate(s["abilities"]):
         check(ab["casting_time"] == 1, f"SPPR113 ct: {ab['casting_time']}")
-        ops = [e["opcode"] for e in ab["effects"]]
+        ops = [e["opcode"] for e in ab["effects"] if e["opcode"] != 328]
         check(ops[:5] == [321, 321, 321, 54, 73] and 0 not in ops, f"SPPR113 ops: {ops}")
         check(all(e["save"] == 0 and e["bonus"] == 0 for e in ab["effects"][:3]), f"SPPR113 321 saves: {ab['effects'][:3]}")
         check(all(e["save"] == 1 and e["bonus"] == -step for e in ab["effects"][3:]), f"SPPR113 ab {step} saves: {ab['effects'][3:]}")
@@ -580,11 +587,17 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
           f"Faerie Fire AC penalty: {ab['effects']}")
     check(any(e["opcode"] == 101 and e["p2"] == 20 and e["duration"] == 24 for e in ab["effects"]),
           f"Faerie Fire invisibility immunity: {ab['effects']}")
+    statdesc_text = g.file("override/STATDESC.2DA").decode("latin-1")
+    faerie_icon = next(int(line.split()[0]) for line in statdesc_text.splitlines() if "CBMIFAF" in line)
+    check(any(e["opcode"] == 142 and e["p2"] == faerie_icon and e["duration"] == 24 and e["save"] == 1
+              for e in ab["effects"]), f"Faerie Fire portrait row: {ab['effects']}")
+    states = g.file("override/CBMIFAF.BAM")
+    cycle_off = struct.unpack_from("<I", states, 0x0c)[0] + struct.unpack_from("<H", states, 0x08)[0] * 12
+    check(struct.unpack_from("<HH", states, cycle_off) == (128 + 66, (128 + 65) * 3), "Faerie Fire BAM cycle 0")
     check(g.tlk(s["name"]) == "Faerie Fire" and "pale violet glow" in g.tlk(s["desc"]), "Faerie Fire strings")
 
     # 18. Aid: op 129 replaced by op 18 (min(L,10) + 1d8 with L=max(ml,3)), duration 60*L, self-refresh op 321, STATDESC row 207 with SPPR150D.
-    statdesc_text = g.file("override/STATDESC.2DA").decode("latin-1")
-    check("207" in statdesc_text and "SPPR150D" in statdesc_text, f"STATDESC.2DA:\n{statdesc_text}")
+    aid_icon = next(int(line.split()[0]) for line in statdesc_text.splitlines() if "SPPR150D" in line)
     s = parse_spl_full(g.file("override/SPPR201.SPL"))
     check(len(s["abilities"]) == 20, f"SPPR201 abilities: {len(s['abilities'])}")
     for idx, ab in enumerate(s["abilities"]):
@@ -597,7 +610,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         hp_fx = [e for e in ab["effects"] if e["opcode"] == 18]
         check(len(hp_fx) == 1 and hp_fx[0]["p1"] == exp_hp and hp_fx[0]["p2"] == 0 and hp_fx[0]["duration"] == exp_dur
               and hp_fx[0]["dice"] == 1 and hp_fx[0]["sides"] == 8, f"SPPR201 ab {idx} op18: {hp_fx}")
-        check(any(e["opcode"] == 142 and e["p2"] == 207 and e["duration"] == exp_dur for e in ab["effects"]),
+        check(any(e["opcode"] == 142 and e["p2"] == aid_icon and e["duration"] == exp_dur for e in ab["effects"]),
               f"SPPR201 ab {idx} icon: {ab['effects']}")
         check(any(e["opcode"] == 215 and e["duration"] == 6 for e in ab["effects"]),
               f"SPPR201 ab {idx} SPHLYBLS duration kept: {ab['effects']}")
@@ -650,6 +663,12 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
         check(ab["casting_time"] == 4, f"SPPR412 ct: {ab['casting_time']}")
         c_fx = [(e["p1"], e["p2"], e["dispel"], e["resource"]) for e in ab["effects"] if e["opcode"] == 177]
         check(c_fx == [(3, 5, 3, exp_res), (15, 5, 3, exp_res), (14, 5, 3, exp_res)], f"SPPR412 177: {c_fx}")
+    divine_icon = next(int(line.split()[0]) for line in statdesc_text.splitlines() if "CBMIDVP" in line)
+    check(all(any(e["opcode"] == 142 and e["p2"] == divine_icon for e in ab["effects"]) for ab in s["abilities"]),
+          f"SPPR412 Divine Power row: {s['abilities']}")
+    states = g.file("override/CBMIDVP.BAM")
+    cycle_off = struct.unpack_from("<I", states, 0x0c)[0] + struct.unpack_from("<H", states, 0x08)[0] * 12
+    check(struct.unpack_from("<HH", states, cycle_off) == (60 + 66, (60 + 65) * 3), "Divine Power BAM cycle 0")
     eff_a = g.file("override/CBM412A.EFF")
     eff_b = g.file("override/CBM412B.EFF")
     check(eff_a is not None and struct.unpack_from("<ii", eff_a, 0x1C) == (6, 0), "CBM412A.EFF")
@@ -708,10 +727,14 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     s = parse_spl_full(g.file("override/SPPR711.SPL"))
     check(s["priest_excl"] == 0x4000, f"SPPR711 priest_excl: {s['priest_excl']:#x}")
     for ab, exp_dur in zip(s["abilities"], (84, 96, 120)):
-        check(ab["effects"][0]["opcode"] == 321 and ab["effects"][0]["resource"] == "SPPR711", f"SPPR711 321: {ab['effects'][0]}")
-        check(ab["effects"][1]["opcode"] == 98 and ab["effects"][1]["p1"] == 2 and ab["effects"][1]["duration"] == exp_dur,
-              f"SPPR711 98: {ab['effects'][1]}")
-        check([e["duration"] for e in ab["effects"][1:]] == [exp_dur, exp_dur, exp_dur], f"SPPR711 durs: {ab['effects']}")
+        check({e["resource"] for e in ab["effects"][:2] if e["opcode"] == 321} == {"SPPR711", mr_res},
+              f"SPPR711 leading family removals: {ab['effects'][:2]}")
+        check(any(e["opcode"] == 206 and e["resource"] == mr_res and e["duration"] == exp_dur
+                  for e in ab["effects"]), f"SPPR711 lower-level family protection: {ab['effects']}")
+        payload = [e for e in ab["effects"] if e["opcode"] not in (206, 321)]
+        check(payload[0]["opcode"] == 98 and payload[0]["p1"] == 2 and payload[0]["duration"] == exp_dur,
+              f"SPPR711 98: {payload[0]}")
+        check([e["duration"] for e in payload] == [exp_dur, exp_dur, exp_dur], f"SPPR711 durs: {payload}")
     check("Duration: 1 round/level" in g.tlk(s["desc"]) and "2 Hit Points per second, and multiple castings do not stack." in g.tlk(s["desc"])
           and "12 Hit Points per round for 14 rounds" in g.tlk(s["desc"]), f"SPPR711 text: {g.tlk(s['desc'])}")
 
@@ -727,7 +750,7 @@ def kept_arcane_and_divine_spells_on_vanilla_shaped_inputs(work, weidu):
     check(any(e["opcode"] == 321 and e["resource"] == "SPWI415" for e in ab["effects"]), "SPPR713 SPWI415 removal")
     check(any(e["opcode"] == 93 and e["target"] == 1 and e["p1"] == 7 for e in ab["effects"]), "SPPR713 fatigue kept")
     icons_240 = {e["p2"] for e in ab["effects"] if e["opcode"] == 240}
-    check({13, 55, 14, 124, 35, 8, 112}.issubset(icons_240), f"SPPR713 op240 icons: {icons_240}")
+    check({13, 55, 14, 124, 35, 8, 112, 2, 3, 6, 7, 44, 47, 48, 101, 126}.issubset(icons_240), f"SPPR713 op240 icons: {icons_240}")
     check("cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep." in g.tlk(s["desc"]),
           f"SPPR713 text: {g.tlk(s['desc'])}")
 
@@ -875,8 +898,8 @@ def kept_spells_variations_and_broken_inputs(work, weidu):
     check([a["min_level"] for a in s["abilities"]] == [1, 3, 5, 6, 7, 9],
           f"SPPR113 var min_levels: {[a['min_level'] for a in s['abilities']]}")
     for ab, exp_bonus in zip(s["abilities"], (0, -1, -2, -2, -3, -4)):
-        check([(e["opcode"], e["save"], e["bonus"], e["resource"]) for e in ab["effects"]] ==
-              [(54, 1, exp_bonus, ""), (73, 1, exp_bonus, ""), (215, 1, exp_bonus, "MODDOOM")],
+        check([(e["opcode"], e["save"], e["bonus"], e["resource"]) for e in ab["effects"] if e["opcode"] not in (321, 328)] ==
+              [(54, 1, exp_bonus, "CBTCURSE"), (73, 1, exp_bonus, "CBTCURSE"), (215, 1, exp_bonus, "MODDOOM")],
               f"SPPR113 var ab {ab['min_level']}: {ab['effects']}")
 
     # Fallback projectile IDs when PROJECTL.IDS is empty: Invisibility Sphere=159, Oracle=338, Silence=169, Faerie Fire=190, Mass Regenerate=337.

@@ -21,10 +21,26 @@ run `setup-chriz-bg-magic` with WeiDU.
 Revisions, the two are not compatible, and the installer warns if it finds Spell
 Revisions.
 
+## Spell bonus types
+
+Selected spell bonuses have a type: Morale, Favor, Luck, Dodge, Deflection or Curse.
+For each statistic, one type contributes its strongest bonus and its strongest penalty.
+Different types combine, and untyped equipment and other effects still contribute.
+A weaker spell resumes contributing when a stronger one expires. Casting the same spell
+again refreshes it. Transformation and Regeneration each allow only one member: a higher
+spell level wins, and a newer casting wins a tie.
+
+Comparing bonus types requires EEex v1.3.1. Without EEex, bonuses from different spells
+accumulate normally; self-refresh and the two exclusive families still work. Pierce Magic
+uses its new resistance reduction only when EEex is present at installation. Reinstall
+this component after adding or removing EEex. Hit-point and extra-attack bonuses are not
+compared by type in this build.
+
 ## Tests
 
 `python tests/run_tests.py --weidu <path to weidu.exe>` runs the installer against small
-made-up game folders. No game files are needed.
+made-up game folders. No game files are needed. The Lua runtime tests require the Python
+package `lupa`, including its `lua53` and `luajit21` modules.
 
 ## Credits
 

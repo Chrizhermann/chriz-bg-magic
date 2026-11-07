@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Selected spells now use Morale, Favor, Luck, Dodge, Deflection and Curse bonus types.
+  EEex compares each statistic separately: a type contributes its strongest bonus and
+  strongest penalty, while different types and untyped effects combine. Weaker effects
+  resume when stronger ones expire. Spell and scroll descriptions identify typed values.
+- Typed spells refresh themselves on recast, including their linked payloads. Shared
+  external effects are isolated before patching. Optional IWD spells are found by symbol
+  and skipped with an informational line when absent.
+- Transformation and Regeneration spells form separate exclusive families: higher spell
+  level wins; a new casting replaces an equal-level member. These rules work without EEex.
+- With EEex installed, Pierce Magic reduces current Magic Resistance by half, rounded down
+  and limited to 10-40 percentage points, for 5 rounds. Its other effects stay unchanged.
+  Without EEex at installation, its existing resistance effect is retained.
+- Added offline installer and LuaJIT/Lua 5.3 tests, plus the disposable-lab `bonus` group.
+  Live acceptance remains pending. HP and extra-attack type comparisons remain deferred.
+- Healing: Cure Light, Moderate (IWD), Medium, Serious and Critical Wounds now use the
+  decided dice rolls and casting times; Mass Cure casts in 4. Cause Wounds uses the matching
+  rolls and heals undead instead of damaging them while preserving direct and touch-charge
+  delivery. Optional IWD Mass Cause Light Wounds also heals undead; Harm casts in 7 and
+  heals undead completely. Changed spell and scroll descriptions match the new behavior.
 - Spirit Armor: a new casting replaces the old one, so its save bonus and its expiry
   damage no longer stack with themselves.
 - Minor Spell Deflection stops only spells up to level 4 (was 7).
@@ -87,6 +106,19 @@
   blindness: permanent blindness and humanoid death on failed save, 3 rounds blind on
   successful save).
 - Descriptions that named the old behaviour are updated (English).
+- Additional decided spell changes (`cbmagic_more.tpa`): new priest spells Protection From
+  Cold (level 3, `CLERIC_CBMAGIC_PROTECTION_FROM_COLD`, built like Priest level 3
+  Protection From Fire) and Protection From Acid (level 4,
+  `CLERIC_CBMAGIC_PROTECTION_FROM_ACID`, built like Priest level 4 Protection From
+  Lightning) for clerics and druids via `ADD_SPELL`; Dispelling Screen replacing Spell
+  Immunity (`SPWI510`, `SCRL6S`, and redirecting `SPWI590`..`SPWI597`, lasting 5 turns in a
+  15-ft party area to absorb one Dispel Magic or one Breach, removed by Pierce Shield and
+  Spellstrike); Nahal's Reckless Dweomer (`SPWI124`) without Aura Cleansing (ability
+  target 7 -> 5 so it respects the round aura timer); Improved Haste (`SPWI613`, `SCRL7Q`)
+  rebuilt as a 1-turn party buff in a 15-ft radius without `opcode 16` (+6 movement rate, +1
+  APR, +2 THAC0/AC/Save vs. Breath, dispellable, cures and grants immunity to Slow); and
+  SCS-style mutual cancellation between Haste and Slow across spells and items while keeping
+  vanilla Haste's bonus, duration, and fatigue untouched.
 - Installer frame for BG2:EE and EET, shared library, and the exported list of decided
   changes (`docs/build-list.json`) with its generator. With Spell Revisions installed the
   installer warns that the two do not go together.

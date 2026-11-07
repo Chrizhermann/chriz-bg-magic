@@ -154,9 +154,12 @@ BEGIN
     FOR (i = 0; i < n; ++i) BEGIN
       SET fx = fx_off + (first + i) * 0x30
       READ_SHORT fx op
+      READ_ASCII (fx + 0x14) resource (8) NULL
       READ_BYTE (fx + 0x0c) timing
       READ_LONG (fx + 0x0e) dur
-      PATCH_IF (op = anchor_opcode) AND (timing = 0) AND (old_dur < 0) BEGIN
+      SET is_anchor = (op = anchor_opcode)
+      PATCH_IF (anchor_opcode = 133 && op = 22 && ~%resource%~ STRING_EQUAL ~CBTLUCK~) BEGIN SET is_anchor = 1 END
+      PATCH_IF is_anchor AND (timing = 0) AND (old_dur < 0) BEGIN
         SET old_dur = dur
       END
     END
@@ -165,10 +168,15 @@ BEGIN
       FOR (i = 0; i < n; ++i) BEGIN
         SET fx = fx_off + (first + i) * 0x30
         READ_SHORT fx op
+        READ_ASCII (fx + 0x14) resource (8) NULL
         READ_BYTE (fx + 0x0c) timing
         READ_LONG (fx + 0x0e) dur
         SET is_owned = 0
         PATCH_IF (op = anchor_opcode) AND (timing = 0) BEGIN
+          SET is_owned = 1
+        END ELSE PATCH_IF (anchor_opcode = 133 && timing = 0
+          && ((op = 22 && ~%resource%~ STRING_EQUAL ~CBTLUCK~)
+            || (op = 328 && ~%resource%~ STRING_EQUAL ~CBTSTATE~))) BEGIN
           SET is_owned = 1
         END ELSE PATCH_IF ((op = 142) AND (timing = 0))
                        OR ((op = 174) AND (timing = 4))
@@ -228,6 +236,61 @@ BEGIN
         END ELSE BEGIN
           SET icon_row = max_id + 1
           INSERT_2DA_ROW rows 3 ~%icon_row% %desc_ref% %bam%~
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// Copies the requested STATES.BAM cycle into cycle 0 of a private BAM for a custom
+// STATDESC row. The character-record UI only renders cycle 0 of a named BAM, while
+// the built-in STATES.BAM uses cycle row + 65. A malformed, unavailable, or too-short
+// source remains a harmless unmodified private copy (or no copy when the resource is
+// absent), and is named in the install log instead of risking a corrupt BAM.
+DEFINE_ACTION_FUNCTION cbmagic_state_icon
+  INT_VAR row = 0
+  STR_VAR resref = ~~
+BEGIN
+  ACTION_IF (row < 0) OR (~%resref%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: cannot make a state icon with row %row% and BAM %resref%; left out.~
+  END ELSE ACTION_IF !(FILE_EXISTS_IN_GAME ~states.bam~) BEGIN
+    PRINT ~chriz-bg-magic: STATES.BAM is unavailable; %resref%.BAM was not made.~
+  END ELSE BEGIN
+    COPY_EXISTING ~states.bam~ ~override/%resref%.bam~
+      PATCH_IF (BUFFER_LENGTH < 4) BEGIN
+        PATCH_PRINT ~chriz-bg-magic: STATES.BAM is too short; %resref%.BAM keeps its safe fallback cycle 0.~
+      END ELSE BEGIN
+        // WeiDU expands BAMC in-place; ordinary BAM V1 files do not need conversion.
+        READ_ASCII 0 compressed_signature (4)
+        PATCH_IF (~%compressed_signature%~ STRING_EQUAL ~BAMC~) BEGIN
+          PATCH_IF (BUFFER_LENGTH < 0x0c) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: compressed STATES.BAM is too short; %resref%.BAM keeps its safe fallback cycle 0.~
+          END ELSE BEGIN
+            READ_LONG 0x08 uncompressed_size
+            DECOMPRESS_REPLACE_FILE 0x0c (SOURCE_SIZE - 0x0c) uncompressed_size
+          END
+        END
+        PATCH_IF (BUFFER_LENGTH < 0x10) BEGIN
+          PATCH_PRINT ~chriz-bg-magic: STATES.BAM is too short after decompression; %resref%.BAM keeps its safe fallback cycle 0.~
+        END ELSE BEGIN
+          READ_ASCII 0 signature (8)
+          PATCH_IF !(~%signature%~ STRING_EQUAL ~BAM V1  ~) BEGIN
+            PATCH_PRINT ~chriz-bg-magic: STATES.BAM is not a usable BAM V1 after decompression; %resref%.BAM keeps its safe fallback cycle 0.~
+          END ELSE BEGIN
+            READ_SHORT 0x08 frames
+            READ_BYTE  0x0a cycles
+            READ_LONG  0x0c frame_off
+            SET source_cycle = row + 65
+            SET cycle_off = frame_off + frames * 12
+            PATCH_IF (source_cycle >= cycles) OR (cycle_off < 0) OR (cycle_off + cycles * 4 > BUFFER_LENGTH) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: STATES.BAM has no safe cycle %source_cycle% for row %row%; %resref%.BAM keeps its fallback cycle 0.~
+            END ELSE BEGIN
+              READ_SHORT (cycle_off + source_cycle * 4) frame_count
+              READ_SHORT (cycle_off + source_cycle * 4 + 2) first_frame
+              WRITE_SHORT cycle_off frame_count
+              WRITE_SHORT (cycle_off + 2) first_frame
+            END
+          END
         END
       END
     BUT_ONLY
@@ -1018,6 +1081,7 @@ BEGIN
             SET c_24 = 0
             SET c_39 = 0
             SET c_175 = 0
+            SET c_sleep_icon = 0
             SET c_old = 0
             FOR (i = 0; i < n; ++i) BEGIN
               SET fx = fx_off + (first + i) * 0x30
@@ -1047,11 +1111,14 @@ BEGIN
               PATCH_IF (op = 39) AND (p2 = 0) AND (dur = 6) AND (p1_prob = 80) AND (p2_prob = 61) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
                 SET c_39 = 1
               END
+              PATCH_IF (op = 142) AND (p2 = 14) AND (p1_prob = 80) AND (p2_prob = 61) BEGIN
+                SET c_sleep_icon = 1
+              END
               PATCH_IF (op = 175) AND (dur = 6) AND (p1_prob = 100) AND (p2_prob = 81) AND ((save BAND 1) != 0) AND (bonus = (0 - 4)) BEGIN
                 SET c_175 = 1
               END
             END
-            PATCH_IF !(c_76 AND c_128 AND c_24 AND c_39 AND c_175 AND !c_old) BEGIN
+            PATCH_IF !(c_76 AND c_128 AND c_24 AND c_39 AND c_175 AND !c_sleep_icon AND !c_old) BEGIN
               SET all_already = 0
             END
           END
@@ -1133,9 +1200,6 @@ BEGIN
               // 4. 61..80: Sleep waking on damage (op 39 p2=0 + icon 14)
               LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 39 target = 2 power = 7
                 parameter2 = 0 timing = 0 resist_dispel = 1 duration = 6 probability1 = 80 probability2 = 61
-                savingthrow = 1 savebonus = (0 - 4) END
-              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = 2 power = 7
-                parameter2 = 14 timing = 0 resist_dispel = 1 duration = 6 probability1 = 80 probability2 = 61
                 savingthrow = 1 savebonus = (0 - 4) END
               // 5. 81..100: Hold (op 175 p2=2 + icon 13 + string 14102)
               LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 175 target = 2 power = 7
@@ -1246,7 +1310,9 @@ BEGIN
             FOR (i = 0; i < na; ++i) BEGIN
               SET fx = fx_off + (fa + i) * 0x30
               READ_SHORT fx op
-              PATCH_IF (op = 130) BEGIN SET has_130 = 1 END
+              READ_ASCII (fx + 0x14) resource (8) NULL
+              // The final bonus pass replaces op130 with our tagged plain rows.
+              PATCH_IF (op = 130 || ((op = 54 || op = 73) && ~%resource%~ STRING_EQUAL ~CBTFAVOR~)) BEGIN SET has_130 = 1 END
             END
           END
           PATCH_IF !has_130 BEGIN
@@ -1693,7 +1759,8 @@ BEGIN
       WRITE_LONG 0x18 0x04000400
       WRITE_SHORT 0x1c 2
       WRITE_SHORT 0x20 0x4000
-      WRITE_SHORT 0x22 10
+      WRITE_ASCII 0x10 ~CAS_P06N~ #8
+      WRITE_SHORT 0x22 15
       WRITE_BYTE 0x25 6
       WRITE_BYTE 0x27 0
       WRITE_LONG 0x34 1
@@ -1753,6 +1820,77 @@ BEGIN
       BUT_ONLY
       PRINT ~chriz-bg-magic: Faerie Fire added as %added_res% (CLERIC_CBMAGIC_FAERIE_FIRE) with projectile %proj_id%.~
     END
+  END
+  // Patch a new spell and an older already-added one by the AC penalty, not by effect order.
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_FAERIE_FIRE~ RET ff_res = resref ff_found = found END
+  ACTION_IF ff_found BEGIN
+    OUTER_SET faerie_fire_icon_ref = RESOLVE_STR_REF (@40082)
+    LAF cbmagic_state_icon INT_VAR row = 128 STR_VAR resref = ~CBMIFAF~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = faerie_fire_icon_ref STR_VAR bam = ~CBMIFAF~ RET faerie_fire_icon = icon_row END
+    COPY_EXISTING ~%ff_res%.spl~ ~override~
+      LPF cbmagic_spl_valid RET valid reason END
+      PATCH_IF !valid BEGIN
+        PATCH_WARN ~chriz-bg-magic: Faerie Fire (%ff_res%) left as it is: %reason%.~
+      END ELSE BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_cnt
+        READ_LONG 0x6a fx_off
+        FOR (a = 0; a < ab_cnt; ++a) BEGIN
+          READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+          READ_SHORT (ab_off + a * 0x28 + 0x20) first
+          SET has_penalty = 0
+          SET has_icon = 0
+          SET penalty_target = 2
+          SET penalty_power = 1
+          SET penalty_timing = 0
+          SET penalty_dispel = 1
+          SET penalty_duration = 24
+          SET penalty_save = 1
+          SET penalty_bonus = 0
+          SET penalty_special = 0
+          FOR (i = 0; i < n; ++i) BEGIN
+            SET fx = fx_off + (first + i) * 0x30
+            READ_SHORT fx op
+            READ_SLONG (fx + 0x04) p1
+            READ_LONG (fx + 0x08) p2
+            PATCH_IF (op = 0) AND (p1 < 0) AND (p2 = 0) BEGIN
+              SET has_penalty = 1
+              READ_BYTE (fx + 0x02) penalty_target
+              READ_BYTE (fx + 0x03) penalty_power
+              READ_BYTE (fx + 0x0c) penalty_timing
+              READ_BYTE (fx + 0x0d) penalty_dispel
+              READ_LONG (fx + 0x0e) penalty_duration
+              READ_LONG (fx + 0x24) penalty_save
+              READ_SLONG (fx + 0x28) penalty_bonus
+              READ_LONG (fx + 0x2c) penalty_special
+            END
+          END
+          PATCH_IF has_penalty BEGIN
+            FOR (i = 0; i < n; ++i) BEGIN
+              SET fx = fx_off + (first + i) * 0x30
+              READ_SHORT fx op
+              READ_BYTE (fx + 0x02) tgt
+              READ_LONG (fx + 0x08) p2
+              READ_BYTE (fx + 0x0c) timing
+              READ_BYTE (fx + 0x0d) dispel
+              READ_LONG (fx + 0x0e) duration
+              READ_LONG (fx + 0x24) save
+              READ_SLONG (fx + 0x28) bonus
+              PATCH_IF (op = 142) AND (tgt = penalty_target) AND (p2 = faerie_fire_icon)
+                       AND (timing = penalty_timing) AND (duration = penalty_duration)
+                       AND (save = penalty_save) AND (bonus = penalty_bonus) AND (dispel = penalty_dispel) BEGIN
+                SET has_icon = 1
+              END
+            END
+            PATCH_IF !has_icon BEGIN
+              LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 142 target = penalty_target power = penalty_power
+                parameter2 = faerie_fire_icon timing = penalty_timing resist_dispel = penalty_dispel duration = penalty_duration
+                savingthrow = penalty_save savebonus = penalty_bonus special = penalty_special END
+            END
+          END
+        END
+      END
+    BUT_ONLY
   END
 END
 
@@ -2187,6 +2325,9 @@ BEGIN
   END ELSE BEGIN
     LAF cbmagic_game_language RET lang END
     OUTER_SET new_name_ref = RESOLVE_STR_REF (@40070)
+    OUTER_SET divine_power_icon_ref = RESOLVE_STR_REF (@40081)
+    LAF cbmagic_state_icon INT_VAR row = 60 STR_VAR resref = ~CBMIDVP~ END
+    LAF cbmagic_statdesc_row INT_VAR desc_ref = divine_power_icon_ref STR_VAR bam = ~CBMIDVP~ RET divine_power_icon = icon_row END
     OUTER_SET changed = 0
     COPY_EXISTING ~%spell%.spl~ ~override~
       LPF cbmagic_spl_valid RET valid reason END
@@ -2246,6 +2387,10 @@ BEGIN
               READ_ASCII (fx + 0x14) res (8) NULL
               PATCH_IF ((op = 54) OR (op = 44) OR (op = 142)) AND (dur > 0) BEGIN
                 SET ab_dur = dur
+              END
+              PATCH_IF (op = 142) AND (p2 = 60) BEGIN
+                WRITE_LONG (fx + 0x08) divine_power_icon
+                SET changed += 1
               END
               PATCH_IF (op = 177) AND (p2 = 5) AND (~%res%~ STRING_EQUAL_CASE ~%eff_res%~) BEGIN
                 PATCH_IF (rd != 3) BEGIN
@@ -2554,7 +2699,8 @@ BEGIN
       WRITE_LONG 0x18 0
       WRITE_SHORT 0x1c 2
       WRITE_SHORT 0x20 0x4000
-      WRITE_SHORT 0x22 14
+      WRITE_ASCII 0x10 ~CAS_P07~ #8
+      WRITE_SHORT 0x22 9
       WRITE_BYTE 0x25 8
       WRITE_BYTE 0x27 0
       WRITE_LONG 0x34 5
@@ -2895,6 +3041,26 @@ BEGIN
               LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
                 parameter2 = 112 timing = 1 resist_dispel = 2 duration = 0 END
               SET changed += 1
+            END
+            // The cures above end these states, but a separate opcode 142 stays on the record:
+            // Feebleminded for good, the others until their time runs out. Measured in the lab.
+            PATCH_FOR_EACH stale_row IN 2 3 6 7 44 47 48 101 126 BEGIN
+              SET has_row = 0
+              READ_LONG 0x64 ab_off
+              READ_LONG 0x6a fx_off
+              READ_SHORT (ab_off + a * 0x28 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x28 + 0x20) first
+              FOR (i = 0; i < n; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_SHORT fx op
+                READ_SLONG (fx + 0x08) p2
+                PATCH_IF (op = 240) AND (p2 = stale_row) BEGIN SET has_row = 1 END
+              END
+              PATCH_IF !has_row BEGIN
+                LPF cbmagic_insert_effect INT_VAR ability = a position = 999 opcode = 240 target = 2 power = 7
+                  parameter2 = stale_row timing = 1 resist_dispel = 2 duration = 0 END
+                SET changed += 1
+              END
             END
           END
           PATCH_IF (changed > 0) BEGIN
