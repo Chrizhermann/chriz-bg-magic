@@ -15,14 +15,18 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
   area, a hit ends it with its icon, a stun from elsewhere stays. All eight wizard elementals arrive
   on the party's side and end the contest as ally or hostile; one of eight turned hostile in that
   run. Symbol: Hopelessness has the same row and was read back, not cast.
-
 - In-game, plain BG2:EE: every earlier group passed again, 117 of 117; 160 changed spells cast once;
   7 of 7 in the waking checks, Emotion: Hopelessness among them.
+
+- First run on the rest of the stack, commit 52d8558 (before Hopelessness and the elementals): the
+  Chriz Easy BG install on EET with SCS and EEex 1.3.1, without Spell Revisions, the script engine on
+  top. The install took 30 seconds, without warnings about game data. Ten fights in a hidden EET game,
+  five BG1 encounters with engine and SCS at Insane, ran without errors.
 
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's
   class setting, and no druid or shaman was in the lab party.
 - Rangers get Icelance too: they share the class setting with druids.
-- Nothing launched in EET, and not run with the rest of the Chriz Easy BG stack.
+- The stack run covers BG1's early levels only, and not the later commit.
 - The 15 % of the contest comes from the game's own script and was seen once, not measured.
