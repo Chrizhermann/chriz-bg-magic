@@ -335,7 +335,7 @@
    "duration": 0,
    "prob1": 100,
    "prob2": 0,
-   "resource": "#curefer",
+   "resource": "CBHCFER",
    "dice": 0,
    "sides": 0,
    "save": 0,

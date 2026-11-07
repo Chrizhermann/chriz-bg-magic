@@ -184,7 +184,7 @@
      "duration": 0,
      "prob1": 100,
      "prob2": 0,
-     "resource": "#cureinv",
+     "resource": "CBHCINV",
      "dice": 0,
      "sides": 0,
      "save": 0,

@@ -61,7 +61,7 @@ BEGIN
   LAF cbmagic_state_value STR_VAR symbol = ~STUN_IMMUNITY~ RET cbm_state_STUN_IMMUNITY = state END
   LAF cbmagic_state_value STR_VAR symbol = ~TENSERS_TRANSFORMATION~ RET cbm_state_TENSERS_TRANSFORMATION = state END
   LAF cbmagic_state_value STR_VAR symbol = ~WEB_IMMUNITY~ RET cbm_state_WEB_IMMUNITY = state END
-  ADD_SECTYPE ~cbm_DispelScreen~ @70133
+  ADD_SECTYPE ~cbm_DispelScreen~ @70136
   ADD_SECTYPE ~cbm_Haste~ ~~
   ADD_SECTYPE ~cbm_Slow~ ~~
   ADD_PROJECTILE ~chriz-bg-magic/pro/cbmffir.pro~
@@ -72,61 +72,61 @@ BEGIN
   OUTER_SET cbm_proj_cbmmreg = cbmmreg
   ADD_PROJECTILE ~chriz-bg-magic/pro/cbmoracl.pro~
   OUTER_SET cbm_proj_cbmoracl = cbmoracl
-  OUTER_SET ref = RESOLVE_STR_REF (@70071)
+  OUTER_SET ref = RESOLVE_STR_REF (@70074)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIFAF~ RET cbm_stat_209 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70134)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPPR150D~ RET cbm_stat_210 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70087)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVP~ RET cbm_stat_211 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70135)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPAN~ RET cbm_stat_212 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70136)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINS~ RET cbm_stat_213 = icon_row END
-  OUTER_SET ref = RESOLVE_STR_REF (@70023)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPWI510D~ RET cbm_stat_214 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70137)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINV~ RET cbm_stat_215 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPPR150D~ RET cbm_stat_210 = icon_row END
+  OUTER_SET ref = RESOLVE_STR_REF (@70090)
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVP~ RET cbm_stat_211 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70138)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIIMP~ RET cbm_stat_216 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPAN~ RET cbm_stat_212 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70139)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISAN~ RET cbm_stat_217 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINS~ RET cbm_stat_213 = icon_row END
+  OUTER_SET ref = RESOLVE_STR_REF (@70026)
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~SPWI510D~ RET cbm_stat_214 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70140)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_218 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIINV~ RET cbm_stat_215 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70141)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_219 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIIMP~ RET cbm_stat_216 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70142)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISOA~ RET cbm_stat_220 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISAN~ RET cbm_stat_217 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70143)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMSD~ RET cbm_stat_221 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_218 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70144)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMST~ RET cbm_stat_222 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMIR~ RET cbm_stat_219 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70145)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWRF~ RET cbm_stat_223 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISOA~ RET cbm_stat_220 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70146)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPFG~ RET cbm_stat_224 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMSD~ RET cbm_stat_221 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70147)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISHF~ RET cbm_stat_225 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIMST~ RET cbm_stat_222 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70148)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDFS~ RET cbm_stat_226 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWRF~ RET cbm_stat_223 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70149)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIBLR~ RET cbm_stat_227 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIPFG~ RET cbm_stat_224 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70150)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVF~ RET cbm_stat_228 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISHF~ RET cbm_stat_225 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70151)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILFR~ RET cbm_stat_229 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDFS~ RET cbm_stat_226 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70152)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILER~ RET cbm_stat_230 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIBLR~ RET cbm_stat_227 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70153)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISEL~ RET cbm_stat_231 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIDVF~ RET cbm_stat_228 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70154)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWAT~ RET cbm_stat_232 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILFR~ RET cbm_stat_229 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70155)
-  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIHPL~ RET cbm_stat_233 = icon_row END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMILER~ RET cbm_stat_230 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70156)
-  LAF cbmagic_statdesc_text INT_VAR row = 8 text = ref END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMISEL~ RET cbm_stat_231 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70157)
-  LAF cbmagic_statdesc_text INT_VAR row = 55 text = ref END
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIWAT~ RET cbm_stat_232 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70158)
+  LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIHPL~ RET cbm_stat_233 = icon_row END
+  OUTER_SET ref = RESOLVE_STR_REF (@70159)
+  LAF cbmagic_statdesc_text INT_VAR row = 8 text = ref END
+  OUTER_SET ref = RESOLVE_STR_REF (@70160)
+  LAF cbmagic_statdesc_text INT_VAR row = 55 text = ref END
+  OUTER_SET ref = RESOLVE_STR_REF (@70161)
   LAF cbmagic_statdesc_text INT_VAR row = 112 text = ref END
   APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
   // Spells of our own, in the slot this install has free.
@@ -139,14 +139,14 @@ BEGIN
   ADD_SPELL ~chriz-bg-magic/res/sppr316.spl~ 1 3 ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~
   LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~ RET cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD = resref END
   COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%.spl~ ~override~
-    SAY 0x8 @70071
-    SAY 0x50 @70072
+    SAY 0x8 @70074
+    SAY 0x50 @70075
     WRITE_SHORT 0x98 cbm_proj_cbmffir
     WRITE_ASCIIE 0xde ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%~ #8
     WRITE_LONG 0x312 cbm_stat_209
   COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%.spl~ ~override~
-    SAY 0x8 @70084
-    SAY 0x50 @70085
+    SAY 0x8 @70087
+    SAY 0x50 @70088
     WRITE_ASCIIE 0x3a6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
     WRITE_LONG 0x45a cbm_state_BUFF_PRO_DAMAGE
     WRITE_ASCIIE 0x556 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
@@ -188,8 +188,8 @@ BEGIN
     WRITE_ASCIIE 0x23b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
     WRITE_LONG 0x246a cbm_state_BUFF_PRO_DAMAGE
   COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%.spl~ ~override~
-    SAY 0x8 @70091
-    SAY 0x50 @70092
+    SAY 0x8 @70094
+    SAY 0x50 @70095
     WRITE_ASCIIE 0x266 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
     WRITE_LONG 0x2ea cbm_state_BUFF_PRO_DAMAGE
     WRITE_ASCIIE 0x3b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
@@ -215,8 +215,8 @@ BEGIN
     WRITE_ASCIIE 0x10d6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
     WRITE_LONG 0x115a cbm_state_BUFF_PRO_DAMAGE
   COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%.spl~ ~override~
-    SAY 0x8 @70101
-    SAY 0x50 @70102
+    SAY 0x8 @70104
+    SAY 0x50 @70105
     WRITE_SHORT 0x98 cbm_proj_cbmmreg
     WRITE_ASCIIE 0x216 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
     WRITE_SHORT 0xc0 cbm_proj_cbmmreg
@@ -244,6 +244,8 @@ BEGIN
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/arow07.itm~ ~override/arow07.itm~
+    SAY 0xc @70000
+    SAY 0x54 @70001
     WRITE_LONG 0x292 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/aurstaf.itm~ ~override/aurstaf.itm~
     WRITE_LONG 0x6e2 cbm_Haste
@@ -442,17 +444,45 @@ BEGIN
     WRITE_LONG 0x252 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x2b2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x312 cbm_state_CBM_BONUS_TYPED
+  COPY ~chriz-bg-magic/res/cbhcber.spl~ ~override/cbhcber.spl~
+  COPY ~chriz-bg-magic/res/cbhcbld.spl~ ~override/cbhcbld.spl~
+  COPY ~chriz-bg-magic/res/cbhccon.spl~ ~override/cbhccon.spl~
+  COPY ~chriz-bg-magic/res/cbhcdef.spl~ ~override/cbhcdef.spl~
+  COPY ~chriz-bg-magic/res/cbhcdis.spl~ ~override/cbhcdis.spl~
+  COPY ~chriz-bg-magic/res/cbhcdrk.spl~ ~override/cbhcdrk.spl~
+  COPY ~chriz-bg-magic/res/cbhcfbm.spl~ ~override/cbhcfbm.spl~
+  COPY ~chriz-bg-magic/res/cbhcfer.spl~ ~override/cbhcfer.spl~
+  COPY ~chriz-bg-magic/res/cbhchol.spl~ ~override/cbhchol.spl~
+  COPY ~chriz-bg-magic/res/cbhcinv.spl~ ~override/cbhcinv.spl~
+  COPY ~chriz-bg-magic/res/cbhcldr.spl~ ~override/cbhcldr.spl~
+  COPY ~chriz-bg-magic/res/cbhcpsn.spl~ ~override/cbhcpsn.spl~
+  COPY ~chriz-bg-magic/res/cbhcslp.spl~ ~override/cbhcslp.spl~
+  COPY ~chriz-bg-magic/res/cbhcstn.spl~ ~override/cbhcstn.spl~
+  COPY ~chriz-bg-magic/res/cbhhumr.spl~ ~override/cbhhumr.spl~
+  COPY ~chriz-bg-magic/res/cbhhumw.eff~ ~override/cbhhumw.eff~
+  COPY ~chriz-bg-magic/res/cbhhumw.spl~ ~override/cbhhumw.spl~
+  COPY ~chriz-bg-magic/res/cbhi118a.spl~ ~override/cbhi118a.spl~
   COPY ~chriz-bg-magic/res/cbhi400.spl~ ~override/cbhi400.spl~
   COPY ~chriz-bg-magic/res/cbhi500.spl~ ~override/cbhi500.spl~
   COPY ~chriz-bg-magic/res/cbhi700.spl~ ~override/cbhi700.spl~
+  COPY ~chriz-bg-magic/res/cbhinvex.spl~ ~override/cbhinvex.spl~
+  COPY ~chriz-bg-magic/res/cbhl415h.spl~ ~override/cbhl415h.spl~
+  COPY ~chriz-bg-magic/res/cbhmk25.eff~ ~override/cbhmk25.eff~
+  COPY ~chriz-bg-magic/res/cbhmk25a.eff~ ~override/cbhmk25a.eff~
+  COPY ~chriz-bg-magic/res/cbhnhums.eff~ ~override/cbhnhums.eff~
+  COPY ~chriz-bg-magic/res/cbhpdeva.spl~ ~override/cbhpdeva.spl~
   COPY ~chriz-bg-magic/res/cbht40.itm~ ~override/cbht40.itm~
   COPY ~chriz-bg-magic/res/cbht70.itm~ ~override/cbht70.itm~
+  COPY ~chriz-bg-magic/res/cbhw118d.spl~ ~override/cbhw118d.spl~
+  COPY ~chriz-bg-magic/res/cbhw118e.spl~ ~override/cbhw118e.spl~
+  COPY ~chriz-bg-magic/res/cbhw118g.spl~ ~override/cbhw118g.spl~
+  COPY ~chriz-bg-magic/res/cbhwsty1.spl~ ~override/cbhwsty1.spl~
   COPY ~chriz-bg-magic/res/cbm412a.eff~ ~override/cbm412a.eff~
   COPY ~chriz-bg-magic/res/cbm412b.eff~ ~override/cbm412b.eff~
   COPY ~chriz-bg-magic/res/cbmg605a.spl~ ~override/cbmg605a.spl~
   COPY ~chriz-bg-magic/res/cbmg605b.spl~ ~override/cbmg605b.spl~
     WRITE_LONG 0xa2 cbm_prot_120_0_1
-    SAY 0x27e @70000
+    SAY 0x27e @70002
   COPY ~chriz-bg-magic/res/cbmgbdom.spl~ ~override/cbmgbdom.spl~
   COPY ~chriz-bg-magic/res/cbmgcaco.eff~ ~override/cbmgcaco.eff~
   COPY ~chriz-bg-magic/res/cbmgfien.eff~ ~override/cbmgfien.eff~
@@ -461,10 +491,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmgmst2.eff~ ~override/cbmgmst2.eff~
   COPY ~chriz-bg-magic/res/cbmgnb1.spl~ ~override/cbmgnb1.spl~
   COPY ~chriz-bg-magic/res/cbmneg16.spl~ ~override/cbmneg16.spl~
-    SAY 0x9e @70001
+    SAY 0x9e @70003
   COPY ~chriz-bg-magic/res/cbmneg40.spl~ ~override/cbmneg40.spl~
-    SAY 0x9e @70002
+    SAY 0x9e @70004
   COPY ~chriz-bg-magic/res/cdgoliro.itm~ ~override/cdgoliro.itm~
+    SAY 0x8 @70005
+    SAY 0xc @70005
   COPY ~chriz-bg-magic/res/cdmiscba.spl~ ~override/cdmiscba.spl~
     WRITE_BYTE 0x27 cbm_Haste
     WRITE_LONG 0xd2 cbm_Haste
@@ -744,200 +776,200 @@ BEGIN
     WRITE_LONG 0xf52 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/scrl1d.itm~ ~override/scrl1d.itm~
     WRITE_LONG 0x54 12159
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70003 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70006 END
   COPY ~chriz-bg-magic/res/scrl1j.itm~ ~override/scrl1j.itm~
     WRITE_LONG 0xc 13056
-    PATCH_IF cbm_english BEGIN SAY 0xc @70004 END
+    PATCH_IF cbm_english BEGIN SAY 0xc @70007 END
     WRITE_LONG 0x54 32429
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70005 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70008 END
   COPY ~chriz-bg-magic/res/scrl1k.itm~ ~override/scrl1k.itm~
     WRITE_LONG 0x54 12179
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70006 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70009 END
   COPY ~chriz-bg-magic/res/scrl1p.itm~ ~override/scrl1p.itm~
     WRITE_LONG 0x54 17647
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70007 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70010 END
   COPY ~chriz-bg-magic/res/scrl1u.itm~ ~override/scrl1u.itm~
     WRITE_LONG 0x54 12166
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70008 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70011 END
   COPY ~chriz-bg-magic/res/scrl2e.itm~ ~override/scrl2e.itm~
     WRITE_LONG 0x54 12175
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70009 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70012 END
   COPY ~chriz-bg-magic/res/scrl56.itm~ ~override/scrl56.itm~
     WRITE_LONG 0x54 12325
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70010 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70013 END
   COPY ~chriz-bg-magic/res/scrl58.itm~ ~override/scrl58.itm~
     WRITE_LONG 0x54 17645
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70011 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70014 END
   COPY ~chriz-bg-magic/res/scrl59.itm~ ~override/scrl59.itm~
     WRITE_LONG 0x54 17646
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70012 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70015 END
   COPY ~chriz-bg-magic/res/scrl5b.itm~ ~override/scrl5b.itm~
     WRITE_LONG 0x54 22830
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70013 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70016 END
   COPY ~chriz-bg-magic/res/scrl5k.itm~ ~override/scrl5k.itm~
     WRITE_LONG 0x54 22609
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70014 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70017 END
   COPY ~chriz-bg-magic/res/scrl61.itm~ ~override/scrl61.itm~
     WRITE_LONG 0x54 18729
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70015 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70018 END
   COPY ~chriz-bg-magic/res/scrl62.itm~ ~override/scrl62.itm~
     WRITE_LONG 0x54 12319
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70016 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70019 END
   COPY ~chriz-bg-magic/res/scrl66.itm~ ~override/scrl66.itm~
     WRITE_LONG 0x54 12154
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70017 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70020 END
   COPY ~chriz-bg-magic/res/scrl6d.itm~ ~override/scrl6d.itm~
     WRITE_LONG 0x54 45889
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70018 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70021 END
   COPY ~chriz-bg-magic/res/scrl6e.itm~ ~override/scrl6e.itm~
     WRITE_LONG 0x54 7481
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70019 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70022 END
   COPY ~chriz-bg-magic/res/scrl6g.itm~ ~override/scrl6g.itm~
     WRITE_LONG 0x54 10862
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70020 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70023 END
   COPY ~chriz-bg-magic/res/scrl6p.itm~ ~override/scrl6p.itm~
     WRITE_LONG 0x54 25890
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70021 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70024 END
   COPY ~chriz-bg-magic/res/scrl6q.itm~ ~override/scrl6q.itm~
     WRITE_LONG 0x54 25894
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70022 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70025 END
   COPY ~chriz-bg-magic/res/scrl6s.itm~ ~override/scrl6s.itm~
     WRITE_LONG 0xc 5019
-    PATCH_IF cbm_english BEGIN SAY 0xc @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0xc @70026 END
     WRITE_LONG 0x54 25913
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70024 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70027 END
   COPY ~chriz-bg-magic/res/scrl6v.itm~ ~override/scrl6v.itm~
     WRITE_LONG 0x54 29221
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70025 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70028 END
   COPY ~chriz-bg-magic/res/scrl6w.itm~ ~override/scrl6w.itm~
     WRITE_LONG 0x54 25922
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70026 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70029 END
   COPY ~chriz-bg-magic/res/scrl71.itm~ ~override/scrl71.itm~
     WRITE_LONG 0x54 6622
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70027 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70030 END
   ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
   COPY ~chriz-bg-magic/res/scrl7l.itm~ ~override/scrl7l.itm~
     WRITE_LONG 0x54 25935
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70028 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70031 END
   END ELSE BEGIN
     PRINT ~chriz-bg-magic: scrl7l.itm stays as it is: its new rule needs EEex.~
   END
   COPY ~chriz-bg-magic/res/scrl7m.itm~ ~override/scrl7m.itm~
     WRITE_LONG 0x54 25936
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70029 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70032 END
   COPY ~chriz-bg-magic/res/scrl7p.itm~ ~override/scrl7p.itm~
     WRITE_LONG 0x54 7779
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70030 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70033 END
   COPY ~chriz-bg-magic/res/scrl7q.itm~ ~override/scrl7q.itm~
     WRITE_LONG 0xc 34583
-    PATCH_IF cbm_english BEGIN SAY 0xc @70031 END
+    PATCH_IF cbm_english BEGIN SAY 0xc @70034 END
     WRITE_LONG 0x54 25938
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70032 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70035 END
   COPY ~chriz-bg-magic/res/scrl7r.itm~ ~override/scrl7r.itm~
     WRITE_LONG 0x54 7622
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70033 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70036 END
   COPY ~chriz-bg-magic/res/scrl7u.itm~ ~override/scrl7u.itm~
     WRITE_LONG 0x54 25943
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70034 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70037 END
   COPY ~chriz-bg-magic/res/scrl7x.itm~ ~override/scrl7x.itm~
     WRITE_LONG 0x54 24838
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70035 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70038 END
   COPY ~chriz-bg-magic/res/scrl7y.itm~ ~override/scrl7y.itm~
     WRITE_LONG 0x54 24840
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70036 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70039 END
   COPY ~chriz-bg-magic/res/scrl7z.itm~ ~override/scrl7z.itm~
     WRITE_LONG 0x54 24842
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70037 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70040 END
   COPY ~chriz-bg-magic/res/scrl83.itm~ ~override/scrl83.itm~
     WRITE_LONG 0x54 12174
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70038 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70041 END
   COPY ~chriz-bg-magic/res/scrl85.itm~ ~override/scrl85.itm~
     WRITE_LONG 0x54 6619
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70039 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70042 END
   COPY ~chriz-bg-magic/res/scrl8i.itm~ ~override/scrl8i.itm~
     WRITE_LONG 0x54 17348
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70040 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70043 END
   COPY ~chriz-bg-magic/res/scrl8j.itm~ ~override/scrl8j.itm~
     WRITE_LONG 0x54 7613
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70041 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70044 END
   COPY ~chriz-bg-magic/res/scrl8l.itm~ ~override/scrl8l.itm~
     WRITE_LONG 0x54 25952
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70042 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70045 END
   COPY ~chriz-bg-magic/res/scrl8m.itm~ ~override/scrl8m.itm~
     WRITE_LONG 0x54 25954
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70043 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70046 END
   COPY ~chriz-bg-magic/res/scrl8n.itm~ ~override/scrl8n.itm~
     WRITE_LONG 0x54 25959
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70044 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70047 END
   COPY ~chriz-bg-magic/res/scrl8o.itm~ ~override/scrl8o.itm~
     WRITE_LONG 0x54 7672
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70045 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70048 END
   COPY ~chriz-bg-magic/res/scrl8q.itm~ ~override/scrl8q.itm~
     WRITE_LONG 0x54 7782
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70046 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70049 END
   COPY ~chriz-bg-magic/res/scrl90.itm~ ~override/scrl90.itm~
     WRITE_LONG 0x54 2969
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70047 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70050 END
   COPY ~chriz-bg-magic/res/scrl93.itm~ ~override/scrl93.itm~
     WRITE_LONG 0x54 12171
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70048 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70051 END
   COPY ~chriz-bg-magic/res/scrl97.itm~ ~override/scrl97.itm~
     WRITE_LONG 0x54 12181
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70049 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70052 END
   COPY ~chriz-bg-magic/res/scrl98.itm~ ~override/scrl98.itm~
     WRITE_LONG 0x54 12197
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70050 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70053 END
   COPY ~chriz-bg-magic/res/scrl99.itm~ ~override/scrl99.itm~
     WRITE_LONG 0x54 12184
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70051 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70054 END
   COPY ~chriz-bg-magic/res/scrl9a.itm~ ~override/scrl9a.itm~
     WRITE_LONG 0x54 26242
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70052 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70055 END
   COPY ~chriz-bg-magic/res/scrl9b.itm~ ~override/scrl9b.itm~
     WRITE_LONG 0x54 17361
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70053 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70056 END
   COPY ~chriz-bg-magic/res/scrl9c.itm~ ~override/scrl9c.itm~
     WRITE_LONG 0x54 7618
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70054 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70057 END
   COPY ~chriz-bg-magic/res/scrl9d.itm~ ~override/scrl9d.itm~
     WRITE_LONG 0x54 26244
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70055 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70058 END
   COPY ~chriz-bg-magic/res/scrl9e.itm~ ~override/scrl9e.itm~
     WRITE_LONG 0x54 7664
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70056 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70059 END
   COPY ~chriz-bg-magic/res/scrl9f.itm~ ~override/scrl9f.itm~
     WRITE_LONG 0x54 17362
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70057 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70060 END
   COPY ~chriz-bg-magic/res/scrl9j.itm~ ~override/scrl9j.itm~
     WRITE_LONG 0x54 7784
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70058 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70061 END
   COPY ~chriz-bg-magic/res/scrl9m.itm~ ~override/scrl9m.itm~
     WRITE_LONG 0x54 26315
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70059 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70062 END
   COPY ~chriz-bg-magic/res/scrl9n.itm~ ~override/scrl9n.itm~
     WRITE_LONG 0x54 17352
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70060 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70063 END
   COPY ~chriz-bg-magic/res/scrl9p.itm~ ~override/scrl9p.itm~
     WRITE_LONG 0x54 7620
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70061 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70064 END
   COPY ~chriz-bg-magic/res/scrl9q.itm~ ~override/scrl9q.itm~
     WRITE_LONG 0x54 26330
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70062 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70065 END
   COPY ~chriz-bg-magic/res/scrl9u.itm~ ~override/scrl9u.itm~
     WRITE_LONG 0x54 18140
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70063 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70066 END
   COPY ~chriz-bg-magic/res/scrlam.itm~ ~override/scrlam.itm~
     WRITE_LONG 0x54 39967
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70064 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70067 END
   COPY ~chriz-bg-magic/res/scrlan.itm~ ~override/scrlan.itm~
     WRITE_LONG 0x54 39957
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70065 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70068 END
   COPY ~chriz-bg-magic/res/scrlao.itm~ ~override/scrlao.itm~
     WRITE_LONG 0x54 39967
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70064 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70067 END
   COPY ~chriz-bg-magic/res/scrlap.itm~ ~override/scrlap.itm~
     WRITE_LONG 0x54 39957
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70065 END
+    PATCH_IF cbm_english BEGIN SAY 0x54 @70068 END
   COPY ~chriz-bg-magic/res/sendai.itm~ ~override/sendai.itm~
     WRITE_LONG 0x172 cbm_Haste
   COPY ~chriz-bg-magic/res/sendai.spl~ ~override/sendai.spl~
@@ -980,7 +1012,7 @@ BEGIN
     WRITE_LONG 0x252a cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spcl415.spl~ ~override/spcl415.spl~
     WRITE_LONG 0x8 103612
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70066 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70069 END
     WRITE_LONG 0x1aa cbm_Haste
   COPY ~chriz-bg-magic/res/spcl415a.spl~ ~override/spcl415a.spl~
   COPY ~chriz-bg-magic/res/spcl415b.spl~ ~override/spcl415b.spl~
@@ -1158,7 +1190,7 @@ BEGIN
     WRITE_LONG 0x612 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/sppr101.spl~ ~override/sppr101.spl~
     WRITE_LONG 0x50 12216
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70067 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70070 END
     WRITE_LONG 0x3fa cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x45a cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x60a cbm_state_CBM_BONUS_TYPED
@@ -1202,13 +1234,13 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr102.spl~ ~override/sppr102.spl~
   COPY ~chriz-bg-magic/res/sppr103.spl~ ~override/sppr103.spl~
     WRITE_LONG 0x50 12323
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70068 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70071 END
   COPY ~chriz-bg-magic/res/sppr105.spl~ ~override/sppr105.spl~
     WRITE_LONG 0x50 12208
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70069 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70072 END
   COPY ~chriz-bg-magic/res/sppr106.spl~ ~override/sppr106.spl~
     WRITE_LONG 0x50 12317
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70070 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70073 END
   COPY ~chriz-bg-magic/res/sppr110.spl~ ~override/sppr110.spl~
     WRITE_LONG 0x39a cbm_prot_59_1_1
     WRITE_LONG 0x42a cbm_prot_59_1_1
@@ -1232,7 +1264,7 @@ BEGIN
     WRITE_LONG 0xe4a cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr113.spl~ ~override/sppr113.spl~
     WRITE_LONG 0x50 3352
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70073 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70076 END
     WRITE_LONG 0x232 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x292 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x2f2 cbm_state_CBM_BONUS_TYPED
@@ -1275,7 +1307,7 @@ BEGIN
     WRITE_LONG 0x16a2 cbm_state_DOOM
   COPY ~chriz-bg-magic/res/sppr201.spl~ ~override/sppr201.spl~
     WRITE_LONG 0x50 12322
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70074 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70077 END
     WRITE_LONG 0x51a cbm_stat_210
     WRITE_LONG 0x6ca cbm_stat_210
     WRITE_LONG 0x87a cbm_stat_210
@@ -1298,7 +1330,7 @@ BEGIN
     WRITE_LONG 0x252a cbm_stat_210
   COPY ~chriz-bg-magic/res/sppr202.spl~ ~override/sppr202.spl~
     WRITE_LONG 0x50 12209
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70075 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70078 END
     WRITE_LONG 0x3da cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x43a cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x49a cbm_state_CBM_BONUS_TYPED
@@ -1391,7 +1423,7 @@ BEGIN
     WRITE_LONG 0x460a cbm_state_BARKSKIN
   COPY ~chriz-bg-magic/res/sppr206.spl~ ~override/sppr206.spl~
     WRITE_LONG 0x50 12318
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70076 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70079 END
     WRITE_LONG 0x232 cbm_prot_59_1_1
     WRITE_LONG 0x2c2 cbm_prot_59_1_1
     WRITE_LONG 0x352 cbm_prot_59_1_1
@@ -1405,7 +1437,7 @@ BEGIN
     WRITE_LONG 0x7d2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr211.spl~ ~override/sppr211.spl~
     WRITE_LONG 0x50 12211
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70077 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70080 END
   COPY ~chriz-bg-magic/res/sppr212.spl~ ~override/sppr212.spl~
   COPY ~chriz-bg-magic/res/sppr250.spl~ ~override/sppr250.spl~
     WRITE_LONG 0x1f2 cbm_Haste
@@ -1414,26 +1446,26 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/sppr302.spl~ ~override/sppr302.spl~
     WRITE_LONG 0x50 12212
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70078 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70081 END
   COPY ~chriz-bg-magic/res/sppr303.spl~ ~override/sppr303.spl~
     WRITE_LONG 0x252 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/sppr304.spl~ ~override/sppr304.spl~
     WRITE_LONG 0x50 12200
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70079 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70082 END
   COPY ~chriz-bg-magic/res/sppr308.spl~ ~override/sppr308.spl~
   COPY ~chriz-bg-magic/res/sppr309.spl~ ~override/sppr309.spl~
     WRITE_LONG 0x50 12221
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70080 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70083 END
   COPY ~chriz-bg-magic/res/sppr312.spl~ ~override/sppr312.spl~
     WRITE_LONG 0x50 12213
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70081 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70084 END
     WRITE_LONG 0x132 cbm_prot_36_18_3
     WRITE_LONG 0x162 cbm_prot_37_75_4
   COPY ~chriz-bg-magic/res/sppr312a.spl~ ~override/sppr312a.spl~
     WRITE_LONG 0x162 cbm_state_BUFF_ENHANCEMENT
   COPY ~chriz-bg-magic/res/sppr314.spl~ ~override/sppr314.spl~
     WRITE_LONG 0x50 4350
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70082 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70085 END
     WRITE_LONG 0x422 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x482 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x662 cbm_state_CBM_BONUS_TYPED
@@ -1466,10 +1498,10 @@ BEGIN
     WRITE_LONG 0x2402 cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/sppr315.spl~ ~override/sppr315.spl~
     WRITE_LONG 0x50 3807
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70083 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70086 END
   COPY ~chriz-bg-magic/res/sppr319.spl~ ~override/sppr319.spl~
     WRITE_LONG 0x50 45047
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70086 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70089 END
   COPY ~chriz-bg-magic/res/sppr319a.spl~ ~override/sppr319a.spl~
     WRITE_LONG 0xd2 cbm_prot_125_1_4
   COPY ~chriz-bg-magic/res/sppr319b.eff~ ~override/sppr319b.eff~
@@ -1481,11 +1513,11 @@ BEGIN
     WRITE_LONG 0x102 cbm_stat_213
   COPY ~chriz-bg-magic/res/sppr401.spl~ ~override/sppr401.spl~
     WRITE_LONG 0x50 12325
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70010 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70013 END
   COPY ~chriz-bg-magic/res/sppr402.spl~ ~override/sppr402.spl~
   COPY ~chriz-bg-magic/res/sppr403.spl~ ~override/sppr403.spl~
     WRITE_LONG 0x50 17645
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70011 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70014 END
     WRITE_LONG 0x2aa cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x2da cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x30a cbm_state_ENTANGLE_IMMUNITY
@@ -1572,10 +1604,10 @@ BEGIN
     WRITE_LONG 0x7b3a cbm_state_BUFF_PRO_EFFECTS
   COPY ~chriz-bg-magic/res/sppr404.spl~ ~override/sppr404.spl~
     WRITE_LONG 0x50 17646
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70012 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70015 END
   COPY ~chriz-bg-magic/res/sppr406.spl~ ~override/sppr406.spl~
     WRITE_LONG 0x50 22830
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70013 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70016 END
     WRITE_LONG 0x192 cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/sppr409.spl~ ~override/sppr409.spl~
     WRITE_LONG 0x2aa cbm_state_DEATH_IMMUNITY
@@ -1636,9 +1668,9 @@ BEGIN
     WRITE_LONG 0x261a cbm_state_DEATH_WARD
   COPY ~chriz-bg-magic/res/sppr412.spl~ ~override/sppr412.spl~
     WRITE_LONG 0x8 6087
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70087 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70090 END
     WRITE_LONG 0x50 6088
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70088 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70091 END
     WRITE_LONG 0x42a cbm_stat_211
     WRITE_LONG 0x45a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x48a cbm_state_HOLY_POWER
@@ -1683,27 +1715,27 @@ BEGIN
     WRITE_LONG 0x2b8a cbm_state_HOLY_POWER
   COPY ~chriz-bg-magic/res/sppr413.spl~ ~override/sppr413.spl~
     WRITE_LONG 0x50 55843
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70089 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70092 END
   COPY ~chriz-bg-magic/res/sppr414.spl~ ~override/sppr414.spl~
     WRITE_LONG 0x50 11185
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70090 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70093 END
     WRITE_LONG 0xa2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr501.spl~ ~override/sppr501.spl~
   COPY ~chriz-bg-magic/res/sppr502.spl~ ~override/sppr502.spl~
     WRITE_LONG 0x50 18729
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70015 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70018 END
   COPY ~chriz-bg-magic/res/sppr503.spl~ ~override/sppr503.spl~
     WRITE_LONG 0x50 12319
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70016 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70019 END
   COPY ~chriz-bg-magic/res/sppr505.spl~ ~override/sppr505.spl~
     WRITE_LONG 0x50 25623
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70093 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70096 END
     WRITE_LONG 0x462 cbm_state_CANNOT_TURN_INVISIBLE
   COPY ~chriz-bg-magic/res/sppr506.spl~ ~override/sppr506.spl~
     WRITE_LONG 0x8 44941
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70094 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70097 END
     WRITE_LONG 0x50 44943
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70095 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70098 END
   COPY ~chriz-bg-magic/res/sppr507.spl~ ~override/sppr507.spl~
     WRITE_LONG 0x3aa cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x6aa cbm_state_BUFF_ENHANCEMENT
@@ -1719,15 +1751,15 @@ BEGIN
     WRITE_LONG 0x24aa cbm_state_BUFF_ENHANCEMENT
   COPY ~chriz-bg-magic/res/sppr509.spl~ ~override/sppr509.spl~
     WRITE_LONG 0x50 26784
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70096 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70099 END
   COPY ~chriz-bg-magic/res/sppr510.spl~ ~override/sppr510.spl~
     WRITE_LONG 0x50 11194
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70097 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
     WRITE_LONG 0xa2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr512.spl~ ~override/sppr512.spl~
   COPY ~chriz-bg-magic/res/sppr513.spl~ ~override/sppr513.spl~
     WRITE_LONG 0x50 7080
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70098 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70101 END
     WRITE_LONG 0x46a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x70a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x9aa cbm_state_BUFF_ENHANCEMENT
@@ -1742,10 +1774,10 @@ BEGIN
     WRITE_LONG 0x214a cbm_state_BUFF_ENHANCEMENT
   COPY ~chriz-bg-magic/res/sppr514.spl~ ~override/sppr514.spl~
     WRITE_LONG 0x50 7469
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70099 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70102 END
   COPY ~chriz-bg-magic/res/sppr517.spl~ ~override/sppr517.spl~
     WRITE_LONG 0x50 45051
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70103 END
   COPY ~chriz-bg-magic/res/sppr517a.spl~ ~override/sppr517a.spl~
     WRITE_LONG 0xd2 cbm_prot_125_1_4
   COPY ~chriz-bg-magic/res/sppr517b.eff~ ~override/sppr517b.eff~
@@ -1758,22 +1790,22 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr602.spl~ ~override/sppr602.spl~
   COPY ~chriz-bg-magic/res/sppr603.spl~ ~override/sppr603.spl~
     WRITE_LONG 0x50 25743
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70103 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70106 END
     WRITE_LONG 0x102 cbm_state_BUFF_ENHANCEMENT
   COPY ~chriz-bg-magic/res/sppr603d.spl~ ~override/sppr603d.spl~
   COPY ~chriz-bg-magic/res/sppr604.spl~ ~override/sppr604.spl~
   COPY ~chriz-bg-magic/res/sppr605.spl~ ~override/sppr605.spl~
     WRITE_LONG 0x50 15212
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70104 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70107 END
   COPY ~chriz-bg-magic/res/sppr606.spl~ ~override/sppr606.spl~
     WRITE_LONG 0x50 14254
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70105 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70108 END
   COPY ~chriz-bg-magic/res/sppr607.spl~ ~override/sppr607.spl~
     WRITE_LONG 0x50 8788
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70106 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70109 END
   COPY ~chriz-bg-magic/res/sppr608.spl~ ~override/sppr608.spl~
     WRITE_LONG 0x50 11202
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70107 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70110 END
     WRITE_LONG 0xa2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr609.spl~ ~override/sppr609.spl~
   COPY ~chriz-bg-magic/res/sppr610.spl~ ~override/sppr610.spl~
@@ -1783,25 +1815,25 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/sppr612.spl~ ~override/sppr612.spl~
     WRITE_LONG 0x50 38576
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70108 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70111 END
   COPY ~chriz-bg-magic/res/sppr613.spl~ ~override/sppr613.spl~
     WRITE_LONG 0x642 cbm_state_BUFF_PRO_WEAPONS
   COPY ~chriz-bg-magic/res/sppr698d.spl~ ~override/sppr698d.spl~
   COPY ~chriz-bg-magic/res/sppr702.spl~ ~override/sppr702.spl~
     WRITE_LONG 0x50 15181
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70109 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70112 END
   COPY ~chriz-bg-magic/res/sppr703.spl~ ~override/sppr703.spl~
     WRITE_LONG 0x50 14315
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70110 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70113 END
   COPY ~chriz-bg-magic/res/sppr704.spl~ ~override/sppr704.spl~
     WRITE_LONG 0x50 44946
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70111 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70114 END
   COPY ~chriz-bg-magic/res/sppr706.spl~ ~override/sppr706.spl~
     WRITE_LONG 0x50 14320
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70112 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70115 END
   COPY ~chriz-bg-magic/res/sppr708.spl~ ~override/sppr708.spl~
     WRITE_LONG 0x50 10897
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70113 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70116 END
   COPY ~chriz-bg-magic/res/sppr710.spl~ ~override/sppr710.spl~
     WRITE_LONG 0xd2 cbm_prot_0x104_37_1
     WRITE_LONG 0x1c2 cbm_Haste
@@ -1810,7 +1842,7 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/sppr711.spl~ ~override/sppr711.spl~
     WRITE_LONG 0x50 10997
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70114 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70117 END
     WRITE_ASCIIE 0x1ce ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
     WRITE_ASCIIE 0x1fe ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
     WRITE_ASCIIE 0x3ae ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
@@ -1827,7 +1859,7 @@ BEGIN
     WRITE_ASCIIE 0xd3e ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
   COPY ~chriz-bg-magic/res/sppr713.spl~ ~override/sppr713.spl~
     WRITE_LONG 0x50 35604
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70115 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70118 END
   COPY ~chriz-bg-magic/res/sppr715.spl~ ~override/sppr715.spl~
     WRITE_LONG 0x1c2 cbm_Haste
   COPY ~chriz-bg-magic/res/sppr715a.spl~ ~override/sppr715a.spl~
@@ -1835,7 +1867,7 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/sppr717.spl~ ~override/sppr717.spl~
     WRITE_LONG 0x50 25751
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70116 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70119 END
   COPY ~chriz-bg-magic/res/sppr717a.spl~ ~override/sppr717a.spl~
     WRITE_LONG 0xd2 cbm_prot_125_1_4
   COPY ~chriz-bg-magic/res/sppr717b.eff~ ~override/sppr717b.eff~
@@ -1847,21 +1879,21 @@ BEGIN
     WRITE_LONG 0x102 cbm_stat_213
   COPY ~chriz-bg-magic/res/sppr718.spl~ ~override/sppr718.spl~
     WRITE_LONG 0x50 45059
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70117 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70120 END
     WRITE_LONG 0x14a cbm_prot_131_1_4
     WRITE_LONG 0x32a cbm_prot_131_1_4
     WRITE_LONG 0x50a cbm_prot_131_1_4
     WRITE_LONG 0x6ea cbm_prot_131_1_4
   COPY ~chriz-bg-magic/res/sppr719.spl~ ~override/sppr719.spl~
     WRITE_LONG 0x50 45058
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70118 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70121 END
   COPY ~chriz-bg-magic/res/sppr725.spl~ ~override/sppr725.spl~
     WRITE_LONG 0x50 63802
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70119 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70122 END
   COPY ~chriz-bg-magic/res/sppr725d.spl~ ~override/sppr725d.spl~
   COPY ~chriz-bg-magic/res/sppr730.spl~ ~override/sppr730.spl~
     WRITE_LONG 0x50 63843
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70120 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70123 END
     WRITE_LONG 0x3b2 cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x3e2 cbm_state_BUFF_PRO_DAMAGE
     WRITE_LONG 0x532 cbm_state_CBM_BONUS_TYPED
@@ -1916,21 +1948,18 @@ BEGIN
     WRITE_LONG 0x282 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi101.spl~ ~override/spwi101.spl~
     WRITE_LONG 0x50 12154
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70017 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70020 END
   COPY ~chriz-bg-magic/res/spwi105.spl~ ~override/spwi105.spl~
   COPY ~chriz-bg-magic/res/spwi106.spl~ ~override/spwi106.spl~
     WRITE_LONG 0x50 6622
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70027 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70030 END
   COPY ~chriz-bg-magic/res/spwi116.spl~ ~override/spwi116.spl~
   COPY ~chriz-bg-magic/res/spwi118.spl~ ~override/spwi118.spl~
     WRITE_LONG 0x50 12174
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70038 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70041 END
     WRITE_LONG 0x34a cbm_stat_212
     WRITE_LONG 0x64a cbm_prot_131_1_4
   COPY ~chriz-bg-magic/res/spwi120.spl~ ~override/spwi120.spl~
-  COPY ~chriz-bg-magic/res/spwi123.spl~ ~override/spwi123.spl~
-    WRITE_LONG 0x50 45889
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70018 END
   COPY ~chriz-bg-magic/res/spwi124.spl~ ~override/spwi124.spl~
   COPY ~chriz-bg-magic/res/spwi125.spl~ ~override/spwi125.spl~
     WRITE_LONG 0x192 cbm_prot_118_0_3
@@ -1942,7 +1971,7 @@ BEGIN
     WRITE_LONG 0xcd2 cbm_prot_118_0_3
   COPY ~chriz-bg-magic/res/spwi201.spl~ ~override/spwi201.spl~
     WRITE_LONG 0x50 6619
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70039 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70042 END
     WRITE_LONG 0x3aa cbm_stat_227
     WRITE_LONG 0x43a cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x49a cbm_state_CBM_BONUS_TYPED
@@ -2072,10 +2101,10 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi205.spl~ ~override/spwi205.spl~
   COPY ~chriz-bg-magic/res/spwi206.spl~ ~override/spwi206.spl~
     WRITE_LONG 0x50 2969
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70047 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70050 END
   COPY ~chriz-bg-magic/res/spwi209.spl~ ~override/spwi209.spl~
     WRITE_LONG 0x50 12171
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70048 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70051 END
     WRITE_LONG 0x252 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x2b2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x312 cbm_state_CBM_BONUS_TYPED
@@ -2085,10 +2114,10 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi212.spl~ ~override/spwi212.spl~
   COPY ~chriz-bg-magic/res/spwi213.spl~ ~override/spwi213.spl~
     WRITE_LONG 0x50 12181
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70049 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70052 END
   COPY ~chriz-bg-magic/res/spwi214.spl~ ~override/spwi214.spl~
     WRITE_LONG 0x50 12197
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70050 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70053 END
     WRITE_LONG 0x43a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x61a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x7fa cbm_state_BUFF_ENHANCEMENT
@@ -2109,14 +2138,14 @@ BEGIN
     WRITE_LONG 0x241a cbm_state_BUFF_ENHANCEMENT
   COPY ~chriz-bg-magic/res/spwi215.spl~ ~override/spwi215.spl~
     WRITE_LONG 0x50 12184
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70051 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70054 END
   COPY ~chriz-bg-magic/res/spwi220.spl~ ~override/spwi220.spl~
     WRITE_LONG 0x50 7481
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70019 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70022 END
   COPY ~chriz-bg-magic/res/spwi298.spl~ ~override/spwi298.spl~
   COPY ~chriz-bg-magic/res/spwi301.spl~ ~override/spwi301.spl~
     WRITE_LONG 0x50 12159
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70003 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70006 END
   COPY ~chriz-bg-magic/res/spwi302.spl~ ~override/spwi302.spl~
     WRITE_LONG 0x222 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi304.spl~ ~override/spwi304.spl~
@@ -2157,13 +2186,13 @@ BEGIN
     WRITE_LONG 0x24ea cbm_Haste
   COPY ~chriz-bg-magic/res/spwi307.spl~ ~override/spwi307.spl~
     WRITE_LONG 0x8 12019
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70004 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70007 END
     WRITE_LONG 0x50 32429
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70005 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70008 END
     WRITE_SHORT 0x98 cbm_proj_cbminv10
   COPY ~chriz-bg-magic/res/spwi308.spl~ ~override/spwi308.spl~
     WRITE_LONG 0x50 12179
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70006 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70009 END
   COPY ~chriz-bg-magic/res/spwi312.spl~ ~override/spwi312.spl~
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spwi312a.spl~ ~override/spwi312a.spl~
@@ -2171,7 +2200,7 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
   COPY ~chriz-bg-magic/res/spwi313.spl~ ~override/spwi313.spl~
     WRITE_LONG 0x50 17647
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70007 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70010 END
   COPY ~chriz-bg-magic/res/spwi315.spl~ ~override/spwi315.spl~
     WRITE_LONG 0x7ba cbm_stat_223
     WRITE_LONG 0xd2a cbm_stat_223
@@ -2195,7 +2224,7 @@ BEGIN
     WRITE_LONG 0x6f0a cbm_stat_223
   COPY ~chriz-bg-magic/res/spwi318.spl~ ~override/spwi318.spl~
     WRITE_LONG 0x50 10862
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70020 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70023 END
     WRITE_LONG 0x32a cbm_state_BUFF_PRO_SPELLS
     WRITE_LONG 0x50a cbm_state_BUFF_PRO_SPELLS
     WRITE_LONG 0x6ea cbm_state_BUFF_PRO_SPELLS
@@ -2216,7 +2245,7 @@ BEGIN
     WRITE_LONG 0x222 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi401.spl~ ~override/spwi401.spl~
     WRITE_LONG 0x50 12166
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70008 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70011 END
   COPY ~chriz-bg-magic/res/spwi403.spl~ ~override/spwi403.spl~
     WRITE_LONG 0x51a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x54a cbm_state_BUFF_PRO_DAMAGE
@@ -2279,7 +2308,7 @@ BEGIN
     WRITE_LONG 0x9a2 cbm_state_OTILUKES_RESILIENT_SPHERE
   COPY ~chriz-bg-magic/res/spwi414.spl~ ~override/spwi414.spl~
     WRITE_LONG 0x50 22609
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70014 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70017 END
     WRITE_LONG 0x252 cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/spwi418.spl~ ~override/spwi418.spl~
     WRITE_LONG 0x51a cbm_state_BUFF_ENHANCEMENT
@@ -2326,20 +2355,20 @@ BEGIN
     WRITE_LONG 0x3ffa cbm_state_RED_FIRESHIELD
   COPY ~chriz-bg-magic/res/spwi420.spl~ ~override/spwi420.spl~
     WRITE_LONG 0x50 25890
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70021 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70024 END
   COPY ~chriz-bg-magic/res/spwi421.spl~ ~override/spwi421.spl~
     WRITE_LONG 0x50 25894
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70022 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70025 END
   COPY ~chriz-bg-magic/res/spwi502.spl~ ~override/spwi502.spl~
     WRITE_LONG 0x50 12175
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70009 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70012 END
   COPY ~chriz-bg-magic/res/spwi503.spl~ ~override/spwi503.spl~
   COPY ~chriz-bg-magic/res/spwi510.spl~ ~override/spwi510.spl~
     WRITE_LONG 0x8 25912
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
     WRITE_BYTE 0x27 cbm_DispelScreen
     WRITE_LONG 0x50 25913
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70024 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70027 END
     WRITE_LONG 0x162 cbm_stat_214
   COPY ~chriz-bg-magic/res/spwi511.spl~ ~override/spwi511.spl~
     WRITE_LONG 0x5ea cbm_state_BUFF_PRO_WEAPONS
@@ -2372,48 +2401,48 @@ BEGIN
     WRITE_LONG 0xa2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi514.spl~ ~override/spwi514.spl~
     WRITE_LONG 0x50 29221
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70025 END
-    SAY 0x316 @70121
-    SAY 0x406 @70122
-    SAY 0x526 @70123
-    SAY 0x646 @70124
-    SAY 0x766 @70125
-    SAY 0x886 @70126
-    SAY 0x9a6 @70127
-    SAY 0xac6 @70128
-    SAY 0xbe6 @70129
-    SAY 0xd06 @70130
-    SAY 0xe26 @70131
-    SAY 0xf46 @70132
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70028 END
+    SAY 0x316 @70124
+    SAY 0x406 @70125
+    SAY 0x526 @70126
+    SAY 0x646 @70127
+    SAY 0x766 @70128
+    SAY 0x886 @70129
+    SAY 0x9a6 @70130
+    SAY 0xac6 @70131
+    SAY 0xbe6 @70132
+    SAY 0xd06 @70133
+    SAY 0xe26 @70134
+    SAY 0xf46 @70135
   COPY ~chriz-bg-magic/res/spwi515.spl~ ~override/spwi515.spl~
     WRITE_LONG 0x50 25922
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70026 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70029 END
     WRITE_SHORT 0x98 cbm_proj_cbmoracl
   COPY ~chriz-bg-magic/res/spwi523d.spl~ ~override/spwi523d.spl~
   COPY ~chriz-bg-magic/res/spwi590.spl~ ~override/spwi590.spl~
     WRITE_LONG 0x8 31671
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi591.spl~ ~override/spwi591.spl~
     WRITE_LONG 0x8 31673
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi592.spl~ ~override/spwi592.spl~
     WRITE_LONG 0x8 31677
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi593.spl~ ~override/spwi593.spl~
     WRITE_LONG 0x8 31678
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi594.spl~ ~override/spwi594.spl~
     WRITE_LONG 0x8 31675
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi595.spl~ ~override/spwi595.spl~
     WRITE_LONG 0x8 31676
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi596.spl~ ~override/spwi596.spl~
     WRITE_LONG 0x8 31672
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi597.spl~ ~override/spwi597.spl~
     WRITE_LONG 0x8 31674
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70023 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70026 END
   COPY ~chriz-bg-magic/res/spwi603.spl~ ~override/spwi603.spl~
     WRITE_LONG 0x572 cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x5a2 cbm_state_TENSERS_TRANSFORMATION
@@ -2437,22 +2466,22 @@ BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
   COPY ~chriz-bg-magic/res/spwi608.spl~ ~override/spwi608.spl~
     WRITE_LONG 0x50 25935
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70028 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70031 END
   END ELSE BEGIN
     PRINT ~chriz-bg-magic: spwi608.spl stays as it is: its new rule needs EEex.~
   END
   COPY ~chriz-bg-magic/res/spwi609.spl~ ~override/spwi609.spl~
     WRITE_LONG 0x50 25936
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70029 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70032 END
     WRITE_LONG 0x432 cbm_state_CANNOT_TURN_INVISIBLE
   COPY ~chriz-bg-magic/res/spwi612.spl~ ~override/spwi612.spl~
     WRITE_LONG 0x50 7779
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70030 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70033 END
   COPY ~chriz-bg-magic/res/spwi613.spl~ ~override/spwi613.spl~
     WRITE_LONG 0x8 25937
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70031 END
+    PATCH_IF cbm_english BEGIN SAY 0x8 @70034 END
     WRITE_LONG 0x50 25938
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70032 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70035 END
     WRITE_LONG 0x212 cbm_Slow
     WRITE_LONG 0x272 cbm_Haste
     WRITE_LONG 0x332 cbm_state_CBM_BONUS_TYPED
@@ -2491,48 +2520,48 @@ BEGIN
     WRITE_LONG 0x3de2 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi614.spl~ ~override/spwi614.spl~
     WRITE_LONG 0x50 7622
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70033 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70036 END
   COPY ~chriz-bg-magic/res/spwi616.spl~ ~override/spwi616.spl~
   COPY ~chriz-bg-magic/res/spwi617.spl~ ~override/spwi617.spl~
     WRITE_LONG 0x50 25943
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70034 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70037 END
   COPY ~chriz-bg-magic/res/spwi620.spl~ ~override/spwi620.spl~
     WRITE_LONG 0x50 24838
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70035 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70038 END
   COPY ~chriz-bg-magic/res/spwi621.spl~ ~override/spwi621.spl~
     WRITE_LONG 0x50 24840
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70036 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70039 END
   COPY ~chriz-bg-magic/res/spwi622.spl~ ~override/spwi622.spl~
     WRITE_LONG 0x50 24842
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70037 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70040 END
   COPY ~chriz-bg-magic/res/spwi707.spl~ ~override/spwi707.spl~
     WRITE_LONG 0x50 17348
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70040 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70043 END
   COPY ~chriz-bg-magic/res/spwi708.spl~ ~override/spwi708.spl~
     WRITE_LONG 0x50 7613
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70041 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70044 END
     WRITE_LONG 0x4c2 cbm_state_BUFF_PRO_WEAPONS
     WRITE_LONG 0x4f2 cbm_state_MANTLE
   COPY ~chriz-bg-magic/res/spwi710.spl~ ~override/spwi710.spl~
     WRITE_LONG 0x50 25952
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70042 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70045 END
   COPY ~chriz-bg-magic/res/spwi711.spl~ ~override/spwi711.spl~
     WRITE_LONG 0x50 25954
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70043 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70046 END
   COPY ~chriz-bg-magic/res/spwi712.spl~ ~override/spwi712.spl~
     WRITE_LONG 0x50 25959
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70044 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70047 END
   COPY ~chriz-bg-magic/res/spwi713.spl~ ~override/spwi713.spl~
     WRITE_LONG 0x50 7672
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70045 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70048 END
   COPY ~chriz-bg-magic/res/spwi715.spl~ ~override/spwi715.spl~
     WRITE_LONG 0x50 7782
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70046 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70049 END
     WRITE_LONG 0xd2 cbm_prot_131_1_4
   COPY ~chriz-bg-magic/res/spwi802.spl~ ~override/spwi802.spl~
   COPY ~chriz-bg-magic/res/spwi805.spl~ ~override/spwi805.spl~
     WRITE_LONG 0x50 26242
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70052 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70055 END
     WRITE_LONG 0x262 cbm_DispelScreen
     WRITE_LONG 0x3b2 cbm_DispelScreen
     WRITE_LONG 0x502 cbm_DispelScreen
@@ -2540,52 +2569,52 @@ BEGIN
     WRITE_LONG 0x7a2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi807.spl~ ~override/spwi807.spl~
     WRITE_LONG 0x50 17361
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70053 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70056 END
   COPY ~chriz-bg-magic/res/spwi808.spl~ ~override/spwi808.spl~
     WRITE_LONG 0x50 7618
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70054 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70057 END
     WRITE_LONG 0x4f2 cbm_state_BUFF_PRO_WEAPONS
     WRITE_LONG 0x522 cbm_state_IMPROVED_MANTLE
   COPY ~chriz-bg-magic/res/spwi809.spl~ ~override/spwi809.spl~
     WRITE_LONG 0x50 26244
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70055 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70058 END
   COPY ~chriz-bg-magic/res/spwi810.spl~ ~override/spwi810.spl~
     WRITE_LONG 0x50 7664
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70056 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70059 END
   COPY ~chriz-bg-magic/res/spwi811.spl~ ~override/spwi811.spl~
     WRITE_LONG 0x50 17362
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70057 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70060 END
   COPY ~chriz-bg-magic/res/spwi812.spl~ ~override/spwi812.spl~
   COPY ~chriz-bg-magic/res/spwi815.spl~ ~override/spwi815.spl~
     WRITE_LONG 0x50 7784
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70058 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70061 END
   COPY ~chriz-bg-magic/res/spwi816.spl~ ~override/spwi816.spl~
     WRITE_LONG 0x50 39957
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70065 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70068 END
     WRITE_LONG 0x122 cbm_prot_131_1_4
     WRITE_LONG 0x302 cbm_prot_131_1_4
     WRITE_LONG 0x4e2 cbm_prot_131_1_4
   COPY ~chriz-bg-magic/res/spwi817.spl~ ~override/spwi817.spl~
     WRITE_LONG 0x50 39967
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70064 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70067 END
   COPY ~chriz-bg-magic/res/spwi903.spl~ ~override/spwi903.spl~
     WRITE_LONG 0x50 26315
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70059 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70062 END
     WRITE_LONG 0x162 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi905.spl~ ~override/spwi905.spl~
     WRITE_LONG 0x50 17352
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70060 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70063 END
   COPY ~chriz-bg-magic/res/spwi907.spl~ ~override/spwi907.spl~
     WRITE_LONG 0x50 7620
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70061 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70064 END
     WRITE_LONG 0x552 cbm_state_BUFF_PRO_WEAPONS
     WRITE_LONG 0x582 cbm_state_ABSOLUTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi908.spl~ ~override/spwi908.spl~
     WRITE_LONG 0x50 26330
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70062 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70065 END
   COPY ~chriz-bg-magic/res/spwi912.spl~ ~override/spwi912.spl~
     WRITE_LONG 0x50 18140
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70063 END
+    PATCH_IF cbm_english BEGIN SAY 0x50 @70066 END
   COPY ~chriz-bg-magic/res/spwi954.spl~ ~override/spwi954.spl~
     WRITE_LONG 0xa2 cbm_state_MAJOR_GLOBE
     WRITE_LONG 0xd2 cbm_state_MINOR_GLOBE

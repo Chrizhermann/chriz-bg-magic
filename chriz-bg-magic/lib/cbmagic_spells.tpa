@@ -404,3 +404,20 @@ BEGIN
     LAF cbmagic_bonus_state STR_VAR symbol RET state END
   END
 END
+
+// --- Find Familiar --------------------------------------------------------------------------
+// Each game keeps its own way of calling the familiar, which is what gives it the Hit Points of the
+// campaign: EET picks by chapter, BG2:EE has only Shadows of Amn and Throne of Bhaal. The mod writes
+// the spell's school and its description.
+DEFINE_ACTION_FUNCTION cbmagic_find_familiar
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN
+    COPY_EXISTING ~spwi123.spl~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x26) BEGIN WRITE_BYTE 0x25 0 END
+    BUT_ONLY
+    OUTER_SET text = RESOLVE_STR_REF (@60105)
+    LAF cbmagic_write_text INT_VAR text STR_VAR spell = ~spwi123~ END
+  END ELSE BEGIN
+    PRINT ~chriz-bg-magic: Find Familiar is not in this game; skipped.~
+  END
+END

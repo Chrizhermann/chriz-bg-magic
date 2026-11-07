@@ -29,6 +29,8 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
   writes (`chriz-bg-magic/res/`, `lib/cbmagic_resources.tpa`, `languages/english/resources.tra`).
   Fields only the install can know are symbols, see `tools/resformat.py`. `lib/cbmagic_iwd.tpa`
   and what it calls patch IWDification's spells until we build them ourselves.
+- A definition names only files the base game or this mod has: `defs/` must work on plain BG2:EE
+  and on EET, with or without EE Fixpack. Helpers of our own are named `CBH*`.
 - Describe every change in `docs/components.md`, in engine-neutral terms.
 - We write the complete description of every spell we change (append a new string and repoint
   the resource; never overwrite a shared strref). No search and replace in old sentences.

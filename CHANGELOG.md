@@ -20,6 +20,9 @@
 - Typed spells refresh themselves on recast, including their linked payloads. Shared
   external effects are isolated before patching. Optional IWD spells are found by symbol
   and skipped with an informational line when absent.
+- The mod brings the helper spells its changes call, so they work on plain BG2:EE and on EET,
+  with or without EE Fixpack. Find Familiar keeps each game's own way of calling the familiar and
+  names the Hit Points of all three campaigns.
 - Transformation and Regeneration spells form separate exclusive families: higher spell
   level wins; a new casting replaces an equal-level member. These rules work without EEex.
 - With EEex installed, Pierce Magic reduces current Magic Resistance by half, rounded down
