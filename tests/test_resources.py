@@ -537,6 +537,24 @@ def what_needs_eeex_stays_out_without_it(work, weidu):
     check_every_resource(g)
 
 
+@test
+def lesser_restoration_ends_drain_with_eeex(work, weidu):
+    """Without EEex the game's Lesser Restoration stays. With it the spell calls CBMLRES, and Blood
+    Rage keeps its own weakness in whatever slot this game gave it."""
+    g = fg.FakeGame(work / "plain", weidu, tlk=fx.tlk(), biff=fx.game())
+    out = install(g)
+    check("sppr417.spl stays as it is: its new rule needs EEex" in out, out)
+    check(g.file("override/SPPR417.SPL") is None, "Lesser Restoration was written without EEex")
+    biff = fx.game(SPELL_IDS=fx.spell_ids([(1421, "CLERIC_BLOOD_RAGE")]), SPPR421_SPL=ie.make_spl(2, 4))
+    g = fg.FakeGame(work / "eeex", weidu, tlk=fx.tlk(), biff=biff, override=EEEX)
+    install(g)
+    effects = g.spl("SPPR417")["abilities"][0]["effects"]
+    check([e["opcode"] for e in effects] == [224, 402, 215, 61, 240, 93] and effects[1]["resource"] == "CBMLRES",
+          f"Lesser Restoration: {[(e['opcode'], e['resource']) for e in effects]}")
+    lua = g.file("override/M_CBMRST.lua").decode("utf-8")
+    check('local SPARED = { ["SPPR421"] = true }' in lua and "%" not in lua, "Blood Rage is not spared")
+
+
 def effects_of(g, name):
     return [e for a in ie.parse_spl(ie.Game(g.root).get(name, "SPL"))["abilities"] for e in a["effects"]]
 

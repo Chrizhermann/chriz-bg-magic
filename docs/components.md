@@ -600,7 +600,15 @@ Every decided SCS-style spell change is implemented in our own library (`cbmagic
 - **Magical Stone (`cbmagic_scs_magical_stone`):** deals 3d4 crushing damage (6d4 against undead) instead of 1d4 via non-dispellable `.EFF` files (`0x5c = 0`).
 - **Summon Insects, Insect Plague, Creeping Doom (`cbmagic_scs_insect_plague`):** main spells strip their own repeating damage (`opcode 272`) and deliver all damage and effects through their subspells; spell failure allows a per-round save vs. breath (at 0, -2, and -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them (`op206`); Stoneskin holds off the secondary effects while skins remain (each damage tick strips a skin); items and spells granting immunity to normal weapons (`op120 p2=2`) block and remove them; Death Spell (`SPWI605`) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help.
 - **Nature's Beauty (`cbmagic_scs_natures_beauty`):** both humanoid slay (`opcode 55`, save vs. spell +3) and blindness are moved to a schoolless area subspell (`CBMGNB1.SPL`, `target = 5`, `projectile = 159`, so True Sight does not dispel it via school removal and a single effect list decides both death and blindness): on a failed save, humanoids die and targets suffer permanent blindness; on a successful save, targets are blinded for 3 rounds.
-- **Lesser Restoration:** stays cleric-only (`0x20 = 0x8000`) and otherwise vanilla for now; attribute-drain removal is deferred to the EEex module (`opcode 402` reading the timed effect list without rewriting spell/item files).
+- **Lesser Restoration:** stays cleric-only as in the base game. With EEex it also ends temporary
+  attribute drain: its opcode 402 calls `CBMLRES` (`lua/M_CBMRST.lua`), which ends every running
+  timed effect on the recipient that lowers Strength, Dexterity, Constitution, Intelligence,
+  Wisdom or Charisma (opcodes 6, 10, 15, 19, 44, 49: a lower value, a fixed value below 12, or a
+  share below 100 %). Disease is opcode 78 and not touched; permanent loss is no timed effect. Blood
+  Rage's own weakness stays: the installer names that spell's file in the module. When a source's
+  drain ends and nothing else of that source stays, its icon, sound and visual go too (Ray of
+  Enfeeblement); Energy Drain keeps its save penalty and icon. No spell or item that drains is
+  rewritten. Without EEex the game's spell stays.
 
 ## Additional decided spell changes (`chriz-bg-magic/lib/cbmagic_more.tpa`)
 
@@ -639,7 +647,10 @@ descriptions still describe the old behaviour.
   with the game's own wing animation in the helmet slot.
 - Gender is BOTH, as on the game's celestials: the gender SUMMONED would let Death Spell destroy
   a creature whose description says it is immune to death magic.
-- Combat stays under the game's `BDSUM00`; which spells it casts is the player's choice.
+- Combat stays under the game's `BDSUM00`; which spells it casts is the player's choice. An enemy's
+  celestial gets the game's own celestial script on arrival (`DEVAGOOD`, `DEVAEVIL`, `PLANGOOD` in
+  the class slot), so it casts as the game's celestials do, and as whatever mod changed those
+  scripts makes them do.
 - The limit is a small override script, `defs/baf/cbmdevac.baf` for devas and
   `defs/baf/cbmplanc.baf` for planetars, compiled to `chriz-bg-magic/files/`. The game's own limit
   in `SUMMLIMT.2DA` does not help: it counts one shared CELESTIAL row by fixed names and animations.

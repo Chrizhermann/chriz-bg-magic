@@ -38,10 +38,23 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
     planetar; once the first is gone another comes; with the party AI button off the second still
     leaves; a second deva leaves while the first stands out of sight.
   - Enemy casters are not limited: two devas of an enemy caster stay beside the party's deva.
+  - An enemy's devas carry the game's `DEVAGOOD` in the class slot, the party's deva none.
   - A deva casts Bless from its book on order; a planetar regenerated 4 Hit Points in 12 seconds.
 - In-game, group `celweapons`, BG2:EE, hits on a foe that cannot die: deva 11 to 20 (1d10+10),
   planetar 13 to 21 (2d6+10), fallen deva 13 to 26 plus its bleeding in single Hit Points.
 - Both groups again in BG2:EE with IWDification: 39 of 39.
+
+## Lesser Restoration
+
+- Offline: without EEex the game's spell stays; with EEex it calls `CBMLRES`, and Blood Rage's file
+  is named in the module.
+- In-game, group `restoration`, BG2:EE with IWDification: on one character Ray of Enfeeblement,
+  a mind flayer's hit, Energy Drain, a disease and Blood Rage's weakness, then Lesser Restoration:
+  Strength 5 to 10, Intelligence 13 to 18, Dexterity 8 to 10 and Constitution back but for the
+  disease's 2; Ray of Enfeeblement's icon went with it; Energy Drain's save penalty and icon, the
+  disease and Blood Rage's weakness stayed. The same in plain BG2:EE, without Blood Rage.
+- The drains were put on as the spell or weapon leaves them, from a hostile creature; a real Ray
+  of Enfeeblement or mind flayer fight was not run.
 
 ## Not covered
 

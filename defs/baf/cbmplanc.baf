@@ -3,11 +3,14 @@
 // stays behind when a creature goes: a gone creature just does not answer.
 // Variables set in a block are not yet set for the triggers of the blocks after it in the same
 // pass, so every block names all it needs.
+// An enemy's celestial casts as the game's own does: its celestial script, from the class slot. The
+// game gives both planetars the same one.
 IF
   Global("CBMARRIVE","LOCALS",0)
   !Allegiance(Myself,GOODCUTOFF)
 THEN
   RESPONSE #100
+    ChangeAIScript("PLANGOOD",CLASS)
     SetGlobal("CBMARRIVE","LOCALS",3)
     Continue()
 END

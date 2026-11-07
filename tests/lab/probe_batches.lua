@@ -55,7 +55,8 @@ function P.others()
     for _, s in ipairs(sprites()) do
         if not members[s.m_id] then
             out[#out + 1] = { name = EEex_Sprite_GetName(s), dv = s.m_scriptName:get(), hp = s.m_baseStats.m_hitPoints,
-                              ea = s.m_typeAI.m_EnemyAlly, id = s.m_id, x = s.m_pos.x, y = s.m_pos.y }
+                              ea = s.m_typeAI.m_EnemyAlly, id = s.m_id, x = s.m_pos.x, y = s.m_pos.y,
+                              class_script = s:getScriptLevelResRef(4) }
         end
     end
     return out
@@ -97,6 +98,26 @@ function P.being(name)
         local key = tostring(e.m_effectId)
         out.equipped[key] = (out.equipped[key] or 0) + 1
     end)
+    return out
+end
+
+-- An effect on a portrait as a creature's spell or weapon would leave it.
+function P.fx_from(who, from, res, kind, op, p1, p2, seconds)
+    local s, f = party(who), named(from)
+    EEex_GameObject_ApplyEffect(s, { effectID = op, effectAmount = p1, dwFlags = p2, durationType = 0,
+                                     duration = seconds, m_sourceRes = res, m_sourceType = kind,
+                                     sourceID = f.m_id, sourceTarget = s.m_id })
+    return true
+end
+
+function P.attributes(who)
+    local s = party(who)
+    local out = {}
+    for name, id in pairs({ str = 36, int = 38, wis = 39, dex = 40, con = 41, chr = 42, level = 34 }) do
+        out[name] = EEex_Sprite_GetStat(s, id)
+    end
+    out.saves = {}
+    for _, id in ipairs({ 9, 10, 11, 12, 13 }) do out.saves[#out.saves + 1] = EEex_Sprite_GetStat(s, id) end
     return out
 end
 

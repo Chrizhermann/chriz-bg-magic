@@ -2,11 +2,14 @@
 
 ## Unreleased
 
+- Lesser Restoration also ends temporary attribute drain, such as Ray of Enfeeblement or a mind
+  flayer's hit. Disease, permanent loss and the weakness after Blood Rage stay. Needs EEex.
+
 - Summon Deva, Summon Fallen Deva, Summon Planetar and Summon Dark Planetar call new creatures:
   their numbers, weapons, spell lists and look are in each spell's description. The party can
   have one deva or fallen deva and one planetar or dark planetar at the same time; a second of
-  the same kind leaves as soon as it arrives. Enemy casters are not limited. The paladin's two
-  summons call the same creatures.
+  the same kind leaves as soon as it arrives. Enemy casters are not limited, and their celestials
+  cast with the game's own celestial scripts. The paladin's two summons call the same creatures.
 
 - The mod now overwrites: every spell, item and effect it changes is written whole, whatever
   stood there. A spell another mod or a player changed no longer stops or skews the install,

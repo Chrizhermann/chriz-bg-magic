@@ -409,6 +409,20 @@ END
 // Each game keeps its own way of calling the familiar, which is what gives it the Hit Points of the
 // campaign: EET picks by chapter, BG2:EE has only Shadows of Amn and Throne of Bhaal. The mod writes
 // the spell's school and its description.
+// Lesser Restoration's callback (lua/M_CBMRST.lua). Blood Rage's own weakness afterwards stays:
+// its resref is whatever slot this game gave the spell.
+DEFINE_ACTION_FUNCTION cbmagic_lesser_restoration
+BEGIN
+  OUTER_SPRINT CBM_RESTORATION_SPARED ~~
+  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_BLOOD_RAGE~ RET rage = resref found END
+  ACTION_IF found BEGIN
+    ACTION_TO_UPPER rage
+    OUTER_SPRINT CBM_RESTORATION_SPARED ~["%rage%"] = true~
+  END
+  COPY ~chriz-bg-magic/lua/M_CBMRST.lua~ ~override/M_CBMRST.lua~
+    EVALUATE_BUFFER
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_find_familiar
 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN

@@ -17,9 +17,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFS = ROOT / "defs"
 MOD = ROOT / "chriz-bg-magic"
 FIRST_STRING = 70000
-# Pierce Magic's new rule is an EEex callback, which does nothing without EEex. There the game's
-# spell and scroll stay; cbmagic_bonus_pierce_magic says so in the log.
-NEEDS_EEEX = ("spwi608.spl", "scrl7l.itm")
+# Pierce Magic's and Lesser Restoration's new rules are EEex callbacks, which do nothing without
+# EEex. There the game's spells and scroll stay, and the log says so.
+NEEDS_EEEX = ("spwi608.spl", "scrl7l.itm", "sppr417.spl")
 
 
 class Strings:

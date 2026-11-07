@@ -24,12 +24,14 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration")
 
 
 def lua_list(values):
     return "{" + ", ".join(str(v) for v in values) + "}"
 
+
+RAGE = None
 
 def run_checks(c, report, only):
     checks = report["checks"]
@@ -933,6 +935,8 @@ def celestials(c, check):
     devas = [o for o in everyone if o["name"] == "Deva"]
     check("Limit: enemy casters are not limited", sum(o["ea"] >= 200 for o in devas) == 2 and sum(o["ea"] < 30 for o in devas) == 1,
           devas=devas)
+    check("An enemy's deva casts with the game's celestial script, the party's does not",
+          all(o["class_script"].upper() in (("DEVAGOOD",) if o["ea"] >= 200 else ("", "NONE")) for o in devas), devas=devas)
 
     # Its book and its nature in play.
     clear("book")
@@ -953,6 +957,42 @@ def celestials(c, check):
           hurt=hurt["hp"], healed=healed["hp"])
 
     clear("end")
+
+
+def restoration(c, check):
+    # Drain of several kinds on the second portrait, as the spell or weapon would leave it, then
+    # Lesser Restoration from the first.
+    c.p("rs-protect", "protect_party()")
+    foe = fresh_foe(c, "rs")
+    before = c.p("rs-before", "attributes(1)")
+    SPELL, ITEM = 1, 2
+    rows = [("SPWI221", SPELL, 44, 5, 1), ("SPWI221", SPELL, 142, 0, 113),       # Ray of Enfeeblement
+            ("MINDFLAY", ITEM, 19, -5, 0),                                      # a mind flayer's hit
+            ("SPWI928", SPELL, 10, -2, 0), ("SPWI928", SPELL, 15, -2, 0),       # Energy Drain: attributes,
+            ("SPWI928", SPELL, 33, -2, 0), ("SPWI928", SPELL, 142, 0, 53),     # a save and its icon stay
+            ("SPPR321", SPELL, 78, 2, 6)]                                       # disease: Constitution -2
+    if RAGE:
+        rows.append((RAGE, SPELL, 49, 3, 1))                                  # Blood Rage's own weakness
+    for i, (res, kind, op, p1, p2) in enumerate(rows):
+        c.p(f"rs-fx-{i}", f'fx_from(1, "{foe}", "{res}", {kind}, {op}, {p1}, {p2}, 300)')
+    time.sleep(1.5)
+    drained = c.p("rs-drained", "attributes(1)")
+    c.p("rs-cast", 'cast(0, "SPPR417", "Player2")')
+    time.sleep(6)
+    after = c.p("rs-after", "attributes(1)")
+    left = [(e["src"], e["op"], e["p2"]) for e in c.p("rs-left", "ops(1, {10, 15, 19, 33, 44, 49, 78, 142})") or []]
+    facts = dict(before=before, drained=drained, after=after, left=left)
+    check("Lesser Restoration: Strength, Intelligence and Dexterity come back, Constitution all but the disease",
+          [after[k] for k in ("str", "int", "dex")] == [before[k] for k in ("str", "int", "dex")] and
+          after["con"] == before["con"] - 2 and drained["con"] == before["con"] - 4 and
+          [drained[k] for k in ("str", "int", "dex")] != [before[k] for k in ("str", "int", "dex")], **facts)
+    check("Lesser Restoration: Ray of Enfeeblement's icon goes with it", ("SPWI221", 142, 113) not in left, **facts)
+    check("Lesser Restoration: Energy Drain's save penalty and icon stay", ("SPWI928", 33, 0) in left and
+          ("SPWI928", 142, 53) in left, **facts)
+    check("Lesser Restoration: disease stays", ("SPPR321", 78, 6) in left, **facts)
+    if RAGE:
+        check("Lesser Restoration: Blood Rage's weakness stays", (RAGE, 49, 1) in left, **facts)
+    c.p("rs-tidy", "remove_all_others()")
 
 
 def celweapons(c, check):
@@ -1354,6 +1394,11 @@ def main():
         GAME = Path(args[args.index("--game") + 1])
     if "bonus" in selected and "--game" in args:
         BONUS = bonus_resources(Path(args[args.index("--game") + 1]))
+    if "restoration" in selected and "--game" in args:
+        global RAGE
+        ids = (Path(args[args.index("--game") + 1]) / "override" / "spell.ids")
+        found = re.search(r"^\s*(\d+)\s+CLERIC_BLOOD_RAGE\s*$", ids.read_text(encoding="latin-1"), re.M) if ids.exists() else None
+        RAGE = f"SPPR{int(found[1]) % 1000:03d}" if found else None
     if "decided" in selected and "--game" in args:
         global AIR, LANCE
         game = Path(args[args.index("--game") + 1])
