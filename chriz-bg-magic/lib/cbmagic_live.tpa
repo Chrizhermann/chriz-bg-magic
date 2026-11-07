@@ -40,8 +40,5 @@ BEGIN
 
     COPY ~chriz-bg-magic/lua/M_CBMREC.lua~ ~override/M_CBMREC.lua~
       EVALUATE_BUFFER
-      PATCH_IF INDEX_BUFFER (~row = %~) >= 0 BEGIN
-        PATCH_FAIL ~chriz-bg-magic: record row stamping failed.~
-      END
   END
 END

@@ -309,3 +309,47 @@ def healing_batch_missing_optional_spells_and_extra_abilities(work, weidu):
     check(all(((_single_fx(a["effects"], 17)["p1"], _single_fx(a["effects"], 17)["dice"], _single_fx(a["effects"], 17)["sides"]) == (5, 1, 8)) for a in spell["abilities"]), spell)
     check(_single_fx(spell["abilities"][1]["effects"], 12, p2=0x80000)["p1"] == 4, "extra effect changed")
     check("CLERIC_CURE_MODERATE_WOUNDS) is not in this game; skipped" in out, out)
+
+
+@test
+def healing_other_wording_changes_the_spell_all_the_same(work, weidu):
+    """A text worded differently, by another mod or in another language, only stays as it is."""
+    biff = {
+        "SPELL.IDS": ie.make_ids([(1103, "CLERIC_CURE_LIGHT_WOUNDS")]),
+        "SPPR103.SPL": ie.make_spl(2, 1, [
+            {"target": 1, "casting_time": 5, "effects": [fx(opcode=17, target=2, p1=8, timing=1)]},
+        ], desc=1),
+        "SCRL01.ITM": _scroll("SPPR103", 1),
+    }
+    g = fg.FakeGame(work, weidu, tp2=HEALING_TP2, tlk=ie.make_tlk(["", "Heilt acht Punkte."]), biff=biff)
+    out = g.install()
+    check("SUCCESSFULLY INSTALLED" in out, out)
+    spell = _spell(g.file("override/SPPR103.SPL"))
+    roll = _single_fx(spell["abilities"][0]["effects"], 17)
+    check((roll["p1"], roll["dice"], roll["sides"]) == (5, 1, 8), "the roll depends on the text")
+    check(spell["abilities"][0]["casting_time"] == 4, "the casting time depends on the text")
+    check("description not updated" in out, "the sentence left as it is is not named in the log")
+
+
+@test
+def healing_odd_spells_lose_only_the_part_that_cannot_be_done(work, weidu):
+    """No healing effect, or a touch charge that does not exist: the casting time still changes."""
+    refs, tlk = _texts()
+    biff = {
+        "SPELL.IDS": ie.make_ids([(1103, "CLERIC_CURE_LIGHT_WOUNDS"), (1414, "CLERIC_CAUSE_SERIOUS_WOUNDS")]),
+        "SPLPROT.2DA": ie.make_2da(["STAT", "VALUE", "RELATION"], [
+            ("0_EA", ["0x10a", "0", "4"]), ("1_GENERAL=UNDEAD", ["0x10b", "4", "1"]),
+            ("2_GENERAL!=UNDEAD", ["0x10b", "4", "5"]),
+        ]),
+        "SPPR103.SPL": ie.make_spl(2, 1, [
+            {"target": 1, "casting_time": 5, "effects": [fx(opcode=146, target=2, p2=1, timing=1, resource="ELSEWHER")]},
+        ], desc=refs["CLW"]),
+        "SPPR414.SPL": _charge_spell(4, "NOITEM", 7, refs["CSERIO"]),
+        "INERT.ITM": ie.make_itm(),
+    }
+    g = fg.FakeGame(work, weidu, tp2=HEALING_TP2, tlk=tlk, biff=biff)
+    out = g.install()
+    check("SUCCESSFULLY INSTALLED" in out, out)
+    check("no healing effect to roll" in out and "NOITEM.itm is not in this game" in out, out)
+    check(_spell(g.file("override/SPPR103.SPL"))["abilities"][0]["casting_time"] == 4, "Cure casting time")
+    check(_spell(g.file("override/SPPR414.SPL"))["abilities"][0]["casting_time"] == 6, "Cause casting time")

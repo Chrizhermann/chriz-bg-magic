@@ -50,8 +50,8 @@
 @60003 = ~Casting Time: 7~
 @60010 = ~causes 8 points of wound or other injury damage to the creature's body to be healed\.~
 @60011 = ~causes 1d8 + 5 points of wound or other injury damage to the creature's body to be healed.~
-@60012 = ~heals 11 Hit Points~
-@60013 = ~heals 2d8 + 4 Hit Points~
+@60012 = ~heals 11 ~
+@60013 = ~heals 2d8 + 4 ~
 @60014 = ~heals 14 points of wound or other injury damage from the creature's body\.~
 @60015 = ~heals 2d8 + 7 points of wound or other injury damage from the creature's body.~
 @60016 = ~heals 17 points of wound or other injury damage to the creature's body\.~

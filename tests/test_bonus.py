@@ -4,6 +4,7 @@ Fixtures reproduce the delivery/field shapes of spell data without reading or co
 any installed game or third-party resources at test runtime.
 """
 import importlib
+import re
 import struct
 from pathlib import Path
 
@@ -226,16 +227,19 @@ def bonus_optional_spells_missing_and_stamped_states(work, weidu):
 
 
 @test
-def bonus_rejects_non_additive_modes_and_rolls_back(work, weidu):
+def bonus_effects_that_cannot_be_counted_stay_untyped(work, weidu):
+    """An effect that sets a value or changes base stats keeps working; its neighbours get a type."""
     for index, (op, mode, timing) in enumerate(((54, 1, 0), (73, 2, 0), (325, 1, 0), (54, 0, 1))):
         g = make_game(work / str(index), weidu,
-                      {"SPWI950.SPL": spell([effect(op, 2, p2=mode, timing=timing)])},
+                      {"SPWI950.SPL": spell([effect(op, 2, p2=mode, timing=timing), effect(37, 1)])},
                       [(2950, "WIZARD_EMOTION_HOPE")])
-        before = g.tree()
-        out = g.install()
-        check(fg.failed(out), f"invalid typed semantics accepted: {op}/{mode}/{timing}\n{out}")
-        check("non-additive mode" in out if mode else "base stats" in out, "missing rejection reason")
-        check(g.tree() == before, "rejected installation left gameplay changes")
+        out = install(g)
+        check(not fg.with_warnings(out), out)
+        check("stays without a type" in out, "the effect left out is not named in the log")
+        found = rows(g, "SPWI950")
+        check(any(r["opcode"] == op and r["p2"] == mode and r["timing"] == timing and r["resource"] == ""
+                  for r in found), f"effect {op}/{mode}/{timing} changed")
+        check(any(r["opcode"] == 37 and r["resource"] == "CBTMORAL" for r in found), "its neighbour got no type")
 
 
 @test
@@ -300,13 +304,12 @@ def bonus_external_timing_comes_from_delivery(work, weidu):
               "stored EFF timing was unnecessarily overwritten")
         check(resource(g, "TIMED.EFF") == original, "shared EFF changed")
     # Conversely, an immediate permanent wrapper makes its child a base-stat change.
+    original = spell([effect(177, resource="BASE", timing=1)])
     g = make_game(work / "invalid", weidu,
-                  {"SPPR950.SPL": spell([effect(177, resource="BASE", timing=1)]),
-                   "BASE.EFF": eff_v2(54, -2)}, [(1950, "CLERIC_UNHOLY_BLIGHT")])
-    before = g.tree()
-    out = g.install()
-    check(fg.failed(out) and "base stats" in out, "permanent wrapper accepted a typed base-stat change")
-    check(g.tree() == before, "permanent wrapper rejection did not roll back")
+                  {"SPPR950.SPL": original, "BASE.EFF": eff_v2(54, -2)}, [(1950, "CLERIC_UNHOLY_BLIGHT")])
+    out = install(g)
+    check("base stats for good" in out and not fg.with_warnings(out), out)
+    check(resource(g, "SPPR950.SPL") == original, "a permanent wrapper's spell changed")
 
 
 @test
@@ -325,17 +328,22 @@ def bonus_conditional_delivery_and_invalid_graphs(work, weidu):
           "conditional payload not tagged")
     for name in ("ROUTE.SPL", "PAYLOAD.SPL"):
         check(resource(g, name) == resources[name], "shared conditional delivery changed")
+    # A branch that cannot be followed stays as it is; the rest of the spell gets its type.
     broken = [
-        ({"SPPR950.SPL": spell([effect(146, resource="SPPR950")])}, "cyclic/deep"),
-        ({"SPPR950.SPL": spell([effect(177, resource="MISSING")])}, "missing delivery resource"),
-        ({"SPPR950.SPL": spell([effect(177, resource="TRUNC")]), "TRUNC.EFF": b"EFF V2.0"}, "truncated EFF"),
+        (146, "SPPR950", {}, "reached a second time"),
+        (177, "MISSING", {}, "not in this game"),
+        (177, "TRUNC", {"TRUNC.EFF": b"EFF V2.0"}, "shorter than an EFF file"),
+        (146, "BADSPL", {"BADSPL.SPL": b"SPL V1  "}, "shorter than an SPL header"),
     ]
-    for index, (files, reason) in enumerate(broken):
+    for index, (op, target, extra, reason) in enumerate(broken):
+        files = {"SPPR950.SPL": spell([effect(op, resource=target), effect(54, 2)]), **extra}
         g = make_game(work / str(index), weidu, files, [(1950, "CLERIC_PRAYER")])
-        before = g.tree()
-        out = g.install()
-        check(fg.failed(out) and reason in out, "invalid delivery did not fail with a useful reason:\n" + out)
-        check(g.tree() == before, "invalid delivery did not roll back")
+        out = install(g)
+        check(not fg.with_warnings(out), out)
+        check(reason in out, "the branch left out is not named in the log:\n" + out)
+        found = rows(g, "SPPR950")
+        check(any(r["opcode"] == op and r["resource"] == target for r in found), "the branch changed")
+        check(any(r["opcode"] == 54 and r["resource"] == "CBTFAVOR" for r in found), "the rest of the spell got no type")
 
 
 @test
@@ -453,18 +461,30 @@ def bonus_state_allocation_collisions_and_exhaustion(work, weidu):
     ids = state_ids(g)
     check(ids["FOREIGN_HIGH"] == 255 and ids["CBM_BONUS_PASS"] == 254 and ids["CBM_BONUS_TYPED"] == 253,
           "allocation did not preserve/reuse existing states")
-    invalid = [
-        ([(255, "CBM_BONUS_PASS"), (255, "FOREIGN")], "shares its value"),
-        ([(254, "CBM_BONUS_PASS"), (255, "CBM_BONUS_PASS")], "duplicate state"),
-        ([(256, "CBM_BONUS_PASS")], "outside 0..255"),
-        ([(value, "FOREIGN_" + str(value)) for value in range(256)], "no free SPLSTATE bit"),
-    ]
-    for index, (entries, reason) in enumerate(invalid):
+    # A marker that is not ours alone is given up for a free one.
+    moved = (
+        [(255, "CBM_BONUS_PASS"), (255, "FOREIGN")],
+        [(254, "CBM_BONUS_PASS"), (255, "CBM_BONUS_PASS")],
+        [(256, "CBM_BONUS_PASS")],
+    )
+    for index, entries in enumerate(moved):
         g = make_game(work / str(index), weidu, {"SPLSTATE.IDS": ie.make_ids(entries)})
-        before = g.tree()
-        out = g.install()
-        check(fg.failed(out) and reason in out, f"state allocation accepted ambiguity/exhaustion:\n{out}")
-        check(g.tree() == before, "state allocation failure did not roll back")
+        install(g)
+        runtime = g.file("override/M_CBMBON.lua").decode("utf-8")
+        passes = int(re.search(r"local PASS_STATE = (\d+)", runtime).group(1))
+        typed = int(re.search(r"local TYPED_STATE = (\d+)", runtime).group(1))
+        taken = {value for value, _ in entries}
+        check(passes != typed and passes <= 255 and typed <= 255 and not taken & {passes, typed},
+              f"markers {passes}, {typed} clash with {entries}")
+    # No free state at all: only the bonus types stay out.
+    full = [(value, "FOREIGN_" + str(value)) for value in range(256)]
+    data = spell([effect(54, 2)])
+    g = make_game(work / "full", weidu, {"SPLSTATE.IDS": ie.make_ids(full), "SPPR950.SPL": data},
+                  [(1950, "CLERIC_PRAYER")])
+    out = install(g)
+    check("bonus types left out" in out and not fg.with_warnings(out), out)
+    check(resource(g, "SPPR950.SPL") == data, "a spell changed without a marker to count it")
+    check(not (Path(g.root) / "override/M_CBMBON.lua").exists(), "listener installed without markers")
 
 
 @test
