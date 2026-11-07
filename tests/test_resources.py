@@ -314,6 +314,39 @@ def decided_phase_one_spell_definitions(work, weidu):
 
 
 @test
+def definitions_lean_on_no_other_mod(work, weidu):
+    """Nothing of EET or EE Fixpack is named: their files are not in every game this mod supports."""
+    def resources(d):
+        if isinstance(d, dict):
+            if isinstance(d.get("resource"), str):
+                yield d["resource"]
+            for value in d.values():
+                yield from resources(value)
+        elif isinstance(d, list):
+            for value in d:
+                yield from resources(value)
+
+    foreign = {f"{name}: {res}" for name, defn in definitions().items() for res in resources(defn)
+               if res.upper().startswith(("#CURE", "K#FAM", "CDWSTYL", "CDINVEXP", "CDMK25", "DWFPDEVA", "SPINHUMW", "SPINHUMR"))}
+    check(not foreign, f"{len(foreign)} named: {sorted(foreign)[:8]}")
+
+
+@test
+def find_familiar_keeps_the_game_s_summoning(work, weidu):
+    """School and description are written; what calls the familiar stays each game's own."""
+    summon = fx.fx(opcode=177, target=1, p2=2, timing=1, resource="K#FAMSUM")
+    g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=fx.game(
+        SPWI123_SPL=ie.make_spl(1, 1, [{"target": 4, "effects": [summon]}], school=2)))
+    install(g)
+    spell = g.file("override/spwi123.spl")
+    check(spell[0x25] == 0, f"Find Familiar school {spell[0x25]}")
+    effects = ie.parse_spl(spell)["abilities"][0]["effects"]
+    check([e["resource"] for e in effects] == ["K#FAMSUM"], f"summoning changed: {effects}")
+    text = ie.tlk_text(g.file("lang/en_us/dialog.tlk"), struct.unpack_from("<i", spell, 0x50)[0])
+    check("48 in Throne of Bhaal" in text and "9 in Baldur's Gate" in text, text[-300:])
+
+
+@test
 def overwrite_whatever_stood_there(work, weidu):
     """A hand edit, other text, other effect counts, garbage and nothing at all: each ends as
     defined, and the install runs through without a warning. Second install and uninstall too."""

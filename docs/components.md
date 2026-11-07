@@ -14,7 +14,8 @@ files, the install code and the strings from `defs/`; only what depends on the i
 open until then: strings, table rows, spell states, projectiles and the slots of new spells.
 So nothing in the install reads old content, and a spell someone edited by hand ends up like
 any other. A definition comes from the reference game, EET with EE Fixpack; plain BG2:EE gets
-the same files.
+the same files. So a definition names only what the base game or this mod has: the helper spells
+of EE Fixpack it calls are in the mod under names of its own (`CBH*`).
 
 Still patched at install, because we do not ship their files: IWDification's spells and the two
 it replaces, Emotion: Hopelessness and Chant (`lib/cbmagic_iwd.tpa`, `lib/cbmagic_healing.tpa`,
@@ -257,6 +258,11 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   descriptions and scrolls say `(Conjuration/Summoning)`.
 - Power Word: Sleep belongs to Enchantment (`4`, Invoker exclusion on the spell and ITM
   `0x2d` bit `0x08` on its scrolls), and its description and scroll say `(Enchantment/Charm)`.
+
+
+Find Familiar is the one spell of these written field by field: each game keeps its own way of
+calling the familiar. EET picks the familiar by chapter, so it has the Hit Points of its campaign;
+BG2:EE has only Shadows of Amn and Throne of Bhaal. The description names all three campaigns.
 
 ## Grease (`cbmagic_vanilla_grease`)
 

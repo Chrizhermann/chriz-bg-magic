@@ -28,6 +28,7 @@ LABEL ~chriz-bg-magic-main~
 REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @9000
 LAF cbmagic_check_spell_revisions END
 LAF cbmagic_write_resources END
+LAF cbmagic_find_familiar END
 LAM cbmagic_index_scrolls
 LAF cbmagic_iwd_spells END
 LAF cbmagic_record_live END

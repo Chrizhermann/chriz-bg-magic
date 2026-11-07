@@ -3,10 +3,14 @@
  "header": {
   "signature": "ITM V1  ",
   "name": 6328,
-  "name_identified": 206766,
+  "name_identified": {
+   "text": "Arrow of Dispelling"
+  },
   "raw_10": "000000a4142400046c000000050080d704202020000000000000000000000000000000002c01000050004941524f5730370014004741524f5730310000000000",
   "description": 6760,
-  "description_identified": 217539,
+  "description_identified": {
+   "text": "This arrow will remove the magical enchantments that its victim is surrounded by.\n\nSTATISTICS:\n\nCombat abilities:\n– Dispel Magic on target when hit\n\nDamage: 1d6 (missile)\nLauncher: Bow\n\nWeight: 0"
+  },
   "raw_58": "4341524f5730370000000000"
  },
  "casting": [
@@ -65,7 +69,7 @@
      "duration": 0,
      "prob1": 100,
      "prob2": 0,
-     "resource": "#curefbm",
+     "resource": "CBHCFBM",
      "dice": 0,
      "sides": 0,
      "save": 0,
@@ -83,7 +87,7 @@
      "duration": 0,
      "prob1": 100,
      "prob2": 0,
-     "resource": "#curedef",
+     "resource": "CBHCDEF",
      "dice": 0,
      "sides": 0,
      "save": 0,

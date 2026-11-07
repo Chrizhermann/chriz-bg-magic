@@ -2,8 +2,12 @@
  "format": "itm",
  "header": {
   "signature": "ITM V1  ",
-  "name": 210966,
-  "name_identified": 210966,
+  "name": {
+   "text": "Attack"
+  },
+  "name_identified": {
+   "text": "Attack"
+  },
   "raw_10": "0000000072620000e00000011c000000000000000000000000000000000000000000000000000000010049534841504530330000000072620000556e00000000",
   "description": -1,
   "description_identified": -1,
@@ -273,7 +277,7 @@
    "duration": 0,
    "prob1": 100,
    "prob2": 0,
-   "resource": "#curefer",
+   "resource": "CBHCFER",
    "dice": 0,
    "sides": 0,
    "save": 0,
@@ -849,7 +853,7 @@
    "duration": 0,
    "prob1": 100,
    "prob2": 0,
-   "resource": "cdwstyl1",
+   "resource": "CBHWSTY1",
    "dice": 0,
    "sides": 0,
    "save": 0,

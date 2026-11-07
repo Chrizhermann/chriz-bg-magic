@@ -25,6 +25,13 @@ spell states. No byte in 595 files stayed unexplained. The result became `defs/`
   the bonus types on real IWD spells. Extra attack, measured: Righteous Wrath alone gives 2 attacks;
   with Haste its bonus goes to 0 and only Haste counts; it comes back when Haste ends; beside
   Improved Haste one of the two counts.
+- After the first run: the definitions came from EET with EE Fixpack and named their files, which
+  plain BG2:EE lacks. Spells then lost their cures, Chromatic Orb its effects, and Find Familiar
+  summoned nothing. The in-game run could not show Find Familiar: it is left out of the cast-once
+  list. Now the mod brings 28 helpers of its own (`CBH*`), Find Familiar is written field by field,
+  and four strings with EET-only numbers are text. Every spell and EFF a definition delivers was
+  checked against plain BG2:EE's files; none is missing. Then again 118 of 118 in plain BG2:EE,
+  155 changed spells cast once, and clean installs in all three labs.
 - The old patches compared between plain BG2:EE and EET: three changes had silently failed in EET
   because EE Fixpack builds those spells differently (Remove Paralysis, its cure sub-spell, Mimic
   Web). They are in `defs/` now.
