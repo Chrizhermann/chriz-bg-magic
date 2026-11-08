@@ -377,7 +377,9 @@ and stays for the duration; one second after the forms end, `CBMPEND` does the s
 | Hell Hound (`CBMPHH`) | 18 / 15 | 4 | 1 | 1d10 piercing + 1d6 fire, +1 | Fiery Breath, 3d6, every 3 rounds; immune to fire |
 | Rat (`CBMPRT`) | 10 / 20 | 4 | 1 | 1d2 piercing, +1 | Hide, at once again |
 
-- The hill giant's own art is not in the base game; it looks like a fire giant for now.
+- The hill giant wears Icewind Dale's verbeeg look (animation `0xE293`, `E293.INI`, the 24
+  `MGVE*.BAM` and 8 `VERBEE*.WAV`, taken from Icewind Dale: Enhanced Edition): BG2:EE has no hill
+  giant art.
 - The mustard jelly's slow is the one this mod gives every slow, so Haste and the slow cancel
   each other as everywhere else.
 - In another form the Strength floors do not apply: the form keeps its values.

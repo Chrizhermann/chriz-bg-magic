@@ -12,7 +12,7 @@ POLYMORPH = {
     "cbmphh.spl": ("CBMPHHW", "CBMPHHC", 18, 0, 15, 1, 4, "CBMPHHB"),
     "cbmprt.spl": ("CBMPRTW", "CBMPRTC", 10, 0, 20, 1, 4, "CBMPRTH"),
 }
-LOOKS = {"cbmphgc.cre": 0x7F3E, "cbmpomc.cre": 0x2200, "cbmphhc.cre": 0x7B04, "cbmprtc.cre": 0xC300}
+LOOKS = {"cbmphgc.cre": 0xE293, "cbmpomc.cre": 0x2200, "cbmphhc.cre": 0x7B04, "cbmprtc.cre": 0xC300}
 
 
 def effects(defn):
@@ -58,6 +58,15 @@ def polymorph_self_is_what_was_decided(work, weidu):
             check({(172, power), (321, power)} <= remover, f"the remover misses {power}")
     for name, animation in LOOKS.items():
         check(defs[name]["animation"] == animation, f"{name}: animation {defs[name]['animation']:#x}")
+    # The hill giant wears Icewind Dale's verbeeg art; BG2:EE has none, so the mod brings it.
+    art = fg.MOD / "files"
+    ini = (art / "e293.ini").read_text(encoding="latin-1").lower()
+    check("resref=mgve" in ini, "the hill giant look names the verbeeg art")
+    bams = sorted(p.name.lower() for p in art.glob("*.bam") if p.name.lower().startswith("mgve"))
+    check(len(bams) == 24, f"the verbeeg art ships whole: {bams}")
+    sounds = {s.strip() for line in ini.splitlines() if "=" in line and not line.split("=")[0].strip().endswith("_frame")
+              for s in line.split("=", 1)[1].split(",") if s.strip().startswith("verbee")}
+    check(sounds and all((art / f"{s}.wav").exists() for s in sounds), f"the hill giant's sounds: {sorted(sounds)}")
     breath = {(e["opcode"], e["timing"], e["duration"]) for e in effects(defs["cbmphhb.spl"]) if e["resource"].upper() == "CBMPHHB"}
     check(breath == {(172, 1, 0), (171, 4, 18)}, f"Fiery Breath comes back after 3 rounds: {breath}")
     for name in ("spwi416.spl", *POLYMORPH):

@@ -110,6 +110,11 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - Not run: the form menu with a party member, the look on screen, Barbarian Rage, Web Tangle,
   Hide and the jelly's slow in a fight, the spider's Armor Class against missiles (its stat read
   0), EET.
+- Hill giant look, later the same day: SCS gives the form Icewind Dale's verbeeg art under the
+  animation slot `0xE293`, art the base game lacks. This mod now ships that art itself, taken from
+  Icewind Dale: Enhanced Edition (`E293.INI`, 24 `MGVE*.BAM`, the 8 `VERBEE*.WAV` it names), with the
+  selection circle and walk sound of SCS's form. Offline 48 of 48; in-game group `polymorph` again
+  13 of 13 in BG2:EE, the hill giant form showing animation `0xE293`.
 
 ## Shapechange
 

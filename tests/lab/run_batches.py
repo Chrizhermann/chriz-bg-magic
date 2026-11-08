@@ -171,7 +171,7 @@ MIGHT, ANIMAL = None, None
 
 # Form innate: (animation, Strength, exceptional, Dexterity, attacks, weapon, power it gives).
 FORMS = {
-    "CBMPHG": (0x7F3E, 19, 0, 10, 1, "CBMPHGW", "CBMPHGR"),
+    "CBMPHG": (0xE293, 19, 0, 10, 1, "CBMPHGW", "CBMPHGR"),
     "CBMPOM": (0x2200, 18, 100, 12, 1, "CBMPOMW", None),
     "SPWI495": (0x7A00, 15, 0, 17, 2, "PLYSPID", "CBMPSPW"),
     "SPWI496": (0x7902, 14, 0, 9, 1, "PLYJELLY", None),

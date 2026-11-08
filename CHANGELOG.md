@@ -4,8 +4,8 @@
 
 - Polymorph Self: the six forms of SCS with their real values, built from this mod's own files:
   hill giant, ogre mage, spider, mustard jelly, hell hound and rat. The spell's text lists each
-  form and what it can do. The hill giant looks like a fire giant: its own art is not in the
-  base game.
+  form and what it can do. The hill giant looks like Icewind Dale's verbeeg; BG2 has no hill
+  giant art, so the mod brings these files and sounds from Icewind Dale: Enhanced Edition.
 - Shapechange: SCS's six forms in the same way: mind flayer, iron golem, giant troll, marilith,
   greater basilisk and invisible stalker, for 6 turns. Only weapons of +3 or better hurt the iron
   golem (SCS's data would have shut out every weapon).
