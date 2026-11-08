@@ -1,0 +1,8 @@
+// The main character as a statue or imprisoned (lua/M_CBMP1.lua). The tick keeps the screen on
+// him and ends the game when nobody else can act.
+IF
+  EEex_LuaTrigger("return CBMP1_Tick()")
+THEN
+  RESPONSE #100
+    GameOver(-1)
+END

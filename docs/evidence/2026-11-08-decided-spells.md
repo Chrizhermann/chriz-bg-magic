@@ -137,6 +137,32 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - Not run: the form menu with a party member, the look on screen, the powers in a fight (Psionic
   Blast, Gas Cloud, Teleport, Petrifying Gaze), the golem's weapon immunity in a fight, EET.
 
+## The main character as a statue or imprisoned (first part, not yet in a game)
+
+- Engine facts from a lab console session (BG2:EE 2.7.3.0, EEex v1.3.1), before the build:
+  - EEex's opcode 403 sees an effect before the engine rolls its save and before opcode
+    immunity: Flesh to Stone (`SPWI604`, opcode 134, save vs. spell) applied 12 times to a main
+    character with spell save 1 reached the screen 12 times; with opcode 101 against 134 on him,
+    6 of 6 still did. So the screen blocks the effect and casts the state through opcode 146 with
+    the old save; opcode immunity is checked by the screen.
+  - Such a cast from inside the screen keeps the save: with spell save 1, 0 of 8 landed; with
+    spell save 20, all landed; no error.
+  - Spell states 0-255 sit in a bit array at `+0xC88` of the creature's stats (state 200 set byte
+    `+0xCA1` to 1). The two gather-check patterns match once each in `Baldur.exe` 2.7.3.0 of BG2:EE
+    (also EET's) and BG:EE, and the bytes at the static addresses read the same in the running game.
+- Offline: the five spells (statue, prison, net, cure, release), installs without EEex (nothing
+  installed, scripts untouched) and with EEex (module with its four states from `SPLSTATE.IDS`,
+  pattern file beside EEex's, the tick on top of each campaign world script from an EET-style
+  `CAMPAIGN.2DA` and, for BG2:EE's heading-only table, on `BALDUR` and `BALDUR25`; the dream guard on
+  `PLAYER1D` and the companions' dream scripts from `PDIALOG.2DA`; the Solar's `PartyRested()` block
+  in `AR4000` with the extra condition), a second install changes nothing; 44 runtime checks of the
+  Lua under mocks in Lua 5.3 and LuaJIT (screen, saves and immunity, Freedom only where he vanished,
+  companions' return, the tick's game over, cutscene, pull-along, hook bytes and layout).
+- Installed into the BG2:EE lab folder with WeiDU only (no game started): the world scripts
+  `BALDUR` and `BALDUR25` carry the tick, the dream scripts and `AR4000` their guards.
+- Not run in a game yet: everything that needs the engine (statue, travel with the party, Freedom
+  in place, cutscenes, dreams, companions coming back).
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

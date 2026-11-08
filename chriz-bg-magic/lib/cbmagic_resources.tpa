@@ -30,6 +30,10 @@ BEGIN
   LAF cbmagic_state_value STR_VAR symbol = ~BUFF_PRO_WEAPONS~ RET cbm_state_BUFF_PRO_WEAPONS = state END
   LAF cbmagic_state_value STR_VAR symbol = ~CANNOT_TURN_INVISIBLE~ RET cbm_state_CANNOT_TURN_INVISIBLE = state END
   LAF cbmagic_state_value STR_VAR symbol = ~CBM_BONUS_TYPED~ RET cbm_state_CBM_BONUS_TYPED = state END
+  LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_NET~ RET cbm_state_CBM_P1_NET = state END
+  LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_OUT~ RET cbm_state_CBM_P1_OUT = state END
+  LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_PRISON~ RET cbm_state_CBM_P1_PRISON = state END
+  LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_STATUE~ RET cbm_state_CBM_P1_STATUE = state END
   LAF cbmagic_state_value STR_VAR symbol = ~CBM_STR_FLOOR~ RET cbm_state_CBM_STR_FLOOR = state END
   LAF cbmagic_state_value STR_VAR symbol = ~CHARM_IMMUNITY~ RET cbm_state_CHARM_IMMUNITY = state END
   LAF cbmagic_state_value STR_VAR symbol = ~CONFUSION_IMMUNITY~ RET cbm_state_CONFUSION_IMMUNITY = state END
@@ -523,6 +527,16 @@ BEGIN
     SAY 0x9e @70008
   COPY ~chriz-bg-magic/res/cbmneg40.spl~ ~override/cbmneg40.spl~
     SAY 0x9e @70009
+  COPY ~chriz-bg-magic/res/cbmp1cu.spl~ ~override/cbmp1cu.spl~
+  COPY ~chriz-bg-magic/res/cbmp1fr.spl~ ~override/cbmp1fr.spl~
+  COPY ~chriz-bg-magic/res/cbmp1im.spl~ ~override/cbmp1im.spl~
+    WRITE_LONG 0x102 cbm_state_CBM_P1_OUT
+    WRITE_LONG 0x132 cbm_state_CBM_P1_PRISON
+  COPY ~chriz-bg-magic/res/cbmp1nt.spl~ ~override/cbmp1nt.spl~
+    WRITE_LONG 0xd2 cbm_state_CBM_P1_NET
+  COPY ~chriz-bg-magic/res/cbmp1st.spl~ ~override/cbmp1st.spl~
+    WRITE_LONG 0x282 cbm_state_CBM_P1_OUT
+    WRITE_LONG 0x2b2 cbm_state_CBM_P1_STATUE
   COPY ~chriz-bg-magic/res/cbmpend.spl~ ~override/cbmpend.spl~
   COPY ~chriz-bg-magic/res/cbmphg.spl~ ~override/cbmphg.spl~
     SAY 0x8 @70010

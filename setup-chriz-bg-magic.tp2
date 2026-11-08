@@ -10,6 +10,7 @@ ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_bonus.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_iwd.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_live.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_player1.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_resources.tpa~
 END
 
@@ -34,5 +35,6 @@ LAF cbmagic_iwd_spells END
 LAF cbmagic_lesser_restoration END
 LAF cbmagic_simulacrum END
 LAF cbmagic_strength_floor END
+LAF cbmagic_main_character END
 LAF cbmagic_record_live END
 LAF cbmagic_bonus END
