@@ -18,6 +18,7 @@ import test_bonus  # noqa: E402,F401
 import test_live  # noqa: E402,F401
 import test_resources  # noqa: E402,F401
 import test_strength  # noqa: E402,F401
+import test_forms  # noqa: E402,F401
 from harness import TESTS  # noqa: E402
 
 

@@ -48,7 +48,45 @@ Saving Throw: None
 The caster summons an 8-Hit-Dice water elemental. The elemental contests the caster's control for 3 rounds; there is a 15% chance that it becomes hostile when the contest ends.~
 @70008 = ~Haste cancelled by Slow~
 @70009 = ~Slow cancelled by Haste~
-@70010 = ~Conjure Water Elemental
+@70010 = ~Shapeshift: Hill Giant~
+@70011 = ~Shapeshift: Hill Giant
+The caster becomes a hill giant: Strength 19, Dexterity 10, Armor Class 3, 1 attack per round, 2d8 piercing damage as a +1 weapon. Each time the caster takes this form, <PRO_HESHE> can use Barbarian Rage once. No spells or items can be used in this form.~
+@70012 = ~Shapeshift: Hell Hound~
+@70013 = ~Shapeshift: Hell Hound
+The caster becomes a hell hound: Strength 18, Dexterity 15, base Armor Class 4, 1 attack per round, 1d10 piercing damage plus 1d6 fire as a +1 weapon. Immune to fire, 50% more damage from cold. Fiery Breath every 3 rounds. No spells or items can be used in this form.~
+@70014 = ~Fiery Breath~
+@70015 = ~Fiery Breath
+The hell hound breathes fire in a cone in front of it: 3d6 fire damage, a save vs. Breath for half. It can breathe again after 3 rounds.~
+@70016 = ~Shapeshift: Ogre Mage~
+@70017 = ~Shapeshift: Ogre Mage
+The caster becomes an ogre mage: Strength 18/00, Dexterity 12, Armor Class 4, 1 attack per round, 1d10 slashing damage as a +1 weapon. In this form the caster can still cast spells and use items.~
+@70018 = ~Shapeshift: Rat~
+@70019 = ~Shapeshift: Rat
+The caster becomes a rat: Strength 10, Dexterity 20, base Armor Class 4, 1 attack per round, 1d2 piercing damage as a +1 weapon. The rat can Hide at any time, as often as it likes. No spells or items can be used in this form.~
+@70020 = ~Hide~
+@70021 = ~Hide
+The rat hides in the shadows and becomes invisible until it attacks or acts. It can hide again at once.~
+@70022 = ~Web Tangle
+The spider spits a web at one creature up to 40 feet away. Unless it saves vs. Spell at -2, it is caught in the web for 2 rounds. Some creatures, such as those immune to webs, are not affected.~
+@70023 = ~Shapeshift: Greater Basilisk~
+@70024 = ~Shapeshift: Greater Basilisk
+The caster becomes a greater basilisk: Strength 18, Dexterity 10, base Armor Class 2, THAC0 11, 3 attacks per round, 1d8+2 piercing damage as a +2 weapon; a bite poisons the target for 20 seconds, 3 damage at a time, unless it saves vs. Death. Immune to slow, hold, paralysis, entanglement, grease, webs and level drain. Petrifying Gaze turns one creature within 50 feet to stone unless it saves vs. Polymorph at -6, and can be used again at once. No spells or items can be used in this form.~
+@70025 = ~Petrifying Gaze~
+@70026 = ~Petrifying Gaze
+The basilisk turns one creature within 50 feet to stone unless it saves vs. Polymorph at -6. It can be used again at once.~
+@70027 = ~Psionic Blast
+The mind flayer stuns one creature within 20 feet for 60 seconds unless it saves vs. Spell. It can be used again at once.~
+@70028 = ~Gas Cloud
+The iron golem breathes a cloud of poison at a point within 20 feet: it poisons for 18 seconds, 3 damage at a time, unless a save vs. Death at -2 succeeds. It can be used again after 3 rounds.~
+@70029 = ~Shapeshift: Invisible Stalker~
+@70030 = ~Shapeshift: Invisible Stalker
+The caster becomes an invisible stalker: Strength 18/10, Dexterity 17, base Armor Class -3, THAC0 11, 1 attack per round, 2d8 crushing damage as a +2 weapon. 80% resistance to missiles, 30% to fire, cold, electricity and acid. Every round the stalker becomes improved-invisible for that round. Spells and items can be used in this form.~
+@70031 = ~Shapeshift: Marilith~
+@70032 = ~Shapeshift: Marilith
+The caster becomes a marilith: Strength 19, Dexterity 18, base Armor Class -6, THAC0 8, 5 attacks per round, 1d8 slashing damage as a +4 weapon, which can add 1d6 damage of a random element and poison. Magic Resistance 85%, immune to fire and electricity, 50% resistance to cold, immune to charm, fear, poison and disease. Teleport takes the marilith to a point in sight and can be used again at once. Spells and items can be used in this form.~
+@70033 = ~Teleport
+The marilith teleports to a point in sight. It can be used again at once.~
+@70034 = ~Conjure Water Elemental
 (Conjuration/Summoning)
 
 Level: 6
@@ -59,8 +97,8 @@ Area of Effect: Special
 Saving Throw: None
 
 The caster summons a water elemental. At 12th level the chances of a 12-, 16-, or 24-Hit-Dice elemental are 64% / 35% / 1%. Each level through 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance, reaching 56% / 35% / 9%. The elemental contests the caster's control for 3 rounds; there is a 15% chance that it becomes hostile when the contest ends.~
-@70011 = ~Attack~
-@70012 = ~Clairvoyance
+@70035 = ~Invulnerable to swarm attacks~
+@70036 = ~Clairvoyance
 (Divination)
 
 Level: 3
@@ -71,8 +109,8 @@ Area of Effect: The caster
 Saving Throw: None
 
 Clairvoyance grants the caster foresight of incoming danger, making the caster immune to backstab attacks for the duration of the spell. The spell lasts for 3 rounds at 5th level, plus 1 additional round every 2 levels thereafter, to a maximum of 10 rounds at 19th level.~
-@70013 = ~Invisibility Sphere~
-@70014 = ~Invisibility Sphere
+@70037 = ~Invisibility Sphere~
+@70038 = ~Invisibility Sphere
 (Illusion/Phantasm)
 
 Level: 3
@@ -83,7 +121,7 @@ Area of Effect: 10-ft. radius
 Saving Throw: None
 
 This spell causes all friendly creatures within 10 ft. of the caster to vanish from sight and be undetectable by normal vision or even infravision. Of course, the invisible creature(s) are not magically silenced, and certain other conditions can render the creature(s) detectable. Even allies cannot see the invisible creature(s) or their gear, unless these allies can normally see invisible things or employ magic to do so. Items dropped or put down by the invisible creature(s) become visible; items picked up disappear if tucked into the clothing or pouches worn by the creature(s). The spell remains in effect until it is magically broken or dispelled, until the wizard or recipient cancels it, until the recipient attacks any creature, or until 1 turn has passed. The invisible being(s) cannot open doors, talk, eat, climb stairs, etc. If they attack, they immediately become visible, although the invisibility enables them to attack first.~
-@70015 = ~Lightning Bolt
+@70039 = ~Lightning Bolt
 (Evocation)
 
 Level: 3
@@ -94,7 +132,7 @@ Area of Effect: Path of bolt
 Saving Throw: 1/2
 
 Upon casting this spell, the wizard releases a powerful stroke of electrical energy that inflicts 1d6 points of damage per level of the caster (maximum damage of 10d6) to each creature within its area of effect. A successful Saving Throw vs. Breath reduces this damage to half (round fractions down). If the lightning bolt intersects with a wall, it will bounce until it reaches its full length.~
-@70016 = ~Skull Trap
+@70040 = ~Skull Trap
 (Necromancy)
 
 Level: 3
@@ -105,7 +143,7 @@ Area of Effect: 11-ft. radius
 Saving Throw: 1/2
 
 When this spell is cast, a skull is thrown by the caster at the target area. The skull floats in the area until a creature comes within 8 ft. of it. When this happens, the skull is triggered and explodes damaging everyone within a 11-ft. radius. The damage inflicted is equal to 1d6 per level of the caster (to a maximum of 12d6), or half with a successful Saving Throw vs. Breath. When casting this spell, it is wise to set it far away from the party lest they set it off accidentally.~
-@70017 = ~Confusion
+@70041 = ~Confusion
 (Enchantment/Charm)
 
 Level: 4
@@ -116,7 +154,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 This spell causes confusion in one or more enemy creatures within the area, creating indecision and the inability to take effective action. All enemy creatures within the area of effect are allowed Saving Throw vs. Spell with a -2 penalty. Those successfully saving are unaffected by the spell, whereas those who fail their Saving Throws will either go berserk, stand confused, or wander about for the duration of the spell. Wandering creatures move as far from the caster as possible, according to their most typical mode of movement (characters walk, fish swim, bats fly, etc.). Any confused creature that is attacked perceives the attacker as an enemy and acts according to its basic nature. The spell lasts for 4 rounds (5 rounds at 15th level and 6 rounds at 20th level).~
-@70018 = ~Cloudkill
+@70042 = ~Cloudkill
 (Conjuration/Summoning)
 
 Level: 5
@@ -127,7 +165,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Special
 
 This spell generates a billowing cloud of ghastly, yellowish green vapors that is so toxic as to slay any creature with 4 or fewer Hit Dice, and causes creatures with 5 to 6 Hit Dice to roll Saving Throws vs. Poison with a -4 penalty or be slain. Holding one's breath has no effect on the lethality of the spell. Those above 6th level (or 6 Hit Dice) must leave the cloud immediately or suffer 1d10 points of poison damage each round while in the area of effect.~
-@70019 = ~Cure Serious Wounds
+@70043 = ~Cure Serious Wounds
 (Necromancy)
 
 Level: 4
@@ -139,7 +177,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell is a more potent version of the Cure Light Wounds spell. The priest lays <PRO_HISHER> hand upon a creature and heals 3d8 + 7 points of wound or other injury damage to the creature's body. This healing cannot affect noncorporeal, nonliving, or extraplanar creatures.~
-@70020 = ~Free Action
+@70044 = ~Free Action
 (Abjuration)
 
 Level: 4
@@ -151,7 +189,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 While under the effects of this spell, the recipient becomes immune to anything that affects <PRO_HISHER> movement. This includes the effects of Web, Hold Person, Grease, Entangle, Slow, and Stun.~
-@70021 = ~Neutralize Poison
+@70045 = ~Neutralize Poison
 (Necromancy)
 
 Level: 4
@@ -163,7 +201,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell removes all toxins from the body, both natural and magical in nature. When this spell is cast upon an individual, it immediately neutralizes any poison and renders the target immune to poison for 1 turn per level of the caster.~
-@70022 = ~Defensive Harmony
+@70046 = ~Defensive Harmony
 (Enchantment/Charm)
 
 Level: 4
@@ -177,7 +215,7 @@ Saving Throw: None
 Defensive Harmony grants affected creatures a defensive bonus by bestowing an enchanted coordination on their attacks and defenses. This allows a group of creatures to act as a single unit for a single battle or encounter. The effect is always centered on the caster, but affects all allies within a 15-ft. radius. Those affected can move outside of this area after the spell is cast and still enjoy the benefits of the harmony. While the spell is in effect, each affected creature gains a +4 bonus to <PRO_HISHER> Armor Class. This lasts for 6 rounds or until dispelled.
 
 Typed spell effects: AC +4 (Dodge); Values may depend on caster level and target.~
-@70023 = ~Spirit Armor
+@70047 = ~Spirit Armor
 (Necromancy)
 
 Level: 4
@@ -194,7 +232,7 @@ The spirit armor does not work cumulatively with any other armor; however, Dexte
 There is a danger, however, as when the spell runs out, the external portion of the spirit is temporarily lost, inflicting 2d4 points of damage upon the target unless the creature makes a Saving Throw vs. Spell.
 
 Typed spell effects: save vs. spell +3 (Deflection); Values may depend on caster level and target.~
-@70024 = ~Cure Critical Wounds
+@70048 = ~Cure Critical Wounds
 (Necromancy)
 
 Level: 5
@@ -206,7 +244,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 The Cure Critical Wounds spell is a very potent version of the Cure Light Wounds spell. The priest lays <PRO_HISHER> hands upon a creature and heals 4d8 + 12 points of damage from wounds or other injuries. The spell does not affect creatures without corporeal bodies, those of extraplanar origin, or those not living.~
-@70025 = ~Flame Strike
+@70049 = ~Flame Strike
 (Evocation)
 
 Level: 5
@@ -218,7 +256,7 @@ Area of Effect: 1 creature
 Saving Throw: 1/2
 
 When the priest calls down a Flame Strike spell, a vertical column of fire roars downward in the exact location called for by the caster. The target must roll a Saving Throw vs. Breath. Failure means the creature sustains 1d8 points of damage per level of the caster; otherwise, the damage is halved.~
-@70026 = ~Grease
+@70050 = ~Grease
 (Conjuration/Summoning)
 
 Level: 1
@@ -229,7 +267,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Special
 
 A Grease spell covers a material surface with a slippery layer of a fatty, greasy nature. Any creature entering the area or caught in it when the spell is cast must save vs. Breath at +2 or slip and slide, unable to move effectively. Those who successfully save can move, albeit slowly, for the rest of the round (but will need to save vs. Breath again the following round). Those who remain in the area are allowed a Saving Throw each round until they escape the area.~
-@70027 = ~Find Familiar
+@70051 = ~Find Familiar
 (Universal)
 
 Level: 1
@@ -304,7 +342,7 @@ CHAOTIC EVIL: Quasit
 – Magic Resistance: 25%
 – Combat: 3 attacks per round at 13 THAC0 for 1d6 damage
 – Special Abilities: Has 100% resistance to fire, cold, and electricity. Can cast Horror and Blur once per day. Regenerates 1 HP/round.~
-@70028 = ~Power Word, Sleep
+@70052 = ~Power Word, Sleep
 (Enchantment/Charm)
 
 Level: 2
@@ -315,7 +353,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When a wizard calls upon a Power Word, Sleep spell, <PRO_HESHE> causes a comatose slumber to come upon 1 creature (other than undead and certain other creatures specifically excluded from the spell's effects). The creature targeted must have less than 20 Hit Points and gets no Saving Throw. Magically sleeping opponents can be attacked with substantial bonuses. The Sleep effect will last for 5 rounds. This spell has no effect on creatures with more than 20 Hit Points.~
-@70029 = ~Minor Spell Deflection
+@70053 = ~Minor Spell Deflection
 (Abjuration)
 
 Level: 3
@@ -326,7 +364,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 This spell is similar to the 6th-level spell Spell Deflection, which causes the spells cast against the wizard to be absorbed and consumed. This spell affects a total of 4 spell levels, including spells cast from scrolls and innate spell-like abilities, but excludes the following: area effects that are not centered directly upon the wizard, as well as area effects that are stationary, such as Cloudkill and Stinking Cloud. As long as the spell is cast directly at the wizard, it will be absorbed. This spell will only affect up to 4th-level spells, but if it tries to absorb a spell that goes over its limit, the spell will fail and the spell deflection will be canceled. For example, if there is only 1 level left and a 3rd-level spell is cast at the wizard, the spell will be absorbed while canceling the Spell Deflection.~
-@70030 = ~Minor Sequencer
+@70054 = ~Minor Sequencer
 (Universal)
 
 Level: 4
@@ -339,7 +377,7 @@ Saving Throw: None
 This spell allows a wizard to store two spells and activate them both at the same time from <PRO_HISHER> Special Ability button. Both spells must be of 2nd level or lower. To create a sequencer, a Mage must memorize not only Minor Sequencer but also the spells <PRO_HESHE> intends to store in it (a Sorcerer can store spells of any level for which <PRO_HESHE> still has spell slots). After casting Minor Sequencer, the player will be prompted to choose the sequenced spells from those <PRO_HESHE> has memorized.
 
 A sequencer lasts until activated and, once used, releases its spells immediately (no casting time). The Special Ability icon also disappears until the next time a sequencer is formed. A wizard can possess only one Minor Sequencer at a time, and it may not be given to other characters.~
-@70031 = ~Teleport Field
+@70055 = ~Teleport Field
 (Alteration)
 
 Level: 4
@@ -350,8 +388,8 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 The wizard instigates a teleportation effect that randomly teleports all enemies in this area for the duration of the spell unless they make a Saving Throw vs. Spell with a -4 penalty. Teleport Field is best used against multiple enemies, serving to confuse them and allowing the wizard to concentrate on activating <PRO_HISHER> defenses.~
-@70032 = ~Dispelling Screen~
-@70033 = ~Dispelling Screen
+@70056 = ~Dispelling Screen~
+@70057 = ~Dispelling Screen
 (Abjuration)
 
 Level: 5
@@ -362,7 +400,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: None
 
 This spell wards the caster and nearby allies with a protective screen against magic removal for 5 turns. For each protected creature, the screen absorbs and negates the next Dispel Magic, Remove Magic, or Breach effect that strikes them, then dissipates. Higher-level magic attacks such as Pierce Shield and Spellstrike strip Dispelling Screen along with other protections without being absorbed by it.~
-@70034 = ~Lower Resistance
+@70058 = ~Lower Resistance
 (Abjuration)
 
 Level: 5
@@ -373,7 +411,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When cast upon a target creature, this spell will lower the Magic Resistance of this creature by 30% + 1% per level of the caster. There is no Saving Throw, and the target's Magic Resistance, if any, does not affect this spell. For example, if a creature has 60% Magic Resistance and this spell is cast on it by a 15th-level Mage, then the target's Magic Resistance would be lowered by 45% automatically. This effect is cumulative for each casting of this spell: If Lower Resistance was cast upon the same creature again, the creature's Magic Resistance would be 60% - 45% (initial casting) - 45% (current casting), which would leave the creature with 0% Magic Resistance. This spell will last until its duration expires and cannot be dispelled.~
-@70035 = ~Oracle
+@70059 = ~Oracle
 (Divination)
 
 Level: 5
@@ -384,7 +422,7 @@ Area of Effect: 30-ft. radius
 Saving Throw: None
 
 When cast, this spell will cancel all Illusion/Phantasm spells of 9th level and lower within its area of effect. The spells affected are Reflected Image, Invisibility, Mirror Image, Non-Detection, Improved Invisibility, Shadow Door, Mislead, Project Image, and Mass Invisibility. The caster can control just whom this spell affects. Therefore, it will affect only creatures that are not in the caster's party. The area of effect is roughly a 30-ft. radius around the caster.~
-@70036 = ~Blindness
+@70060 = ~Blindness
 (Illusion/Phantasm)
 
 Level: 1
@@ -395,7 +433,7 @@ Area of Effect: 1 creature
 Saving Throw: Neg.
 
 This 1st-level spell temporarily blinds its target. A Saving Throw is allowed and, if successful, there are no harmful effects. If a victim is blinded, <PRO_HESHE> receives a -4 penalty to <PRO_HISHER> attack rolls and Armor Class.~
-@70037 = ~Pierce Magic
+@70061 = ~Pierce Magic
 (Abjuration)
 
 Level: 6
@@ -406,7 +444,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast upon a target creature, there will be two major effects: First, the creature's Magic Resistance, if any, will be lowered by half its current value, rounded down, with a minimum reduction of 10 and a maximum of 40 percentage points; second, one spell protection of 8th level or lower affecting the creature, if any, will be canceled. Spells affected by Pierce Magic are Minor Spell Deflection, Minor Spell Turning, Spell Deflection, Spell Turning, Minor Globe of Invulnerability, Spell Immunity, and Globe of Invulnerability. The target's Magic Resistance, if any, does not affect this spell, nor do any of the spell protections. Magic Resistance remains lowered for 5 rounds.~
-@70038 = ~True Sight
+@70062 = ~True Sight
 (Divination)
 
 Level: 6
@@ -417,7 +455,7 @@ Area of Effect: 120-ft. radius
 Saving Throw: None
 
 When this spell is cast, an area roughly 120 ft. in radius around the caster will be affected. Instantly and once per round for 1 turn after this spell is cast, all hostile Illusion/Phantasm spells in the area of effect will be dispelled. The spells that are affected by this are Reflected Image, Invisibility, Mirror Image, Non-Detection, Improved Invisibility, Shadow Door, Mislead, Project Image, and Simulacrum. The area of effect is roughly a 120-ft. radius around the caster. The target's Magic Resistance, if any, does not come into effect with this spell. This spell only affects enemies, thus it is unable to dispel invisibility from a party member.~
-@70039 = ~Power Word, Silence
+@70063 = ~Power Word, Silence
 (Enchantment/Charm)
 
 Level: 6
@@ -428,8 +466,8 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 In using this spell, the wizard points at an individual and utters the Power Word. For the next 7 rounds, that creature cannot make any sound. This silence completely foils any spells that require verbal components. The only ways to counter this spell are either a Dispel Magic or a Vocalize spell. There is no Saving Throw.~
-@70040 = ~Improved Haste~
-@70041 = ~Improved Haste
+@70064 = ~Improved Haste~
+@70065 = ~Improved Haste
 (Alteration)
 
 Level: 6
@@ -442,7 +480,7 @@ Saving Throw: None
 When this spell is cast, all allied creatures within a 15-ft. radius are infused with magical speed for 1 turn. Affected creatures move at twice their normal rate (+6 movement rate), gain 1 extra attack per round, and receive a +2 bonus to THAC0, Armor Class, and Saving Throws vs. Breath. Unlike the 3rd-level Haste spell, Improved Haste does not fatigue the recipients when its duration expires.
 
 Improved Haste dispels any Slow effects on the recipients and renders them immune to Slow for its duration. Its effects are dispellable and are not cumulative with Haste or other similar magical speed effects.~
-@70042 = ~Death Fog
+@70066 = ~Death Fog
 (Conjuration/Summoning)
 
 Level: 6
@@ -453,7 +491,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: None
 
 The casting of a Death Fog spell creates an area of solid fog that has the additional property of being highly acidic. All animal life not immune to acid suffers 8 points of damage for each round they are exposed to the vapors of the Death Fog. Death Fog will also instantly kill all summoned creatures, regardless of their Hit Dice and immunities.~
-@70043 = ~Contingency
+@70067 = ~Contingency
 (Universal)
 
 Level: 6
@@ -468,7 +506,7 @@ Upon casting this spell, the wizard is allowed to choose a spell out of <PRO_HIS
 For example, a 12th-level wizard could place the spell Stoneskin in a contingency with the starting condition being "the wizard reaches 50% of <PRO_HISHER> Hit Points." Once the wizard is reduced to 50% of <PRO_HISHER> Hit Points or below, Stoneskin would be immediately cast upon <PRO_HIMHER>. This requires no action by the wizard, but happens automatically and instantaneously.
 
 A limitation of this spell is that the target of the spell placed in the contingency must be the caster: Therefore, it may not be an offensive spell, nor may it target any other party members.~
-@70044 = ~Conjure Fire Elemental
+@70068 = ~Conjure Fire Elemental
 (Conjuration/Summoning)
 
 Level: 6
@@ -479,7 +517,7 @@ Area of Effect: Special
 Saving Throw: None
 
 Upon casting a Conjure Fire Elemental spell, the caster opens a special gate to the Elemental Plane of Fire, and a fire elemental is summoned in the vicinity of the caster. At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level). The elemental will do the bidding of the caster until it is slain or the duration of the spell runs out. All of the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication and no need to know the language of the summoned creature. However, every time this spell is cast, there is a 15% chance that the elemental will escape the instructions of the caster, go berserk, and attack the wizard who dared summoning it. If it can't reach the summoner, it will fight its way toward <PRO_HIMHER>. This berserking elemental will also remain until slain or the spell's duration expires. The elemental is locked into a psychic contest with the caster for 3 rounds after being summoned. At the end of this time, if the caster has won, <PRO_HESHE> has control of the elemental; however, if <PRO_HESHE> has lost, the elemental goes berserk and tries to kill <PRO_HIMHER>. This does not prevent the use of other charm-type spells after the contest was lost. If charm spells are used before the contest is over, they will have no effect on the outcome.~
-@70045 = ~Conjure Air Elemental
+@70069 = ~Conjure Air Elemental
 (Conjuration/Summoning)
 
 Level: 6
@@ -490,7 +528,7 @@ Area of Effect: Special
 Saving Throw: None
 
 Upon casting a Conjure Air Elemental spell, the caster opens a special gate to the Elemental Plane of Air, and an air elemental is summoned in the vicinity of the caster. At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level). The elemental will do the bidding of the caster until it is slain or the duration of the spell runs out. All of the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication and no need to know the language of the summoned creature. However, every time this spell is cast, there is a 15% chance that the elemental will escape the instructions of the caster, go berserk, and attack the wizard who dared summoning it. If it can't reach the summoner, it will fight its way toward <PRO_HIMHER>. This berserking elemental will also remain until slain or the spell's duration expires. The elemental is locked into a psychic contest with the caster for 3 rounds after being summoned. At the end of this time, if the caster has won, <PRO_HESHE> has control of the elemental; however, if <PRO_HESHE> has lost, the elemental goes berserk and tries to kill <PRO_HIMHER>. This does not prevent the use of other charm-type spells after the contest was lost. If charm spells are used before the contest is over, they will have no effect on the outcome.~
-@70046 = ~Conjure Earth Elemental
+@70070 = ~Conjure Earth Elemental
 (Conjuration/Summoning)
 
 Level: 6
@@ -501,7 +539,7 @@ Area of Effect: Special
 Saving Throw: None
 
 Upon casting a Conjure Earth Elemental spell, the caster opens a special gate to the Elemental Plane of Earth, and an earth elemental is summoned in the vicinity of the caster. At 12th level, there is a 64% chance that a 12-Hit-Dice elemental appears, a 35% chance that a 16-Hit-Dice elemental appears, and a 1% chance that a 24-Hit-Dice elemental appears; each caster level up to 20th shifts 1% from the 12-Hit-Dice chance to the 24-Hit-Dice chance (56% / 35% / 9% at 20th level). The elemental will do the bidding of the caster until it is slain or the duration of the spell runs out. All of the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication and no need to know the language of the summoned creature. However, every time this spell is cast, there is a 15% chance that the elemental will escape the instructions of the caster, go berserk, and attack the wizard who dared summoning it. If it can't reach the summoner, it will fight its way toward <PRO_HIMHER>. This berserking elemental will also remain until slain or the spell's duration expires. The elemental is locked into a psychic contest with the caster for 3 rounds after being summoned. At the end of this time, if the caster has won, <PRO_HESHE> has control of the elemental; however, if <PRO_HESHE> has lost, the elemental goes berserk and tries to kill <PRO_HIMHER>. This does not prevent the use of other charm-type spells after the contest was lost. If charm spells are used before the contest is over, they will have no effect on the outcome.~
-@70047 = ~Chromatic Orb
+@70071 = ~Chromatic Orb
 (Evocation)
 
 Level: 1
@@ -529,7 +567,7 @@ This spell causes a 2-ft. diameter sphere to appear in the caster's hand. When t
  12th Level: 2d8 acid damage and instantly kills the victim.
 
 NOTE: The victim saves vs. Spell with a +6 bonus against all the effects and gets no save against the damage.~
-@70048 = ~Blur
+@70072 = ~Blur
 (Illusion/Phantasm)
 
 Level: 2
@@ -542,7 +580,7 @@ Saving Throw: None
 When a Blur spell is cast, the wizard causes the outline of <PRO_HISHER> form to become blurred, shifting and wavering. This distortion causes all missile and melee attacks against the caster to be made with a -3 penalty. The wizard also gains a +1 bonus to all of <PRO_HISHER> Saving Throws.
 
 Typed spell effects: AC +3 (Dodge); save vs. death +1 (Dodge); save vs. wands +1 (Dodge); save vs. polymorph +1 (Dodge); save vs. breath +1 (Dodge); save vs. spell +1 (Dodge); Values may depend on caster level and target.~
-@70049 = ~Cacofiend
+@70073 = ~Cacofiend
 (Conjuration/Summoning)
 
 Level: 7
@@ -553,7 +591,7 @@ Area of Effect: Special
 Saving Throw: None
 
 When this spell is cast, it teleports in a powerful fiend (a bone fiend for lawful casters, or a nabassu for neutral and chaotic casters) that will go on a rampage and attack everything in sight. Anyone under the effects of a Protection From Evil spell or scroll will not be targeted by the fiend. This is a dangerous spell to invoke, best saved for desperate times.~
-@70050 = ~Mantle
+@70074 = ~Mantle
 (Abjuration)
 
 Level: 7
@@ -564,7 +602,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 When the spell is cast, it confers complete invulnerability to all weapons of +3 or lower enchantment. This spell is incredibly powerful, yet has a very short duration and this, combined with its very short casting time, makes Mantle useful only in the thick of intense combat. This spell will not work in conjunction with Protection From Magical Weapons. This effect lasts for the duration of the spell or until dispelled.~
-@70051 = ~Spell Sequencer
+@70075 = ~Spell Sequencer
 (Universal)
 
 Level: 7
@@ -577,7 +615,7 @@ Saving Throw: None
 This spell allows a wizard to store three spells and activate them all at the same time from <PRO_HISHER> Special Ability button. All spells must be of 4th level or lower. To create a sequencer, a Mage must memorize not only Spell Sequencer but also the spells <PRO_HESHE> intends to store in it (a Sorcerer can store spells of any level for which <PRO_HESHE> still has spell slots). After casting Spell Sequencer, the player will be prompted to choose the sequenced spells from those <PRO_HESHE> has memorized.
 
 A sequencer lasts until activated and, once used, releases its spells immediately (no casting time). The Special Ability icon also disappears until the next time a sequencer is formed. A wizard can possess only one Spell Sequencer at a time, and it may not be given to other characters.~
-@70052 = ~Sphere of Chaos
+@70076 = ~Sphere of Chaos
 (Alteration)
 
 Level: 7
@@ -593,7 +631,7 @@ All enemies within the area of effect must save vs. Spell at -4 or suffer one of
  - target is panicked
  - target is put to sleep (wakes on damage)
  - target is held~
-@70053 = ~Delayed Blast Fireball
+@70077 = ~Delayed Blast Fireball
 (Invocation/Evocation)
 
 Level: 7
@@ -604,7 +642,7 @@ Area of Effect: 11-ft. radius
 Saving Throw: 1/2
 
 This spell creates a Fireball that hovers at a point determined by the caster. The Fireball will stay in position until someone walks too close to it; at that point, it will explode, dealing 15d6 points of damage. Victims are allowed a Saving Throw vs. Breath for half damage.~
-@70054 = ~Finger of Death
+@70078 = ~Finger of Death
 (Necromancy)
 
 Level: 7
@@ -615,7 +653,7 @@ Area of Effect: 1 creature
 Saving Throw: Neg.
 
 The Finger of Death spell snuffs out the victim's life force. The caster points <PRO_HISHER> finger at the victim after the incantation is complete, effectively ripping the life out of its body unless a Save vs. Death is made. A creature that successfully saves still receives 2d8+1 points of damage.~
-@70055 = ~Power Word, Stun
+@70079 = ~Power Word, Stun
 (Enchantment/Charm)
 
 Level: 7
@@ -631,7 +669,7 @@ When a Power Word, Stun spell is uttered, any creature of the Mage's choice with
  60 to 89 Hit Points: Stunned for 1d4 rounds;
  90 or more Hit Points: unaffected.
 Note that if a creature is weakened so that its Hit Points are below its usual maximum, the current number of Hit Points is used to determine this spell's effects. Free Action protects against this spell.~
-@70056 = ~Invisibility
+@70080 = ~Invisibility
 (Illusion/Phantasm)
 
 Level: 2
@@ -642,7 +680,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell causes the creature touched to vanish from sight and be undetectable by normal vision or even infravision. Of course, the invisible creature is not magically silenced, and certain other conditions can render the creature detectable. Even allies cannot see the invisible creature or its gear, unless these allies can normally see invisible things or employ magic to do so. Items dropped or put down by the invisible creature become visible; items picked up disappear if tucked into the clothing or pouches worn by the creature. The spell remains in effect until it is magically broken or dispelled, until the recipient attacks any creature, or until 8 hours have passed. The caster cannot perform any actions that manipulate the environment around <PRO_HIMHER>, such as opening doors, disarming a trap, or opening a chest. The caster can, however, cast defensive spells on <PRO_HIMHER>self and fellow party members. And if <PRO_HESHE> attacks, <PRO_HESHE> immediately becomes visible, although the invisibility enables <PRO_HIMHER> to attack first.~
-@70057 = ~Luck
+@70081 = ~Luck
 (Enchantment/Charm)
 
 Level: 2
@@ -655,7 +693,7 @@ Saving Throw: None
 The recipient of this spell gains extraordinary luck for the next 15 rounds, receiving a +1 bonus to <PRO_HISHER> Saving Throws, attack rolls, and minimum damage/healing rolls as well as +5% to all thieving skills. Furthermore, damage dice for all effects outside a weapon's base damage is reduced by 1. For example, a 6d6 fireball will do 6d5 damage, and a flaming long sword that deals 1d8+2 slashing plus 1d3 fire damage will deal 1d8+2 slashing plus 1d2 fire damage instead.
 
 Typed spell effects: save vs. spell +1 (Luck); save vs. breath +1 (Luck); save vs. polymorph +1 (Luck); save vs. wands +1 (Luck); save vs. death +1 (Luck); Luck +1 (Luck); Values may depend on caster level and target.~
-@70058 = ~Stinking Cloud
+@70082 = ~Stinking Cloud
 (Conjuration/Summoning)
 
 Level: 2
@@ -666,7 +704,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 When casting a Stinking Cloud spell, the wizard creates a billowing mass of nauseous vapors up to 90 ft. away from <PRO_HISHER> position. Any creature caught within the cloud must roll a successful Saving Throw vs. Poison at +2 or be sent reeling and fall down for 1d2 rounds. Those who make successful Saving Throws can leave the cloud without suffering any ill effects, although those remaining in the cloud must continue to save each round. A Dispel Magic will remove the nausea on a particular character, but if they remain in the cloud, then they are still subject to its effects.~
-@70059 = ~Strength
+@70083 = ~Strength
 (Alteration)
 
 Level: 2
@@ -677,7 +715,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 Application of this spell sets the Strength of the character to 18 and then adds a +50% bonus on top of this. The character receives any strength bonuses appropriate. For example, if a character has between 18/50 and 18/00 Strength, then <PRO_HISHER> Strength will just be set to 18/00. If a character has a Strength between 18/01 and 18/50, then <PRO_HISHER> Strength will become 18/50 + original percentage. If <PRO_HISHER> Strength is less than 18, then it will just become 18/50. A Strength of 19 or more is not lowered. Bonuses and penalties from other sources apply in addition.~
-@70060 = ~Web
+@70084 = ~Web
 (Conjuration/Summoning)
 
 Level: 2
@@ -688,7 +726,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 A Web spell creates a many-layered mass of strong, sticky strands similar to spider webs but far larger and tougher. The Web spell covers a maximum area of about 15 ft. in radius (roughly the same size as a Fireball). Creatures caught within webs, or simply touching them, become stuck among the gluey fibers. Anyone in the area when the spell is cast must roll a Saving Throw vs. Breath with a -2 penalty. If the Saving Throw is successful, then the creature is free to move out of the area. A failed Saving Throw means the creature is stuck in the webs unable to move. Each round that a creature remains in the web, it must make a Saving Throw or be unable to move.~
-@70061 = ~Pierce Shield
+@70085 = ~Pierce Shield
 (Abjuration)
 
 Level: 8
@@ -699,7 +737,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast, it launches a massive attack on an enemy wizard's spell defenses. The target's Magic Resistance will be lowered by 10% + 1% per level of the caster. Next, Pierce Shield will cancel one spell protection of any level. For example, if this spell was cast by a 15th-level wizard, the target creature would lose 25% Magic Resistance from its current total, reducing it to 0 if less than that remains, as well as canceling one spell protection if the Mage currently has one. The list of spells that this includes: Minor Spell Deflection, Minor Spell Turning, Spell Deflection, Minor Globe of Invulnerability, Dispelling Screen, Globe Of Invulnerability, Spell Turning, Spell Shield, and Spell Trap. Magic Resistance does not affect this spell, nor do any of the spell protections. The resistance remains lowered for 1 round per level of the caster. It cannot be dispelled.~
-@70062 = ~Summon Fiend
+@70086 = ~Summon Fiend
 (Conjuration/Summoning)
 
 Level: 8
@@ -710,7 +748,7 @@ Area of Effect: Special
 Saving Throw: None
 
 More powerful than the 7th-level variant, casting this Cacofiend spell summons a frenzied cornugon (for lawful casters) or glabrezu (for neutral and chaotic casters). This fiend will attack everyone in the area who is not protected by a Protection From Evil spell. Only desperate or suicidal wizards use this spell.~
-@70063 = ~Improved Mantle
+@70087 = ~Improved Mantle
 (Abjuration)
 
 Level: 8
@@ -721,7 +759,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 When the spell is cast, it confers complete invulnerability to all weapons of +4 or lower enchantment. This spell is incredibly powerful, yet has a very short duration, and this, combined with its very short casting time, makes Improved Mantle useful only in the thick of intense combat. This spell will not work in conjunction with Protection From Magical Weapons. This effect lasts for the duration of the spell or until dispelled.~
-@70064 = ~Spell Trigger
+@70088 = ~Spell Trigger
 (Universal)
 
 Level: 8
@@ -732,7 +770,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 This spell allows a wizard to store spells in a magical ability (accessed via the Special Ability button) that is created by the spell. This item, the trigger, can store three spells to be released simultaneously, all of which must be of 6th level or lower. A wizard can only possess one spell trigger at a time, and the trigger may not be given to other characters. Once the spell trigger is used, the icon will disappear from the Special Ability button.~
-@70065 = ~Incendiary Cloud
+@70089 = ~Incendiary Cloud
 (Conjuration/Summoning)
 
 Level: 8
@@ -743,7 +781,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: 1/2
 
 This spell creates a billowing cloud of roaring flame. Any in the area of the spell must leave the cloud immediately or suffer 1d4 points of fire damage per level of the caster each round while in the area of effect, with a Save vs. Breath for half.~
-@70066 = ~Symbol, Fear
+@70090 = ~Symbol, Fear
 (Enchantment/Charm)
 
 Level: 8
@@ -754,7 +792,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Fear is a powerful enchantment that allows the wizard to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode, causing all enemies within the area to make a Save vs. Spell at a -4 penalty or be affected by fear for 2 rounds + 1 round for every 3 levels of the caster.~
-@70067 = ~Power Word, Blind
+@70091 = ~Power Word, Blind
 (Enchantment/Charm)
 
 Level: 8
@@ -765,7 +803,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When a Power Word, Blind spell is cast, one creature of the spellcaster's choice becomes sightless. This lasts for 6 rounds or until dispelled. All of the effects of blindness apply to the victim, such as a penalty to hit and to AC. The visibility range of the afflicted character is also decreased.~
-@70068 = ~Spellstrike
+@70092 = ~Spellstrike
 (Abjuration)
 
 Level: 9
@@ -776,7 +814,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast at a target creature, it will dispel all of the magical protections that surround that creature. This includes Minor Spell Turning, Minor Globe of Invulnerability, Dispelling Screen, Globe Of Invulnerability, Minor Spell Deflection, Spell Turning, Spell Shield, Spell Deflection, and Spell Trap. The target's Magic Resistance, if any, does not affect this spell.~
-@70069 = ~Gate
+@70093 = ~Gate
 (Conjuration/Summoning)
 
 Level: 9
@@ -787,7 +825,7 @@ Area of Effect: Special
 Saving Throw: None
 
 By means of this spell, the caster calls an outer-planar creature (a pit fiend for lawful casters, or a balor for neutral and chaotic casters) to attack <PRO_HISHER> foes as well as <PRO_HIMHER>self, if <PRO_HESHE>'s not careful. The caster must use a Protection From Evil spell on <PRO_HIMHER>self (and comrades) to keep the devil from noticing <PRO_HIMHER>. If the caster fails to protect <PRO_HIMHER>self in this manner, the pit fiend will tear the caster and <PRO_HISHER> companions apart piece by piece, then feast on the remains.~
-@70070 = ~Absolute Immunity
+@70094 = ~Absolute Immunity
 (Abjuration)
 
 Level: 9
@@ -798,7 +836,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 When the spell is cast, it confers complete invulnerability to all weapons up to +6 enchantment. This spell is incredibly powerful, hence the short duration. However, the casting time is also very short, making this spell incredibly useful in the thick of combat, where buying a few seconds can mean the difference between life or death. It is important to note that this spell does not work in combination with Protection From Magical Weapons. This spell lasts for the duration or until dispelled.~
-@70071 = ~Chain Contingency
+@70095 = ~Chain Contingency
 (Universal)
 
 Level: 9
@@ -809,7 +847,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 Chain Contingency channels some of the magical energy of the wizard and releases it only under certain circumstances. The wizard chooses three spells that will be released under certain conditions, such as being hit by an enemy. When this condition occurs, all three spells are cast immediately. Spells of 8th level or lower may be used in the contingency.~
-@70072 = ~Power Word, Kill
+@70096 = ~Power Word, Kill
 (Enchantment/Charm)
 
 Level: 9
@@ -820,7 +858,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When a Power Word, Kill spell is uttered, one creature within the spell range is slain. The creature must have 60 or fewer current Hit Points, otherwise the spell has no effect. There is no Saving Throw.~
-@70073 = ~Symbol, Death
+@70097 = ~Symbol, Death
 (Enchantment/Charm)
 
 Level: 8
@@ -831,7 +869,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Death is a powerful enchantment that allows the wizard to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode, causing all enemies within the area to make a Save vs. Death or die. Creatures with more than 60 current Hit Points are immune to this effect.~
-@70074 = ~Symbol, Stun
+@70098 = ~Symbol, Stun
 (Enchantment/Charm)
 
 Level: 8
@@ -842,8 +880,8 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Stun is a powerful enchantment that allows the wizard to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode, causing all enemies within the area to make a Save vs. Spell at a -4 penalty or be stunned for 2 rounds + 1 round for every 3 levels of the caster. Free Action protects against this effect.~
-@70075 = ~Trap~
-@70076 = ~Summon Deva
+@70099 = ~Trap~
+@70100 = ~Summon Deva
 (Conjuration/Summoning)
 
 Level: Quest
@@ -871,7 +909,7 @@ Spells by level:
 5: Raise Dead; True Seeing; Mass Cure
 6: Blade Barrier; Heal
 7: Holy Word~
-@70077 = ~Summon Fallen Deva
+@70101 = ~Summon Fallen Deva
 (Conjuration/Summoning)
 
 Level: Quest
@@ -899,7 +937,16 @@ Spells by level:
 5: Flame Strike; True Seeing; Greater Command
 6: Blade Barrier; Harm
 7: Unholy Word~
-@70078 = ~Bless
+@70102 = ~Shapeshift: Mind Flayer~
+@70103 = ~Shapeshift: Mind Flayer
+The caster becomes a mind flayer: Strength 10, Dexterity 10, base Armor Class 3, THAC0 11, 4 attacks per round, 1d2 crushing damage as a +2 weapon; each hit lowers the target's Intelligence by 5 for 30 seconds. Magic Resistance 90%, 50% resistance to slashing, crushing, piercing and missile damage. Psionic Blast stuns one creature within 20 feet for 60 seconds unless it saves vs. Spell, and can be used again at once. Spells and items can be used in this form.~
+@70104 = ~Shapeshift: Iron Golem~
+@70105 = ~Shapeshift: Iron Golem
+The caster becomes an iron golem: Strength 24, Dexterity 9, base Armor Class 3, THAC0 3, 1 attack per round, 4d10 crushing damage as a +4 weapon. Magic Resistance 100%, fire resistance 125% (fire heals), 100% resistance to cold, electricity and acid, 20% to slashing, crushing, piercing and missile damage; only weapons of +3 or better can hurt it, and it cannot be backstabbed. Gas Cloud: a cloud of poison around a point within 20 feet poisons those who fail a save vs. Death at -2 for 18 seconds, 3 damage at a time; it can be used again after 3 rounds. No spells or items can be used in this form.~
+@70106 = ~Shapeshift: Giant Troll~
+@70107 = ~Shapeshift: Giant Troll
+The caster becomes a giant troll: Strength 22, Dexterity 18, base Armor Class 4, THAC0 8, 3 attacks per round, 2d6 piercing damage as a +2 weapon. It regenerates 5 Hit Points every few seconds (about 2 a second), moves faster and is immune to hold, paralysis, sleep, stun and unconsciousness. Spells and items can be used in this form.~
+@70108 = ~Bless
 (Conjuration/Summoning)
 
 Level: 1
@@ -913,7 +960,7 @@ Saving Throw: None
 Upon uttering the Bless spell, the caster raises the morale of friendly creatures by +1. Furthermore, it raises their attack and damage rolls by +1. The caster determines at what range (up to 40 ft.) the spell will be cast. At the instant the spell is completed, it affects all creatures in a 15-ft. radius centered on the point selected by the caster (thus, affected creatures leaving the area are still subject to the spell's effects; those entering the area after the casting is completed are not).
 
 Typed spell effects: THAC0 +1 (Favor); damage +1 (Favor); Values may depend on caster level and target.~
-@70079 = ~Command
+@70109 = ~Command
 (Enchantment/Charm)
 
 Level: 1
@@ -924,7 +971,7 @@ Area of Effect: 1 creature
 Saving Throw: Spell negates
 
 The target falls asleep for 1 round unless it succeeds at a Save vs. Spell. Damage wakes the target. The saving throw penalty is -1 for every two caster levels after 1st, to a maximum of -4 at 9th level.~
-@70080 = ~Cure Light Wounds
+@70110 = ~Cure Light Wounds
 (Necromancy)
 
 Level: 1
@@ -938,7 +985,7 @@ Saving Throw: None
 By casting this spell and laying <PRO_HISHER> hand upon a creature, the priest causes 1d8 + 5 points of wound or other injury damage to the creature's body to be healed. This healing cannot affect creatures without corporeal bodies, nor can it cure wounds of creatures not living or of extraplanar origin.
 
 Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal—or can be cured—just as any normal injury.~
-@70081 = ~Entangle
+@70111 = ~Entangle
 (Alteration)
 
 Level: 1
@@ -950,7 +997,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 By means of this spell, the caster is able to cause plants in the area of effect to entangle creatures within the area. The grasses, weeds, bushes, and even trees wrap, twist, and entwine about the creatures, holding them fast. Once per round, a creature can attempt to save vs. Breath with a +3 bonus to avoid entanglement. An entangled creature can still attack, but receives a -2 penalty to its Armor Class.~
-@70082 = ~Magical Stone
+@70112 = ~Magical Stone
 (Enchantment)
 
 Level: 1
@@ -962,8 +1009,8 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 By using this spell, the priest can create a small magical pebble, which then flies out and hits a target opponent. The stone deals 3d4 points of crushing damage to whomever it hits (6d4 to undead). The stones are considered +1 weapons for determining if a creature can be struck (those struck only by magical weapons, for instance), although they do not have an attack or damage bonus.~
-@70083 = ~Faerie Fire~
-@70084 = ~Faerie Fire
+@70113 = ~Faerie Fire~
+@70114 = ~Faerie Fire
 (Evocation)
 
 Level: 1
@@ -975,7 +1022,7 @@ Area of Effect: 5-ft. radius
 Saving Throw: Neg.
 
 This spell outlines enemies in the area of effect with a pale violet glow. Outlined creatures suffer a -2 penalty to Armor Class and cannot become invisible for 4 rounds unless they make a Saving Throw vs. Spell.~
-@70085 = ~Doom
+@70115 = ~Doom
 (Alteration)
 
 Level: 1
@@ -989,7 +1036,7 @@ Saving Throw: Neg.
 This spell causes a feeling of doom to overwhelm the target. For the duration of the spell, the target receives a -2 penalty to THAC0, damage rolls, and Saving Throws unless the target makes a Saving Throw vs. Spell (with an additional -1 penalty at 3rd, 5th, 7th, and 9th level, up to -4).
 
 Typed spell effects: THAC0 -2 (Curse); damage -2 (Curse); save vs. death -2 (Curse); save vs. wands -2 (Curse); save vs. polymorph -2 (Curse); save vs. breath -2 (Curse); save vs. spell -2 (Curse); Values may depend on caster level and target.~
-@70086 = ~Aid
+@70116 = ~Aid
 (Necromancy, Conjuration)
 
 Level: 2
@@ -1003,7 +1050,7 @@ Saving Throw: None
 The recipient of this spell gains a special bonus of 1d8 additional Hit Points +1 per level of the caster (up to a maximum of 1d8+10) for the duration of the spell. The Aid spell enables the recipient to actually have more Hit Points than <PRO_HISHER> current maximum. The bonus Hit Points are lost first when the recipient takes damage and may not be regained by curative magic.
 
 Example: A 1st-level Fighter has 8 Hit Points, suffers 2 points of damage (8 - 2 = 6), then receives an Aid spell that grants <PRO_HIMHER> 5 additional Hit Points. The Fighter now has 11 Hit Points, 3 of which are temporary. If <PRO_HESHE> is then hit for 7 points of damage, 4 normal Hit Points and all 3 temporary Hit Points are lost. The Fighter then receives a Cure Light Wounds spell that heals 4 points of damage, restoring <PRO_HIMHER> to <PRO_HISHER> original 8 Hit Points.~
-@70087 = ~Barkskin
+@70117 = ~Barkskin
 (Alteration)
 
 Level: 2
@@ -1017,7 +1064,7 @@ Saving Throw: None
 When a priest casts the Barkskin spell upon a creature, its skin becomes as tough as bark, increasing its base Armor Class to 6, plus 1 for every 4 levels of the priest: Armor Class 5 at 4th level, Armor Class 4 at 8th, and so on. In addition, Saving Throws vs. all attack forms except magic gain a +1 bonus. This spell can be placed on the caster or on any other creature <PRO_HESHE> touches.
 
 Typed spell effects: save vs. death +1 (Deflection); save vs. wands +1 (Deflection); save vs. polymorph +1 (Deflection); save vs. breath +1 (Deflection); Values may depend on caster level and target.~
-@70088 = ~Flame Blade
+@70118 = ~Flame Blade
 (Evocation)
 
 Level: 2
@@ -1029,7 +1076,7 @@ Area of Effect: Special
 Saving Throw: None
 
 With this spell, the caster causes a blazing ray of red-hot fire to spring forth from <PRO_HISHER> hand. This blade-like ray is wielded as if it were a sword that the caster already knows how to use, hence there are no bonuses or penalties. If the caster successfully hits with the flame blade in melee combat, the creature struck suffers 1d4 points of slashing damage, plus an additional 1d2+4 points of fire damage. However, it is treated as a magical weapon, so creatures struck only by magical weapons can be harmed by it.~
-@70089 = ~Silence, 15' Radius
+@70119 = ~Silence, 15' Radius
 (Alteration)
 
 Level: 2
@@ -1041,7 +1088,7 @@ Area of Effect: 15-ft. radius sphere
 Saving Throw: Neg.
 
 Upon casting this spell, complete silence prevails in the affected area. All sound is stopped: Conversation is impossible and spells cannot be cast. Each enemy creature in the area must make a Saving Throw vs. Spell with a -5 penalty; if the save is failed then they are silenced for the duration of the spell. Note that this spell does not continue to affect the area after being cast; only those in the area at the time of the casting are affected by the silence.~
-@70090 = ~Call Lightning
+@70120 = ~Call Lightning
 (Alteration)
 
 Level: 3
@@ -1053,7 +1100,7 @@ Area of Effect: 360-ft. radius
 Saving Throw: 1/2
 
 Call Lightning must be cast outside; otherwise, it will not work, and the spell is wasted. The caster is able to call down one bolt of lightning per round. The spell has a duration of 1 round per level of the caster (to a maximum of 11 rounds). Each bolt causes 2d8 points of electrical damage, plus an additional 1d8 points per level of the caster. Thus, an 8th-level caster will call down eight bolts, each dealing 10d8 (2d8 + 8d8) points of damage. The bolt of lightning flashes down in a vertical stroke at any of the priest's enemies. The first enemy struck by the lightning will be the enemy targeted. After that, any enemy (but no allies) may be struck by the ensuing lightning storm.~
-@70091 = ~Glyph of Warding
+@70121 = ~Glyph of Warding
 (Abjuration, Evocation)
 
 Level: 3
@@ -1065,7 +1112,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: 1/2
 
 A Glyph of Warding is a powerful inscription magically drawn to prevent unauthorized or hostile creatures from passing, entering, or opening. It can be used to guard a small bridge, to ward an entry, or as a trap on a chest or box. Any creature violating the warded area is subject to the magic it stores, although a successful Saving Throw vs. Breath enables the creature to take half damage from the glyph. When the spell is cast, the priest weaves a tracery of faintly glowing lines around the warding sigil. When the glyph is activated, it deals 1d4 points of electrical damage per level of the caster.~
-@70092 = ~Invisibility Purge
+@70122 = ~Invisibility Purge
 (Divination)
 
 Level: 3
@@ -1077,7 +1124,7 @@ Area of Effect: 120-ft. radius
 Saving Throw: None
 
 Any enemy invisible creatures within the area of effect have their invisibility dispelled. This includes creatures under the effects of Improved Invisibility, Shadow Door, Invisibility, Mislead, and so on.~
-@70093 = ~Strength of One
+@70123 = ~Strength of One
 (Alteration)
 
 Level: 3
@@ -1089,7 +1136,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: None
 
 When this spell is cast, party members within the area of effect are given a Strength score of 18/75. If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered. Bonuses and penalties from other sources apply in addition. The spell lasts for 1 turn, whereupon everyone's Strength returns to normal.~
-@70094 = ~Unholy Blight
+@70124 = ~Unholy Blight
 (Necromancy)
 
 Level: 3
@@ -1103,7 +1150,7 @@ Saving Throw: Special
 This spell calls upon energy from the Negative Energy Plane in order to open a channel between it and the targets. The result is that any good creatures within the spell's area of effect take 1d4 points of damage per level of the caster, or half damage upon a successful Saving Throw vs. Spell. If the victims fail their Saving Throw, they also receive a -2 penalty to all their rolls for 4 rounds.
 
 Typed spell effects: all saves -2 (Curse); THAC0 -2 (Curse); Values may depend on caster level and target.~
-@70095 = ~Cure Medium Wounds
+@70125 = ~Cure Medium Wounds
 (Necromancy)
 
 Level: 3
@@ -1115,8 +1162,8 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 By casting this spell and laying <PRO_HISHER> hand upon a creature, the priest heals 2d8 + 7 points of wound or other injury damage from the creature's body. This healing cannot affect creatures without corporeal bodies, nor can it cure wounds of creatures not living or of extraplanar origin. Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal—or can be cured—just as any normal injury.~
-@70096 = ~Protection From Cold~
-@70097 = ~Protection From Cold
+@70126 = ~Protection From Cold~
+@70127 = ~Protection From Cold
 (Abjuration)
 
 Level: 3
@@ -1128,7 +1175,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 The effects of a Protection From Cold spell last no longer than 3 rounds plus 1 round per level of the caster. When the spell is cast, it confers complete invulnerability to normal cold and to exposure to magical cold (icy dragon breath, winter wolf breath, spells such as Chill Touch, Cone of Cold, Ice Storm, and so on), absorbing 80% of all the damage dealt by such magical sources.~
-@70098 = ~Summon Insects
+@70128 = ~Summon Insects
 (Conjuration/Summoning)
 
 Level: 3
@@ -1140,8 +1187,8 @@ Area of Effect: 1 creature
 Saving Throw: Neg.
 
 The Summon Insects spell attracts a cloud or swarm of normal insects to attack one enemy of the caster. This swarm gathers at a point chosen by the caster within the spell's range and attacks any single creature the caster points to. The victim may make a Saving Throw vs. Breath Weapon with a -4 penalty to escape the swarm; otherwise, the victim receives 1 point of damage every 2 seconds for the duration of the spell. Moreover, the victim fights with a -2 penalty to <PRO_HISHER> attack roll and a -2 penalty to <PRO_HISHER> Armor Class. The swarm will repeatedly bite the target, forcing the target to make a Saving Throw vs. Breath Weapon each round or suffer a 50% chance of spell failure. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune.~
-@70099 = ~Divine Power~
-@70100 = ~Divine Power
+@70129 = ~Divine Power~
+@70130 = ~Divine Power
 (Evocation)
 
 Level: 4
@@ -1152,7 +1199,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 Through this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score becomes 18/00 unless it is already higher, and bonuses and penalties from other sources apply in addition. The priest's THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled.~
-@70101 = ~Negative Plane Protection
+@70131 = ~Negative Plane Protection
 (Abjuration)
 
 Level: 4
@@ -1164,7 +1211,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell affords the caster or the touched creature partial protection from undead monsters with Negative Energy Plane connections (such as vampires), and certain weapons and spells that drain energy levels. The Negative Plane Protection spell opens a channel to the Positive Energy Plane, possibly offsetting the effects of the negative energy attack. A protected creature struck by a negative energy attack is protected against any form of level draining for the duration of the spell. The protected creature suffers only normal Hit Point damage from the attack and does not suffer any drain of experience. This spell cannot be cast on the Negative Energy Plane.~
-@70102 = ~Cause Serious Wounds
+@70132 = ~Cause Serious Wounds
 (Necromancy)
 
 Level: 4
@@ -1176,7 +1223,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell is the reverse of Cure Serious Wounds. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell inflicts 3d8 + 7 points of damage upon the target. The next attack that the priest makes will inflict this effect, however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw. Undead are healed for 3d8 + 7 Hit Points.~
-@70103 = ~Lesser Restoration
+@70133 = ~Lesser Restoration
 (Necromancy)
 
 Level: 4
@@ -1188,8 +1235,8 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast, the life energy level of the recipient is raised. This reverses any previous life energy level drain of the creature by a force or monster. The spell also ends every temporary drain of Strength, Dexterity, Constitution, Intelligence, Wisdom or Charisma that a spell, a weapon or a monster inflicted, such as Ray of Enfeeblement or the touch of a mind flayer. It does not cure disease, does not undo a permanent loss, and does not lift the exhaustion that follows Blood Rage. The casting of this spell is very draining on the priest and <PRO_HESHE> will likely require rest immediately after the casting, as it will cause days' worth of fatigue almost instantaneously.~
-@70104 = ~Protection From Acid~
-@70105 = ~Protection From Acid
+@70134 = ~Protection From Acid~
+@70135 = ~Protection From Acid
 (Abjuration)
 
 Level: 4
@@ -1201,7 +1248,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When the spell is cast, it confers complete invulnerability to all acid-based attacks, whether magical or non-magical, such as Melf's Acid Arrow, acid breath, or a creature's special attacks. The protection will last for the duration of the spell or until successfully dispelled.~
-@70106 = ~True Seeing
+@70136 = ~True Seeing
 (Divination)
 
 Level: 5
@@ -1213,8 +1260,8 @@ Area of Effect: 120-ft. radius
 Saving Throw: None
 
 When this spell is cast, an area roughly 120 ft. in radius around the caster will be affected. Instantly and once each round for 1 turn after this spell is cast, all hostile Illusion/Phantasm spells in the area of effect will be dispelled. The spells that are affected by this are Reflected Image, Invisibility, Mirror Image, Non-Detection, Improved Invisibility, Shadow Door, Mislead, Project Image, and Simulacrum. The area of effect is roughly a 120-ft. radius around the caster. The target's Magic Resistance, if any, does not come into effect with this spell. This spell only affects enemies; thus, it is unable to dispel the invisibility from a party member.~
-@70107 = ~Stoneskin~
-@70108 = ~Stoneskin
+@70137 = ~Stoneskin~
+@70138 = ~Stoneskin
 (Alteration)
 
 Sphere: Elemental
@@ -1226,7 +1273,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 When a Druid casts this powerful spell upon <PRO_HIMHER>self, an outer skin of stone will move up from the ground, completely covering <PRO_HIMHER>. This skin is, of course, magical and will hinder the Druid in no way. The effect of this is to protect the Druid from physical attacks such as melee weapons and projectiles. For every 2 levels of the caster, an additional skin is gained upon casting. For example, a 10th-level Druid would receive 5 skins. For each skin the Druid possesses, the spell will stop one attack, so a 10th-level Druid would be protected from the first 5 attacks made against <PRO_HIMHER> but the 6th would affect <PRO_HIMHER> normally. The skins will remain on the Druid until <PRO_HESHE> is affected by a Dispel Magic, all of the skins are removed due to physical attacks, or the spell's duration expires. It is important to note that this will not protect the Druid from any area attacks such as Fireball; however, it will protect <PRO_HIMHER> from physical magical attacks such as Magic Missile.~
-@70109 = ~Champion's Strength
+@70139 = ~Champion's Strength
 (Alteration)
 
 Level: 5
@@ -1240,7 +1287,7 @@ Saving Throw: None
 When this spell is cast, the priest effectively draws on the strength of <PRO_HISHER> god and lends it to the target creature, in effect creating a champion. The target gains a bonus to <PRO_HISHER> THAC0 at a rate of 1 for every 3 levels of the caster. So a 9th level priest would confer a THAC0 bonus of 3 to the target, and so on. Also the target's Strength becomes 18/00 for the duration of the spell unless it is already higher, with all the bonuses to hit and damage rolls that this Strength confers; bonuses and penalties from other sources apply in addition. Champion's Strength ends an active Draw Upon Divine Might on the target and keeps a new one from taking hold while it lasts.
 
 The drawback to this is that the priest must concentrate on the connection between the target and <PRO_HISHER> god for the duration of the spell, hence losing the ability to cast any spells during this time. The effect lasts for 3 rounds for every level of the caster or until dispelled.~
-@70110 = ~Magic Resistance
+@70140 = ~Magic Resistance
 (Alteration)
 
 Level: 5
@@ -1252,7 +1299,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast, the recipient receives a resistance to all magic. The resistance conferred is 2% per level of the caster, up to a maximum of 40% at 20th level. This resistance is added to any Magic Resistance the target already has, and casting the spell again on the same creature replaces the previous casting. This effect will last for the duration of the spell or until dispelled.~
-@70111 = ~Cause Critical Wounds
+@70141 = ~Cause Critical Wounds
 (Necromancy)
 
 Level: 5
@@ -1264,7 +1311,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell is the reverse of Cure Critical Wounds. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell inflicts 4d8 + 12 points of damage upon the target. The next attack that the priest makes will cause this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.~
-@70112 = ~Righteous Magic
+@70142 = ~Righteous Magic
 (Alteration)
 
 Level: 5
@@ -1276,7 +1323,7 @@ Area of Effect: The caster
 Saving Throw: None
 
 This is a powerful combat spell that enhances the priest's physical prowess, transforming <PRO_HIMHER> into a juggernaut of destruction. The effect adds 1 temporary Hit Point per level of the caster, adds 1 point of Strength every 3 levels of the caster (to a maximum of 25), and causes every successful hit to inflict maximum damage. The effects last for the duration of the spell or until dispelled.~
-@70113 = ~Mass Cure
+@70143 = ~Mass Cure
 (Necromancy)
 
 Level: 5
@@ -1288,7 +1335,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: None
 
 When casting this spell, the priest must picture the faces of <PRO_HISHER> fellow party members clearly and focus on the unity of the group. Upon completion, all party members within a 15-ft. radius of the caster are healed 1d8 + 1/level Hit Points. Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal—or can be cured—just as any normal injury.~
-@70114 = ~Insect Plague
+@70144 = ~Insect Plague
 (Conjuration/Summoning)
 
 Sphere: Combat
@@ -1300,8 +1347,8 @@ Area of Effect: 15-ft. radius
 Saving Throw: Special
 
 When this spell is cast by the priest, a horde of creeping, hopping, and flying insects gather and swarm. This swarm will jump first to the enemy target, then to the nearest allies of the target's, until up to 6 creatures have been affected. Creatures within the swarm must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a 100% chance of spell failure (each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune). Creatures in the insect plague sustain 1 point of damage each second they remain within regardless of their Armor Class, due to the bites and stings of the insects. Invisibility is no protection. Due to the suffocating nature of the writhing insect swarm, each victim must make a Saving Throw vs. Spell at -2 or run away in fear for 1 round.~
-@70115 = ~Mass Regenerate~
-@70116 = ~Mass Regenerate
+@70145 = ~Mass Regenerate~
+@70146 = ~Mass Regenerate
 (Alteration)
 
 Level: 5
@@ -1313,7 +1360,7 @@ Area of Effect: Sight
 Saving Throw: None
 
 When cast, this spell grants the druid and all party members within sight steady regeneration of 2 Hit Points per round (1 Hit Point every 3 seconds) for 1 turn plus 2 rounds per level of the caster (up to 30 rounds at 10th level). Multiple castings do not stack.~
-@70117 = ~Blade Barrier
+@70147 = ~Blade Barrier
 (Evocation)
 
 Level: 6
@@ -1325,7 +1372,7 @@ Area of Effect: Special
 Saving Throw: Special
 
 The priest employs this spell to set up a wall of circling, razor-sharp blades. These whirl and flash around the caster, creating an impenetrable barrier. Any enemy attempting to pass through the Blade Barrier suffers 8d8 points of damage. Creatures within the area of the barrier when it is invoked are entitled to a Saving Throw vs. Spell to take half damage. The barrier remains for 1 turn.~
-@70118 = ~Conjure Fire Elemental
+@70148 = ~Conjure Fire Elemental
 (Conjuration/Summoning)
 
 Level: 6
@@ -1337,7 +1384,7 @@ Area of Effect: Special
 Saving Throw: None
 
 Upon casting a Conjure Fire Elemental spell, the caster opens a special gate to the Elemental Plane of Fire, and a fire elemental is summoned in the vicinity of the caster. The chance of summoning a 12-, 16-, or 24-Hit-Dice elemental scales with caster level from 64% / 35% / 1% at 11th level (61% / 37% / 2% at 12th, 52% / 42% / 6% at 15th) up to 37% / 51% / 12% at 20th level. The elemental will do the bidding of the caster until it is slain or the duration of the spell runs out. All the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication and no need to know the language of the summoned creature. Unlike Mages, priests do not have to engage in a battle of the minds to control their elemental.~
-@70119 = ~Fire Seeds
+@70149 = ~Fire Seeds
 (Conjuration/Summoning)
 
 Level: 6
@@ -1349,7 +1396,7 @@ Area of Effect: The caster
 Saving Throw: 1/2
 
 Casting the Fire Seed spell creates 4 fire seeds that will appear in the caster's inventory. The seeds will remain in existence for 3 turns after the spell is cast. If they are thrown at an enemy, a fireball will ensue, causing 2d8 points of damage to all within a 7-ft. radius unless they make a Saving Throw vs. Spell for half damage.~
-@70120 = ~Heal
+@70150 = ~Heal
 (Necromancy)
 
 Level: 6
@@ -1361,7 +1408,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 The very potent Heal spell enables the priest to wipe away disease and injury in the creature who receives the benefits of the spell. It completely cures all disease and blindness in the recipient and heals all points of damage suffered due to wounds or injury. It also dispels a Feeblemind spell and cures those mental disorders caused by spells or injury to the brain. Naturally, the effects can be negated by later wounds, injuries, and diseases.~
-@70121 = ~Harm
+@70151 = ~Harm
 (Necromancy)
 
 Level: 6
@@ -1373,7 +1420,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This spell is the reverse of Heal. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell reduces the target to 1 Hit Point. Undead are healed completely instead. The next attack that the priest makes will inflict this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw.~
-@70122 = ~Bolt of Glory
+@70152 = ~Bolt of Glory
 (Invocation/Evocation)
 
 Level: 6
@@ -1391,7 +1438,7 @@ Creature Type                       Damage
  Elemental                             3d4
  Undead                                8d6
  Demon                                 10d6~
-@70123 = ~Conjure Earth Elemental
+@70153 = ~Conjure Earth Elemental
 (Conjuration/Summoning)
 
 Level: 7
@@ -1403,7 +1450,7 @@ Area of Effect: Special
 Saving Throw: None
 
 Upon casting a Conjure Earth Elemental spell, the caster opens a special gate to the Elemental Plane of Earth, and an earth elemental is summoned in the vicinity of the caster. The chance of summoning a 12-, 16-, or 24-Hit-Dice elemental scales with caster level from 64% / 35% / 1% at 11th level (61% / 37% / 2% at 12th, 52% / 42% / 6% at 15th) up to 37% / 51% / 12% at 20th level. All of the commands given to the elemental are done telepathically, so there is no time lost due to miscommunication, and it is not necessary to know the language of the summoned creature. Unlike Mages, priests do not have to engage in a battle of the minds to control their summoned elemental.~
-@70124 = ~Gate
+@70154 = ~Gate
 (Conjuration/Summoning)
 
 Level: 7
@@ -1415,7 +1462,7 @@ Area of Effect: Special
 Saving Throw: None
 
 By means of this spell, the caster calls an outer-planar creature (a pit fiend for lawful casters, or a balor for neutral and chaotic casters) to attack <PRO_HISHER> foes as well as <PRO_HIMHER>self, if <PRO_HESHE>'s not careful. The caster must use a Protection From Evil spell on <PRO_HIMHER>self (and comrades) to keep the devil from noticing <PRO_HIMHER>. If the caster fails to protect <PRO_HIMHER>self in this manner, the pit fiend will tear the caster and <PRO_HISHER> companions apart piece by piece, then feast on the remains.~
-@70125 = ~Nature's Beauty
+@70155 = ~Nature's Beauty
 (Illusion/Phantasm)
 
 Level: 7
@@ -1427,7 +1474,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Neg.
 
 When this spell is cast, the caster appears to undergo a remarkable transformation. The caster becomes the very ideal of beauty: For a male, this is usually a nymph; for a female, it varies. As with a nymph, anyone viewing the disguised caster must make a Saving Throw vs. Spell with +3 bonus or be permanently blinded (and slain instantly if humanoid). If the Saving Throw is successful, viewers are blinded for 3 rounds. The transformation is instantaneous, but lasts only seconds, affecting those near the caster (excluding fellow party members).~
-@70126 = ~Symbol, Fear
+@70156 = ~Symbol, Fear
 (Enchantment/Charm)
 
 Level: 7
@@ -1439,7 +1486,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Fear is a powerful enchantment that allows the priest to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode causing all enemies within the area to make a Saving Throw vs. Spell with a -4 penalty or be affected by fear for 2 rounds + 1 round every 3 levels of the caster.~
-@70127 = ~Finger of Death
+@70157 = ~Finger of Death
 (Necromancy)
 
 Level: 7
@@ -1451,8 +1498,8 @@ Area of Effect: 1 creature
 Saving Throw: Neg.
 
 The Finger of Death spell snuffs out the victim's life force. The caster points <PRO_HISHER> finger at the victim after the incantation is complete and, unless the victim saves vs. Death, he dies. A creature successfully making the Saving Throw still receives 2d8 points of damage + 1 per level of the caster.~
-@70128 = ~Sphere of Chaos~
-@70129 = ~Sphere of Chaos
+@70158 = ~Sphere of Chaos~
+@70159 = ~Sphere of Chaos
 (Enchantment/Charm)
 
 Level: 7
@@ -1463,7 +1510,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: Spell negates at -4
 
 Each round, enemies in the area must save vs. Spell at -4 or suffer one equally likely effect for 1 round: feeblemind, confusion, panic, sleep that ends on damage, or hold.~
-@70130 = ~Regeneration
+@70160 = ~Regeneration
 (Necromancy)
 
 Level: 7
@@ -1475,7 +1522,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 This powerful spell enables the priest to imbue one creature with the ability to regenerate. This regeneration will heal any wounds and even regenerate lost limbs. The creature affected will regain 2 Hit Points per second, and multiple castings do not stack. The effect lasts for 1 round per level of the caster or until dispelled. For example, a 14th-level priest would regenerate 12 Hit Points per round for 14 rounds.~
-@70131 = ~Greater Restoration
+@70161 = ~Greater Restoration
 (Necromancy)
 
 Level: 7
@@ -1487,7 +1534,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 When this spell is cast, the life energy level of the recipient is raised. This reverses any previous life energy level drain of the creature by a force or monster. A Greater Restoration spell will also restore the Intelligence score of a creature affected by the Feeblemind spell and negate any form of insanity, such as confusion or berserk. It fully heals the target and cures any diseases, poisons, blindness, deafness, curses, petrification, polymorph, hold, stun, or sleep. The casting of this spell is very draining on the priest, and <PRO_HESHE> will likely require rest immediately afterward.~
-@70132 = ~Creeping Doom
+@70162 = ~Creeping Doom
 (Conjuration/Summoning)
 
 Level: 7
@@ -1499,7 +1546,7 @@ Area of Effect: Special
 Saving Throw: Special
 
 When the caster utters the spell Creeping Doom, <PRO_HESHE> calls forth a mass of venomous, biting and stinging arachnids, insects, and myriapods. This carpetlike mass swarms over a large area, spreading to all enemy creatures within 30 ft. of the target. Those trapped by the insects suffer 2 points of damage each second and must make a Saving Throw vs. Breath Weapon at -2 each round or suffer a spell failure rate of 100%. Each damage tick removes a Stoneskin layer while Stoneskin holds off the secondary penalties until the skins run out; Fire Shield and immunity to normal weapons protect against the swarm, and undead are immune. For each round the victim remains inside the cloud, <PRO_HESHE> must make a Save vs. Spell at -2 or run away in fear for one round. The advantage of Creeping Doom over its 5th-level counterpart Insect Plague is that it does twice as much damage in half the amount of time.~
-@70133 = ~Symbol, Stun
+@70163 = ~Symbol, Stun
 (Enchantment/Charm)
 
 Level: 7
@@ -1511,7 +1558,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Stun is a powerful enchantment that allows the priest to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode, causing all enemies within the area of effect to make a Saving Throw vs. Spell with a -4 penalty or be stunned for 2 rounds + 1 round every 3 levels of the caster. Free Action protects against this effect.~
-@70134 = ~Symbol, Death
+@70164 = ~Symbol, Death
 (Enchantment/Charm)
 
 Level: 7
@@ -1523,7 +1570,7 @@ Area of Effect: 12-ft. radius
 Saving Throw: Neg.
 
 Symbol, Death is a powerful enchantment that allows the priest to inscribe a symbol on the ground or any other surface. The symbol will remain there until an opponent comes too close, at which point it will explode, causing all enemies within the area of effect to make a Saving Throw vs. Death or die. Creatures with more than 60 current Hit Points are immune to this effect.~
-@70135 = ~Globe of Blades
+@70165 = ~Globe of Blades
 (Evocation)
 
 Level: Quest
@@ -1535,7 +1582,7 @@ Area of Effect: Special
 Saving Throw: Special
 
 The priest employs this spell to set up a globe of razor-sharp blades. These whirl and flash around the caster, creating a dangerous barrier. Any enemy attempting to pass through the blade barrier suffers 10d10 points of damage. Creatures within the area of the barrier when it is invoked are entitled to a Saving Throw vs. Spell at -2. If this is successful, the damage is halved. The barrier remains for 1 turn.~
-@70136 = ~Aura of Flaming Death
+@70166 = ~Aura of Flaming Death
 (Evocation, Alteration)
 
 Level: Quest
@@ -1548,7 +1595,31 @@ Saving Throw: None
 This spell causes the caster to be enveloped by an aura of intense flame that both injures opponents and protects the caster from damage. This shield not only grants the user 90% Fire Resistance and an AC bonus of 4, but also protects <PRO_HIMHER> from attacks made within a 5-ft. radius. An opponent that hits the caster with any weapons or spells within this radius suffers 2d10+2 fire damage. In addition, the intense heat protects the caster from all non-magical weapons, melee or missile.
 
 Typed spell effects: AC +4 (Deflection); Values may depend on caster level and target.~
-@70137 = ~Chaos
+@70167 = ~Polymorph Self
+(Alteration)
+
+Level: 4
+Range: 0
+Duration: 1 turn + 3 rounds/level
+Casting Time: 4
+Area of Effect: The caster
+Saving Throw: None
+
+With this spell the wizard can take the shape of six creatures. Each form, and the wizard's natural form, becomes a special ability for the duration: the wizard can change between them at any time and as often as <PRO_HESHE> wishes. In another form the wizard keeps <PRO_HISHER> mind and Hit Points but takes the body of the creature: its Strength, Dexterity, base Armor Class, attacks and natural protections; the bonus for a high Dexterity still counts. A higher Strength of the wizard's own does not carry over. Only as an ogre mage can the wizard cast spells or use items. When the spell ends, the wizard returns to <PRO_HISHER> natural form.
+
+Hill Giant: Strength 19, Dexterity 10, Armor Class 3, 1 attack per round, 2d8 piercing as a +1 weapon; Barbarian Rage once each time this form is taken.
+Ogre Mage: Strength 18/00, Dexterity 12, Armor Class 4, 1 attack per round, 1d10 slashing as a +1 weapon; can cast spells and use items.
+Spider: Strength 15, Dexterity 17, base Armor Class 4, 2 attacks per round, 1d4+1 piercing as a +1 weapon with a poisonous bite; faster movement; Web Tangle once each time this form is taken.
+Mustard Jelly: Strength 14, Dexterity 9, the wizard's own Armor Class, 1 attack per round at up to 15 feet, 5d4 crushing as a +3 weapon that slows and poisons; Magic Resistance 125% and strong resistances.
+Hell Hound: Strength 18, Dexterity 15, base Armor Class 4, 1 attack per round, 1d10 piercing plus 1d6 fire as a +1 weapon; immune to fire; Fiery Breath every 3 rounds.
+Rat: Strength 10, Dexterity 20, base Armor Class 4, 1 attack per round, 1d2 piercing as a +1 weapon; can Hide at any time.~
+@70168 = ~Shapeshift: Spider~
+@70169 = ~Shapeshift: Spider
+The caster becomes a giant spider: Strength 15, Dexterity 17, base Armor Class 4, 2 attacks per round, 1d4+1 piercing damage as a +1 weapon; a bite poisons the target for 30 seconds unless it saves vs. Death at +1. The spider moves faster and cannot be caught in webs. Each time the caster takes this form, <PRO_HESHE> can spit Web Tangle once. No spells or items can be used in this form.~
+@70170 = ~Shapeshift: Mustard Jelly~
+@70171 = ~Shapeshift: Mustard Jelly
+The caster becomes a mustard jelly: Strength 14, Dexterity 9, the caster's own Armor Class, 1 attack per round at up to 15 feet, 5d4 crushing damage as a +3 weapon. A hit slows the target for 200 seconds unless it saves vs. Polymorph at -2, and poisons it for 30 seconds unless it saves vs. Death at +2. The jelly moves faster, has 125% Magic Resistance, 100% resistance to electricity and piercing damage, 85% to missiles, 50% to cold and 30% to slashing and crushing damage, and is immune to non-magical weapons, poison, charm, confusion, fear, sleep, hold, stun, petrification, level drain and death magic, to Cloudkill, Chaos, Confusion, Hold Person, Nature's Beauty and swarms. No spells or items can be used in this form.~
+@70172 = ~Chaos
 (Enchantment/Charm)
 
 Level: 5
@@ -1559,19 +1630,19 @@ Area of Effect: 15-ft. radius
 Saving Throw: Special
 
 Creatures with 4 Hit Dice or fewer are confused automatically. Creatures with 5 Hit Dice or more may save vs. Spell at -4 to resist.~
-@70138 = ~Magic Resistance lowered by 39%~
-@70139 = ~Magic Resistance lowered by 40%~
-@70140 = ~Magic Resistance lowered by 41%~
-@70141 = ~Magic Resistance lowered by 42%~
-@70142 = ~Magic Resistance lowered by 43%~
-@70143 = ~Magic Resistance lowered by 44%~
-@70144 = ~Magic Resistance lowered by 45%~
-@70145 = ~Magic Resistance lowered by 46%~
-@70146 = ~Magic Resistance lowered by 47%~
-@70147 = ~Magic Resistance lowered by 48%~
-@70148 = ~Magic Resistance lowered by 49%~
-@70149 = ~Magic Resistance lowered by 50%~
-@70150 = ~Conjure Lesser Fire Elemental
+@70173 = ~Magic Resistance lowered by 39%~
+@70174 = ~Magic Resistance lowered by 40%~
+@70175 = ~Magic Resistance lowered by 41%~
+@70176 = ~Magic Resistance lowered by 42%~
+@70177 = ~Magic Resistance lowered by 43%~
+@70178 = ~Magic Resistance lowered by 44%~
+@70179 = ~Magic Resistance lowered by 45%~
+@70180 = ~Magic Resistance lowered by 46%~
+@70181 = ~Magic Resistance lowered by 47%~
+@70182 = ~Magic Resistance lowered by 48%~
+@70183 = ~Magic Resistance lowered by 49%~
+@70184 = ~Magic Resistance lowered by 50%~
+@70185 = ~Conjure Lesser Fire Elemental
 (Conjuration/Summoning)
 
 Level: 5
@@ -1582,7 +1653,7 @@ Area of Effect: Special
 Saving Throw: None
 
 The caster summons an 8-Hit-Dice fire elemental. The elemental contests the caster's control for 3 rounds; there is a 15% chance that it becomes hostile when the contest ends.~
-@70151 = ~Conjure Lesser Air Elemental
+@70186 = ~Conjure Lesser Air Elemental
 (Conjuration/Summoning)
 
 Level: 5
@@ -1593,7 +1664,7 @@ Area of Effect: Special
 Saving Throw: None
 
 The caster summons an 8-Hit-Dice air elemental. The elemental contests the caster's control for 3 rounds; there is a 15% chance that it becomes hostile when the contest ends.~
-@70152 = ~Conjure Lesser Earth Elemental
+@70187 = ~Conjure Lesser Earth Elemental
 (Conjuration/Summoning)
 
 Level: 5
@@ -1604,7 +1675,7 @@ Area of Effect: Special
 Saving Throw: None
 
 The caster summons an 8-Hit-Dice earth elemental. The elemental contests the caster's control for 3 rounds; there is a 15% chance that it becomes hostile when the contest ends.~
-@70153 = ~Simulacrum
+@70188 = ~Simulacrum
 (Illusion/Phantasm)
 
 Level: 8
@@ -1615,7 +1686,25 @@ Area of Effect: Special
 Saving Throw: None
 
 A duplicate of the caster is created with this spell. The duplicate is almost identical to the caster, making it a very powerful ally. It is created at 60% of the caster's level and has all the spells that the caster would have at that level. Of the caster's special abilities it keeps those that its class and kit give at that level, as often as that level gives them, and no more uses than the caster had left; abilities from items, quests or anything else are lost. It cannot use quick-slot items. It also has 60% of the caster's Hit Points and is fully under <PRO_HISHER> control.~
-@70154 = ~Summon Planetar
+@70189 = ~Shapechange
+(Alteration)
+
+Level: 9
+Range: 0
+Duration: 6 turns
+Casting Time: 9
+Area of Effect: The caster
+Saving Throw: None
+
+With this spell the wizard can take the shape of six powerful creatures. Each form, and the wizard's natural form, becomes a special ability for the duration: the wizard can change between them at any time and as often as <PRO_HESHE> wishes. In another form the wizard keeps <PRO_HISHER> mind and Hit Points but takes the body of the creature: its Strength, Dexterity, base Armor Class, THAC0, attacks and natural protections; the bonus for a high Dexterity still counts. The wizard can cast spells and use items in every form except the iron golem and the greater basilisk. When the spell ends, the wizard returns to <PRO_HISHER> natural form.
+
+Mind Flayer: 4 attacks per round that drain Intelligence; Magic Resistance 90%, 50% physical resistance; Psionic Blast stuns.
+Iron Golem: Strength 24, 4d10 crushing as a +4 weapon; Magic Resistance 100%, immune to the elements and to weapons below +3; Gas Cloud every 3 rounds.
+Giant Troll: Strength 22, 3 attacks per round; regenerates about 2 Hit Points a second.
+Marilith: 5 attacks per round, base Armor Class -6; Magic Resistance 85%, immune to fire and electricity; Teleport.
+Greater Basilisk: 3 poisonous attacks per round; Petrifying Gaze.
+Invisible Stalker: improved-invisible every round; 80% resistance to missiles.~
+@70190 = ~Summon Planetar
 (Conjuration/Summoning)
 
 Level: 10
@@ -1643,7 +1732,7 @@ Spells by level:
 5: Raise Dead (x2); True Seeing (x2); Chaotic Commands (x2)
 6: Blade Barrier (x2); Heal; Bolt of Glory
 7: Holy Word; Greater Restoration~
-@70155 = ~Summon Dark Planetar
+@70191 = ~Summon Dark Planetar
 (Conjuration/Summoning)
 
 Level: 10
@@ -1671,7 +1760,7 @@ Spells by level:
 5: Flame Strike (x2); True Seeing (x2); Greater Command (x2)
 6: Blade Barrier (x2); Harm; Dolorous Decay
 7: Fire Storm; Unholy Word~
-@70156 = ~Strength
+@70192 = ~Strength
 (Alteration)
 
 Level: 2
@@ -1682,7 +1771,7 @@ Area of Effect: 1 creature
 Saving Throw: None
 
 Application of this spell sets the Strength of the character to 18 and then adds a +50% bonus on top of this. The character receives any strength bonuses appropriate. For example, if a character has between 18/50 and 18/00 Strength, then <PRO_HISHER> Strength will just be set to 18/00. If a character has a Strength between 18/01 and 18/50, then <PRO_HISHER> Strength will become 18/50 + original percentage. If <PRO_HISHER> Strength is less than 18, then it will just become 18/50. However, this spell will actually lower a character's Strength if it is already 19 or more.~
-@70157 = ~Strength of One
+@70193 = ~Strength of One
 (Alteration)
 
 Level: 3
@@ -1694,7 +1783,7 @@ Area of Effect: 15-ft. radius
 Saving Throw: None
 
 When this spell is cast, party members within the area of effect are given a Strength score of 18/75. If a party member already has a Strength score of 18/75 or higher, <PRO_HISHER> Strength is not lowered. The spell lasts for 1 turn, whereupon everyone's Strength returns to normal.~
-@70158 = ~Divine Power
+@70194 = ~Divine Power
 (Evocation)
 
 Level: 4
@@ -1705,29 +1794,29 @@ Area of Effect: The caster
 Saving Throw: None
 
 Through this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score is set to 18/00—even if it is normally higher—<PRO_HISHER> THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled.~
-@70159 = ~Dispelling Screen Dissipates~
-@70160 = ~Aid~
-@70161 = ~Pain~
-@70162 = ~Insect Swarm~
-@70163 = ~Invisible~
-@70164 = ~Improved Invisibility~
-@70165 = ~Sanctuary~
-@70166 = ~Mirror Image~
-@70167 = ~Reflected Image~
-@70168 = ~Shield of the Archons~
-@70169 = ~Minor Spell Deflection~
-@70170 = ~Minor Spell Turning~
-@70171 = ~Wraithform~
-@70172 = ~Protection From Good~
-@70173 = ~Shadow Form~
-@70174 = ~Defensive Stance~
-@70175 = ~Blur~
-@70176 = ~Divine Favor~
-@70177 = ~Fire Resistance Lowered~
-@70178 = ~Electrical Resistance Lowered~
-@70179 = ~Selûne's Blessing~
-@70180 = ~Enhanced Attributes~
-@70181 = ~Hit Points Lowered~
-@70182 = ~Blinded~
-@70183 = ~Stunned~
-@70184 = ~Deafened~
+@70195 = ~Dispelling Screen Dissipates~
+@70196 = ~Aid~
+@70197 = ~Pain~
+@70198 = ~Insect Swarm~
+@70199 = ~Invisible~
+@70200 = ~Improved Invisibility~
+@70201 = ~Sanctuary~
+@70202 = ~Mirror Image~
+@70203 = ~Reflected Image~
+@70204 = ~Shield of the Archons~
+@70205 = ~Minor Spell Deflection~
+@70206 = ~Minor Spell Turning~
+@70207 = ~Wraithform~
+@70208 = ~Protection From Good~
+@70209 = ~Shadow Form~
+@70210 = ~Defensive Stance~
+@70211 = ~Blur~
+@70212 = ~Divine Favor~
+@70213 = ~Fire Resistance Lowered~
+@70214 = ~Electrical Resistance Lowered~
+@70215 = ~Selûne's Blessing~
+@70216 = ~Enhanced Attributes~
+@70217 = ~Hit Points Lowered~
+@70218 = ~Blinded~
+@70219 = ~Stunned~
+@70220 = ~Deafened~

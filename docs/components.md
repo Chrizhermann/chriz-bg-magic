@@ -355,6 +355,56 @@ Magic Resistance (opcode 166 parameter 2 = 0) instead of setting it (parameter 2
 it never lowers a higher value. Because it now adds, a leading self-refresh (opcode 321)
 replaces any previous casting of `SPPR509` on the same target. Its description is updated.
 
+## Polymorph Self (`SPWI416` and the `CBMP*` files)
+
+SCS's six forms with SCS's real values, built from this mod's own files; nothing of SCS is named.
+The spell lasts 1 turn + 3 rounds a level (one ability a level, 1 to 20). On casting it gives the
+natural form and the six forms as special abilities for the duration and opens a menu of the
+forms (`CBMPOLY.2DA`). Taking a form first removes the powers of the last form (`CBMFREM`), then
+puts the form's weapon in the magic weapon slot, gives the form again so it can be taken once
+more, and gives the form's power (`CBMP*G`). The weapon holds the body: the look (opcode 135,
+appearance only, from `CBMP*C` or the game's creature), Strength, exceptional Strength and
+Dexterity, attacks, base Armor Class, resistances and, except for the ogre mage, the blocked
+spell, item and talk buttons. The natural form (`CBMPNAT`) clears the weapon slot and the powers
+and stays for the duration; one second after the forms end, `CBMPEND` does the same.
+
+| Form | Strength / Dexterity | Base AC | Attacks | Weapon | Power |
+| --- | --- | --- | --- | --- | --- |
+| Hill Giant (`CBMPHG`) | 19 / 10 | 3 | 1 | 2d8 piercing, +1 | Barbarian Rage, once each time the form is taken |
+| Ogre Mage (`CBMPOM`) | 18/00 / 12 | 4 | 1 | 1d10 slashing, +1 | can cast spells and use items |
+| Spider (`SPWI495`) | 15 / 17 | 4 | 2 | 1d4+1 piercing, +1, poison | Web Tangle, once each time the form is taken |
+| Mustard Jelly (`SPWI496`) | 14 / 9 | own | 1, 15 ft. | 5d4 crushing, +3, slow and poison | Magic Resistance 125%, resistances, immunities |
+| Hell Hound (`CBMPHH`) | 18 / 15 | 4 | 1 | 1d10 piercing + 1d6 fire, +1 | Fiery Breath, 3d6, every 3 rounds; immune to fire |
+| Rat (`CBMPRT`) | 10 / 20 | 4 | 1 | 1d2 piercing, +1 | Hide, at once again |
+
+- The hill giant's own art is not in the base game; it looks like a fire giant for now.
+- The mustard jelly's slow is the one this mod gives every slow, so Haste and the slow cancel
+  each other as everywhere else.
+- In another form the Strength floors do not apply: the form keeps its values.
+
+## Shapechange (`SPWI916` and the `CBMS*` files)
+
+Built the same way as Polymorph Self from SCS's six forms and SCS's real values, with the same
+remover and empty weapon. The spell lasts 6 turns (one ability), with its own natural form
+(`CBMSNAT`), end (`CBMSEND`) and menu (`CBMSHAP.2DA`). The forms keep the game's resources where
+the game has them (`SPIN152`-`SPIN154`, `CDMINDFL.ITM`, `CDGOLIRO.ITM`, `TROLLALL.ITM`, the
+creatures `SHMIND`, `SHIRON`, `SHTROLL`, `STALKE`), written whole by this mod.
+
+| Form | Strength / Dexterity | Base AC / THAC0 | Attacks | Weapon | Powers and protections |
+| --- | --- | --- | --- | --- | --- |
+| Mind Flayer (`SPIN152`) | 10 / 10 | 3 / 11 | 4 | 1d2 crushing, +2, Intelligence -5 for 30 s | MR 90%, 50% physical; Psionic Blast (stun 60 s, save vs. Spell), again at once; can cast |
+| Iron Golem (`SPIN153`) | 24 / 9 | 3 / 3 | 1 | 4d10 crushing, +4 | MR 100%, fire 125%, cold, electricity and acid 100%, 20% physical, weapons below +3 cannot hurt it, no backstabs; Gas Cloud every 3 rounds |
+| Giant Troll (`SPIN154`) | 22 / 18 | 4 / 8 | 3 | 2d6 piercing, +2 | regenerates 5 HP every few seconds (about 2 a second), faster, immune to hold, paralysis, sleep, stun; can cast |
+| Marilith (`CBMSMA`) | 19 / 18 | -6 / 8 | 5 | 1d8 slashing, +4, random elemental damage and poison | MR 85%, immune to fire and electricity, 50% cold, immune to charm, fear, poison, disease; Teleport, again at once; can cast |
+| Greater Basilisk (`CBMSBA`) | 18 / 10 | 2 / 11 | 3 | 1d8+2 piercing, +2, poison for 20 s (3 at a time) | Petrifying Gaze (save vs. Polymorph at -6), again at once |
+| Invisible Stalker (`CBMSIS`) | 18/10 / 17 | -3 / 11 | 1 | 2d8 crushing, +2 | improved invisibility every round, 80% missiles, 30% elements; can cast |
+
+Two slips in SCS's data are corrected: the stalker's base Armor Class -3, which SCS writes as
+65533, and one of the iron golem's three weapon immunities, whose two values SCS swaps (opcode 120
+type 1, "magical", which with "non-magical" would leave no weapon able to hurt it); the golem now
+has the game's own iron golem immunity (non-magical, +1 and +2). Copied monster weapons protect
+creatures that are immune to their poison through the weapon itself.
+
 ## Strength floors (`cbmagic_strength_floor`, `lua/M_CBMSTR.lua`)
 
 A spell of this mod that gives a fixed Strength never lowers a higher one, and bonuses and
@@ -378,7 +428,8 @@ penalties from other sources count on top of it, in whatever order they came:
   that; otherwise the game's value stays. Strength stays between 1 and 25.
 - A set Strength from elsewhere, such as a potion of giant strength or Ray of Enfeeblement, is
   part of what the game works out: the higher of the two wins.
-- A creature in another form (polymorphed) keeps the values of its form.
+- A creature in another form keeps the values of its form: polymorphed, or with any opcode 135 on
+  it, as Polymorph Self's forms, which change only the look.
 - In a fight the written Strength counts like the game's own: measured in the lab with fists.
 - Without EEex the four spells of defs/ come in their versions from `defs/without-eeex/`, which
   set Strength as the game does (Strength of One there keeps its sub-spell and guards), and

@@ -1,0 +1,76 @@
+{
+ "format": "cre",
+ "name": -1,
+ "tooltip": -1,
+ "flags": 0,
+ "xp": 0,
+ "hp": 15,
+ "animation": 49920,
+ "ac": 10,
+ "thac0": 20,
+ "attacks": 255,
+ "lore": 0,
+ "sex": 1,
+ "racial_enemy": 0,
+ "ea": 2,
+ "general": 1,
+ "race": 1,
+ "class": 1,
+ "specific": 0,
+ "gender": 1,
+ "alignment": 0,
+ "colors": [
+  20,
+  31,
+  31,
+  7,
+  14,
+  20,
+  0
+ ],
+ "saves": [
+  20,
+  20,
+  20,
+  20,
+  20
+ ],
+ "resistances": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "levels": [
+  1,
+  1,
+  1
+ ],
+ "attributes": [
+  9,
+  0,
+  9,
+  9,
+  9,
+  9,
+  9
+ ],
+ "sounds": {},
+ "scripts": [
+  "None",
+  "None",
+  "None",
+  "None",
+  "None"
+ ],
+ "script_name": "None",
+ "spells": [],
+ "items": {}
+}

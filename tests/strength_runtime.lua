@@ -122,6 +122,8 @@ return function(template)
     -- Not counted: other states, forms, effects still waiting, other tags.
     equal(pair(run(sprite(10, 0, { floor(18100) }, nil, { state = false }))), "10/0", "no state, no change")
     equal(pair(run(sprite(10, 0, { floor(18100) }, nil, { polymorphed = 1 }))), "10/0", "a form keeps its values")
+    equal(pair(run(sprite(10, 0, { floor(18100) }, { effect(135, 0, 1, "CBMPRTC") }))), "10/0",
+        "a form from an item that changes only the look keeps its values too")
     equal(pair(run(sprite(10, 0, { floor(18100, 4096 + 4) }))), "10/0", "a delayed floor waits")
     equal(pair(run(sprite(10, 0, { effect(44, 0, 0, "CBTOTHER", 18100) }))), "10/0", "another tag is no floor")
     equal(pair(run(sprite(10, 0, { effect(44, 3, 0, "", 18100) }))), "10/0", "a special field alone is no floor")

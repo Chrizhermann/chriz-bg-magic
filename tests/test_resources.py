@@ -338,7 +338,8 @@ def definitions_lean_on_no_other_mod(work, weidu):
                 yield from resources(value)
 
     foreign = {f"{name}: {res}" for name, defn in definitions().items() for res in resources(defn)
-               if res.upper().startswith(("#CURE", "K#FAM", "CDWSTYL", "CDINVEXP", "CDMK25", "DWFPDEVA", "SPINHUMW", "SPINHUMR"))}
+               if res.upper().startswith(("#CURE", "K#FAM", "CDWSTYL", "CDINVEXP", "CDMK25", "DWFPDEVA", "SPINHUMW", "SPINHUMR",
+                                               "DW-", "DW_", "DWSS", "DW#"))}
     check(not foreign, f"{len(foreign)} named: {sorted(foreign)[:8]}")
 
 

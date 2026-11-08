@@ -90,6 +90,48 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - Not run: a creature in another form (only mocked), Ray of Enfeeblement in a fight, the
   versions without EEex in a game (offline only), EET.
 
+## Polymorph Self
+
+- Source of the values: a disposable lab, BG2:EE 2.7.3.0 with EEex and only SCS 35.21's spell
+  tweaks, read file by file; an EET lab with more mods had other mods' changes in SCS's forms, so
+  it was not used. Strings below 103599 are the game's own (the unmodded game's string table).
+- One slip in SCS's data: the spider's -4 against missiles was written as 65532 (the game also
+  takes it as -4), so -4 is written.
+- Offline: the spell's 20 abilities (forms for 60 + 18 per level seconds, the natural form one
+  second longer), the menu, every form's weapon, look, Strength, Dexterity, attacks and base Armor
+  Class, the powers and the remover, the breath's 3 rounds; nothing of SCS is named.
+- In-game, group `polymorph`, BG2:EE 13 of 13, a spawned Korgan without gear or scripts: the spell
+  gives the natural form and six forms; each form had its look, Strength, Dexterity, weapon and
+  only its own power; the mustard jelly had Magic Resistance 125, the hell hound fire 100 and cold
+  -50; Fiery Breath came back after 3 rounds; the natural form gave back his look and body and
+  removed the powers; the rat kept Strength 10 under Divine Power; when the spell ran out he was
+  in his natural form without forms or powers. Appearance-only forms do not set the game's
+  polymorph flag: the Strength floor looks for opcode 135 instead.
+- Not run: the form menu with a party member, the look on screen, Barbarian Rage, Web Tangle,
+  Hide and the jelly's slow in a fight, the spider's Armor Class against missiles (its stat read
+  0), EET.
+
+## Shapechange
+
+- Same source as Polymorph Self. Two slips in SCS's data: the stalker's base Armor Class -3 was
+  written as 65533, so -3 is written; one of the iron golem's three weapon immunities has its two
+  values swapped against the game's own `IMMUNE3.ITM` (opcode 120 type 1, "magical", beside type 2,
+  "non-magical"), so the golem gets the game's iron golem immunity: non-magical, +1 and +2.
+- Offline: one ability of 6 turns, the natural form one second longer, the menu, every form's
+  weapon, look, Strength, Dexterity, attacks, base Armor Class and THAC0, the powers in the shared
+  remover, the stalker's invisibility removed with the form, the golem's three immunities.
+- In-game, group `shapechange`, BG2:EE 13 of 13, the same Korgan: the spell gives the natural form
+  and six forms; each form had its look, Strength, weapon and own power; the mind flayer had Magic
+  Resistance 90, the iron golem 100 and fire 125, the marilith 85 and fire 100; the stalker was
+  invisible; the natural form gave back his look and ended the invisibility. The giant troll
+  healed 5 Hit Points at a time, every 2 to 3 seconds (about 1.9 a second over 24 seconds), not
+  every second as the effect says: periodic effects pulse on the creature's own one-second grid,
+  which each heal reseeds (`ie-duration.md` in the bg-modding skill). The texts say "about 2 a
+  second" and give no rate per second for poison, which was not measured.
+- Polymorph Self ran again in the same game: 13 of 13.
+- Not run: the form menu with a party member, the look on screen, the powers in a fight (Psionic
+  Blast, Gas Cloud, Teleport, Petrifying Gaze), the golem's weapon immunity in a fight, EET.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

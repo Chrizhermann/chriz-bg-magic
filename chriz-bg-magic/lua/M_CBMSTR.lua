@@ -38,7 +38,10 @@ end
 -- EFF the way the engine applies it.
 local function visit(effect, sums, path, depth)
     local opcode = effect.m_effectId
-    if opcode == 177 then
+    if opcode == 135 then
+        -- Another form, from a spell or an item, whether it changes the whole creature or its look.
+        sums.form = true
+    elseif opcode == 177 then
         local name = resref(effect.m_res):upper()
         if path[name] then error("external effect cycle: " .. name) end
         if depth >= 32 then error("external effect chain exceeds 32 links") end
@@ -80,7 +83,7 @@ function S.resolve(sprite)
     end
     EEex_Utility_IterateCPtrList(sprite.m_equipedEffectList, each)
     EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, each)
-    if sums.floor <= 0 then return end
+    if sums.floor <= 0 or sums.form then return end
     local strength = math.max(1, math.min(25, math.floor(sums.floor / 1000) + sums.strength))
     local extra = 0
     if strength == 18 then extra = math.max(0, math.min(100, sums.floor % 1000 + sums.extra)) end

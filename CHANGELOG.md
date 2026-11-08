@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Polymorph Self: the six forms of SCS with their real values, built from this mod's own files:
+  hill giant, ogre mage, spider, mustard jelly, hell hound and rat. The spell's text lists each
+  form and what it can do. The hill giant looks like a fire giant: its own art is not in the
+  base game.
+- Shapechange: SCS's six forms in the same way: mind flayer, iron golem, giant troll, marilith,
+  greater basilisk and invisible stalker, for 6 turns. Only weapons of +3 or better hurt the iron
+  golem (SCS's data would have shut out every weapon).
+
 - Strength, Strength of One, Divine Power, Champion's Strength and IWDification's Animal Rage no
   longer lower a higher Strength, and bonuses and penalties from other sources, such as Draw Upon
   Divine Might or an item's +1, count on top of them, whichever came first. A creature in another

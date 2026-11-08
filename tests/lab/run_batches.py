@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor", "polymorph", "shapechange")
 
 
 def lua_list(values):
@@ -169,77 +169,153 @@ def fist_hits(c, tag, seconds=24):
 MIGHT, ANIMAL = None, None
 
 
-def floor(c, check):
-    # A spell that gives a fixed Strength never lowers a higher one; bonuses and penalties count on
-    # top of it, in either order. A timed set stands for what the game works out without the floor.
-    pair = lambda s: (s["str"], s["strex"])  # noqa: E731
-    spells = ["SPPR412", "SPPR507", "SPWI214", "SPPR312", *(r for r in (MIGHT, ANIMAL) if r)]
+# Form innate: (animation, Strength, exceptional, Dexterity, attacks, weapon, power it gives).
+FORMS = {
+    "CBMPHG": (0x7F3E, 19, 0, 10, 1, "CBMPHGW", "CBMPHGR"),
+    "CBMPOM": (0x2200, 18, 100, 12, 1, "CBMPOMW", None),
+    "SPWI495": (0x7A00, 15, 0, 17, 2, "PLYSPID", "CBMPSPW"),
+    "SPWI496": (0x7902, 14, 0, 9, 1, "PLYJELLY", None),
+    "CBMPHH": (0x7B04, 18, 0, 15, 1, "CBMPHHW", "CBMPHHB"),
+    "CBMPRT": (0xC300, 10, 0, 20, 1, "CBMPRTW", "CBMPRTH"),
+}
+POWERS = {"CBMPHGR", "CBMPSPW", "CBMPHHB", "CBMPRTH"}
+# Shapechange's forms: (animation, Strength, exceptional, Dexterity, attacks, weapon, power).
+SHAPES = {
+    "SPIN152": (0x7F01, 10, 0, 10, 4, "CDMINDFL", "CBMSFPB"),
+    "SPIN153": (0x7F04, 24, 0, 9, 1, "CDGOLIRO", "CBMSGOC"),
+    "SPIN154": (0x7F00, 22, 0, 18, 3, "TROLLALL", None),
+    "CBMSMA": (0xE090, 19, 0, 19 - 1, 5, "CBMSMAW", "CBMSMAT"),
+    "CBMSBA": (0x7101, 18, 0, 10, 3, "CBMSBAW", "CBMSBAZ"),
+    "CBMSIS": (0x6405, 18, 10, 17, 1, "CBMSISW", None),
+}
+SHAPE_POWERS = {"CBMSFPB", "CBMSGOC", "CBMSMAT", "CBMSBAZ"}
 
-    def fresh(i, strength, extra=0):
-        c.p(f"fl-clear{i}-{strength}", f"clear({i}, {lua_strings(spells)})")
-        c.p(f"fl-set{i}-{strength}", f"fx({i}, 44, {strength}, 1, 900)")
-        c.p(f"fl-setx{i}-{strength}", f"fx({i}, 97, {extra}, 1, 900)")
-        time.sleep(1.5)
-        return pair(c.p(f"fl-before{i}-{strength}", f"stats({i})"))
 
-    def cast(i, res, wait=2.5):
-        c.p(f"fl-cast{i}-{res}", f'on_member({i}, "{res}")')
-        time.sleep(wait)
-        return pair(c.p(f"fl-after{i}-{res}", f"stats({i})"))
-
-    last = None
-    for name, res, cases in (("Divine Power", "SPPR412", (((10, 0), (18, 100)), ((19, 0), (19, 0)))),
-                             ("Champion's Strength", "SPPR507", (((12, 0), (18, 100)), ((20, 0), (20, 0)))),
-                             ("Strength", "SPWI214", (((10, 0), (18, 50)), ((18, 30), (18, 80)), ((19, 0), (19, 0)))),
-                             ("Animal Rage", ANIMAL, (((10, 0), (19, 0)), ((22, 0), (22, 0))))):
-        if not res:
-            continue
-        for (strength, extra), expected in cases:
-            before = fresh(0, strength, extra)
-            after = cast(0, res)
-            check(f"{name}: {strength}/{extra} becomes {expected[0]}/{expected[1]}", after == expected,
-                  before=before, after=after)
-            last = (strength, extra)
-    c.p("fl-end", f"clear(0, {lua_strings(spells)})")
-    time.sleep(2)
-    gone = pair(c.p("fl-gone", "stats(0)"))
-    check("the floor gone: Strength back to what the game works out", gone == last, gone=gone, expected=last)
-
-    if MIGHT:
-        results = {}
-        for order in ((MIGHT, "SPPR412"), ("SPPR412", MIGHT)):
-            fresh(0, 10)
-            for res in order:
-                after = cast(0, res)
-            bonus = [e["p1"] for e in c.p(f"fl-might-{order[0]}", "ops(0, {132})") or []]
-            results[order[0]] = (after, bonus)
-        first, second = results[MIGHT], results["SPPR412"]
-        check("Draw Upon Divine Might counts on top of Divine Power, in either order",
-              first[0] == second[0] and bool(first[1]) and first[0][0] == 18 + first[1][0],
-              might_first=first, divine_first=second)
-        c.p("fl-end2", f"clear(0, {lua_strings(spells)})")
-
-    # In a fight: Korgan without his gear, Strength 10, under Divine Power punches for 7 or 8.
-    c.p("fl-clear", "remove_all_others()")
+def shapechange(c, check):
+    # As for Polymorph Self: a spawned Korgan without gear or scripts takes every form in turn.
+    c.p("sh-clear", "remove_all_others()")
     time.sleep(1.5)
-    c.p("fl-foe", 'spawn("SPIDHU01", 110, 0)')
-    c.p("fl-korgan", 'spawn("KORGAN15", 60, 0)')
+    c.p("sh-korgan", 'spawn("KORGAN15", 60, 0)')
     time.sleep(2.5)
-    c.p("fl-live", 'fx("spidhu01", 208, 1, 0, 600)')
-    c.p("fl-hp", 'fx("spidhu01", 18, 900, 0, 600)')
-    c.p("fl-ally", """order("korgan", 'ChangeEnemyAlly(Myself,ALLY)')""")
-    c.p("fl-strip", """order("korgan", 'DestroyAllEquipment()')""")
-    c.p("fl-weak", 'fx("korgan", 44, 10, 1, 600)')
+    for level in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+        c.p(f"sh-script-{level}", f"""order("korgan", 'ChangeAIScript("",{level})')""")
+    c.p("sh-strip", """order("korgan", 'DestroyAllEquipment()')""")
     time.sleep(2)
-    weak = fist_hits(c, "fl-weak", 16)
-    c.p("fl-divine", 'cast_now("korgan", "SPPR412")')
+    natural = c.p("sh-natural", 'form_state("korgan")')
+    c.p("sh-cast", 'cast_now("korgan", "SPWI916")')
+    time.sleep(2)
+    cast = c.p("sh-after-cast", 'form_state("korgan")')
+    check("Shapechange gives the natural form and the six forms", {"CBMSNAT", *SHAPES} <= set(cast["innates"]),
+          innates=sorted(cast["innates"]))
+    one_attack = None
+    for form, (anim, strength, extra, dex, apr, weapon, power) in SHAPES.items():
+        c.p(f"sh-{form}", f'cast_now("korgan", "{form}")')
+        time.sleep(2.5)
+        state = c.p(f"sh-{form}-state", 'form_state("korgan")')
+        powers = set(state["innates"]) & SHAPE_POWERS
+        if form == "SPIN153":
+            one_attack = state["apr"]
+        exceptional = extra if extra or strength != 18 else natural["strex"]
+        check(f"form {form}: look, body, weapon and powers", state["anim"] == anim and
+              (state["str"], state["strex"]) == (strength, exceptional) and weapon in state["items"] and
+              powers == ({power} if power else set()) and form in state["innates"], state=state)
+        if form == "SPIN152":
+            check("mind flayer: Magic Resistance 90", state["mr"] == 90, state=state)
+        if form == "SPIN153":
+            check("iron golem: Magic Resistance 100, fire 125", (state["mr"], state["fire"]) == (100, 125), state=state)
+        if form == "SPIN154":
+            c.p("sh-hurt", 'damage("korgan", 100)')
+            time.sleep(0.5)
+            points = []
+            for i in range(25):
+                points.append(c.p(f"sh-regen-{i}", 'form_state("korgan")')["hp"])
+                time.sleep(1)
+            gains = [b - a for a, b in zip(points, points[1:]) if b > a]
+            check("giant troll: regenerates", bool(gains), points=points, gains=gains,
+                  per_second=round((points[-1] - points[0]) / 24, 2))
+        if form == "CBMSMA":
+            check("marilith: Magic Resistance 85, fire 100", (state["mr"], state["fire"]) == (85, 100), state=state)
+        if form == "CBMSIS":
+            time.sleep(4)
+            seen = c.p("sh-stalker-seen", 'form_state("korgan")')
+            check("invisible stalker: invisible", seen["state"] % 32 >= 16, state=seen["state"])
+    c.p("sh-home", 'cast_now("korgan", "CBMSNAT")')
+    time.sleep(8)
+    home = c.p("sh-home-state", 'form_state("korgan")')
+    check("natural form: own look, no form weapon, no powers, no more invisibility, the forms stay",
+          home["anim"] == natural["anim"] and not any(i in home["items"] for i in ("CDMINDFL", "CDGOLIRO", "TROLLALL",
+          "CBMSMAW", "CBMSBAW", "CBMSISW")) and not set(home["innates"]) & SHAPE_POWERS
+          and home["state"] % 32 < 16 and {"CBMSNAT", *SHAPES} <= set(home["innates"]), home=home, natural=natural)
+    c.p("sh-tidy", "remove_all_others()")
+
+
+def polymorph(c, check):
+    # A spawned Korgan without gear or scripts casts Polymorph Self and takes every form in turn: no
+    # party member, so no form menu opens. Korgan is a fighter: the game adds his extra attacks to a
+    # form's, so attacks are compared between forms.
+    c.p("po-clear", "remove_all_others()")
+    time.sleep(1.5)
+    c.p("po-korgan", 'spawn("KORGAN15", 60, 0)')
     time.sleep(2.5)
-    strong_stats = c.p("fl-strong-stats", 'stats("korgan")')
-    strong = fist_hits(c, "fl-strong", 20)
-    check("Divine Power in a fight: Strength 10 punches for 1 or 2, under the floor 7 or 8",
-          bool(weak) and max(weak) <= 4 and bool(strong) and min(strong) >= 7, weak=weak, strong=strong,
-          stats=strong_stats)
-    c.p("fl-tidy", "remove_all_others()")
+    for level in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+        c.p(f"po-script-{level}", f"""order("korgan", 'ChangeAIScript("",{level})')""")
+    c.p("po-strip", """order("korgan", 'DestroyAllEquipment()')""")
+    time.sleep(2)
+    natural = c.p("po-natural", 'form_state("korgan")')
+    c.p("po-cast", 'cast_now("korgan", "SPWI416")')
+    time.sleep(2)
+    cast = c.p("po-after-cast", 'form_state("korgan")')
+    granted = set(cast["innates"])
+    check("Polymorph Self gives the natural form and the six forms", {"CBMPNAT", *FORMS} <= granted,
+          innates=sorted(granted))
+    previous, one_attack = None, None
+    for form, (anim, strength, extra, dex, apr, weapon, power) in FORMS.items():
+        c.p(f"po-{form}", f'cast_now("korgan", "{form}")')
+        time.sleep(2.5)
+        state = c.p(f"po-{form}-state", 'form_state("korgan")')
+        powers = set(state["innates"]) & POWERS
+        if one_attack is None:
+            one_attack = state["apr"]
+        exceptional = extra if extra or strength != 18 else natural["strex"]
+        check(f"form {form}: look, body, weapon and powers", state["anim"] == anim and
+              (state["str"], state["strex"], state["dex"]) == (strength, exceptional, dex) and
+              state["apr"] == one_attack + apr - 1 and weapon in state["items"] and
+              powers == ({power} if power else set()) and form in state["innates"],
+              state=state, previous=previous)
+        previous = form
+        if form == "SPWI496":
+            check("mustard jelly: Magic Resistance 125", state["mr"] == 125, state=state)
+        if form == "CBMPHH":
+            check("hell hound: fire 100, cold -50", (state["fire"], state["cold"]) == (100, -50), state=state)
+            c.p("po-breath", 'cast_now("korgan", "CBMPHHB")')
+            time.sleep(1.5)
+            spent = c.p("po-breath-spent", 'form_state("korgan")')
+            time.sleep(19)
+            back = c.p("po-breath-back", 'form_state("korgan")')
+            check("hell hound: Fiery Breath comes back after 3 rounds", "CBMPHHB" not in spent["innates"]
+                  and "CBMPHHB" in back["innates"], spent=spent["innates"], back=back["innates"])
+    c.p("po-home", 'cast_now("korgan", "CBMPNAT")')
+    time.sleep(2.5)
+    home = c.p("po-home-state", 'form_state("korgan")')
+    check("natural form: own look and body, no form weapon, no powers, the forms stay",
+          home["anim"] == natural["anim"] and (home["str"], home["strex"], home["dex"], home["ac"], home["apr"]) ==
+          (natural["str"], natural["strex"], natural["dex"], natural["ac"], natural["apr"])
+          and not any(i.startswith(("CBMP", "PLY")) for i in home["items"])
+          and not set(home["innates"]) & POWERS and {"CBMPNAT", *FORMS} <= set(home["innates"]),
+          home=home, natural=natural)
+    c.p("po-rat", 'cast_now("korgan", "CBMPRT")')
+    time.sleep(2)
+    c.p("po-divine", 'cast_now("korgan", "SPPR412")')
+    time.sleep(2.5)
+    under = c.p("po-divine-state", 'form_state("korgan")')
+    check("a form keeps its Strength under Divine Power", (under["str"], under["strex"]) == (10, 0), state=under)
+    # The spell runs 1 turn + 3 rounds a level; Korgan casts at level 1: 78 seconds after the cast.
+    time.sleep(40)
+    end = c.p("po-end-state", 'form_state("korgan")')
+    check("the spell ends: natural form, forms and powers gone",
+          end["anim"] == natural["anim"] and not ({"CBMPNAT", *FORMS, *POWERS} & set(end["innates"]))
+          and not any(i.startswith(("CBMP", "PLY")) for i in end["items"]), end=end)
+    c.p("po-tidy", "remove_all_others()")
 
 
 def mr(c, check):

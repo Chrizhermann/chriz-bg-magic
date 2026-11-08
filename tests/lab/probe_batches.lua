@@ -192,6 +192,29 @@ function P.strength_effects(name)
     return out
 end
 
+-- What a creature's body is now: attributes, armour, attacks, look, the item in the magic weapon slot.
+function P.form_state(name)
+    local s = type(name) == "number" and party(name) or named(name)
+    if not s then return nil end
+    local st = s.m_derivedStats
+    local out = { str = st.m_nSTR, strex = st.m_nSTRExtra, dex = st.m_nDEX, ac = st.m_nArmorClass,
+                  apr = st.m_nNumberOfAttacks, missile = EEex_Sprite_GetStat(s, 3), polymorphed = st.m_bPolymorphed,
+                  mr = st.m_nResistMagic, fire = EEex_Sprite_GetStat(s, 14), cold = EEex_Sprite_GetStat(s, 15),
+                  hp = s.m_baseStats.m_hitPoints, base_anim = s.m_baseStats.m_animationType,
+                  state = st.m_generalState }
+    local ok, anim = pcall(function() return s.m_animation.m_animation.m_animationID end)
+    out.anim = ok and anim or tostring(anim)
+    out.items = {}
+    for i = 0, 38 do
+        local ok, item = pcall(function() return s.m_equipment.m_items:get(i) end)
+        if ok and item and item.pRes then out.items[#out.items + 1] = item.pRes.resref:get():upper() end
+    end
+    out.selected = s.m_equipment.m_selectedWeapon
+    out.innates = {}
+    for _, _, spell in s:getKnownInnateSpellsIterator() do out.innates[#out.innates + 1] = spell:upper() end
+    return out
+end
+
 -- The party AI button. Returns what it says now.
 function P.party_ai(on)
     local now = game:GetPartyAI()
