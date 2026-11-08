@@ -24,7 +24,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Divine Power\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThrough this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score is set to 18/00—even if it is normally higher—<PRO_HISHER> THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled.",
+   "text": "Divine Power\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThrough this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score becomes 18/00 unless it is already higher, and bonuses and penalties from other sources apply in addition. The priest's THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled.",
    "old": 6088
   },
   "description_identified": -1,
@@ -124,26 +124,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 42,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 42,
@@ -154,7 +156,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -435,26 +437,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 48,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 48,
@@ -465,7 +469,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -746,26 +750,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 54,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 54,
@@ -776,7 +782,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -1057,26 +1063,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 60,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 60,
@@ -1087,7 +1095,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -1368,26 +1376,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 66,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 66,
@@ -1398,7 +1408,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -1679,26 +1689,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 72,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 72,
@@ -1709,7 +1721,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -1990,26 +2002,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 78,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 78,
@@ -2020,7 +2034,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -2301,26 +2315,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 84,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 84,
@@ -2331,7 +2347,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -2612,26 +2628,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 90,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 90,
@@ -2642,7 +2660,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -2923,26 +2941,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 96,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 96,
@@ -2953,7 +2973,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -3234,26 +3254,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 102,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 102,
@@ -3264,7 +3286,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -3545,26 +3567,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 108,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 108,
@@ -3575,7 +3599,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -3856,26 +3880,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 114,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 114,
@@ -3886,7 +3912,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,
@@ -4167,26 +4193,28 @@
      "opcode": 44,
      "target": 1,
      "power": 4,
-     "p1": 18,
-     "p2": 1,
+     "p1": 0,
+     "p2": 0,
      "timing": 0,
      "dispel": 3,
      "duration": 120,
      "prob1": 100,
      "prob2": 0,
-     "resource": "",
+     "resource": "CBTSTRF",
      "dice": 0,
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 18100
     },
     {
-     "opcode": 97,
+     "opcode": 328,
      "target": 1,
      "power": 4,
-     "p1": 100,
-     "p2": 1,
+     "p1": 0,
+     "p2": {
+      "state": "CBM_STR_FLOOR"
+     },
      "timing": 0,
      "dispel": 3,
      "duration": 120,
@@ -4197,7 +4225,7 @@
      "sides": 0,
      "save": 0,
      "bonus": 0,
-     "special": 0
+     "special": 1
     },
     {
      "opcode": 141,

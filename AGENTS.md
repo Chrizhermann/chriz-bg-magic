@@ -28,7 +28,9 @@ Revisions fork that Chriz Easy BG installs today (`chriz-bg-collection`).
   change one, edit its definition and run `python tools/build_resources.py`; commit what it
   writes (`chriz-bg-magic/res/`, `lib/cbmagic_resources.tpa`, `languages/english/resources.tra`).
   Fields only the install can know are symbols, see `tools/resformat.py`. `lib/cbmagic_iwd.tpa`
-  and what it calls patch IWDification's spells until we build them ourselves.
+  and what it calls patch IWDification's spells until we build them ourselves. A file whose new
+  rule needs EEex but which carries other decided changes too has its version without EEex in
+  `defs/without-eeex/`; keep both versions the same apart from that rule (a test compares them).
 - A definition names only files the base game or this mod has: `defs/` must work on plain BG2:EE
   and on EET, with or without EE Fixpack. Helpers of our own are named `CBH*`.
 - Describe every change in `docs/components.md`, in engine-neutral terms.

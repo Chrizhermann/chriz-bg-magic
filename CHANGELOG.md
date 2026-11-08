@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Strength, Strength of One, Divine Power, Champion's Strength and IWDification's Animal Rage no
+  longer lower a higher Strength, and bonuses and penalties from other sources, such as Draw Upon
+  Divine Might or an item's +1, count on top of them, whichever came first. A creature in another
+  form keeps the Strength of its form. Needs EEex; without it these spells set Strength as before.
+
 - Simulacrum: the copy keeps the special abilities of its class and kit that its own level gives,
   no more uses than the caster had left; abilities from items and quests are lost. It cannot use
   quick-slot items. Needs EEex.

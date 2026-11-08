@@ -33,5 +33,6 @@ LAM cbmagic_index_scrolls
 LAF cbmagic_iwd_spells END
 LAF cbmagic_lesser_restoration END
 LAF cbmagic_simulacrum END
+LAF cbmagic_strength_floor END
 LAF cbmagic_record_live END
 LAF cbmagic_bonus END

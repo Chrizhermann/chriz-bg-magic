@@ -430,6 +430,34 @@ BEGIN
   COPY ~chriz-bg-magic/lua/M_CBMSIM.lua~ ~override/M_CBMSIM.lua~
 END
 
+// Strength floors (lua/M_CBMSTR.lua): a spell of this mod that gives a fixed Strength never lowers a
+// higher one, and bonuses and penalties from other sources count on top of it. The spells of defs/
+// carry the marker already; IWDification's Animal Rage gets it here, in whatever slot this game gave
+// it. Without EEex nothing here happens: the spells of defs/ come in their versions that set
+// Strength as the game does, and Animal Rage stays as IWDification wrote it.
+DEFINE_ACTION_FUNCTION cbmagic_strength_floor
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    LAF cbmagic_state_value STR_VAR symbol = ~CBM_STR_FLOOR~ RET CBM_STR_FLOOR_STATE = state END
+    COPY ~chriz-bg-magic/lua/M_CBMSTR.lua~ ~override/M_CBMSTR.lua~
+      EVALUATE_BUFFER
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_ANIMAL_RAGE~ RET rage = resref found END
+    ACTION_IF found BEGIN
+      // Strength 19 for 15 rounds, as a floor. Every other effect of the spell stays.
+      COPY_EXISTING ~%rage%.spl~ ~override~
+        LPF DELETE_EFFECT INT_VAR match_opcode = 44 END
+        LPF DELETE_EFFECT INT_VAR match_opcode = 97 END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 44 target = 2 power = 5 parameter1 = 0 parameter2 = 0
+          timing = 0 duration = 90 resist_dispel = 3 special = 19000 STR_VAR resource = ~CBTSTRF~ END
+        LPF ADD_SPELL_EFFECT INT_VAR opcode = 328 target = 2 power = 5 parameter1 = 0
+          parameter2 = CBM_STR_FLOOR_STATE timing = 0 duration = 90 resist_dispel = 3 special = 1 END
+      BUT_ONLY
+      OUTER_SET text = RESOLVE_STR_REF (@60108)
+      LAF cbmagic_write_text INT_VAR text STR_VAR spell = EVAL ~%rage%~ END
+    END
+  END
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_find_familiar
 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN

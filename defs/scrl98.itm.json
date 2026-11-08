@@ -7,7 +7,7 @@
   "raw_10": "000000006974656d6c0000000b00805e7260202000000000004009000000004000000000c80000003200495343524c3938000000475343524c30310000000000",
   "description": -1,
   "description_identified": {
-   "text": "Strength\n(Alteration)\n\nLevel: 2\nRange: 20 ft.\nDuration: 1 turn/level\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nApplication of this spell sets the Strength of the character to 18 and then adds a +50% bonus on top of this. The character receives any strength bonuses appropriate. For example, if a character has between 18/50 and 18/00 Strength, then <PRO_HISHER> Strength will just be set to 18/00. If a character has a Strength between 18/01 and 18/50, then <PRO_HISHER> Strength will become 18/50 + original percentage. If <PRO_HISHER> Strength is less than 18, then it will just become 18/50. However, this spell will actually lower a character's Strength if it is already 19 or more.",
+   "text": "Strength\n(Alteration)\n\nLevel: 2\nRange: 20 ft.\nDuration: 1 turn/level\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nApplication of this spell sets the Strength of the character to 18 and then adds a +50% bonus on top of this. The character receives any strength bonuses appropriate. For example, if a character has between 18/50 and 18/00 Strength, then <PRO_HISHER> Strength will just be set to 18/00. If a character has a Strength between 18/01 and 18/50, then <PRO_HISHER> Strength will become 18/50 + original percentage. If <PRO_HISHER> Strength is less than 18, then it will just become 18/50. A Strength of 19 or more is not lowered. Bonuses and penalties from other sources apply in addition.",
    "old": 12197
   },
   "raw_58": "435343524c30310000000000"

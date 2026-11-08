@@ -26,10 +26,14 @@ RACE_ROW, NEW_ROW = ["118", "0", "3"], ["131", "1", "4"]  # one the fixture has,
 EFF = next(path.name.split(".")[0].upper() for path in sorted(fx.DEFS.glob("*.eff.json")))
 
 
-def definitions():
-    """{"sppr103.spl": what defs/ says}."""
+def definitions(folder=None):
+    """{"sppr103.spl": what defs/ says}; with `folder`, what defs/<folder>/ says."""
+    root = fx.DEFS / folder if folder else fx.DEFS
     return {path.stem.lower(): json.loads(path.read_text(encoding="utf-8"))
-            for path in sorted(fx.DEFS.glob("*.json")) if path.name != "tables.json"}
+            for path in sorted(root.glob("*.json")) if path.name != "tables.json"}
+
+
+ALT = build_resources.ALT.name
 
 
 def is_symbol(value):
@@ -108,11 +112,11 @@ class Numbers:
         raise ValueError(symbol)
 
 
-def defined_bytes(g, numbers, name, defn, actual):
+def defined_bytes(g, numbers, name, defn, actual, folder=""):
     """The resource as defs/ defines it in this game. A string's number is free: the check is that
     the number in the file leads to the defined text."""
     data, stamps = rf.build_resource(defn)
-    check(data == (RES / name).read_bytes(), f"{name}: res/ is not what defs/ builds")
+    check(data == (RES / folder / name).read_bytes(), f"{name}: res/ is not what defs/ builds")
     buffer = bytearray(data)
     for stamp in stamps:
         at, kind, symbol = stamp["offset"], stamp["kind"], stamp["value"]
@@ -142,12 +146,18 @@ def check_every_resource(g, derived=()):
     numbers = Numbers(g)
     eeex = g.file("override/M___EEex.lua") is not None
     wrong = []
-    for name, defn in definitions().items():
+    alternatives = definitions(ALT)
+    for name, defn in {**alternatives, **definitions()}.items():
         if name in derived or (name in build_resources.NEEDS_EEEX and not eeex):
             continue
+        folder = ""
+        if name in alternatives and not eeex:
+            defn, folder = alternatives[name], ALT
+        elif name not in definitions():
+            continue  # only without EEex
         actual = g.file(f"override/{installed_name(numbers, name)}")
         check(actual is not None, f"{name} is not in override")
-        expected = defined_bytes(g, numbers, name, defn, actual)
+        expected = defined_bytes(g, numbers, name, defn, actual, folder)
         if actual != expected:
             wrong.append(f"{name}: {differs(expected, actual)}")
     check(not wrong, f"{len(wrong)} resources differ from defs/: {wrong[:12]}")
@@ -188,8 +198,9 @@ def stamped(g, numbers, kind, value=None):
 def the_build_is_in_sync_with_defs(work, weidu):
     """What is committed is what the generator makes of defs/."""
     build_resources.build(work / "built")
-    built = {p.name: p.read_bytes() for p in (work / "built/res").iterdir()}
-    shipped = {p.name: p.read_bytes() for p in RES.iterdir()}
+    built = {p.relative_to(work / "built/res").as_posix(): p.read_bytes()
+             for p in (work / "built/res").rglob("*") if p.is_file()}
+    shipped = {p.relative_to(RES).as_posix(): p.read_bytes() for p in RES.rglob("*") if p.is_file()}
     check(built.keys() == shipped.keys(), f"res/ differs in files: {sorted(built.keys() ^ shipped.keys())[:10]}")
     wrong = [name for name in built if built[name] != shipped[name]]
     check(not wrong, f"res/ is out of date: {wrong[:10]}")

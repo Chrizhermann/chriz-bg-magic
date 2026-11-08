@@ -355,17 +355,34 @@ Magic Resistance (opcode 166 parameter 2 = 0) instead of setting it (parameter 2
 it never lowers a higher value. Because it now adds, a leading self-refresh (opcode 321)
 replaces any previous casting of `SPPR509` on the same target. Its description is updated.
 
-## Strength of One (`cbmagic_vanilla_strength_of_one`)
+## Strength floors (`cbmagic_strength_floor`, `lua/M_CBMSTR.lua`)
 
-Strength of One (`SPPR312`) no longer lowers a party member's Strength if they already have
-18/75 or higher:
+A spell of this mod that gives a fixed Strength never lowers a higher one, and bonuses and
+penalties from other sources count on top of it, in whatever order they came:
 
-- How: the Strength and portrait icon effects (`opcode 44`, `opcode 97`, `opcode 142`) move
-  into a sub-spell (`SPPR312A.SPL`) cast instantly at caster level via `opcode 146`
-  (`parameter 2 = 1`). Before casting `SPPR312A`, two `opcode 318` guards on `SPLPROT.2DA`
-  rows block `SPPR312A` on targets with `STR > 18` (`stat 36 > 18`) or `STREXTRA >= 75`
-  (`stat 37 >= 75`). Visuals, sound and status text remain in `SPPR312.SPL`, and its
-  description is updated.
+| Spell | Strength at least | Notes |
+| --- | --- | --- |
+| Strength (`SPWI214`, scroll `SCRL98`) | 18 | plus its own +50 exceptional Strength, as before |
+| Strength of One (`SPPR312`) | 18/75 | written whole, without the sub-spell |
+| Divine Power (`SPPR412`) | 18/00 | |
+| Champion's Strength (`SPPR507`) | 18/00 | |
+| Animal Rage (IWDification, `CLERIC_ANIMAL_RAGE`) | 19 | given its floor at install, in its own slot |
+
+- How: the spell carries a marker instead of setting Strength: opcode 44 by 0 with the resource
+  `CBTSTRF` and Strength × 1000 + exceptional Strength in its special field, beside a private
+  spell state (`CBM_STR_FLOOR`). After each pass of a creature's effects, the EEex listener takes
+  the highest marker and adds every Strength bonus and penalty on the creature: opcode 44 by a
+  value, opcode 97 by a value, and the oldest Draw Upon Divine Might (opcode 132), also inside
+  EFF files (opcode 177). Effects still waiting to start do not count. When that gives more than
+  the game worked out without the floor, the Strength (and exceptional Strength at 18) becomes
+  that; otherwise the game's value stays. Strength stays between 1 and 25.
+- A set Strength from elsewhere, such as a potion of giant strength or Ray of Enfeeblement, is
+  part of what the game works out: the higher of the two wins.
+- A creature in another form (polymorphed) keeps the values of its form.
+- In a fight the written Strength counts like the game's own: measured in the lab with fists.
+- Without EEex the four spells of defs/ come in their versions from `defs/without-eeex/`, which
+  set Strength as the game does (Strength of One there keeps its sub-spell and guards), and
+  Animal Rage stays as IWDification wrote it. The log names each such file.
 
 ## Blindness (`cbmagic_vanilla_blindness_duration`)
 

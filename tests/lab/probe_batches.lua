@@ -165,6 +165,33 @@ function P.order(name, text)
     return true
 end
 
+-- A creature casts a spell on itself at once (opcode 146, its own level), past whatever it is doing.
+function P.cast_now(name, res)
+    local s = named(name)
+    if not s then return false end
+    EEex_GameObject_ApplyEffect(s, { effectID = 146, dwFlags = 1, res = res, durationType = 1,
+                                     sourceID = s.m_id, sourceTarget = s.m_id })
+    return true
+end
+
+-- Strength now and every effect on a creature that can change it, from both effect lists.
+function P.strength_effects(name)
+    local s = type(name) == "number" and party(name) or named(name)
+    local out = { str = s.m_derivedStats.m_nSTR, strex = s.m_derivedStats.m_nSTRExtra,
+                  base = s.m_baseStats.m_STRBase, effects = {} }
+    for _, list in ipairs({ "m_equipedEffectList", "m_timedEffectList" }) do
+        EEex_Utility_IterateCPtrList(s[list], function(e)
+            local op = e.m_effectId
+            if op == 44 or op == 97 or op == 132 or op == 177 or op == 328 then
+                out.effects[#out.effects + 1] = { list = list:sub(3, 6), op = op, p1 = e.m_effectAmount, p2 = e.m_dWFlags,
+                    res = e.m_res:get(), src = e.m_sourceRes:get(), dt = e.m_durationType, special = e.m_special,
+                    done = e.m_done }
+            end
+        end)
+    end
+    return out
+end
+
 -- The party AI button. Returns what it says now.
 function P.party_ai(on)
     local now = game:GetPartyAI()

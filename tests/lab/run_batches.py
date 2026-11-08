@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor")
 
 
 def lua_list(values):
@@ -148,6 +148,98 @@ def strength(c, check):
     check("Strength of One: 10 becomes 18/75", pair(after[0]) == (18, 75), before=pair(before[0]), after=pair(after[0]))
     check("Strength of One: 19 stays 19", after[1]["str"] == 19, before=pair(before[1]), after=pair(after[1]))
     check("Strength of One: 18/90 stays 18/90", pair(after[2]) == (18, 90), before=pair(before[2]), after=pair(after[2]))
+
+
+def fist_hits(c, tag, seconds=24):
+    """Hit point losses of the spider while Korgan punches it."""
+    c.p(f"{tag}-unpause", "unpause()")
+    c.p(f"{tag}-go", """order("korgan", 'Attack(NearestEnemyOf(Myself))')""")
+    last, drops = c.p(f"{tag}-at", 'creature("spidhu01")')["hp"], []
+    for i in range(int(seconds / 0.25)):
+        time.sleep(0.25)
+        if i % 8 == 0:
+            c.p(f"{tag}-unpause-{i}", "unpause()")
+        hp = c.p(f"{tag}-{i}", 'creature("spidhu01")')["hp"]
+        if hp < last:
+            drops.append(last - hp)
+        last = hp
+    return drops
+
+
+MIGHT, ANIMAL = None, None
+
+
+def floor(c, check):
+    # A spell that gives a fixed Strength never lowers a higher one; bonuses and penalties count on
+    # top of it, in either order. A timed set stands for what the game works out without the floor.
+    pair = lambda s: (s["str"], s["strex"])  # noqa: E731
+    spells = ["SPPR412", "SPPR507", "SPWI214", "SPPR312", *(r for r in (MIGHT, ANIMAL) if r)]
+
+    def fresh(i, strength, extra=0):
+        c.p(f"fl-clear{i}-{strength}", f"clear({i}, {lua_strings(spells)})")
+        c.p(f"fl-set{i}-{strength}", f"fx({i}, 44, {strength}, 1, 900)")
+        c.p(f"fl-setx{i}-{strength}", f"fx({i}, 97, {extra}, 1, 900)")
+        time.sleep(1.5)
+        return pair(c.p(f"fl-before{i}-{strength}", f"stats({i})"))
+
+    def cast(i, res, wait=2.5):
+        c.p(f"fl-cast{i}-{res}", f'on_member({i}, "{res}")')
+        time.sleep(wait)
+        return pair(c.p(f"fl-after{i}-{res}", f"stats({i})"))
+
+    last = None
+    for name, res, cases in (("Divine Power", "SPPR412", (((10, 0), (18, 100)), ((19, 0), (19, 0)))),
+                             ("Champion's Strength", "SPPR507", (((12, 0), (18, 100)), ((20, 0), (20, 0)))),
+                             ("Strength", "SPWI214", (((10, 0), (18, 50)), ((18, 30), (18, 80)), ((19, 0), (19, 0)))),
+                             ("Animal Rage", ANIMAL, (((10, 0), (19, 0)), ((22, 0), (22, 0))))):
+        if not res:
+            continue
+        for (strength, extra), expected in cases:
+            before = fresh(0, strength, extra)
+            after = cast(0, res)
+            check(f"{name}: {strength}/{extra} becomes {expected[0]}/{expected[1]}", after == expected,
+                  before=before, after=after)
+            last = (strength, extra)
+    c.p("fl-end", f"clear(0, {lua_strings(spells)})")
+    time.sleep(2)
+    gone = pair(c.p("fl-gone", "stats(0)"))
+    check("the floor gone: Strength back to what the game works out", gone == last, gone=gone, expected=last)
+
+    if MIGHT:
+        results = {}
+        for order in ((MIGHT, "SPPR412"), ("SPPR412", MIGHT)):
+            fresh(0, 10)
+            for res in order:
+                after = cast(0, res)
+            bonus = [e["p1"] for e in c.p(f"fl-might-{order[0]}", "ops(0, {132})") or []]
+            results[order[0]] = (after, bonus)
+        first, second = results[MIGHT], results["SPPR412"]
+        check("Draw Upon Divine Might counts on top of Divine Power, in either order",
+              first[0] == second[0] and bool(first[1]) and first[0][0] == 18 + first[1][0],
+              might_first=first, divine_first=second)
+        c.p("fl-end2", f"clear(0, {lua_strings(spells)})")
+
+    # In a fight: Korgan without his gear, Strength 10, under Divine Power punches for 7 or 8.
+    c.p("fl-clear", "remove_all_others()")
+    time.sleep(1.5)
+    c.p("fl-foe", 'spawn("SPIDHU01", 110, 0)')
+    c.p("fl-korgan", 'spawn("KORGAN15", 60, 0)')
+    time.sleep(2.5)
+    c.p("fl-live", 'fx("spidhu01", 208, 1, 0, 600)')
+    c.p("fl-hp", 'fx("spidhu01", 18, 900, 0, 600)')
+    c.p("fl-ally", """order("korgan", 'ChangeEnemyAlly(Myself,ALLY)')""")
+    c.p("fl-strip", """order("korgan", 'DestroyAllEquipment()')""")
+    c.p("fl-weak", 'fx("korgan", 44, 10, 1, 600)')
+    time.sleep(2)
+    weak = fist_hits(c, "fl-weak", 16)
+    c.p("fl-divine", 'cast_now("korgan", "SPPR412")')
+    time.sleep(2.5)
+    strong_stats = c.p("fl-strong-stats", 'stats("korgan")')
+    strong = fist_hits(c, "fl-strong", 20)
+    check("Divine Power in a fight: Strength 10 punches for 1 or 2, under the floor 7 or 8",
+          bool(weak) and max(weak) <= 4 and bool(strong) and min(strong) >= 7, weak=weak, strong=strong,
+          stats=strong_stats)
+    c.p("fl-tidy", "remove_all_others()")
 
 
 def mr(c, check):
@@ -1483,6 +1575,13 @@ def main():
         ids = (Path(args[args.index("--game") + 1]) / "override" / "spell.ids")
         found = re.search(r"^\s*(\d+)\s+CLERIC_BLOOD_RAGE\s*$", ids.read_text(encoding="latin-1"), re.M) if ids.exists() else None
         RAGE = f"SPPR{int(found[1]) % 1000:03d}" if found else None
+    if "floor" in selected and "--game" in args:
+        global MIGHT, ANIMAL
+        ids = (Path(args[args.index("--game") + 1]) / "override" / "spell.ids")
+        text = ids.read_text(encoding="latin-1") if ids.exists() else ""
+        found = {symbol: re.search(rf"^\s*(\d+)\s+{symbol}\s*$", text, re.M)
+                 for symbol in ("CLERIC_DRAW_UPON_HOLY_MIGHT", "CLERIC_ANIMAL_RAGE")}
+        MIGHT, ANIMAL = (f"SPPR{int(m[1]) % 1000:03d}" if m else None for m in found.values())
     if "decided" in selected and "--game" in args:
         global AIR, LANCE
         game = Path(args[args.index("--game") + 1])

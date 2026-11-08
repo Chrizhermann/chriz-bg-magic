@@ -67,6 +67,29 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
   his copy one.
 - Not run: high-level abilities, multi-class and dual-class casters, a party member as caster.
 
+## Strength floors
+
+- Before building, a probe in the BG2:EE lab: Korgan without his gear punched for 1 or 2 with
+  Strength 14; with 18/00 written into his derived stats by a listener, for 7 or 8. A Strength
+  written that way counts in a fight. An opcode 44 with the resource `CBTSTRF` kept its tag and
+  special field on the effect list.
+- Offline: the four floor spells carry the marker and the spell state and set no Strength; their
+  versions without EEex set it and are otherwise the same spells; installs without and with EEex,
+  IWDification's Animal Rage in its own slot, a second install that changes nothing; the listener
+  under Lua 5.3 and LuaJIT with mocked engines (37 checks each: floors, bonuses in both orders,
+  Draw Upon Divine Might once, caps, forms, waiting effects, EFF wrappers, passes, errors).
+- In-game, groups `strength` and `floor`, BG2:EE 13 of 13 and BG2:EE with IWDification 15 of 15:
+  Strength of One 10 to 18/75, 19 and 18/90 kept; Divine Power 10 to 18/00, 19 kept; Champion's
+  Strength 12 to 18/00, 20 kept; Strength 10 to 18/50, 18/30 to 18/80, 19 kept; Animal Rage 10
+  to 19, 22 kept; after the spells end the game's own value returns; Draw Upon Divine Might on
+  top of Divine Power gave the same Strength in both orders; in a fight Korgan under Divine
+  Power hit for 7 or 8, and for 11 or 12 while his own Barbarian Rage (+4) ran: 22 on top of the
+  floor.
+- Seen on the way: a Strength bonus that stands before a set Strength on the effect list still
+  counts on top of it (+4, then a set to 10: 14).
+- Not run: a creature in another form (only mocked), Ray of Enfeeblement in a fight, the
+  versions without EEex in a game (offline only), EET.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

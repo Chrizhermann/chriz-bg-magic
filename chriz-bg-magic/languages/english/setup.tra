@@ -192,6 +192,18 @@ Area of Effect: 15-ft. radius
 Saving Throw: Spell negates (-2)
 
 The priest places a hostile magical symbol. When an enemy triggers it, enemies in the symbol's area that fail their saving throws are stunned and lose hope for 120 seconds. Taking damage ends this spell's hopelessness.~
+@60108 = ~Animal Rage
+(Enchantment)
+
+Level: 5
+Sphere: Combat
+Range: Touch
+Duration: 15 rounds
+Casting Time: 8
+Area of Effect: 1 creature
+Saving Throw: None
+
+This spell imbues the target creature with animal ferocity. The target creature gains a Strength score of 19 unless it is already higher, +20 Hit Points, +20% movement rate, and a +2 bonus to all Saving Throws; bonuses and penalties to Strength from other sources apply in addition. The target loses the ability to cast spells while Animal Rage is in effect; when enemies are within sight, <PRO_HESHE> immediately attacks in melee, using whatever is in hand. While this spell is in effect, there is a 5% chance per round that the target will go berserk, attacking friend and foe alike.~
 @50101 = ~Recitation
 (Abjuration, Invocation/Evocation)
 
