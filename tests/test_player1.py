@@ -17,7 +17,7 @@ PARTY_RESTED, GLOBAL = 16531, 0x400F
 EEEX = {
     "M___EEex.lua": b"-- synthetic EEex bootstrap\n",
     "TRIGGER.IDS": ie.make_ids([(0x410E, "EEex_LuaTrigger(S:Chunk*)"), (PARTY_RESTED, "PartyRested()"),
-                                (GLOBAL, "Global(S:Name*,S:Area*,I:Value*)")]),
+                                (GLOBAL, "Global(S:Name*,S:Area*,I:Value*)"), (0x40D5, "ActuallyInCombat()")]),
     "ACTION.IDS": ie.make_ids([(0, "NoAction()"), (366, "GameOver(I:StrRef*)")]),
     "OBJECT.IDS": ie.make_ids([(1, "Myself")]),
 }
@@ -71,8 +71,19 @@ def player1_definitions(work, weidu):
 def player1_without_and_with_eeex(work, weidu):
     """Without EEex nothing of this is installed; with EEex the module knows its states, the pattern
     file sits beside EEex's own, and every campaign world script starts with the tick."""
+    # Cures of this made-up game: another mod's spell, a wand that casts it, a ring that casts the wand's
+    # spell through a spell of its own, a Freedom, and things that cure nothing.
+    cure = [{"target": 1, "effects": [{**ie.FX_DEFAULTS, "opcode": 43}]}]
     biff = fx.game(BALDUR_BCS=EMPTY_BCS, BALDUR25_BCS=EMPTY_BCS, CAMPAIGN_2DA=CAMPAIGN, PLAYER1D_BCS=EMPTY_BCS,
-                   AERIED_BCS=EMPTY_BCS, AERIE25D_BCS=EMPTY_BCS, AR4000_BCS=SOLAR_BCS, PDIALOG_2DA=PDIALOG)
+                   AERIED_BCS=EMPTY_BCS, AERIE25D_BCS=EMPTY_BCS, AR4000_BCS=SOLAR_BCS, PDIALOG_2DA=PDIALOG,
+                   XXFLESH_SPL=ie.make_spl(1, 6, cure),
+                   XXVIA_SPL=ie.make_spl(4, 1, [{"target": 1, "effects": [{**ie.FX_DEFAULTS, "opcode": 146, "resource": "xxflesh"}]}]),
+                   XXFREE_SPL=ie.make_spl(1, 9, [{"target": 1, "effects": [{**ie.FX_DEFAULTS, "opcode": 212}]}]),
+                   XXNOT_SPL=ie.make_spl(1, 1, [{"target": 1, "effects": [{**ie.FX_DEFAULTS, "opcode": 12}]}]),
+                   XXWAND_ITM=ie.make_itm([[{**ie.FX_DEFAULTS, "opcode": 146, "resource": "XXFLESH"}]]),
+                   XXRING_ITM=ie.make_itm([[{**ie.FX_DEFAULTS, "opcode": 148, "resource": "XXVIA"}]]),
+                   XXSWORD_ITM=ie.make_itm([[{**ie.FX_DEFAULTS, "opcode": 12}]]),
+                   XXBROKEN_ITM=b"ITM V1  broken")
     g = fg.FakeGame(work / "plain", weidu, tlk=fx.tlk(), biff=biff, files=PATTERNS)
     out = install(g)
     check("the main character's petrification and imprisonment stay as in the base game" in out, out[-600:])
@@ -88,13 +99,23 @@ def player1_without_and_with_eeex(work, weidu):
     lua = g.file("override/M_CBMP1.lua").decode("utf-8")
     found = re.search(r"P\.NET, P\.OUT, P\.STATUE, P\.PRISON = (\d+), (\d+), (\d+), (\d+)", lua)
     check(found and "%CBM_" not in lua, "the states were not filled in")
+    lists = dict(re.findall(r"(statue|prison) = \{spells = \{(.*?)\}, items = \{(.*?)\}\}", lua) and
+                 [(kind, (set(re.findall(r'\["(\w+)"\]', spells)), set(re.findall(r'\["(\w+)"\]', items))))
+                  for kind, spells, items in re.findall(r"(statue|prison) = \{spells = \{(.*?)\}, items = \{(.*?)\}\}", lua)])
+    # The mod's own files with the effect are found the same way (Greater Restoration, SoD's healing).
+    check({"XXFLESH", "XXVIA", "SPPR713", "BDREJUVE"} <= lists["statue"][0] and "XXNOT" not in lists["statue"][0],
+          f"spells that turn stone to flesh: {lists['statue'][0]}")
+    check({"XXWAND", "XXRING"} <= lists["statue"][1] and not {"XXSWORD", "XXBROKEN"} & lists["statue"][1],
+          f"items that do: {lists['statue'][1]}")
+    check("XXFREE" in lists["prison"][0] and "XXFLESH" not in lists["prison"][0], f"what frees: {lists['prison'][0]}")
     ids = g.file("override/splstate.ids").decode("latin-1")
     for value, symbol in zip(found.groups(), ("CBM_P1_NET", "CBM_P1_OUT", "CBM_P1_STATUE", "CBM_P1_PRISON")):
         check(re.search(rf"^{value}\s+{symbol}\s*$", ids, re.M) and int(value) <= 255, f"{symbol} = {value}")
     check(g.file("EEex_scripts/extra_pattern_dbs/CBMP1.db") == (fg.MOD / "eeex/CBMP1.db").read_bytes(), "patterns")
     for world in ("BALDUR", "BALDUR25"):
         script = g.file(f"override/{world}.BCS")
-        check(script is not None and script.count(b"CBMP1_Tick") == 1, f"{world}: the tick")
+        check(script is not None and script.count(b"CBMP1_Tick") == 1 and script.count(b"CBMP1_Stuck") == 1
+              and script.count(b'"GLOBALCBM_P1_STUCK"') == 1, f"{world}: the tick and the dead-end clock")
     check(g.file("override/BDBALDUR.BCS") is None, "a world script the game does not have")
     # Scripts read the global the tick keeps: a prisoner's spell states are not kept up.
     guard = str(GLOBAL).encode() + b' 1 0 0 0 "GLOBALCBM_P1_OUT"'
@@ -123,4 +144,4 @@ def player1_lua_runtime_lua53_and_luajit(work, weidu):
     for implementation in ("lupa.lua53", "lupa.luajit21"):
         runtime = importlib.import_module(implementation).LuaRuntime()
         count = runtime.execute(suite)(template)
-        check(count >= 60, f"{implementation}: only {count} runtime checks ran")
+        check(count >= 91, f"{implementation}: only {count} runtime checks ran")

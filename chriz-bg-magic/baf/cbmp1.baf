@@ -6,3 +6,13 @@ THEN
   RESPONSE #100
     GameOver(-1)
 END
+
+// A dead end and no cure: the clock runs while nobody fights.
+IF
+  Global("CBM_P1_STUCK","GLOBAL",1)
+  !ActuallyInCombat()
+  EEex_LuaTrigger("return CBMP1_Stuck()")
+THEN
+  RESPONSE #100
+    GameOver(-1)
+END

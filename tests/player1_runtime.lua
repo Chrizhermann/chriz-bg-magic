@@ -18,6 +18,8 @@ return function(template)
     local NET, OUT, STATUE, PRISON = 230, 231, 232, 233
     local source = template:gsub("%%CBM_P1_NET_STATE%%", tostring(NET)):gsub("%%CBM_P1_OUT_STATE%%", tostring(OUT))
         :gsub("%%CBM_P1_STATUE_STATE%%", tostring(STATUE)):gsub("%%CBM_P1_PRISON_STATE%%", tostring(PRISON))
+        :gsub("%%CBM_P1_STONE_SPELLS%%", '["SPWI625"] = true, '):gsub("%%CBM_P1_STONE_ITEMS%%", '["SCRLPET"] = true, ["RING29"] = true, ')
+        :gsub("%%CBM_P1_FREE_SPELLS%%", '["SPWI917"] = true, '):gsub("%%CBM_P1_FREE_ITEMS%%", '["SCRL9Z"] = true, ')
     check(not source:find("%%CBM_"), "every placeholder is filled")
 
     local function ref(value) return { get = function() return value end } end
@@ -90,6 +92,25 @@ return function(template)
             for _, part in ipairs(assembly) do text[#text + 1] = tostring(part) end
             w.hooks[#w.hooks + 1] = { address = address, restore = restore, labels = labels, text = table.concat(text, " ") }
         end
+        env.EEex_Trigger_ParseConditionalString = function(text)
+            local item = text:match('^HasItem%("([^"]+)",Myself%)$')
+            assert(item, "an item check: " .. text)
+            w.parsed = (w.parsed or 0) + 1
+            return { evalConditionalAsAIBase = function(_, s) return s.items[item] == true end }
+        end
+        env.EEex_Utility_FreeCPtrList = function(l) l.freed = true w.freed = (w.freed or 0) + 1 end
+        env.EEex_Area_GetVariableInt = function(area, name) return (area.vars or {})[name] or 0 end
+        local function book(field)
+            return function(s)
+                local i = 0
+                return function()
+                    i = i + 1
+                    if s[field][i] then return 5, i - 1, s[field][i] end
+                end
+            end
+        end
+        env.EEex_Sprite_GetKnownMageSpellsIterator = book("mage")
+        env.EEex_Sprite_GetKnownPriestSpellsIterator = book("priest")
         env.EEex_GameState_GetGlobalInt = function(name) return w.globals[name] or 0 end
         env.EEex_GameState_SetGlobalInt = function(name, value)
             w.globals[name] = value
@@ -113,10 +134,19 @@ return function(template)
         return w
     end
 
+    local function place(area, flags, vars)
+        return { m_resref = ref(area), m_header = { m_flags = flags or 0 }, vars = vars }
+    end
     local function sprite(w, id, area, x, y)
-        local s = { m_id = id, m_pArea = { m_resref = ref(area) }, m_pos = { x = x, y = y }, m_activeImprisonment = 1,
+        local s = { m_id = id, m_pArea = place(area), m_pos = { x = x, y = y }, m_activeImprisonment = 1,
                     states = {}, state = 0, locals = {}, m_equipedEffectList = list({}), m_timedEffectList = list({}),
-                    scripts = {}, address = 0x10000 * id }
+                    scripts = {}, address = 0x10000 * id, items = {}, mage = {}, priest = {}, buttons = {} }
+        s.GetQuickButtons = function(self, kind, disabled)
+            assert(disabled == false, "castable only")
+            local out = {}
+            for _, resref in ipairs(self.buttons[kind] or {}) do out[#out + 1] = { m_abilityId = { m_res = ref(resref) } } end
+            return list(out)
+        end
         w.sprites[id] = s
         return s
     end
@@ -185,19 +215,19 @@ return function(template)
     w.applied = {}
     -- In the prison his spell states read unset; only his effect list tells.
     carry(p1, net, maze, prisonMark)
-    p1.m_pArea = { m_resref = ref("AR0402") }
+    p1.m_pArea = place("AR0402")
     check(screen(nil, effect(211), p1) == true and #w.applied == 0 and p1.locals.CBMP1AR == "AR0400",
         "a second imprisonment changes nothing")
 
     check(screen(nil, effect(212), p1) == true and #w.applied == 0, "Freedom elsewhere is blocked")
     check(screen(nil, effect(212, { m_durationType = 4 }), p1) == false, "the maze's own delayed Freedom is let be")
-    p1.m_pArea = { m_resref = ref("ar0400") }
+    p1.m_pArea = place("ar0400")
     check(screen(nil, effect(212), p1) == false and #w.applied == 0 and #w.queued == 0,
         "Freedom where he vanished passes; the tick tidies up")
     carry(p1, net)
-    p1.m_pArea = { m_resref = ref("AR0402") }
+    p1.m_pArea = place("AR0402")
     check(screen(nil, effect(212), p1) == false, "Freedom on a free man passes anywhere")
-    p1.m_pArea = { m_resref = ref("AR0400") }
+    p1.m_pArea = place("AR0400")
 
     w.applied, w.queued = {}, {}
     check(screen(nil, effect(43), p1) == false and #w.applied == 0, "Stone to Flesh on flesh does nothing")
@@ -300,16 +330,16 @@ return function(template)
 
     -- Split by a script.
     w.queued = {}
-    p2.m_pArea, p3.m_pArea = { m_resref = ref("AR0402") }, { m_resref = ref("AR0400") }
+    p2.m_pArea, p3.m_pArea = place("AR0402"), place("AR0400")
     w.time = w.time + 15
     tick()
     check(#w.queued == 0, "one member walking off alone pulls nobody")
-    p3.m_pArea = { m_resref = ref("AR0402") }
+    p3.m_pArea = place("AR0402")
     w.time = w.time + 15
     tick()
     check(#w.queued == 1 and w.queued[1].who == 2
         and w.queued[1].text == 'MoveGlobal("AR0402",Protagonist,[120.210])', "pulled after the party")
-    p2.m_pArea, p3.m_pArea = { m_resref = ref("AR0400") }, { m_resref = ref("AR0400") }
+    p2.m_pArea, p3.m_pArea = place("AR0400"), place("AR0400")
 
     -- Cured.
     carry(p1, net)
@@ -339,12 +369,12 @@ return function(template)
     -- Freedom: the engine takes the maze away wherever it is cast.
     w.applied = {}
     carry(p1, net, prisonMark)
-    p1.m_pArea = { m_resref = ref("AR0402") }
+    p1.m_pArea = place("AR0402")
     w.time = w.time + 15
     check(tick() == false and #w.applied == 1 and w.applied[1].args.effectID == 213 and #w.queued == 0,
         "away from where he vanished the prison closes again")
     w.applied = {}
-    p1.m_pArea = { m_resref = ref("AR0400") }
+    p1.m_pArea = place("AR0400")
     w.time = w.time + 15
     check(tick() == false and #w.applied == 1 and w.applied[1].args.effectID == 146
         and w.applied[1].args.res == "CBMP1FR", "where he vanished the prison's marks are taken off")
@@ -353,6 +383,95 @@ return function(template)
     w.time = w.time + 15
     tick()
     check(#w.applied == 1, "once, while the marks are still coming off")
+
+    -- Dead ends ---------------------------------------------------------------------------------
+    local P = w.env.CBMPlayer1
+    local members = { p1, p2, p3 }
+    check(P.has_cure(members, p1, "statue") == false and P.has_cure(members, p1, "prison") == false, "nobody carries a cure")
+    p1.items.SCRLPET = true
+    p1.buttons[2] = { "SPWI625" }
+    check(P.has_cure(members, p1, "statue") == false, "what he carries himself is out of reach")
+    p1.items.SCRLPET, p1.buttons[2] = nil, nil
+    p3.items.SCRLPET = true
+    check(P.has_cure(members, p1, "statue") == true and P.has_cure(members, p1, "prison") == false,
+        "a scroll with a companion cures the statue, not the prison")
+    p3.state = 0x800
+    check(P.has_cure(members, p1, "statue") == false, "not with a dead companion")
+    p3.state = 0
+    p3.items.SCRLPET = nil
+    p2.buttons[4] = { "spwi917" }
+    check(P.has_cure(members, p1, "prison") == true and w.freed > 0, "a Freedom ready to cast, and the lists are freed")
+    p2.buttons[4] = nil
+    p2.mage = { "SPWI112", "SPWI625" }
+    check(P.has_cure(members, p1, "statue") == true, "Stone to Flesh in a book counts where the party can rest")
+    p1.m_pArea = place("AR0400", 0x20)
+    check(P.has_cure(members, p1, "statue") == false, "not where nobody can rest")
+    p2.m_activeImprisonment = 0
+    p1.m_pArea = place("AR0400")
+    check(P.has_cure(members, p1, "statue") == false, "nor with its owner in a maze")
+    p2.m_activeImprisonment, p2.mage = 1, {}
+    local parsed = w.parsed
+    P.has_cure(members, p1, "statue")
+    check(w.parsed == parsed, "each item check is compiled once")
+
+    check(P.dead_end(p1) == false, "a street is no dead end")
+    p1.m_pArea = place("ar2900")
+    check(P.dead_end(p1) == true, "Hell is")
+    p1.m_pArea = place("AR4500")
+    check(P.dead_end(p1) == true, "the Pocket Plane before its exit works")
+    w.globals.GavePocketPlane = 1
+    check(P.dead_end(p1) == false, "not once it works")
+    p1.m_pArea = place("AR6108", 0, { DeactivatePortal = 1 })
+    check(P.dead_end(p1) == true, "Sendai's chamber with its portals shut (a variable of the area)")
+    p1.m_pArea = place("AR6108", 0, { DeactivatePortal = 2 })
+    check(P.dead_end(p1) == false, "and open")
+    for _, name in ipairs({ "AR0602", "AR0603", "AR2300", "AR3001", "AR0700" }) do
+        p1.m_pArea = place(name)
+        check(P.dead_end(p1) == false, name .. " can be left: no dead end")
+    end
+
+    -- The clock: out, a dead end, no cure.
+    for _, s in ipairs(members) do s.m_pArea = place("AR2900") end
+    carry(p1, net, statueMark)
+    w.time = w.time + 15
+    check(tick() == false and w.globals.CBM_P1_STUCK == 1, "stuck in Hell as a statue without a cure")
+    local stuck = w.env.CBMP1_Stuck
+    check(stuck() == false and (w.globals.CBM_P1_CLOCK or 0) == 0, "the clock starts")
+    w.time = w.time + 8
+    check(stuck() == false and w.globals.CBM_P1_CLOCK == 8, "and runs while the scripts ask")
+    w.time = w.time + 300
+    check(stuck() == false and w.globals.CBM_P1_CLOCK == 8, "a fight, a pause or a scene in between does not count")
+    for _ = 1, 54 do
+        w.time = w.time + 8
+        stuck()
+    end
+    check(w.globals.CBM_P1_CLOCK == 440 and stuck() == false, "not yet")
+    w.time = w.time + 8
+    check(stuck() == false, "448 ticks")
+    w.time = w.time + 8
+    check(stuck() == true, "after 30 seconds the game is over")
+    p3.items.SCRLPET = true
+    w.time = w.time + 15
+    tick()
+    check(w.globals.CBM_P1_STUCK == 0 and w.globals.CBM_P1_CLOCK == 0, "a cure in the party stops and clears the clock")
+    p3.items.SCRLPET = nil
+    carry(p1, net, statueMark, maze, prisonMark)
+    p1.m_activeImprisonment = 0
+    p3.items.SCRLPET = true
+    w.time = w.time + 15
+    tick()
+    check(w.globals.CBM_P1_STUCK == 1, "a statue in a prison needs both cures")
+    p3.items.SCRL9Z = true
+    w.time = w.time + 15
+    tick()
+    check(w.globals.CBM_P1_STUCK == 0, "with both it is not stuck")
+    p3.items = {}
+    p1.m_activeImprisonment = 1
+    carry(p1, net)
+    w.time = w.time + 15
+    tick()
+    check(w.globals.CBM_P1_STUCK == 0, "free: not stuck")
+    for _, s in ipairs(members) do s.m_pArea = place("AR0400") end
 
     -- No main character, or a dead one.
     carry(p1, net, statueMark)

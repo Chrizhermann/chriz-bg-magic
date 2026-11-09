@@ -14,6 +14,7 @@
 --   like a dead member while he is out; the engine then moves him with the party.
 -- * The world scripts call CBMP1_Tick(): it ends the game when nobody else can act, imprisons him
 --   again after a cutscene freed him, and pulls him after the party when a script split them.
+-- * In a dead end without a cure the game ends after 30 seconds without combat (CBMP1_Stuck).
 -- * Companions keep the game's petrification and imprisonment, which put them out of the party
 --   and empty their party AI slot. The screen keeps that script first; when Stone to Flesh or
 --   Freedom brings them back, they rejoin the party (if there is room) with their script.
@@ -24,7 +25,8 @@ if not (EEex_GameObject_ApplyEffect and EEex_HookConditionalJumpOnFailWithLabels
         and EEex_Utility_IterateCPtrList and EEex_Sprite_GetSpellState and EEex_GameObject_Get
         and EEex_Sprite_GetCharacterIndex and EEex_AIBase_GetScriptLevel and EEex_AIBase_SetScriptLevelResRef
         and EEex_Malloc and EEex_WritePtr and EEex_HookIntegrityWatchdogRegister and EEex_FlattenTable
-        and EEex_GameState_GetGlobalInt and EEex_GameState_SetGlobalInt) then
+        and EEex_GameState_GetGlobalInt and EEex_GameState_SetGlobalInt
+        and EEex_Trigger_ParseConditionalString and EEex_Utility_FreeCPtrList and EEex_Area_GetVariableInt) then
     return
 end
 
@@ -268,6 +270,172 @@ local function companion_back(s)
     EEex_Sprite_SetLocalInt(s, "CBMP1KO", 0)
 end
 
+-- Dead ends. Where the party cannot go and fetch help, and carries no cure, the game ends after a
+-- short while without combat, as it always did. In doubt nothing here says "dead end" or "no cure".
+--
+-- What cures: every spell and item of this game with Stone to Flesh's or Freedom's effect, listed
+-- at install (lib/cbmagic_player1.tpa).
+P.CURES = {
+    statue = {spells = {%CBM_P1_STONE_SPELLS%}, items = {%CBM_P1_STONE_ITEMS%}},
+    prison = {spells = {%CBM_P1_FREE_SPELLS%}, items = {%CBM_P1_FREE_ITEMS%}},
+}
+P.DEAD_END_TICKS = 450        -- 30 seconds
+P.item_checks = P.item_checks or {}
+
+local function listed(set, resref)
+    return resref ~= nil and set[tostring(resref):upper()] == true
+end
+
+-- A spell he can cast right now (memorized and not used up, or an ability).
+local function castable(s, spells)
+    local found = false
+    for _, buttons_of in ipairs({2, 4}) do
+        local ok, buttons = pcall(function() return s:GetQuickButtons(buttons_of, false) end)
+        if ok and buttons then
+            pcall(EEex_Utility_IterateCPtrList, buttons, function(button)
+                if listed(spells, button.m_abilityId.m_res:get()) then found = true return true end
+            end)
+            pcall(EEex_Utility_FreeCPtrList, buttons)
+        end
+        if found then return true end
+    end
+    return false
+end
+
+-- A spell in his book: a rest brings it back.
+local function known(s, spells)
+    local found = false
+    for _, iterator in pairs({EEex_Sprite_GetKnownMageSpellsIterator, EEex_Sprite_GetKnownPriestSpellsIterator}) do
+        pcall(function()
+            for _, _, resref in iterator(s) do
+                if listed(spells, resref) then found = true break end
+            end
+        end)
+        if found then return true end
+    end
+    return false
+end
+
+-- An item he carries, bags included (the game's own HasItem looks into them).
+local function holds(s, item)
+    local check = P.item_checks[item]
+    if check == nil then
+        local ok, parsed = pcall(EEex_Trigger_ParseConditionalString, string.format('HasItem("%s",Myself)', item))
+        check = ok and parsed or false
+        P.item_checks[item] = check
+    end
+    if not check then return true end       -- cannot tell: in doubt he has it
+    local ok, result = pcall(function() return check:evalConditionalAsAIBase(s) end)
+    return not ok or result == true
+end
+
+-- May the party rest here? Then a spell in a book counts.
+local function can_rest(sprite)
+    local resting = true
+    pcall(function()
+        if EEex_BAnd(sprite.m_pArea.m_header.m_flags, 0x20) ~= 0 then resting = false end   -- NOREST
+    end)
+    return resting
+end
+
+function P.has_cure(members, p1, kind)
+    local cures = P.CURES[kind]
+    local rest = can_rest(p1)
+    for _, s in ipairs(members) do
+        if s.m_id ~= p1.m_id and s.m_activeImprisonment ~= 0
+                and EEex_BAnd(EEex_Sprite_GetState(s), 0x800) == 0 then
+            if castable(s, cures.spells) or (rest and known(s, cures.spells)) then return true end
+            for item in pairs(cures.items) do
+                if holds(s, item) then return true end
+            end
+        end
+    end
+    return false
+end
+
+-- The areas the party cannot leave by its own choice, each with the story state in which that
+-- holds: every variable named must lie in its range (a GLOBAL, or one of the area where marked);
+-- none named means always. Only what the game's data proves is here: no travel region that works,
+-- no way onto the world map, and the scripts that move the party out wait for the story. Places
+-- one can fight a way out of (Irenicus' dungeon, the Sahuagin city, Watcher's Keep) are not.
+local function areas(...)
+    local set = {}
+    for _, name in ipairs({...}) do set[name] = true end
+    return set
+end
+
+P.DEAD_ENDS = {
+    -- Shadows of Amn
+    {areas = areas("AR0600", "AR0604", "AR0605", "AR0606")},                -- the circus tent under Kalah's illusion
+    {areas = areas("AR1501", "AR1502", "AR1503", "AR1504", "AR1505", "AR1506", "AR1507", "AR1508", "AR1509",
+        "AR1510", "AR1511", "AR1512", "AR1513", "AR1514")},                  -- Spellhold: dungeon, maze and tests
+    {areas = areas("AR2900", "AR2901", "AR2902", "AR2903", "AR2904", "AR2905")},   -- Hell
+    -- Throne of Bhaal
+    {areas = areas("AR4000")},                                               -- the start, until Illasera falls
+    {areas = areas("AR4500"), when = {{"GavePocketPlane", 0, 0}}},           -- the Pocket Plane before its exit works
+    {areas = areas("AR6108"), when = {{"DeactivatePortal", 1, 1, "area"}}},  -- Sendai's chamber, portals shut
+    {areas = areas("AR6200")},                                               -- the Throne of Bhaal
+    -- Siege of Dragonspear (EET)
+    {areas = areas("BD4400", "BD4500", "BD4600", "BD4601", "BD4700")},       -- Avernus
+    {areas = areas("BD6100")},                                               -- the last scene
+}
+
+function P.dead_end(sprite)
+    local name = current_area(sprite):upper()
+    for _, entry in ipairs(P.DEAD_ENDS) do
+        if entry.areas[name] then
+            local shut = true
+            for _, rule in ipairs(entry.when or {}) do
+                local value
+                if rule[4] == "area" then
+                    value = EEex_Area_GetVariableInt(sprite.m_pArea, rule[1])
+                else
+                    value = EEex_GameState_GetGlobalInt(rule[1])
+                end
+                if value < rule[2] or value > rule[3] then shut = false end
+            end
+            if shut then return true end
+        end
+    end
+    return false
+end
+
+-- Out, in a dead end, and no cure for what holds him.
+local function stuck(p1, members, mine)
+    if not (mine.statue or mine.maze) or not P.dead_end(p1) then return false end
+    if mine.maze and not P.has_cure(members, p1, "prison") then return true end
+    if mine.statue and not P.has_cure(members, p1, "statue") then return true end
+    return false
+end
+
+local function set_stuck(flag)
+    local value = flag and 1 or 0
+    if EEex_GameState_GetGlobalInt("CBM_P1_STUCK") ~= value then EEex_GameState_SetGlobalInt("CBM_P1_STUCK", value) end
+    if not flag and EEex_GameState_GetGlobalInt("CBM_P1_CLOCK") ~= 0 then EEex_GameState_SetGlobalInt("CBM_P1_CLOCK", 0) end
+end
+
+-- The world scripts ask this while CBM_P1_STUCK is set and nobody fights: the clock runs on, and at
+-- its end the game is over. Time in combat, in pauses and in scenes does not count.
+function CBMP1_Stuck()
+    local ok, result = pcall(function()
+        local now = game().m_worldTime.m_gameTime
+        local step = now - (P.stuck_at or now)
+        P.stuck_at = now
+        if step < 0 or step > 30 then step = 0 end
+        local clock = EEex_GameState_GetGlobalInt("CBM_P1_CLOCK") + step
+        if step > 0 then EEex_GameState_SetGlobalInt("CBM_P1_CLOCK", clock) end
+        if clock >= P.DEAD_END_TICKS then
+            log("a dead end and no cure: game over")
+            return true
+        end
+        return false
+    end)
+    if ok then return result == true end
+    P.errors = P.errors + 1
+    if P.errors <= 10 then log("dead end error: " .. tostring(result)) end
+    return false
+end
+
 P.net_for = P.net_for or {}
 P.net_at, P.prison_at, P.free_at = P.net_at or -1000, P.prison_at or -1000, P.free_at or -1000
 
@@ -279,7 +447,7 @@ end
 local function tick(now)
     P.install_travel()
     local p1 = P.protagonist()
-    if not p1 then set_out(nil) return false end
+    if not p1 then set_out(nil) set_stuck(false) return false end
     local members = party()
     for _, s in ipairs(members) do
         -- An imprisoned companion's states cannot be read; it has left the party anyway.
@@ -294,9 +462,10 @@ local function tick(now)
             end
         end
     end
-    if EEex_BAnd(EEex_Sprite_GetState(p1), STATE_DEAD) ~= 0 then set_out(nil) return false end
+    if EEex_BAnd(EEex_Sprite_GetState(p1), STATE_DEAD) ~= 0 then set_out(nil) set_stuck(false) return false end
     local mine = P.scan(p1)
     set_out((mine.statue or mine.maze) and p1 or nil)
+    set_stuck(stuck(p1, members, mine))
     if not mine.net then
         if now - P.net_at >= 75 or now < P.net_at then
             P.net_at = now

@@ -2,12 +2,13 @@
 
 ## Unreleased
 
-- The main character as a statue or imprisoned (needs EEex; dead ends without a cure and the
-  travel block for story areas still to come): petrification and imprisonment no longer end the game. He becomes a tough statue or
+- The main character as a statue or imprisoned (needs EEex): petrification and imprisonment no longer end the game. He becomes a tough statue or
   vanishes into a prison, the party takes him along when it travels, and only Stone to Flesh, or
   Freedom where he vanished, bring him back. The game ends when nobody else in the party can act.
   Petrified or imprisoned companions leave the party as before, but once cured they rejoin with
-  their party AI script. Resting stays possible; dreams wait until he is free.
+  their party AI script. Resting stays possible; dreams wait until he is free. Where the party
+  cannot leave and carries no cure (Hell, Spellhold's maze, the Throne of Bhaal and the like), the
+  game ends after 30 seconds without combat.
 - Polymorph Self: the six forms of SCS with their real values, built from this mod's own files:
   hill giant, ogre mage, spider, mustard jelly, hell hound and rat. The spell's text lists each
   form and what it can do. The hill giant looks like Icewind Dale's verbeeg; BG2 has no hill

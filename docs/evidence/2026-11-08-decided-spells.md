@@ -154,10 +154,11 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
   pattern file beside EEex's, the tick on top of each campaign world script from an EET-style
   `CAMPAIGN.2DA` and, for BG2:EE's heading-only table, on `BALDUR` and `BALDUR25`; the dream guard on
   `PLAYER1D` and the companions' dream scripts from `PDIALOG.2DA`; the Solar's `PartyRested()` block
-  in `AR4000` with the extra condition), a second install changes nothing; 60 runtime checks of the
-  Lua under mocks in Lua 5.3 and LuaJIT (screen, saves and immunity, the prison read from the effect
-  list, Freedom here and elsewhere, companions' return, the tick's game over, cutscene, pull-along,
-  the hooks' bytes, label and cell).
+  in `AR4000` with the extra condition), a second install changes nothing; the cure list from a
+  made-up game (another mod's spell, a wand and a ring that cast it, a Freedom, a broken item
+  file); 91 runtime checks of the Lua under mocks in Lua 5.3 and LuaJIT (screen, saves and immunity,
+  the prison read from the effect list, Freedom here and elsewhere, companions' return, the tick's
+  game over, cutscene, pull-along, the hooks' bytes, label and cell, cures, dead ends, the clock).
 - Installed into the BG2:EE lab folder with WeiDU only (no game started): the world scripts
   `BALDUR` and `BALDUR25` carry the tick, the dream scripts and `AR4000` their guards.
 - In-game, 2026-11-10, a console session on the BG2:EE lab (2.7.3.0, EEex v1.3.1), party of
@@ -191,6 +192,23 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
     Stone to Flesh: back in the party with its own script.
   - Both others put into a maze while he was a statue: the tick answered "game over" once; game
     time stopped 43 ticks later and no script ran again.
+- Dead ends, same day:
+  - The list of dead ends comes from a read of the game's data (areas, scripts, world map) of
+    BG2:EE 2.7.3.0 and an EET install: only places with proof are in, 9 situations; 13 more are
+    likely but one step is concluded, not read, and are left out.
+  - The cure list of the lab install: Stone to Flesh from `SPWI625`, `SPPR713`, `BDREJUVE`, the
+    items `SCRLPET`, `SCRL8C`, `RING29`, `STAF16`, `SW1H71`; Freedom from `SPWI917`, `OHBFREE`,
+    `SCRL9Z`.
+  - In the lab game: no cure with nothing; a Stone to Flesh scroll with a companion counted; a
+    Freedom scroll with the main character himself did not; a companion with Stone to Flesh in
+    his book counted while the area allowed resting and no longer with the area's no-rest flag.
+  - With the arena made a dead end for the test (no rest, statue, no scroll): the stuck flag came
+    on, the clock ran to 456 ticks in 58 script passes and the game-over answer came 452 ticks
+    after the start.
+  - A false trigger in front stops a block before its Lua trigger is evaluated (seen with a
+    condition evaluated from the console), which is what keeps the clock still in combat. A real
+    fight during the clock was not staged: the creatures spawned did not fight.
+  - Not seen: a scroll inside a bag, a real dead end of the game, the clock across a save.
 - One lab game crashed on a probe of mine (a string read from a guessed address), not on the mod.
 - Not seen yet: the world map and map edges (the other hook), ambushes, the Pocket Plane's exit,
   dreams at a rest, the statue hit in a fight, EET with its other campaigns, a save and reload

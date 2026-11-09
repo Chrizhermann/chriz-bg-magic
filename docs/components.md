@@ -707,8 +707,7 @@ descriptions still describe the old behaviour.
 ## The main character as a statue or imprisoned (`cbmagic_main_character`, `lua/M_CBMP1.lua`)
 
 Needs EEex; without it nothing here is installed and the game ends as before. Seen working in a
-BG2:EE lab game (see the evidence file); dead ends without a cure and the travel block for story
-areas are not built yet.
+BG2:EE lab game (see the evidence file). A travel block for story areas is not built.
 
 - **Petrification no longer ends the game.** On the main character, petrification (opcode 134,
   opcode 13 "stoned") becomes a statue (`CBMP1ST`): held (opcode 185, which Free Action does not
@@ -745,6 +744,27 @@ areas are not built yet.
   on every member, keeps the cell and the global, ends the game when nobody else in the party can
   act (alive, not charmed, not imprisoned), imprisons him again after a cutscene woke him, tidies
   up after a Freedom, and pulls him after the party when a script moved everyone else away.
+- **Dead ends.** Where the party cannot leave by its own choice and carries no cure for what holds
+  him, the game ends after 30 seconds without combat, as it always did (`CBMP1_Stuck`, a second
+  block in the world scripts behind `!ActuallyInCombat()`; the clock is the global `CBM_P1_CLOCK`,
+  so a fight, a pause or a scene stops it without clearing it). In doubt nothing counts as a dead
+  end or as "no cure":
+  - Dead ends are only what the game's data proves (no working exit, no way onto the world map,
+    the scripts that move the party out wait for the story): the circus tent under Kalah's
+    illusion, Spellhold's dungeon, maze and tests, Hell, the start of Throne of Bhaal, the Pocket
+    Plane before its exit works, Sendai's chamber while its portals are shut, the Throne of Bhaal,
+    and in Siege of Dragonspear Avernus and the last scene. Places one can fight a way out of
+    (Irenicus' dungeon, the Sahuagin city, Watcher's Keep) are none. Further places that are
+    likely shut for a time (the Planar Sphere away from Athkatla, Spellhold's upper floors, Ust
+    Natha with its gate shut, Pocket Plane challenges, Abazigal's chamber, parts of Dragonspear
+    castle, the Isle of Balduran, the fights with Sarevok) are not counted yet: there the party
+    is stuck without the game ending.
+  - Cures are listed at install from every spell and item of the game with Stone to Flesh's
+    effect (opcode 43) or Freedom's (opcode 212), also through a spell they cast, whatever mod
+    brought them. A cure counts with a companion who is alive and not imprisoned: a spell ready
+    to cast, a spell in a book where the area allows resting, or an item carried (bags included,
+    whoever could use it). What the main character carries himself does not count. A statue
+    inside a prison needs both cures.
 - **Dreams wait** while he is out (`baf/cbmp1_dream.baf`, on the global): his own dream script
   (`PLAYER1D`), every companion's dream script from the campaigns' dialog tables (`PDIALOG`,
   `25DIALOG`, `BGDIALOG`, `BDDIALOG`) and the Solar's calls after a rest in Throne of Bhaal

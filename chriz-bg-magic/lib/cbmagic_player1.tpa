@@ -2,6 +2,71 @@
 // longer end the game at once: he becomes a statue or vanishes into a prison, the party takes him
 // along, and only Stone to Flesh or Freedom (where he vanished) bring him back. Needs EEex; without
 // it nothing here is installed and the game ends as before.
+// What can cure him: every spell and item of this game that turns stone to flesh (opcode 43) or
+// frees a prisoner (opcode 212), by itself or through a spell it casts (opcodes 146, 148, 326),
+// whatever mod brought it. Nothing is changed; the lists go into lua/M_CBMP1.lua for the dead-end
+// rule. A file that cannot be read is left out.
+DEFINE_ACTION_FUNCTION cbmagic_cure_list
+  RET stone_spells stone_items free_spells free_items
+BEGIN
+  ACTION_FOR_EACH kind IN ~spl~ ~itm~ BEGIN
+    COPY_EXISTING_REGEXP GLOB ~^.+\.%kind%$~ ~override~
+      SPRINT me ~%SOURCE_RES%~
+      TO_UPPER me
+      PATCH_TRY
+        PATCH_IF (~%kind%~ STRING_EQUAL ~spl~) BEGIN
+          GET_OFFSET_ARRAY cbm_heads SPL_V10_HEADERS
+        END ELSE BEGIN
+          GET_OFFSET_ARRAY cbm_heads ITM_V10_HEADERS
+        END
+        PHP_EACH cbm_heads AS index => head BEGIN
+          PATCH_IF (~%kind%~ STRING_EQUAL ~spl~) BEGIN
+            GET_OFFSET_ARRAY2 cbm_effects head SPL_V10_HEAD_EFFECTS
+          END ELSE BEGIN
+            GET_OFFSET_ARRAY2 cbm_effects head ITM_V10_HEAD_EFFECTS
+          END
+          PHP_EACH cbm_effects AS number => effect BEGIN
+            READ_SHORT effect opcode
+            PATCH_IF (opcode = 43) BEGIN SET $cbm_stone(~%me%~ ~%kind%~) = 1 END
+            PATCH_IF (opcode = 212) BEGIN SET $cbm_free(~%me%~ ~%kind%~) = 1 END
+            PATCH_IF (opcode = 146) OR (opcode = 148) OR (opcode = 326) BEGIN
+              READ_ASCII (effect + 0x14) cast (8) NULL
+              TO_UPPER cast
+              PATCH_IF (~%cast%~ STR_CMP ~~) BEGIN SET $cbm_casts(~%me%~ ~%kind%~ ~%cast%~) = 1 END
+            END
+          END
+        END
+      WITH DEFAULT
+      END
+    BUT_ONLY
+  END
+  // A caster of a cure is a cure, two steps deep.
+  OUTER_FOR (round = 0; round < 2; ++round) BEGIN
+    ACTION_PHP_EACH cbm_casts AS key => on BEGIN
+      ACTION_IF VARIABLE_IS_SET $cbm_stone(~%key_2%~ ~spl~) BEGIN OUTER_SET $cbm_stone(~%key_0%~ ~%key_1%~) = 1 END
+      ACTION_IF VARIABLE_IS_SET $cbm_free(~%key_2%~ ~spl~) BEGIN OUTER_SET $cbm_free(~%key_0%~ ~%key_1%~) = 1 END
+    END
+  END
+  OUTER_SPRINT stone_spells ~~
+  OUTER_SPRINT stone_items ~~
+  OUTER_SPRINT free_spells ~~
+  OUTER_SPRINT free_items ~~
+  ACTION_PHP_EACH cbm_stone AS key => on BEGIN
+    ACTION_IF (~%key_1%~ STRING_EQUAL ~spl~) BEGIN
+      OUTER_SPRINT stone_spells ~%stone_spells%["%key_0%"] = true, ~
+    END ELSE BEGIN
+      OUTER_SPRINT stone_items ~%stone_items%["%key_0%"] = true, ~
+    END
+  END
+  ACTION_PHP_EACH cbm_free AS key => on BEGIN
+    ACTION_IF (~%key_1%~ STRING_EQUAL ~spl~) BEGIN
+      OUTER_SPRINT free_spells ~%free_spells%["%key_0%"] = true, ~
+    END ELSE BEGIN
+      OUTER_SPRINT free_items ~%free_items%["%key_0%"] = true, ~
+    END
+  END
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_main_character
 BEGIN
   OUTER_SET ready = 0
@@ -15,6 +80,8 @@ BEGIN
     LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_OUT~ RET CBM_P1_OUT_STATE = state END
     LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_STATUE~ RET CBM_P1_STATUE_STATE = state END
     LAF cbmagic_state_value STR_VAR symbol = ~CBM_P1_PRISON~ RET CBM_P1_PRISON_STATE = state END
+    LAF cbmagic_cure_list RET CBM_P1_STONE_SPELLS = stone_spells CBM_P1_STONE_ITEMS = stone_items
+      CBM_P1_FREE_SPELLS = free_spells CBM_P1_FREE_ITEMS = free_items END
     COPY ~chriz-bg-magic/lua/M_CBMP1.lua~ ~override/M_CBMP1.lua~
       EVALUATE_BUFFER
     // The travel hook's patterns (Baldur.exe 2.7.3.0). Without them the party cannot leave while he
