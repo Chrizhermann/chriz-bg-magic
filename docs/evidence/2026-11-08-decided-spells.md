@@ -137,7 +137,7 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - Not run: the form menu with a party member, the look on screen, the powers in a fight (Psionic
   Blast, Gas Cloud, Teleport, Petrifying Gaze), the golem's weapon immunity in a fight, EET.
 
-## The main character as a statue or imprisoned (first part, not yet in a game)
+## The main character as a statue or imprisoned (first part)
 
 - Engine facts from a lab console session (BG2:EE 2.7.3.0, EEex v1.3.1), before the build:
   - EEex's opcode 403 sees an effect before the engine rolls its save and before opcode
@@ -147,21 +147,54 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
     the old save; opcode immunity is checked by the screen.
   - Such a cast from inside the screen keeps the save: with spell save 1, 0 of 8 landed; with
     spell save 20, all landed; no error.
-  - Spell states 0-255 sit in a bit array at `+0xC88` of the creature's stats (state 200 set byte
-    `+0xCA1` to 1). The two gather-check patterns match once each in `Baldur.exe` 2.7.3.0 of BG2:EE
-    (also EET's) and BG:EE, and the bytes at the static addresses read the same in the running game.
+  - The two gather-check patterns match once each in `Baldur.exe` 2.7.3.0 of BG2:EE (also EET's)
+    and BG:EE, and the bytes at the static addresses read the same in the running game.
 - Offline: the five spells (statue, prison, net, cure, release), installs without EEex (nothing
   installed, scripts untouched) and with EEex (module with its four states from `SPLSTATE.IDS`,
   pattern file beside EEex's, the tick on top of each campaign world script from an EET-style
   `CAMPAIGN.2DA` and, for BG2:EE's heading-only table, on `BALDUR` and `BALDUR25`; the dream guard on
   `PLAYER1D` and the companions' dream scripts from `PDIALOG.2DA`; the Solar's `PartyRested()` block
-  in `AR4000` with the extra condition), a second install changes nothing; 44 runtime checks of the
-  Lua under mocks in Lua 5.3 and LuaJIT (screen, saves and immunity, Freedom only where he vanished,
-  companions' return, the tick's game over, cutscene, pull-along, hook bytes and layout).
+  in `AR4000` with the extra condition), a second install changes nothing; 60 runtime checks of the
+  Lua under mocks in Lua 5.3 and LuaJIT (screen, saves and immunity, the prison read from the effect
+  list, Freedom here and elsewhere, companions' return, the tick's game over, cutscene, pull-along,
+  the hooks' bytes, label and cell).
 - Installed into the BG2:EE lab folder with WeiDU only (no game started): the world scripts
   `BALDUR` and `BALDUR25` carry the tick, the dream scripts and `AR4000` their guards.
-- Not run in a game yet: everything that needs the engine (statue, travel with the party, Freedom
-  in place, cutscenes, dreams, companions coming back).
+- In-game, 2026-11-10, a console session on the BG2:EE lab (2.7.3.0, EEex v1.3.1), party of
+  three, in the BuffBot arena and in `AR0330`/`AR0331` (two rooms without area scripts, joined by
+  party-required exits). The exits were used the way a click does it: the engine's action 93 with
+  the travel region's object in the action's integer parameter. What the first runs found and what
+  changed:
+  - An imprisoned creature's spell states read unset (all, also older ones), and a bit written
+    into either of its stat blocks was gone 3 seconds later. The prison is now read from the effect
+    list, the hooks compare against a cell, scripts read a global.
+  - The maze brings a delayed Freedom (opcode 212) of its own when it is applied; the screen takes
+    only an undelayed one for a cast Freedom.
+  - A Freedom cast in another area freed the prisoner without the opcode reaching his screen: the
+    tick now closes the prison again away from the stored place.
+  - `ClearActions(Myself)` queued in front of `JumpToPoint` takes the jump with it.
+  - A bare `je jmp_success` in the hook assembled to a jump to the next instruction (seen in the
+    dumped hook bytes); `#L(jmp_success)` gives the real target.
+  - Joining the party again puts `DPLAYER2` into the party AI slot; the companion's own script is
+    now put back over it.
+- Seen with the final code:
+  - Flesh to Stone (spell save made to fail): statue, held, no game over, cell and global set;
+    Stone to Flesh: cured, both cleared. With opcode 101 against 134 on him: no statue.
+  - Imprisonment: prison with the place stored; a cutscene woke him and the tick imprisoned him
+    again once; Freedom there: free, the prison's effects gone, on his spot.
+  - Exit `AR0330` to `AR0331` and back with the statue: the whole party arrived, the statue with
+    it, still a statue. Counter-test with the tick stopped and the cell emptied: nobody moved.
+  - The same exits with the prisoner: he arrived with the party, imprisoned. Freedom in the other
+    room: still imprisoned (a fresh maze in his list). Back in the first room: Freedom freed him.
+  - A script moved the two others to the other room (`LeaveAreaLUA`): the statue followed.
+  - A companion petrified by the game left the party (script slot emptied, `KickedOut` set);
+    Stone to Flesh: back in the party with its own script.
+  - Both others put into a maze while he was a statue: the tick answered "game over" once; game
+    time stopped 43 ticks later and no script ran again.
+- One lab game crashed on a probe of mine (a string read from a guessed address), not on the mod.
+- Not seen yet: the world map and map edges (the other hook), ambushes, the Pocket Plane's exit,
+  dreams at a rest, the statue hit in a fight, EET with its other campaigns, a save and reload
+  while he is out, the look on screen.
 
 ## Not covered
 

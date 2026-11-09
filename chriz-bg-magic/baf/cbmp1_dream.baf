@@ -1,7 +1,8 @@
-// No dream while the main character is a statue or imprisoned (lua/M_CBMP1.lua). A dream that did
-// not run keeps its own variable unset, so it comes at the first rest after he is free.
+// No dream while the main character is a statue or imprisoned (lua/M_CBMP1.lua keeps the global). A
+// dream that did not run keeps its own variable unset, so it comes at the first rest after he is
+// free.
 IF
-  CheckSpellState(Protagonist,CBM_P1_OUT)
+  Global("CBM_P1_OUT","GLOBAL",1)
 THEN
   RESPONSE #100
     NoAction()

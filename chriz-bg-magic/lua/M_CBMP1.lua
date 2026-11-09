@@ -6,8 +6,12 @@
 --   state through opcode 146 with the old effect's save; Protection from Petrification and the like
 --   (opcode 101) are checked here. Stone to Flesh (opcode 43) ends the statue; Freedom (opcode 212)
 --   ends the prison only in the area where he vanished, and puts him back on that spot.
--- * Travel: the party takes him along. Two jump hooks in the engine's gather check let a member
---   with the state CBM_P1_OUT pass like a dead one; the engine then moves him with the party.
+-- * While a creature is imprisoned the engine does not keep its spell states up (lab: they read
+--   unset, and bits written into its stats are wiped within seconds). So the prison is read from
+--   his effect list, the travel hooks compare against a cell the tick keeps, and scripts get the
+--   global CBM_P1_OUT.
+-- * Travel: the party takes him along. Two jump hooks in the engine's gather check let him pass
+--   like a dead member while he is out; the engine then moves him with the party.
 -- * The world scripts call CBMP1_Tick(): it ends the game when nobody else can act, imprisons him
 --   again after a cutscene freed him, and pulls him after the party when a script split them.
 -- * Companions keep the game's petrification and imprisonment, which put them out of the party
@@ -16,9 +20,11 @@
 --
 -- Nothing of this shows a technical message in the game; problems go to the log. LuaJIT syntax.
 
-if not (EEex_GameObject_ApplyEffect and EEex_HookConditionalJumpOnFail and EEex_LabelDefault
+if not (EEex_GameObject_ApplyEffect and EEex_HookConditionalJumpOnFailWithLabels and EEex_LabelDefault
         and EEex_Utility_IterateCPtrList and EEex_Sprite_GetSpellState and EEex_GameObject_Get
-        and EEex_Sprite_GetCharacterIndex and EEex_AIBase_GetScriptLevel and EEex_AIBase_SetScriptLevelResRef) then
+        and EEex_Sprite_GetCharacterIndex and EEex_AIBase_GetScriptLevel and EEex_AIBase_SetScriptLevelResRef
+        and EEex_Malloc and EEex_WritePtr and EEex_HookIntegrityWatchdogRegister and EEex_FlattenTable
+        and EEex_GameState_GetGlobalInt and EEex_GameState_SetGlobalInt) then
     return
 end
 
@@ -95,6 +101,24 @@ local function at_prison_place(sprite)
     return current_area(sprite):upper() == (EEex_Sprite_GetLocalString(sprite, "CBMP1AR") or ""):upper()
 end
 
+-- What he carries of ours, read from his effect list.
+function P.scan(sprite)
+    local found = {net = false, statue = false, marker = false, maze = false}
+    EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
+        local id = effect.m_effectId
+        if id == 403 then
+            if effect.m_res:get():upper() == "CBMP1SCR" then found.net = true end
+        elseif id == 328 then
+            local source = effect.m_sourceRes:get():upper()
+            if source == P.STATUE_SPELL and effect.m_dWFlags == P.STATUE then found.statue = true end
+            if source == P.PRISON_SPELL and effect.m_dWFlags == P.PRISON then found.marker = true end
+        elseif id == 213 then
+            if effect.m_sourceRes:get():upper() == P.PRISON_SPELL then found.maze = true end
+        end
+    end)
+    return found
+end
+
 -- A companion: the game's own petrification and imprisonment stay, without the return bug.
 local function companion(effect, sprite)
     local id = effect.m_effectId
@@ -123,7 +147,7 @@ local function screen(effect, sprite)
         cast_instead(sprite, effect, P.STATUE_SPELL)
         return true
     elseif id == 211 then
-        if has(sprite, P.PRISON) or P.immune(sprite, 211) then return true end
+        if P.immune(sprite, 211) or P.scan(sprite).marker then return true end
         -- Where he stands now is where Freedom must find him.
         EEex_Sprite_SetLocalString(sprite, "CBMP1AR", current_area(sprite))
         EEex_Sprite_SetLocalInt(sprite, "CBMP1X", sprite.m_pos.x)
@@ -139,14 +163,10 @@ local function screen(effect, sprite)
         end
         return false
     elseif id == 212 then
-        if has(sprite, P.PRISON) then
-            if not at_prison_place(sprite) then return true end
-            cast_instead(sprite, effect, P.FREE_SPELL)
-            local x, y = EEex_Sprite_GetLocalInt(sprite, "CBMP1X"), EEex_Sprite_GetLocalInt(sprite, "CBMP1Y")
-            EEex_Action_QueueResponseStringOnAIBase(string.format("ClearActions(Myself)\nJumpToPoint([%d.%d])", x, y), sprite)
-            log("Freedom in " .. current_area(sprite))
-        end
-        return false
+        -- A maze brings a Freedom of its own, set for the end of its duration: that one is no cast
+        -- Freedom. A cast one works only where he vanished; the tick then tidies up after it.
+        if pending(effect) then return false end
+        return P.scan(sprite).marker and not at_prison_place(sprite)
     end
     return false
 end
@@ -161,9 +181,10 @@ function CBMP1SCR(op403, effect, sprite)
 end
 
 -- Travel. The gather check of LeaveArea (map edge, world map) and LeaveAreaName (exits) skips dead
--- members ("test [rax], 800h; jne"); a member with CBM_P1_OUT skips the same way. rax holds the
--- active stats there; spell states 0-255 are a bit array at +0xC88 in 2.7.3.0.
-P.STATES_AT = 0xC88
+-- members ("test [rax], 800h; jne"). The hooks let one more member skip the same way: the one whose
+-- address stands in a cell the tick keeps, the main character while he is out. rdi is the member;
+-- rax is free there (both paths load it anew). The hook's own labels need #L(...): a bare
+-- "je jmp_success" assembles to a jump to the next instruction.
 P.hook = P.hook or {status = "not installed"}
 
 local function expected(address)
@@ -174,22 +195,10 @@ local function expected(address)
     return true
 end
 
-local function layout_ok(sprite)
-    -- The bit of our net state must sit where the hook reads.
-    if P.NET < 0 or P.NET > 255 or not has(sprite, P.NET) then return nil end
-    local stats = EEex_UDToPtr(sprite:getActiveStats())
-    local byte = EEex_ReadU8(stats + P.STATES_AT + math.floor(P.NET / 8))
-    return EEex_BAnd(byte, ({1, 2, 4, 8, 16, 32, 64, 128})[P.NET % 8 + 1]) ~= 0
-end
-
-function P.install_travel(sprite)
+function P.install_travel()
     local hook = P.hook
     if hook.done then return end
-    local check = layout_ok(sprite)
-    if check == nil then return end          -- try again once the net is on him
     hook.done = true
-    if not check then hook.status = "off: spell states are not where expected" log("travel: " .. hook.status) return end
-    if P.OUT < 0 or P.OUT > 255 then hook.status = "off: state out of range" log("travel: " .. hook.status) return end
     local addresses = {}
     for _, label in ipairs({"CBMP1-LeaveArea-DeadTest", "CBMP1-LeaveAreaName-DeadTest"}) do
         local address = EEex_LabelDefault(label, nil)
@@ -197,20 +206,31 @@ function P.install_travel(sprite)
         if not expected(address) then hook.status = "off: other code at " .. label log("travel: " .. hook.status) return end
         addresses[#addresses + 1] = address
     end
-    local offset = P.STATES_AT + math.floor(P.OUT / 8)
-    local mask = ({1, 2, 4, 8, 16, 32, 64, 128})[P.OUT % 8 + 1]
+    local cell = EEex_Malloc(8)
+    EEex_WritePtr(cell, 0)
     EEex_DisableCodeProtection()
     local ok, err = pcall(function()
         for _, address in ipairs(addresses) do
-            EEex_HookConditionalJumpOnFail(address, 5, {[[
-                test byte ptr ds:[rax+]], offset, [[], ]], mask, [[ #ENDL
-                jnz jmp_success #ENDL
-            ]]})
+            EEex_HookConditionalJumpOnFailWithLabels(address, 5, {
+                {"hook_integrity_watchdog_ignore_registers", {EEex_HookIntegrityWatchdogRegister.RAX}}},
+                EEex_FlattenTable({{[[
+                    mov rax, qword ptr ds:[#$(1)] ]], {cell}, [[ #ENDL
+                    cmp rdi, rax
+                    je #L(jmp_success)
+                ]]}}))
         end
     end)
     EEex_EnableCodeProtection()
+    if ok then hook.cell = cell end
     hook.status = ok and "active" or ("off: " .. tostring(err))
     log("travel: " .. hook.status)
+end
+
+-- Who is out, for the hooks (the cell) and for scripts (the global).
+local function set_out(sprite)
+    if P.hook.cell then EEex_WritePtr(P.hook.cell, sprite and EEex_UDToPtr(sprite) or 0) end
+    local value = sprite and 1 or 0
+    if EEex_GameState_GetGlobalInt("CBM_P1_OUT") ~= value then EEex_GameState_SetGlobalInt("CBM_P1_OUT", value) end
 end
 
 -- The world tick, about once a second from the top of the campaign world scripts. Returns true when
@@ -233,15 +253,15 @@ end
 local function can_act(s)
     local state = EEex_Sprite_GetState(s)
     if EEex_BAnd(state, STATE_DEAD) ~= 0 or EEex_BAnd(state, STATE_CHARMED) ~= 0 then return false end
-    if has(s, P.OUT) then return false end
     return s.m_activeImprisonment ~= 0
 end
 
--- A companion back in the party: the party AI script the game emptied comes back. One whose save
--- kept it in the party just loses the mark.
+-- A companion back in the party: the party AI script it had comes back. The game emptied the slot
+-- when it left, and joining puts a standard script there (lab: DPLAYER2). One whose save kept it
+-- in the party just loses the mark.
 local function companion_back(s)
     local stored = EEex_Sprite_GetLocalString(s, "CBMP1DS") or ""
-    if stored ~= "" and EEex_AIBase_GetScriptLevelResRef(s, 7) == "" then
+    if stored ~= "" and EEex_AIBase_GetScriptLevelResRef(s, 7):upper() ~= stored:upper() then
         EEex_AIBase_SetScriptLevelResRef(s, 7, stored, EEex_Sprite_GetLocalInt(s, "CBMP1PS") == 1)
         log("party AI script back: " .. stored)
     end
@@ -249,27 +269,73 @@ local function companion_back(s)
 end
 
 P.net_for = P.net_for or {}
+P.net_at, P.prison_at, P.free_at = P.net_at or -1000, P.prison_at or -1000, P.free_at or -1000
 
-local function tick()
+local function net_on(s)
+    EEex_GameObject_ApplyEffect(s, {effectID = 146, dwFlags = 1, res = P.NET_SPELL, durationType = 1,
+        sourceID = s.m_id, sourceTarget = s.m_id})
+end
+
+local function tick(now)
+    P.install_travel()
     local p1 = P.protagonist()
-    if not p1 then return false end
+    if not p1 then set_out(nil) return false end
     local members = party()
     for _, s in ipairs(members) do
-        if EEex_BAnd(EEex_Sprite_GetState(s), STATE_DEAD) == 0 then
+        -- An imprisoned companion's states cannot be read; it has left the party anyway.
+        if s.m_id ~= p1.m_id and s.m_activeImprisonment ~= 0 and EEex_BAnd(EEex_Sprite_GetState(s), STATE_DEAD) == 0 then
             if not has(s, P.NET) then
                 if not P.net_for[s.m_id] then
                     P.net_for[s.m_id] = true
-                    EEex_GameObject_ApplyEffect(s, {effectID = 146, dwFlags = 1, res = P.NET_SPELL, durationType = 1,
-                        sourceID = s.m_id, sourceTarget = s.m_id})
+                    net_on(s)
                 end
-            elseif s.m_id ~= p1.m_id and EEex_Sprite_GetLocalInt(s, "CBMP1KO") == 1 then
+            elseif EEex_Sprite_GetLocalInt(s, "CBMP1KO") == 1 then
                 companion_back(s)
             end
         end
     end
-    if EEex_BAnd(EEex_Sprite_GetState(p1), STATE_DEAD) ~= 0 or not has(p1, P.NET) then return false end
-    P.install_travel(p1)
-    if not has(p1, P.OUT) then return false end
+    if EEex_BAnd(EEex_Sprite_GetState(p1), STATE_DEAD) ~= 0 then set_out(nil) return false end
+    local mine = P.scan(p1)
+    set_out((mine.statue or mine.maze) and p1 or nil)
+    if not mine.net then
+        if now - P.net_at >= 75 or now < P.net_at then
+            P.net_at = now
+            net_on(p1)
+        end
+        return false
+    end
+    local function imprison(why)
+        EEex_GameObject_ApplyEffect(p1, {effectID = 213, dwFlags = 1, durationType = 0,
+            duration = P.PRISON_DURATION, sourceID = p1.m_id, sourceTarget = p1.m_id,
+            m_sourceRes = P.PRISON_SPELL})
+        log(why)
+    end
+    if mine.marker and not mine.maze then
+        -- A Freedom took the maze away. The engine frees every prisoner of an area through whoever
+        -- the spell reaches there, past his own screen (lab), so the place is checked here: where
+        -- he vanished he is free and back on his spot; anywhere else the prison closes again.
+        if not at_prison_place(p1) then
+            imprison("Freedom away from where he vanished: imprisoned again")
+            return false
+        end
+        if now - P.free_at >= 30 or now < P.free_at then
+            P.free_at = now
+            EEex_GameObject_ApplyEffect(p1, {effectID = 146, dwFlags = 1, res = P.FREE_SPELL, durationType = 1,
+                sourceID = p1.m_id, sourceTarget = p1.m_id})
+            -- No ClearActions in front: it would take the jump with it.
+            EEex_Action_QueueResponseStringOnAIBase(string.format("JumpToPoint([%d.%d])",
+                EEex_Sprite_GetLocalInt(p1, "CBMP1X"), EEex_Sprite_GetLocalInt(p1, "CBMP1Y")), p1)
+            log("Freedom in " .. current_area(p1))
+        end
+        return false
+    end
+    if mine.maze and p1.m_activeImprisonment ~= 0 and (now - P.prison_at >= 30 or now < P.prison_at) then
+        -- A cutscene sets every imprisoned party member active again; imprison him again after it.
+        -- The engine keeps waking him for a few seconds after a scene, hence the pause.
+        P.prison_at = now
+        imprison("imprisoned again after a cutscene")
+    end
+    if not (mine.statue or mine.maze) then return false end
     local helpers = 0
     for _, s in ipairs(members) do
         if s.m_id ~= p1.m_id and can_act(s) then helpers = helpers + 1 end
@@ -277,13 +343,6 @@ local function tick()
     if helpers == 0 then
         log("nobody else can act: game over")
         return true
-    end
-    -- A cutscene sets every imprisoned party member active again; imprison him again after it.
-    if has(p1, P.PRISON) and p1.m_activeImprisonment ~= 0 then
-        EEex_GameObject_ApplyEffect(p1, {effectID = 213, dwFlags = 1, durationType = 0,
-            duration = P.PRISON_DURATION, sourceID = p1.m_id, sourceTarget = p1.m_id,
-            m_sourceRes = P.PRISON_SPELL})
-        log("imprisoned again after a cutscene")
     end
     -- A script moved everyone who can act away without him: follow them. A member who walked off
     -- alone through an exit for one does not count while another stays with him.
@@ -307,7 +366,7 @@ function CBMP1_Tick()
         local now = game().m_worldTime.m_gameTime
         if now >= P.last and now - P.last < 15 then return false end
         P.last = now
-        return tick()
+        return tick(now)
     end)
     if ok then return result == true end
     P.errors = P.errors + 1

@@ -80,7 +80,7 @@ BEGIN
     ACTION_IF FILE_EXISTS_IN_GAME ~ar4000.bcs~ BEGIN
       COPY_EXISTING ~ar4000.bcs~ ~override~
         DECOMPILE_AND_PATCH BEGIN
-          REPLACE_TEXTUALLY ~^\([ %TAB%]*\)PartyRested()~ ~\1PartyRested()%LNL%\1!CheckSpellState(Protagonist,CBM_P1_OUT)~
+          REPLACE_TEXTUALLY ~^\([ %TAB%]*\)PartyRested()~ ~\1PartyRested()%LNL%\1!Global("CBM_P1_OUT","GLOBAL",1)~
         END
       BUT_ONLY
     END

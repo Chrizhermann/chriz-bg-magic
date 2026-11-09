@@ -13,13 +13,13 @@ from test_resources import check_every_resource, definitions, install
 EMPTY_BCS = b"SC\nSC\n"
 CAMPAIGN = ie.make_2da(["WORLDSCRIPT", "DESCRIPTION"], [("SOA", ["BALDUR", "-1"]), ("TOB", ["BALDUR25", "-1"]),
                                                         ("BP1", ["BALDUR", "-1"])])
-PARTY_RESTED, CHECK_SPELL_STATE = 16531, 16550
+PARTY_RESTED, GLOBAL = 16531, 0x400F
 EEEX = {
     "M___EEex.lua": b"-- synthetic EEex bootstrap\n",
     "TRIGGER.IDS": ie.make_ids([(0x410E, "EEex_LuaTrigger(S:Chunk*)"), (PARTY_RESTED, "PartyRested()"),
-                                (CHECK_SPELL_STATE, "CheckSpellState(O:Object*,I:State*SPLSTATE)")]),
+                                (GLOBAL, "Global(S:Name*,S:Area*,I:Value*)")]),
     "ACTION.IDS": ie.make_ids([(0, "NoAction()"), (366, "GameOver(I:StrRef*)")]),
-    "OBJECT.IDS": ie.make_ids([(1, "Myself"), (27, "Protagonist")]),
+    "OBJECT.IDS": ie.make_ids([(1, "Myself")]),
 }
 NULL_OB = b'0 0 0 0 0 0 0 0 0 0 0 0 ""OB\n'
 # AR4000: one block, PartyRested() -> NoAction(), as the Solar's call after a rest starts.
@@ -96,14 +96,13 @@ def player1_without_and_with_eeex(work, weidu):
         script = g.file(f"override/{world}.BCS")
         check(script is not None and script.count(b"CBMP1_Tick") == 1, f"{world}: the tick")
     check(g.file("override/BDBALDUR.BCS") is None, "a world script the game does not have")
-    out_state = found.group(2).encode()
-    guard = str(CHECK_SPELL_STATE).encode() + b" " + out_state + b" 0 "
+    # Scripts read the global the tick keeps: a prisoner's spell states are not kept up.
+    guard = str(GLOBAL).encode() + b' 1 0 0 0 "GLOBALCBM_P1_OUT"'
     for dream in ("PLAYER1D", "AERIED", "AERIE25D"):
         script = g.file(f"override/{dream}.BCS")
-        check(script is not None and script.count(guard) == 1 and b'0 0 0 0 0 0 0 27 0 0 0 0 ""OB' in script,
-              f"{dream}: no dream while he is out")
+        check(script is not None and script.count(guard) == 1, f"{dream}: no dream while he is out")
     solar = g.file("override/AR4000.BCS")
-    check(solar is not None and solar.count(str(CHECK_SPELL_STATE).encode() + b" " + out_state + b" 1 ") == 1
+    check(solar is not None and solar.count(str(GLOBAL).encode() + b' 1 1 0 0 "GLOBALCBM_P1_OUT"') == 1
           and solar.count(str(PARTY_RESTED).encode() + b" 0 0 ") == 1, "the Solar waits too")
     installed = g.tree()
     install(g)
@@ -124,4 +123,4 @@ def player1_lua_runtime_lua53_and_luajit(work, weidu):
     for implementation in ("lupa.lua53", "lupa.luajit21"):
         runtime = importlib.import_module(implementation).LuaRuntime()
         count = runtime.execute(suite)(template)
-        check(count >= 44, f"{implementation}: only {count} runtime checks ran")
+        check(count >= 60, f"{implementation}: only {count} runtime checks ran")

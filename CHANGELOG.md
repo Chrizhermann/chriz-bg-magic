@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- The main character as a statue or imprisoned (needs EEex; work in progress, not yet tested in a
-  game): petrification and imprisonment no longer end the game. He becomes a tough statue or
+- The main character as a statue or imprisoned (needs EEex; dead ends without a cure and the
+  travel block for story areas still to come): petrification and imprisonment no longer end the game. He becomes a tough statue or
   vanishes into a prison, the party takes him along when it travels, and only Stone to Flesh, or
   Freedom where he vanished, bring him back. The game ends when nobody else in the party can act.
   Petrified or imprisoned companions leave the party as before, but once cured they rejoin with

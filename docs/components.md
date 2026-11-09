@@ -706,8 +706,9 @@ descriptions still describe the old behaviour.
 
 ## The main character as a statue or imprisoned (`cbmagic_main_character`, `lua/M_CBMP1.lua`)
 
-Needs EEex; without it nothing here is installed and the game ends as before. Work in progress:
-tested offline only so far, not yet in a game.
+Needs EEex; without it nothing here is installed and the game ends as before. Seen working in a
+BG2:EE lab game (see the evidence file); dead ends without a cure and the travel block for story
+areas are not built yet.
 
 - **Petrification no longer ends the game.** On the main character, petrification (opcode 134,
   opcode 13 "stoned") becomes a statue (`CBMP1ST`): held (opcode 185, which Free Action does not
@@ -717,29 +718,38 @@ tested offline only so far, not yet in a game.
 - **Imprisonment no longer ends the game.** It becomes a prison (`CBMP1IM`): a maze with an
   endless fixed duration (opcode 213, parameter 2 = 1) and the Imprisonment icon.
 - **Only the real cures help.** Stone to Flesh (opcode 43) from any source ends the statue
-  (`CBMP1CU`). Freedom (opcode 212) ends the prison only in the area where he vanished and puts him
-  back on that spot (`CBMP1FR`), as the spell's text says.
+  (`CBMP1CU`). Freedom ends the prison only in the area where he vanished and puts him back on
+  that spot (`CBMP1FR`), as the spell's text says. The engine frees every prisoner of an area
+  through whoever a Freedom reaches there, past his own screen, so the tick checks the place:
+  away from it the prison closes again within a second.
 - **How it hooks in.** A screen (EEex opcode 403, `CBMP1NT`, kept through death) sees such effects
   before the engine rolls their save, so it blocks them and casts the state through opcode 146
   with the old effect's save, level and source; opcode immunity (Protection from Petrification) is
   checked by the screen. Other creatures keep the game's own petrification.
+- **A prisoner's spell states are not kept up** by the engine: they read unset, and bits written
+  into his stats are wiped within seconds. So the module reads the prison from his effect list
+  (`P.scan`), and scripts get the global `CBM_P1_OUT` (1 while he is a statue or imprisoned). The
+  spell state `CBM_P1_OUT` is reliable for the statue only.
 - **Companions** keep the game's petrification and imprisonment: they leave the party as before,
-  so the others can fetch help. The game also empties their party AI slot, which made them come
-  back broken. The screen (on every party member) keeps that script first; when Stone to Flesh or
-  Freedom reaches them, they rejoin the party if there is room, and the tick gives the script back.
+  so the others can fetch help. The game also empties their party AI slot, and joining again puts
+  a standard script there. The screen (on every party member) keeps their own script first; when
+  Stone to Flesh or Freedom reaches them, they rejoin the party if there is room, and the tick
+  gives the script back.
 - **The party takes him along.** Two jump hooks in the engine's gather check (`LeaveArea` for map
-  edges and the world map, `LeaveAreaName` for exits) let a member with the state `CBM_P1_OUT`
-  pass like a dead one, so the engine moves him with the party. The patterns
-  (`eeex/CBMP1.db`, `Baldur.exe` 2.7.3.0) and the bytes are checked at start; anything else keeps
-  the hooks off, and then the party cannot leave while he is out.
+  edges and the world map, `LeaveAreaName` for exits) let one more member pass like a dead one:
+  the one whose address stands in a cell the tick keeps. The engine then moves him with the
+  party. The patterns (`eeex/CBMP1.db`, `Baldur.exe` 2.7.3.0) and the bytes are checked at start;
+  anything else keeps the hooks off, and then the party cannot leave while he is out.
 - **The world tick** (`baf/cbmp1.baf` on top of every campaign's world script from
-  `CAMPAIGN.2DA`): it puts the screen on him, ends the game when nobody else in the party can act
-  (alive, not charmed, not out), imprisons him again after a cutscene set him free, and pulls him
-  after the party when a script moved everyone else away.
-- **Dreams wait** while he is out (`baf/cbmp1_dream.baf`): his own dream script (`PLAYER1D`), every
-  companion's dream script from the campaigns' dialog tables (`PDIALOG`, `25DIALOG`, `BGDIALOG`,
-  `BDDIALOG`) and the Solar's calls after a rest in Throne of Bhaal (`PartyRested()` in `AR4000`).
-  A dream that did not run keeps its variable unset and comes at the first rest after he is free.
+  `CAMPAIGN.2DA`, or on `BALDUR` and `BALDUR25` where that table names none): it puts the screen
+  on every member, keeps the cell and the global, ends the game when nobody else in the party can
+  act (alive, not charmed, not imprisoned), imprisons him again after a cutscene woke him, tidies
+  up after a Freedom, and pulls him after the party when a script moved everyone else away.
+- **Dreams wait** while he is out (`baf/cbmp1_dream.baf`, on the global): his own dream script
+  (`PLAYER1D`), every companion's dream script from the campaigns' dialog tables (`PDIALOG`,
+  `25DIALOG`, `BGDIALOG`, `BDDIALOG`) and the Solar's calls after a rest in Throne of Bhaal
+  (`PartyRested()` in `AR4000`). A dream that did not run keeps its variable unset and comes at
+  the first rest after he is free.
 
 ## Celestial summons (`cbmagic_main`)
 
