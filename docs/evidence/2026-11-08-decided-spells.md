@@ -214,6 +214,21 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
   dreams at a rest, the statue hit in a fight, EET with its other campaigns, a save and reload
   while he is out, the look on screen.
 
+## Touch spells (2026-11-10)
+
+- Open since the healing changes: in the arena an ordered attack with a touch spell had never
+  landed. Now a spawned Korgan without gear or scripts casts on himself and strikes a held target
+  with Hit Points to spare (group `touch`, BG2:EE lab, 12 of 12):
+  - Each spell gave its touch weapon (`CBHT40`, `CRITICAL`, `CBHT70`), and the first hit used it up.
+  - A huge spider lost 25 to Cause Serious Wounds (3d8 + 7) and 34 to Cause Critical Wounds
+    (4d8 + 12); Harm left it 1 Hit Point.
+  - A zombie, hurt first, gained 26 from Cause Serious Wounds and 30 from Cause Critical Wounds;
+    Harm healed it completely.
+- Not run: a saving throw against the touch, Cause Light, Moderate and Medium Wounds (cast at a
+  distance, covered by the earlier batches), IWDification's variants, EET.
+- The lab group `floor` had dropped out of `tests/lab/run_batches.py` with the Polymorph Self
+  commit (the list still named it); it is back and ran 10 of 10.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

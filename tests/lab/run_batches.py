@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor", "polymorph", "shapechange")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor", "polymorph", "shapechange", "touch")
 
 
 def lua_list(values):
@@ -167,6 +167,142 @@ def fist_hits(c, tag, seconds=24):
 
 
 MIGHT, ANIMAL = None, None
+
+
+def floor(c, check):
+    # A spell that gives a fixed Strength never lowers a higher one; bonuses and penalties count on
+    # top of it, in either order. A timed set stands for what the game works out without the floor.
+    pair = lambda s: (s["str"], s["strex"])  # noqa: E731
+    spells = ["SPPR412", "SPPR507", "SPWI214", "SPPR312", *(r for r in (MIGHT, ANIMAL) if r)]
+
+    def fresh(i, strength, extra=0):
+        c.p(f"fl-clear{i}-{strength}", f"clear({i}, {lua_strings(spells)})")
+        c.p(f"fl-set{i}-{strength}", f"fx({i}, 44, {strength}, 1, 900)")
+        c.p(f"fl-setx{i}-{strength}", f"fx({i}, 97, {extra}, 1, 900)")
+        time.sleep(1.5)
+        return pair(c.p(f"fl-before{i}-{strength}", f"stats({i})"))
+
+    def cast(i, res, wait=2.5):
+        c.p(f"fl-cast{i}-{res}", f'on_member({i}, "{res}")')
+        time.sleep(wait)
+        return pair(c.p(f"fl-after{i}-{res}", f"stats({i})"))
+
+    last = None
+    for name, res, cases in (("Divine Power", "SPPR412", (((10, 0), (18, 100)), ((19, 0), (19, 0)))),
+                             ("Champion's Strength", "SPPR507", (((12, 0), (18, 100)), ((20, 0), (20, 0)))),
+                             ("Strength", "SPWI214", (((10, 0), (18, 50)), ((18, 30), (18, 80)), ((19, 0), (19, 0)))),
+                             ("Animal Rage", ANIMAL, (((10, 0), (19, 0)), ((22, 0), (22, 0))))):
+        if not res:
+            continue
+        for (strength, extra), expected in cases:
+            before = fresh(0, strength, extra)
+            after = cast(0, res)
+            check(f"{name}: {strength}/{extra} becomes {expected[0]}/{expected[1]}", after == expected,
+                  before=before, after=after)
+            last = (strength, extra)
+    c.p("fl-end", f"clear(0, {lua_strings(spells)})")
+    time.sleep(2)
+    gone = pair(c.p("fl-gone", "stats(0)"))
+    check("the floor gone: Strength back to what the game works out", gone == last, gone=gone, expected=last)
+
+    if MIGHT:
+        results = {}
+        for order in ((MIGHT, "SPPR412"), ("SPPR412", MIGHT)):
+            fresh(0, 10)
+            for res in order:
+                after = cast(0, res)
+            bonus = [e["p1"] for e in c.p(f"fl-might-{order[0]}", "ops(0, {132})") or []]
+            results[order[0]] = (after, bonus)
+        first, second = results[MIGHT], results["SPPR412"]
+        check("Draw Upon Divine Might counts on top of Divine Power, in either order",
+              first[0] == second[0] and bool(first[1]) and first[0][0] == 18 + first[1][0],
+              might_first=first, divine_first=second)
+        c.p("fl-end2", f"clear(0, {lua_strings(spells)})")
+
+    # In a fight: Korgan without his gear, Strength 10, under Divine Power punches for 7 or 8.
+    c.p("fl-clear", "remove_all_others()")
+    time.sleep(1.5)
+    c.p("fl-foe", 'spawn("SPIDHU01", 110, 0)')
+    c.p("fl-korgan", 'spawn("KORGAN15", 60, 0)')
+    time.sleep(2.5)
+    c.p("fl-live", 'fx("spidhu01", 208, 1, 0, 600)')
+    c.p("fl-hp", 'fx("spidhu01", 18, 900, 0, 600)')
+    c.p("fl-ally", """order("korgan", 'ChangeEnemyAlly(Myself,ALLY)')""")
+    c.p("fl-strip", """order("korgan", 'DestroyAllEquipment()')""")
+    c.p("fl-weak", 'fx("korgan", 44, 10, 1, 600)')
+    time.sleep(2)
+    weak = fist_hits(c, "fl-weak", 16)
+    c.p("fl-divine", 'cast_now("korgan", "SPPR412")')
+    time.sleep(2.5)
+    strong_stats = c.p("fl-strong-stats", 'stats("korgan")')
+    strong = fist_hits(c, "fl-strong", 20)
+    check("Divine Power in a fight: Strength 10 punches for 1 or 2, under the floor 7 or 8",
+          bool(weak) and max(weak) <= 4 and bool(strong) and min(strong) >= 7, weak=weak, strong=strong,
+          stats=strong_stats)
+    c.p("fl-tidy", "remove_all_others()")
+
+
+# Touch spells: (the touch weapon the spell gives, lowest and highest roll); Harm leaves 1 Hit Point.
+TOUCH = {
+    "SPPR414": ("Cause Serious Wounds", "CBHT40", 10, 31),      # 3d8 + 7
+    "SPPR510": ("Cause Critical Wounds", "CRITICAL", 16, 44),   # 4d8 + 12
+    "SPPR608": ("Harm", "CBHT70", None, None),
+}
+
+
+def first_change(c, tag, target, seconds=16):
+    """The target's Hit Points before and after the first change while Korgan attacks it."""
+    c.p(f"{tag}-unpause", "unpause()")
+    start = c.p(f"{tag}-at", f'creature("{target}")')["hp"]
+    c.p(f"{tag}-go", """order("korgan", 'Attack(NearestEnemyOf(Myself))')""")
+    for i in range(int(seconds / 0.25)):
+        time.sleep(0.25)
+        if i % 8 == 0:
+            c.p(f"{tag}-unpause-{i}", "unpause()")
+        hp = c.p(f"{tag}-{i}", f'creature("{target}")')["hp"]
+        if hp != start:
+            return start, hp
+    return start, start
+
+
+def touch(c, check):
+    # Cause Serious Wounds, Cause Critical Wounds and Harm give a touch weapon; its first hit harms the
+    # living and heals the undead. A spawned Korgan without gear or scripts casts and strikes a held
+    # huge spider and a held zombie, both with Hit Points to spare.
+    for res, name, undead in (("SPIDHU01", "spidhu01", False), ("ZOMBIE01", "Zombie", True)):
+        for spell, (title, weapon, low, high) in TOUCH.items():
+            tag = f"to-{name[:4]}-{spell}"
+            fresh_foe(c, tag, res, name, 110)
+            c.p(f"{tag}-hp", f'fx("{name}", 18, 900, 0, 600)')
+            c.p(f"{tag}-korgan", 'spawn("KORGAN15", 60, 0)')
+            time.sleep(2.5)
+            for level in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+                c.p(f"{tag}-script-{level}", f"""order("korgan", 'ChangeAIScript("",{level})')""")
+            c.p(f"{tag}-ally", """order("korgan", 'ChangeEnemyAlly(Myself,ALLY)')""")
+            c.p(f"{tag}-strip", """order("korgan", 'DestroyAllEquipment()')""")
+            c.p(f"{tag}-live", 'fx("korgan", 208, 1, 0, 600)')
+            time.sleep(2)
+            full = c.p(f"{tag}-full", f'creature("{name}")')["hp"]
+            if undead:
+                c.p(f"{tag}-hurt", f'damage("{name}", 400)')
+                time.sleep(1)
+            c.p(f"{tag}-cast", f'cast_now("korgan", "{spell}")')
+            time.sleep(1.5)
+            armed = c.p(f"{tag}-armed", 'form_state("korgan")')["items"]
+            start, after = first_change(c, tag, name)
+            spent = c.p(f"{tag}-spent", 'form_state("korgan")')["items"]
+            facts = dict(full=full, start=start, after=after, armed=armed, spent=spent)
+            check(f"{title}: the spell gives its touch weapon, and the hit uses it up",
+                  weapon in armed and weapon not in spent, **facts)
+            if undead and low is None:
+                check(f"{title} on a zombie: healed completely", after == full and start < full, **facts)
+            elif undead:
+                check(f"{title} on a zombie: heals {low} to {high}", low <= after - start <= high, **facts)
+            elif low is None:
+                check(f"{title} on a spider: down to 1 Hit Point", after == 1 and start > 1, **facts)
+            else:
+                check(f"{title} on a spider: {low} to {high} damage", low <= start - after <= high, **facts)
+    c.p("to-tidy", "remove_all_others()")
 
 
 # Form innate: (animation, Strength, exceptional, Dexterity, attacks, weapon, power it gives).
