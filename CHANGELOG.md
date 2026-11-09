@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Texts: a scroll now shows the description of its spell wherever this mod writes that
+  description (nine of the game's scrolls had kept the old text). The summoned elementals are
+  named by size, the same for every element: Lesser, plain, Greater, Elder.
 - The main character as a statue or imprisoned (needs EEex): petrification and imprisonment no longer end the game. He becomes a tough statue or
   vanishes into a prison, the party takes him along when it travels, and only Stone to Flesh, or
   Freedom where he vanished, bring him back. The game ends when nobody else in the party can act.

@@ -704,10 +704,21 @@ old strings, which other resources may share, stay. The text patterns exist only
 English so far: on a game in another language the installer warns that those
 descriptions still describe the old behaviour.
 
+- **Scrolls** (`cbmagic_scroll_texts`, generated, and `cbmagic_text_to_scrolls`): every scroll
+  of the game that casts or teaches a spell whose description this mod writes shows that
+  description, also a scroll the mod does not ship. Nine of the game's own scrolls had kept the
+  old text (Polymorph Self, Shapechange, Simulacrum, Chaos, Champion's Strength, the three
+  Conjure Lesser Elementals, the Restoration scroll).
+- **Elementals** (`cbmagic_elemental_names`): the elementals this mod summons carry one name per
+  size, the same for every element: Lesser (8 Hit Dice), plain (12), Greater (16) and Elder (24).
+  The files had the game's names, which called every water elemental "Greater Water Elemental"
+  and every earth and fire elemental plainly by its element.
+
 ## The main character as a statue or imprisoned (`cbmagic_main_character`, `lua/M_CBMP1.lua`)
 
 Needs EEex; without it nothing here is installed and the game ends as before. Seen working in a
-BG2:EE lab game (see the evidence file). A travel block for story areas is not built.
+BG2:EE lab game (see the evidence file). Travel into story areas is not blocked while he is out:
+that is left out for now, to be judged in play (a block could cut the way to a cure).
 
 - **Petrification no longer ends the game.** On the main character, petrification (opcode 134,
   opcode 13 "stoned") becomes a statue (`CBMP1ST`): held (opcode 185, which Free Action does not

@@ -281,6 +281,21 @@ BEGIN
   END
 END
 
+// The description a spell carries now goes onto each of its scrolls (English games, as above).
+DEFINE_ACTION_FUNCTION cbmagic_text_to_scrolls
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+    OUTER_SET text = 0 - 1
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x54) BEGIN READ_LONG 0x50 text END
+    BUT_ONLY
+    ACTION_IF (text >= 0) BEGIN
+      LAF cbmagic_write_text INT_VAR text STR_VAR spell END
+    END
+  END
+END
+
 // Scrolls of every spell: for each ITM of type 11 (scroll) whose abilities cast or teach a
 // spell (opcode 146, 147 or 148 naming it), $cbmagic_scrolls(~<SPELL>~) lists the scroll
 // (space-separated, upper case). A macro, so the index stays in the caller's scope: the
@@ -455,6 +470,36 @@ BEGIN
       OUTER_SET text = RESOLVE_STR_REF (@60108)
       LAF cbmagic_write_text INT_VAR text STR_VAR spell = EVAL ~%rage%~ END
     END
+  END
+END
+
+// The elementals this mod summons carry one name per size, the same for every element: Lesser
+// (8 Hit Dice), plain (12), Greater (16) and Elder (24). The files came with the game's names,
+// which called every water elemental "Greater" and every earth and fire elemental plain.
+DEFINE_ACTION_FUNCTION cbmagic_elemental_names
+BEGIN
+  // As with the descriptions: English names only for an English game.
+  LAF cbmagic_game_language RET lang END
+  ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+    COPY ~chriz-bg-magic/files/cbmwla.cre~ ~override/cbmwla.cre~ SAY NAME1 @60120 SAY NAME2 @60120
+    COPY ~chriz-bg-magic/files/cbmwa1.cre~ ~override/cbmwa1.cre~ SAY NAME1 @60121 SAY NAME2 @60121
+    COPY ~chriz-bg-magic/files/cbmair1.cre~ ~override/cbmair1.cre~ SAY NAME1 @60121 SAY NAME2 @60121
+    COPY ~chriz-bg-magic/files/cbmwa2.cre~ ~override/cbmwa2.cre~ SAY NAME1 @60122 SAY NAME2 @60122
+    COPY ~chriz-bg-magic/files/cbmair2.cre~ ~override/cbmair2.cre~ SAY NAME1 @60122 SAY NAME2 @60122
+    COPY ~chriz-bg-magic/files/cbmwa3.cre~ ~override/cbmwa3.cre~ SAY NAME1 @60123 SAY NAME2 @60123
+    COPY ~chriz-bg-magic/files/cbmair3.cre~ ~override/cbmair3.cre~ SAY NAME1 @60123 SAY NAME2 @60123
+    COPY ~chriz-bg-magic/files/cbmwle.cre~ ~override/cbmwle.cre~ SAY NAME1 @60124 SAY NAME2 @60124
+    COPY ~chriz-bg-magic/files/cbmwe1.cre~ ~override/cbmwe1.cre~ SAY NAME1 @60125 SAY NAME2 @60125
+    COPY ~chriz-bg-magic/files/cbmwe2.cre~ ~override/cbmwe2.cre~ SAY NAME1 @60126 SAY NAME2 @60126
+    COPY ~chriz-bg-magic/files/cbmwe3.cre~ ~override/cbmwe3.cre~ SAY NAME1 @60127 SAY NAME2 @60127
+    COPY ~chriz-bg-magic/files/cbmwlf.cre~ ~override/cbmwlf.cre~ SAY NAME1 @60128 SAY NAME2 @60128
+    COPY ~chriz-bg-magic/files/cbmwf1.cre~ ~override/cbmwf1.cre~ SAY NAME1 @60129 SAY NAME2 @60129
+    COPY ~chriz-bg-magic/files/cbmwf2.cre~ ~override/cbmwf2.cre~ SAY NAME1 @60130 SAY NAME2 @60130
+    COPY ~chriz-bg-magic/files/cbmwf3.cre~ ~override/cbmwf3.cre~ SAY NAME1 @60131 SAY NAME2 @60131
+    COPY ~chriz-bg-magic/files/cbmwlw.cre~ ~override/cbmwlw.cre~ SAY NAME1 @60132 SAY NAME2 @60132
+    COPY ~chriz-bg-magic/files/cbmww1.cre~ ~override/cbmww1.cre~ SAY NAME1 @60133 SAY NAME2 @60133
+    COPY ~chriz-bg-magic/files/cbmww2.cre~ ~override/cbmww2.cre~ SAY NAME1 @60134 SAY NAME2 @60134
+    COPY ~chriz-bg-magic/files/cbmww3.cre~ ~override/cbmww3.cre~ SAY NAME1 @60135 SAY NAME2 @60135
   END
 END
 

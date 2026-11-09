@@ -103,11 +103,13 @@ def build(target=MOD):
         source = f"res/{folder}/{name}" if folder else f"res/{name}"
         return "\n".join([f"  COPY ~chriz-bg-magic/{source}~ ~override/{name}~", *lines])
 
-    main = []
+    main, own_text = [], []
     for path in sorted(DEFS.glob("*.json")):
         if path.name == "tables.json":
             continue
         name, lines = written(path, "")
+        if name.endswith(".spl") and isinstance(json.loads(path.read_text(encoding="utf-8"))["header"]["description"], dict):
+            own_text.append(name[:-4])
         if name in added:
             symbol = added[name]
             added_blocks.append((name, symbol, lines))
@@ -168,6 +170,13 @@ def build(target=MOD):
         out.extend(lines)
     out.append("  // Spells and items, overwritten.")
     out.extend(blocks)
+    out.append("END\n")
+    out.append("// A scroll shows its spell's description: every scroll of this game that casts or teaches a spell")
+    out.append("// whose text this mod writes, also one this mod does not ship.")
+    out.append("DEFINE_ACTION_FUNCTION cbmagic_scroll_texts\nBEGIN")
+    for name in own_text:
+        if name + ".spl" not in added:
+            out.append(f"  LAF cbmagic_text_to_scrolls STR_VAR spell = ~{name}~ END")
     out.append("END\n")
     tpa = target / "lib" / "cbmagic_resources.tpa"
     tra = target / "languages" / "english" / "resources.tra"

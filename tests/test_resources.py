@@ -140,6 +140,17 @@ def differs(old, new):
     return f"{len(old)} and {len(new)} bytes, first difference at {first:#x}"
 
 
+# The elementals the mod summons and what an English game calls them: Lesser (8 Hit Dice), plain
+# (12), Greater (16) and Elder (24), the same for every element.
+ELEMENTALS = {}
+for _letter, _element in (("a", "Air"), ("e", "Earth"), ("f", "Fire"), ("w", "Water")):
+    for _tier, _prefix in (("l", "Lesser "), ("1", ""), ("2", "Greater "), ("3", "Elder ")):
+        _file = f"cbmwl{_letter}.cre" if _tier == "l" else f"cbmw{_letter}{_tier}.cre"
+        ELEMENTALS[_file] = f"{_prefix}{_element} Elemental"
+        if _letter == "a" and _tier != "l":
+            ELEMENTALS[f"cbmair{_tier}.cre"] = f"{_prefix}{_element} Elemental"
+
+
 def check_every_resource(g, derived=()):
     """Every file of defs/ and files/ is in override as defined, whatever stood there before.
     `derived`: files an install rightly builds from the spells of the game it finds."""
@@ -162,8 +173,17 @@ def check_every_resource(g, derived=()):
             wrong.append(f"{name}: {differs(expected, actual)}")
     check(not wrong, f"{len(wrong)} resources differ from defs/: {wrong[:12]}")
     for path in sorted((fg.MOD / "files").iterdir()):
-        if path.name not in derived:
-            check(g.file(f"override/{path.name}") == path.read_bytes(), f"{path.name} differs from files/")
+        if path.name in derived:
+            continue
+        actual, shipped = g.file(f"override/{path.name}"), path.read_bytes()
+        if path.name in ELEMENTALS and g.lang == "en_US":
+            # An English game gets the mod's names: one per size, the same for every element.
+            check(actual is not None and actual[:8] + actual[16:] == shipped[:8] + shipped[16:],
+                  f"{path.name} differs from files/ in more than its names")
+            names = {g.tlk(n) for n in struct.unpack_from("<ii", actual, 8)}
+            check(names == {ELEMENTALS[path.name]}, f"{path.name} is called {names}")
+        else:
+            check(actual == shipped, f"{path.name} differs from files/")
     return numbers
 
 
@@ -547,6 +567,28 @@ def what_needs_eeex_stays_out_without_it(work, weidu):
     install(g)
     check(any(e["opcode"] == 402 for e in g.spl("SPWI608")["abilities"][0]["effects"]), "EEex: ours")
     check_every_resource(g)
+
+
+@test
+def scrolls_carry_their_spells_text(work, weidu):
+    """A scroll shows its spell's description: also a scroll this mod does not ship (the game's own
+    Polymorph Self scroll, another mod's), whatever it said. Other languages keep theirs."""
+    stale = [[fx.fx(opcode=147, target=1, timing=1, resource="SPWI416")]]
+    casts = [[fx.fx(opcode=146, target=1, timing=1, resource="spwi916")]]
+    other = [[fx.fx(opcode=147, target=1, timing=1, resource="XXOTHER")]]
+    biff = fx.game(SCRL5M_ITM=ie.make_itm(stale, desc=1), XXSHAPE_ITM=ie.make_itm(casts, desc=0),
+                   XXOTHER_ITM=ie.make_itm(other, desc=1), XXWAND_ITM=ie.make_itm(stale, desc=1, item_type=35))
+    g = fg.FakeGame(work / "english", weidu, tlk=fx.tlk(), biff=biff)
+    install(g)
+    check_every_resource(g)
+    for scroll, spell, form in (("SCRL5M", "SPWI416", "Hill Giant"), ("XXSHAPE", "SPWI916", "Mind Flayer")):
+        text = g.itm_descs(scroll)[1]
+        check(text == g.spl(spell)["desc"] and form in g.tlk(text), f"{scroll}: {g.tlk(text)[:60]!r}")
+    check(g.file("override/XXOTHER.ITM") is None, "a scroll of another spell was touched")
+    check(g.file("override/XXWAND.ITM") is None, "an item that is no scroll was touched")
+    g = fg.FakeGame(work / "german", weidu, tlk=fx.tlk(), biff=biff, lang="de_DE")
+    install(g)
+    check(g.file("override/SCRL5M.ITM") is None, "a scroll of another language was touched")
 
 
 @test

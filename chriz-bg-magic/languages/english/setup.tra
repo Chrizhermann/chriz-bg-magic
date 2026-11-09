@@ -192,6 +192,23 @@ Area of Effect: 15-ft. radius
 Saving Throw: Spell negates (-2)
 
 The priest places a hostile magical symbol. When an enemy triggers it, enemies in the symbol's area that fail their saving throws are stunned and lose hope for 120 seconds. Taking damage ends this spell's hopelessness.~
+// The elementals this mod summons, by size: 8, 12, 16 and 24 Hit Dice.
+@60120 = ~Lesser Air Elemental~
+@60121 = ~Air Elemental~
+@60122 = ~Greater Air Elemental~
+@60123 = ~Elder Air Elemental~
+@60124 = ~Lesser Earth Elemental~
+@60125 = ~Earth Elemental~
+@60126 = ~Greater Earth Elemental~
+@60127 = ~Elder Earth Elemental~
+@60128 = ~Lesser Fire Elemental~
+@60129 = ~Fire Elemental~
+@60130 = ~Greater Fire Elemental~
+@60131 = ~Elder Fire Elemental~
+@60132 = ~Lesser Water Elemental~
+@60133 = ~Water Elemental~
+@60134 = ~Greater Water Elemental~
+@60135 = ~Elder Water Elemental~
 @60108 = ~Animal Rage
 (Enchantment)
 
