@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 7680,
+  "description": {
+   "text": "Abi-Dalzim's Horrid Wilting\n(Necromancy)\n\nLevel: 8\nRange: Visual range of the caster\nDuration: Instant\nCasting Time: 8\nArea of Effect: 15-ft. radius\nSaving Throw: 1/2\n\nThis spell evaporates moisture from the bodies of every living creature within the area of effect, inflicting 1d8 damage per level of the caster. Affected creatures are allowed a Saving Throw vs. Spell for half damage. This spell is especially devastating to water elementals and plant creatures, who receive a penalty of -2 to their Saving Throws. Creatures with no moisture to lose are immune: undead, golems, animated swords such as Mordenkainen's Sword, and air, earth and fire elementals. This spell will not harm party members.",
+   "old": 7680
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

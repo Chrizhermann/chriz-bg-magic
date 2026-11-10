@@ -229,6 +229,26 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
 - The lab group `floor` had dropped out of `tests/lab/run_batches.py` with the Polymorph Self
   commit (the list still named it); it is back and ran 10 of 10.
 
+## Numbers and texts (2026-11-10)
+
+No game was started for these; files were read after an install into the BG2:EE lab folder
+(2.7.3.0, EEex v1.3.1, no EE Fixpack), and the offline suite ran 53 of 53.
+
+- Numbers: every definition was compared with the base game's tables (PROJECTL.IDS, MSECTYPE,
+  SPLPROT, STATDESC, SPLSTATE.IDS and the creature id files). Found and fixed: the immunity
+  states, Grease's areas, two record icons and one secondary type. After the install each Grease
+  level points at its own area (`cbmgr01` to `cbmgr20`) with level + 3 triggers, Unholy Blight
+  shows icon 35, and the Sleep spell tests the state the installer numbered for
+  `SLEEP_IMMUNITY`.
+- Texts: the 23 new descriptions and the eight completed ones are in the game's strings, and the
+  game's own scrolls of Fireball, Haste, Breach and Tenser's Transformation point at the same
+  string as their spell.
+- Left as they are: Dispel Magic and Remove Magic destroy a creature with `SPECIFIC = 25`. Only
+  EE Fixpack gives that value to the summoned Nishruu and Hakeashar, so without it the effect
+  does nothing. Files of Baldur's Gate and Siege of Dragonspear (`BD*`, some items) are written
+  on plain BG2:EE as well, where nothing uses them; their names are EET string numbers.
+- Not seen in a game: Grease's duration by level, the icons, the texts on screen.
+
 ## Not covered
 
 - Whether druids and shamans find the new spells in their books: that follows from the spell's

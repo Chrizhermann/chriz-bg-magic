@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 25941,
+  "description": {
+   "text": "Disintegrate\n(Alteration)\n\nLevel: 6\nRange: Visual range of the caster\nDuration: Instant\nCasting Time: 6\nArea of Effect: 1 creature\nSaving Throw: Neg.\n\nWhen this spell is cast at another creature, a thin green ray is shot out. Upon contact with the ray, the creature must make a Saving Throw vs. Spell or be transformed into dust. This transformation is instantaneous and irreversible. There is also a good chance that this will destroy some if not all of the items that the creature is carrying. Mordenkainen's Sword is destroyed outright, with no Saving Throw.",
+   "old": 25941
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

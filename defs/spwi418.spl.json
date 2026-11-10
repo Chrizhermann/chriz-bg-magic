@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 25881,
+  "description": {
+   "text": "Fireshield (Red)\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 3 rounds + 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThe red Fireshield protects the user from fire damage by surrounding the caster with a shield of flame. This shield does not only grant the user a 50% Fire Resistance, but also protects <PRO_HIMHER> from attacks made from within a 5-ft. radius around <PRO_HIMHER>. An opponent that hits the caster with any weapons or spells within this radius suffers 1d8+2 points of fire damage. The shield also destroys insect swarms: an active Summon Insects, Insect Plague or Creeping Doom on the caster ends, and no new swarm can settle on the caster while the spell lasts.",
+   "old": 25881
+  },
   "description_identified": -1,
   "description_icon": "",
   "enchantment": 0

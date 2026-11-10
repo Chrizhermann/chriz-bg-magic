@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12144,
+  "description": {
+   "text": "Wraithform\n(Alteration, Illusion)\n\nLevel: 3\nRange: 0\nDuration: 2 rounds/level\nCasting Time: 1\nArea of Effect: The caster\nSaving Throw: None\n\nWhen this spell is cast, the wizard and all of <PRO_HISHER> gear become insubstantial. The caster is subject only to magical or special attacks, including those by weapons of +1 or better enchantment, or by creatures otherwise able to affect those struck only by magical weapons. The wizard also gains 25% resistance to magic damage. While in wraithform, the caster cannot cast either arcane or divine spells. Insect swarms cannot bite an insubstantial body: an active Summon Insects, Insect Plague or Creeping Doom on the caster ends, and no swarm can harm the caster while the spell lasts.",
+   "old": 12144
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

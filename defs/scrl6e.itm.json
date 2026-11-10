@@ -7,7 +7,7 @@
   "raw_10": "009c8c40000504006c0000000b00805e7260202000000000004009000008000000000000c8000000320053705769323230410000475343524c30310000000000",
   "description": -1,
   "description_identified": {
-   "text": "Power Word, Sleep\n(Enchantment/Charm)\n\nLevel: 2\nRange: 90 ft.\nDuration: 5 rounds\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen a wizard calls upon a Power Word, Sleep spell, <PRO_HESHE> causes a comatose slumber to come upon 1 creature (other than undead and certain other creatures specifically excluded from the spell's effects). The creature targeted must have less than 20 Hit Points and gets no Saving Throw. Magically sleeping opponents can be attacked with substantial bonuses. The Sleep effect will last for 5 rounds. This spell has no effect on creatures with more than 20 Hit Points.",
+   "text": "Power Word, Sleep\n(Enchantment/Charm)\n\nLevel: 2\nRange: 90 ft.\nDuration: 5 rounds\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen a wizard calls upon a Power Word, Sleep spell, <PRO_HESHE> causes a comatose slumber to come upon 1 creature (other than undead, dragons and elementals). The creature targeted must have less than 20 Hit Points and gets no Saving Throw. Magically sleeping opponents can be attacked with substantial bonuses. The Sleep effect will last for 5 rounds. This spell has no effect on creatures with more than 20 Hit Points. Any damage wakes a sleeping creature at once.",
    "old": 7481
   },
   "raw_58": "435343524c30310000000000"

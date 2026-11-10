@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 7607,
+  "description": {
+   "text": "Protection From Normal Weapons\n(Abjuration)\n\nLevel: 5\nRange: 0\nDuration: 1 round/level\nCasting Time: 2\nArea of Effect: The caster\nSaving Throw: None\n\nWhen the spell is cast, it confers complete invulnerability to all non-magical weapons. This does not include weapons that are blessed or enchanted. Insect swarms are kept off in the same way: an active Summon Insects, Insect Plague or Creeping Doom on the caster ends, and no swarm can harm the caster while the spell lasts. This spell may not be cast on someone who is protected from magical weapons. This effect lasts for the duration of the spell or until dispelled.",
+   "old": 7607
+  },
   "description_identified": -1,
   "description_icon": "",
   "enchantment": 0

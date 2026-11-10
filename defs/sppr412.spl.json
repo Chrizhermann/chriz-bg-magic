@@ -24,7 +24,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Divine Power\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThrough this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score becomes 18/00 unless it is already higher, and bonuses and penalties from other sources apply in addition. The priest's THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled.",
+   "text": "Divine Power\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThrough this spell, the caster imbues <PRO_HIMHER>self with the strength and skill of a Fighter of the same level. The priest's Strength score becomes 18/00 unless it is already higher, and bonuses and penalties from other sources apply in addition. The priest's THAC0 becomes that of a Fighter of the same level (including base attacks per round at levels 7 and 13), and <PRO_HESHE> gains 1 temporary Hit Point per level. This will last for the duration of the spell or until dispelled. Divine Power does not take hold while Righteous Magic, Champion's Strength or Tenser's Transformation is active on the caster, and each of those ends it.",
    "old": 6088
   },
   "description_identified": -1,

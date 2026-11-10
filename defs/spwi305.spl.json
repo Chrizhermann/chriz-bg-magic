@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12193,
+  "description": {
+   "text": "Haste\n(Alteration)\n\nLevel: 3\nRange: 15 ft.\nDuration: 3 rounds + 1 round/level\nCasting Time: 3\nArea of Effect: 15-ft. radius\nSaving Throw: None\n\nWhen this spell is cast, all creatures affected function at double their normal movement rate, gain a -2 initiative bonus, and receive an extra attack per round. Thus, a creature moving at 6 and attacking once per round would move at 12 and attack twice per round. At the instant the spell is completed, it affects all allied creatures in a 15-ft. radius centered on a point selected by the caster (thus, creatures leaving the area are still subject to the spell's effect; those entering the area after the casting is completed are not). This spell is not cumulative with itself or with other similar magic. Spellcasting and spell effects are not affected. Note that Haste and Slow cancel each other: cast on a slowed creature, this spell only ends the Slow, and the creature returns to its normal speed.",
+   "old": 12193
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

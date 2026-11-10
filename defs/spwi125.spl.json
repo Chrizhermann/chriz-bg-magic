@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 38587,
+  "description": {
+   "text": "Spook\n(Illusion/Phantasm)\n\nLevel: 1\nRange: 30 ft.\nDuration: 3 rounds\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: Neg.\n\nA Spook spell enables the wizard to play upon natural fears to cause the target creature to perceive the caster as someone or something inimical, which then appears to advance upon it in a threatening manner. If the creature does not make a successful Saving Throw vs. Spell, it turns and flees at maximum speed as far from the wizard as possible. The creature suffers a Saving Throw penalty of -1 every 2 levels of the caster, up to a maximum of -6 at 12th level. Although the caster does not actually pursue the fleeing creature, a phantasm from its own mind does. Undead are completely unaffected, as is any creature under the effect of True Sight or True Seeing.",
+   "old": 38587
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

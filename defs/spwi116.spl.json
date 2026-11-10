@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12172,
+  "description": {
+   "text": "Sleep\n(Enchantment/Charm)\n\nLevel: 1\nRange: Visual range of the caster\nDuration: 5 rounds/level\nCasting Time: 1\nArea of Effect: 15-ft. radius\nSaving Throw: Neg.\n\nWhen a wizard casts a Sleep spell, <PRO_HESHE> causes a comatose slumber to come upon one or more enemies (other than undead and certain other creatures specifically excluded from the spell's effects). All creatures to be affected by the Sleep spell must be within a 15-ft. radius. Creatures in the area of effect must make a Saving Throw vs. Death with a -3 penalty or fall asleep. Monsters with 5 Hit Dice or more are unaffected. Attacks against sleeping opponents never miss. Any damage wakes a sleeping creature at once.",
+   "old": 12172
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

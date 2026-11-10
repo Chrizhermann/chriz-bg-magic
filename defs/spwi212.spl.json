@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12142,
+  "description": {
+   "text": "Mirror Image\n(Illusion/Phantasm)\n\nLevel: 2\nRange: 0\nDuration: 3 rounds + 1 round/level\nCasting Time: 1\nArea of Effect: Special\nSaving Throw: None\n\nWhen a Mirror Image spell is invoked, the caster causes from 2 to 8 exact duplicates of <PRO_HIMHER>self to come into being around <PRO_HIMHER>. These images do exactly what the wizard does. Since the spell causes a blurring and slight distortion when cast, it is impossible for opponents to be certain which are the illusions and which is the actual wizard. When an image is struck by a melee or missile attack—magical or otherwise—it disappears, but any other existing images remain intact until they are struck. However, it is important to note that this will not protect the caster against every attack, as it is possible for an enemy to choose the real caster amongst all the images. A new casting replaces the earlier images, and Mirror Image ends a Reflected Image and keeps a new one from forming while it lasts.",
+   "old": 12142
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

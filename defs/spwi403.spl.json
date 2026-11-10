@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 25879,
+  "description": {
+   "text": "Fireshield (Blue)\n(Evocation)\n\nLevel: 4\nRange: 0\nDuration: 3 rounds + 1 round/level\nCasting Time: 4\nArea of Effect: The caster\nSaving Throw: None\n\nThe blue Fireshield protects the user from cold damage by surrounding the caster with a shield of ice flame. This shield not only grants the user 50% Cold Resistance, but also protects the caster from attacks made within a 5-ft. radius around the caster. An opponent that hits the caster with any weapons or spells within this radius suffers 1d8+2 cold damage. The shield also destroys insect swarms: an active Summon Insects, Insect Plague or Creeping Doom on the caster ends, and no new swarm can settle on the caster while the spell lasts.",
+   "old": 25879
+  },
   "description_identified": -1,
   "description_icon": "",
   "enchantment": 0

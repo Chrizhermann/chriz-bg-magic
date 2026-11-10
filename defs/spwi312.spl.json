@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12196,
+  "description": {
+   "text": "Slow\n(Alteration)\n\nLevel: 3\nRange: 25 ft.\nDuration: 1 turn\nCasting Time: 3\nArea of Effect: 15-ft. radius\nSaving Throw: Neg.\n\nA Slow spell causes creatures to move and attack at half of their normal rates. It negates Haste, but does not otherwise affect magically hasted or slowed creatures: a hasted creature only loses its Haste and returns to its normal speed, and no Saving Throw prevents this. Slowed creatures have an Armor Class and attack penalty of -4. Creatures save at -4 vs. Spell.",
+   "old": 12196
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

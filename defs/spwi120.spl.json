@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 25867,
+  "description": {
+   "text": "Reflected Image\n(Illusion/Phantasm)\n\nLevel: 1\nRange: 0\nDuration: 3 rounds + 1 round/level\nCasting Time: 1\nArea of Effect: The caster\nSaving Throw: None\n\nUpon casting this spell, the wizard creates 1 image of <PRO_HIMHER>self that will travel alongside <PRO_HIMHER>. The image will perform all of the actions that the wizard does so that if any enemies are trying to attack the wizard, they will not know which one is real. There is a 50% chance that the attacker will attack the image and a 50% chance that he will attack the caster. The image will disappear with a successful Dispel Magic, when attacked, or when the spell's duration expires. A new casting replaces the earlier image. The spell has no effect while a Mirror Image spell lasts on the wizard, and casting Mirror Image ends it.",
+   "old": 25867
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

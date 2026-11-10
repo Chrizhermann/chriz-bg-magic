@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 7918,
+  "description": {
+   "text": "Death Spell\n(Necromancy)\n\nLevel: 6\nRange: Visual range of the caster\nDuration: Instant\nCasting Time: 6\nArea of Effect: 15-ft. radius\nSaving Throw: None\n\nWhen a Death Spell is cast, it snuffs out the life force of creatures within the area of effect, instantly and irrevocably. Creatures with more than 8 Hit Dice are immune to this spell with the exception of summoned creatures, which are automatically slain. Only enemies are affected by this spell, but it also disperses the insect swarms of Summon Insects, Insect Plague and Creeping Doom that plague the caster's allies within the area.",
+   "old": 7918
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

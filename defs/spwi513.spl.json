@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 25915,
+  "description": {
+   "text": "Breach\n(Abjuration)\n\nLevel: 5\nRange: 40 ft.\nDuration: Instant\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nWhen this spell is cast at a creature, it breaches and dispels all of the specific and combat protections on the target creature. Here is a complete list of all the specific protection spells that are dispelled by Breach: Shield, Protection Circle, Resist Fear, Protection From Fire/Cold, Fireshield, Protection From Acid, Protection From Electricity, Protection From Magic Energy, Protection From The Elements, and Protection From Energy. The combat protection spells dispelled by Breach are Protection From Normal Missiles, Protection From Normal Weapons, Protection From Magical Weapons, Stoneskin, Armor, Ghost Armor, Spirit Armor, Absolute Immunity, Mantle, and Improved Mantle. The target's Magic Resistance, if any, does not affect this spell. A Dispelling Screen on the target absorbs the Breach: the screen dissipates, and the target keeps its other protections.",
+   "old": 25915
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 6939,
+  "description": {
+   "text": "Greater Command\n(Enchantment/Charm)\n\nLevel: 5\nSphere: Charm\nRange: Visual range of the caster\nDuration: 1 round/level\nCasting Time: 1\nArea of Effect: 15-ft. radius\nSaving Throw: Neg.\n\nAs with the 1st-level spell Command, this spell enables the priest to command other creatures to \"die\" (sleep), except that the effects of this spell last 1 round per level of the caster. At the end of the round, the creature(s) awaken and are unharmed. Any damage wakes a sleeping creature at once. The area of effect is similar to that of a Stinking Cloud or a Fireball.",
+   "old": 6939
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

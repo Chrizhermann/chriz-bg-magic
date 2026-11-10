@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Grease\n(Conjuration/Summoning)\n\nLevel: 1\nRange: 30 ft.\nDuration: 3 rounds + 1 round/level\nCasting Time: 1\nArea of Effect: 15-ft. radius\nSaving Throw: Special\n\nA Grease spell covers a material surface with a slippery layer of a fatty, greasy nature. Any creature entering the area or caught in it when the spell is cast must save vs. Breath at +2 or slip and slide, unable to move effectively. Those who successfully save can move, albeit slowly, for the rest of the round (but will need to save vs. Breath again the following round). Those who remain in the area are allowed a Saving Throw each round until they escape the area.",
+   "text": "Grease\n(Conjuration/Summoning)\n\nLevel: 1\nRange: 30 ft.\nDuration: 3 rounds + 1 round/level\nCasting Time: 1\nArea of Effect: 15-ft. radius\nSaving Throw: Special\n\nA Grease spell covers a material surface with a slippery layer of a fatty, greasy nature. Any creature entering the area or caught in it when the spell is cast must save vs. Breath at +2 or slip and slide, unable to move effectively. Those who successfully save can move, albeit slowly, for the rest of the round (but will need to save vs. Breath again the following round). Those who remain in the area are allowed a Saving Throw each round until they escape the area. Dragons and flying and incorporeal creatures are not affected.",
    "old": 12154
   },
   "description_identified": 9999999,

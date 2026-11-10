@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12176,
+  "description": {
+   "text": "Cone of Cold\n(Evocation)\n\nLevel: 5\nRange: 0\nDuration: Instant\nCasting Time: 5\nArea of Effect: 18-ft. cone with 90-deg. arc\nSaving Throw: 1/2\n\nWhen this spell is cast, it generates a cone-shaped area of extreme cold originating at the wizard's hand and extending outward in a cone 18 ft. long with a 90-deg. arc. It drains heat and causes 1d4+1 points of damage per level of the caster. For example, a 10th-level wizard would cast a cone of cold causing 10d4+10 points of damage. A successful Saving Throw vs. Breath halves the damage.",
+   "old": 12176
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0

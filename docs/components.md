@@ -721,6 +721,18 @@ descriptions still describe the old behaviour.
   description, also a scroll the mod does not ship. Nine of the game's own scrolls had kept the
   old text (Polymorph Self, Shapechange, Simulacrum, Chaos, Champion's Strength, the three
   Conjure Lesser Elementals, the Restoration scroll).
+- **Whole descriptions for changed rules** (in `defs/`, checked against each definition and the
+  base game's spell): 23 spells whose rules this mod changed still showed the game's text and
+  now carry their own. Death Ward (casting time 1); Greater Command, Color Spray and Sleep
+  (damage wakes); Reflected Image and Mirror Image (they do not combine); Spook (True Sight and
+  True Seeing); Fireball and Cone of Cold (save vs. Breath); Haste and Slow (they cancel each
+  other); Tenser's Transformation (its family); Death Spell (disperses insect swarms);
+  Disintegrate (destroys Mordenkainen's Sword); Abi-Dalzim's Horrid Wilting (who is immune); both
+  Dispel Magics, Remove Magic and Breach (Dispelling Screen); Wraithform, both Fire Shields and
+  Protection From Normal Weapons (insect swarms). Eight older texts of this mod were completed:
+  Grease, Web, Entangle and Stinking Cloud name who is immune, Stinking Cloud and Power Word,
+  Sleep say that damage wakes, and Divine Power, Righteous Magic and Champion's Strength name
+  their family.
 - **Elementals** (`cbmagic_elemental_names`): the elementals this mod summons carry one name per
   size, the same for every element: Lesser (8 Hit Dice), plain (12), Greater (16) and Elder (24).
   The files had the game's names, which called every water elemental "Greater Water Elemental"

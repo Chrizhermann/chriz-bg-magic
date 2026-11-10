@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 7808,
+  "description": {
+   "text": "Tenser's Transformation\n(Alteration)\n\nLevel: 6\nRange: 0\nDuration: 1 round/level\nCasting Time: 6\nArea of Effect: The caster\nSaving Throw: None\n\nTenser's Transformation is a sight guaranteed to astound any creature not aware of its power, for when the wizard casts the spell, <PRO_HESHE> undergoes a startling transformation. The size and strength of the wizard increase to heroic proportions, and <PRO_HESHE> becomes a formidable fighting machine.\n\nThe spell causes the caster to become a berserk Fighter: <PRO_HISHER> Hit Points double, and all damage <PRO_HESHE> sustains is first detracted from this magically-gained life; <PRO_HISHER> Armor Class gains a +4 bonus up to a maximum Armor Class of -10; and all <PRO_HISHER> attacks are made as though <PRO_HESHE> were a Fighter of the same level (i.e. the wizard uses the combat values normally reserved to Fighters, although no extra attacks per round are gained). Each attack also receives a +2 bonus to hit and damage rolls. The effect lasts for the duration of the spell or until dispelled. Tenser's Transformation ends an active Divine Power, Righteous Magic or Champion's Strength on the caster and keeps a new one from taking hold while it lasts.",
+   "old": 7808
+  },
   "description_identified": -1,
   "description_icon": "",
   "enchantment": 0

@@ -47,7 +47,7 @@ def polymorph_self_is_what_was_decided(work, weidu):
         check({(171, name.split(".")[0].upper()), (172, name.split(".")[0].upper())} <=
               {(e["opcode"], e["resource"].upper()) for e in rows}, f"{name}: can be taken again")
         item = defs[weapon.lower() + ".itm"]["casting"]
-        values = {(e["opcode"], e["p2"]): e["p1"] for e in item}
+        values = {(e["opcode"], e["p2"]): e["p1"] for e in item if isinstance(e["p2"], int)}  # a symbol is no stat row
         check(any(e["opcode"] == 135 and e["p2"] == 1 and e["resource"].upper() == look for e in item), f"{weapon}: look")
         check(values.get((44, 1)) == strength and values.get((97, 1), 0) == extra and values.get((15, 1)) == dex
               and values.get((1, 1)) == apr and values.get((0, 16)) == ac, f"{weapon}: {values}")
@@ -104,7 +104,7 @@ def shapechange_is_what_was_decided(work, weidu):
         check((146, "CBMFREM") in rows and (111, weapon) in rows and rows.index((146, "CBMFREM")) < rows.index((111, weapon)),
               f"{name}: clears other powers, then takes the weapon: {rows}")
         item = defs[weapon.lower() + ".itm"]["casting"]
-        values = {(e["opcode"], e["p2"]): e["p1"] for e in item}
+        values = {(e["opcode"], e["p2"]): e["p1"] for e in item if isinstance(e["p2"], int)}  # a symbol is no stat row
         check(any(e["opcode"] == 135 and e["p2"] == 1 and e["resource"].upper() == look for e in item), f"{weapon}: look")
         check(values.get((44, 1)) == strength and values.get((97, 1), 0) == extra and values.get((15, 1)) == dex
               and values.get((1, 1)) == apr and values.get((0, 16)) == ac and values.get((54, 1)) == thac0,

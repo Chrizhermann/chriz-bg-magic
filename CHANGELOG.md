@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Texts: 23 spells whose rules changed now describe those rules (among them Haste and Slow,
+  Mirror Image and Reflected Image, Fireball, Cone of Cold, Sleep, Dispel Magic, Remove Magic,
+  Breach, Tenser's Transformation), and eight older texts name who is immune, what wakes a
+  sleeper and which spells replace each other.
 - Numbers of the reference game removed from the definitions, so every install gets the same
   result: Grease lasts 3 rounds + 1 round a level through areas of its own (on a game without
   EE Fixpack it had pointed at wrong or missing areas), immunities against sleep, hold, slow and

@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 5790,
+  "description": {
+   "text": "Death Ward\n(Necromancy)\n\nLevel: 4\nRange: Visual range of the caster\nDuration: 1 turn/level\nCasting Time: 1\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell protects the target from all forms of death magic for the duration of the spell. This includes, but is not limited to, Disintegrate; Power Word, Kill; Death Spell; and Finger of Death.",
+   "old": 5790
+  },
   "description_identified": -1,
   "description_icon": "",
   "enchantment": 0

@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Righteous Magic\n(Alteration)\n\nLevel: 5\nSphere: Combat\nRange: 0\nDuration: 1 round/level\nCasting Time: 5\nArea of Effect: The caster\nSaving Throw: None\n\nThis is a powerful combat spell that enhances the priest's physical prowess, transforming <PRO_HIMHER> into a juggernaut of destruction. The effect adds 1 temporary Hit Point per level of the caster, adds 1 point of Strength every 3 levels of the caster (to a maximum of 25), and causes every successful hit to inflict maximum damage. The effects last for the duration of the spell or until dispelled.",
+   "text": "Righteous Magic\n(Alteration)\n\nLevel: 5\nSphere: Combat\nRange: 0\nDuration: 1 round/level\nCasting Time: 5\nArea of Effect: The caster\nSaving Throw: None\n\nThis is a powerful combat spell that enhances the priest's physical prowess, transforming <PRO_HIMHER> into a juggernaut of destruction. The effect adds 1 temporary Hit Point per level of the caster, adds 1 point of Strength every 3 levels of the caster (to a maximum of 25), and causes every successful hit to inflict maximum damage. The effects last for the duration of the spell or until dispelled. Righteous Magic ends an active Divine Power or Champion's Strength on the caster and keeps a new Divine Power from taking hold while it lasts. It does not take hold while Tenser's Transformation is active on the caster.",
    "old": 7080
   },
   "description_identified": -1,

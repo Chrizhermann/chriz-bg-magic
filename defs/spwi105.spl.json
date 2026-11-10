@@ -20,7 +20,10 @@
   "lore": 0,
   "ground_icon": "",
   "weight": 0,
-  "description": 12191,
+  "description": {
+   "text": "Color Spray\n(Alteration)\n\nLevel: 1\nRange: 50 ft.\nDuration: Instant\nCasting Time: 1\nArea of Effect: 90-degree arc\nSaving Throw: Special\n\nUpon casting this spell, the wizard causes a vivid, fan-shaped spray of clashing colors to spring forth from <PRO_HISHER> hand. 1d6 creatures within the area are affected in order of increasing distance from the wizard. All creatures in the area of effect that have 4 Hit Dice or less must make a successful Saving Throw or be rendered unconscious for 5 rounds. Any damage wakes an unconscious creature at once.",
+   "old": 12191
+  },
   "description_identified": 9999999,
   "description_icon": "",
   "enchantment": 0
