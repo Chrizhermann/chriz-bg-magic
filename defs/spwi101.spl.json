@@ -43,7 +43,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 349,
+   "projectile": {
+    "projectile": "cbmgr01"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -276,7 +278,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 350,
+   "projectile": {
+    "projectile": "cbmgr02"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -509,7 +513,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 351,
+   "projectile": {
+    "projectile": "cbmgr03"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -742,7 +748,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 352,
+   "projectile": {
+    "projectile": "cbmgr04"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -975,7 +983,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 353,
+   "projectile": {
+    "projectile": "cbmgr05"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -1208,7 +1218,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 354,
+   "projectile": {
+    "projectile": "cbmgr06"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -1441,7 +1453,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 355,
+   "projectile": {
+    "projectile": "cbmgr07"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -1674,7 +1688,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 356,
+   "projectile": {
+    "projectile": "cbmgr08"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -1907,7 +1923,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 357,
+   "projectile": {
+    "projectile": "cbmgr09"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -2140,7 +2158,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 358,
+   "projectile": {
+    "projectile": "cbmgr10"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -2373,7 +2393,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 359,
+   "projectile": {
+    "projectile": "cbmgr11"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -2606,7 +2628,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 360,
+   "projectile": {
+    "projectile": "cbmgr12"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -2839,7 +2863,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 361,
+   "projectile": {
+    "projectile": "cbmgr13"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -3072,7 +3098,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 362,
+   "projectile": {
+    "projectile": "cbmgr14"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -3305,7 +3333,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 363,
+   "projectile": {
+    "projectile": "cbmgr15"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -3538,7 +3568,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 364,
+   "projectile": {
+    "projectile": "cbmgr16"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -3771,7 +3803,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 365,
+   "projectile": {
+    "projectile": "cbmgr17"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -4004,7 +4038,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 366,
+   "projectile": {
+    "projectile": "cbmgr18"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -4237,7 +4273,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 367,
+   "projectile": {
+    "projectile": "cbmgr19"
+   },
    "effects": [
     {
      "opcode": 324,
@@ -4470,7 +4508,9 @@
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,
-   "projectile": 368,
+   "projectile": {
+    "projectile": "cbmgr20"
+   },
    "effects": [
     {
      "opcode": 324,

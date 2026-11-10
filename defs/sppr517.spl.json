@@ -49,7 +49,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 129,
+     "p1": {
+      "state": "PANIC_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,

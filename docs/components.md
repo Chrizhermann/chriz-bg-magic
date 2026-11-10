@@ -17,6 +17,15 @@ any other. A definition comes from the reference game, EET with EE Fixpack; plai
 the same files. So a definition names only what the base game or this mod has: the helper spells
 of EE Fixpack it calls are in the mod under names of its own (`CBH*`).
 
+The same holds for numbers. Spell states, SPLPROT rows, secondary types, projectiles and record
+icons that the base game does not have are named by symbol in `defs/` and get their number at
+install; a plain number always lies inside the base game's tables (a test checks every
+definition). The reference game's numbers had leaked into five places and are gone: the
+immunity states EE Fixpack numbers 119 and 127 to 142 (447 effects), Grease's areas, the record
+icon of Unholy Blight (now the game's own "Cursed", icon 35), the icon of the form weapons'
+proficiency helper `CBHWSTY1` (dropped: its row and image belong to EE Fixpack) and the secondary
+type of the mind flayer form's drain `CBMSFLH` (none now).
+
 Still patched at install, because we do not ship their files: IWDification's spells and the two
 it replaces, Emotion: Hopelessness and Chant (`lib/cbmagic_iwd.tpa`, `lib/cbmagic_healing.tpa`,
 `lib/cbmagic_bonus.tpa`). This goes when the IWD spells become our own.
@@ -267,6 +276,9 @@ BG2:EE has only Shadows of Amn and Throne of Bhaal. The description names all th
   say so.
 - Flying, incorporeal and dragon creatures are immune by race (`WYVERN`, `BEHOLDER`,
   `MEPHIT`, `SPECTRE`, `WRAITH`, `SHADOW`, `MIST`, `DRAGON`).
+- It lasts as its description says, 3 rounds + 1 round a level: one area per caster level
+  (`cbmgr01.pro` to `cbmgr20.pro` via `ADD_PROJECTILE`, the game's `GREASE.PRO` with 4 to 23
+  triggers). The base game's Grease lasts 10 rounds at every level.
 
 ## Stinking Cloud (`cbmagic_vanilla_stinking_cloud`)
 

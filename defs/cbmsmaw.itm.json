@@ -339,7 +339,9 @@
    "target": 2,
    "power": 0,
    "p1": 0,
-   "p2": 128,
+   "p2": {
+    "state": "STUN_IMMUNITY"
+   },
    "timing": 2,
    "dispel": 0,
    "duration": 0,
@@ -519,7 +521,9 @@
    "target": 2,
    "power": 0,
    "p1": 0,
-   "p2": 129,
+   "p2": {
+    "state": "PANIC_IMMUNITY"
+   },
    "timing": 2,
    "dispel": 0,
    "duration": 0,

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Numbers of the reference game removed from the definitions, so every install gets the same
+  result: Grease lasts 3 rounds + 1 round a level through areas of its own (on a game without
+  EE Fixpack it had pointed at wrong or missing areas), immunities against sleep, hold, slow and
+  the like are tested by name, Unholy Blight shows the game's "Cursed" icon, and the form
+  weapons' helper no longer shows an icon.
 - Texts: a scroll now shows the description of its spell wherever this mod writes that
   description (nine of the game's scrolls had kept the old text). The summoned elementals are
   named by size, the same for every element: Lesser, plain, Greater, Elder.

@@ -118,7 +118,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 130,
+     "p1": {
+      "state": "CONFUSION_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 2,

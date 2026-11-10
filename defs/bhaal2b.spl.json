@@ -190,7 +190,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -407,7 +409,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -624,7 +628,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -841,7 +847,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -1058,7 +1066,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -1275,7 +1285,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -1492,7 +1504,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -1709,7 +1723,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 139,
+     "p1": {
+      "state": "SLOW_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,

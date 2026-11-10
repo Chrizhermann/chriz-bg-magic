@@ -104,7 +104,9 @@
      "opcode": 324,
      "target": 2,
      "power": 4,
-     "p1": 138,
+     "p1": {
+      "state": "HASTE_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 0,

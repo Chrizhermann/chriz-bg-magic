@@ -229,7 +229,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 141,
+     "p1": {
+      "state": "MINOR_GLOBE"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 0,
@@ -247,7 +249,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 132,
+     "p1": {
+      "state": "WEB_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,

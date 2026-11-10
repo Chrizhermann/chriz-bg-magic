@@ -362,6 +362,73 @@ def definitions_lean_on_no_other_mod(work, weidu):
                                                "DW-", "DW_", "DWSS", "DW#"))}
     check(not foreign, f"{len(foreign)} named: {sorted(foreign)[:8]}")
 
+    # Spell states the base game does not have (the EE Fixpack numbers its immunity states 119 and
+    # 127 to 142) are named by symbol, never by number: the installer gives a missing symbol a free
+    # number, and a test of the Fixpack's number would look at a state nobody sets.
+    missing = {119, *range(127, 166)}
+
+    def effects(d):
+        if isinstance(d, dict):
+            if "opcode" in d:
+                yield d
+            for value in d.values():
+                yield from effects(value)
+        elif isinstance(d, list):
+            for value in d:
+                yield from effects(value)
+
+    numbered = set()
+    for folder in (None, ALT):
+        for name, defn in definitions(folder).items():
+            for e in effects(defn):
+                p1, p2 = e.get("p1"), e.get("p2")
+                tested = e["opcode"] in (318, 324, 326) and p2 in (110, 111) and isinstance(p1, int) and p1 in missing
+                given = e["opcode"] == 328 and e.get("special") == 1 and isinstance(p2, int) and p2 in missing
+                if tested or given:
+                    numbered.add(f"{name}: opcode {e['opcode']}, state {p1 if tested else p2}")
+    check(not numbered, f"{len(numbered)} effects name a state of another mod by number: {sorted(numbered)[:8]}")
+
+    # The same for every table a mod can add rows to: a plain number stays inside what the base
+    # game has (BG2:EE 2.7.3.0: PROJECTL.IDS to 345, 14 secondary types, SPLPROT rows to 145,
+    # STATDESC rows to 206); anything behind that is named by symbol and numbered at install.
+    beyond = set()
+    for folder in (None, ALT):
+        for name, defn in definitions(folder).items():
+            sectype = defn.get("header", {}).get("sectype")
+            if isinstance(sectype, int) and sectype > 13:
+                beyond.add(f"{name}: secondary type {sectype}")
+            for ability in defn.get("abilities", []):
+                if isinstance(ability.get("projectile"), int) and ability["projectile"] > 346:
+                    beyond.add(f"{name}: projectile {ability['projectile']}")
+            for e in effects(defn):
+                p2 = e.get("p2")
+                if not isinstance(p2, int):
+                    continue
+                if e["opcode"] in (142, 169, 240) and p2 > 206:
+                    beyond.add(f"{name}: opcode {e['opcode']}, icon {p2}")
+                if e["opcode"] in (205, 221, 226, 228, 230) and p2 > 13:
+                    beyond.add(f"{name}: opcode {e['opcode']}, secondary type {p2}")
+                if e["opcode"] in (318, 324, 326) and p2 > 145:
+                    beyond.add(f"{name}: opcode {e['opcode']}, SPLPROT row {p2}")
+    check(not beyond, f"{len(beyond)} numbers of another install: {sorted(beyond)[:8]}")
+
+
+@test
+def grease_lasts_as_its_text_says(work, weidu):
+    """Each caster level has its own area: 3 rounds and one more per level, on every install."""
+    abilities = definitions()["spwi101.spl"]["abilities"]
+    check([a["min_level"] for a in abilities] == list(range(1, 21)), "one ability per level")
+    areas = []
+    for ability in abilities:
+        level = ability["min_level"]
+        check(ability["projectile"] == {"projectile": f"cbmgr{level:02d}"}, f"level {level}: its own projectile")
+        data = (fg.MOD / "pro" / f"cbmgr{level:02d}.pro").read_bytes()
+        check(len(data) == 768 and data[:8] == b"PRO V1.0" and data[0x216] == level + 3, f"level {level}: {level + 3} rounds")
+        areas.append(data[:0x216] + data[0x217:])
+    check(len(set(areas)) == 1, "the areas differ only in how long they last")
+    listed = json.loads((fx.DEFS / "tables.json").read_text(encoding="utf-8"))["projectiles"]
+    check(all(f"cbmgr{level:02d}" in listed for level in range(1, 21)), "every area is registered at install")
+
 
 @test
 def celestials_are_what_was_decided(work, weidu):

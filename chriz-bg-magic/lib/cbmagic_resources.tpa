@@ -77,6 +77,46 @@ BEGIN
   OUTER_SET cbm_proj_cbmmreg = cbmmreg
   ADD_PROJECTILE ~chriz-bg-magic/pro/cbmoracl.pro~
   OUTER_SET cbm_proj_cbmoracl = cbmoracl
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr01.pro~
+  OUTER_SET cbm_proj_cbmgr01 = cbmgr01
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr02.pro~
+  OUTER_SET cbm_proj_cbmgr02 = cbmgr02
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr03.pro~
+  OUTER_SET cbm_proj_cbmgr03 = cbmgr03
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr04.pro~
+  OUTER_SET cbm_proj_cbmgr04 = cbmgr04
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr05.pro~
+  OUTER_SET cbm_proj_cbmgr05 = cbmgr05
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr06.pro~
+  OUTER_SET cbm_proj_cbmgr06 = cbmgr06
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr07.pro~
+  OUTER_SET cbm_proj_cbmgr07 = cbmgr07
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr08.pro~
+  OUTER_SET cbm_proj_cbmgr08 = cbmgr08
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr09.pro~
+  OUTER_SET cbm_proj_cbmgr09 = cbmgr09
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr10.pro~
+  OUTER_SET cbm_proj_cbmgr10 = cbmgr10
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr11.pro~
+  OUTER_SET cbm_proj_cbmgr11 = cbmgr11
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr12.pro~
+  OUTER_SET cbm_proj_cbmgr12 = cbmgr12
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr13.pro~
+  OUTER_SET cbm_proj_cbmgr13 = cbmgr13
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr14.pro~
+  OUTER_SET cbm_proj_cbmgr14 = cbmgr14
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr15.pro~
+  OUTER_SET cbm_proj_cbmgr15 = cbmgr15
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr16.pro~
+  OUTER_SET cbm_proj_cbmgr16 = cbmgr16
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr17.pro~
+  OUTER_SET cbm_proj_cbmgr17 = cbmgr17
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr18.pro~
+  OUTER_SET cbm_proj_cbmgr18 = cbmgr18
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr19.pro~
+  OUTER_SET cbm_proj_cbmgr19 = cbmgr19
+  ADD_PROJECTILE ~chriz-bg-magic/pro/cbmgr20.pro~
+  OUTER_SET cbm_proj_cbmgr20 = cbmgr20
   OUTER_SET ref = RESOLVE_STR_REF (@70113)
   LAF cbmagic_statdesc_row INT_VAR desc_ref = ref STR_VAR bam = ~CBMIFAF~ RET cbm_stat_209 = icon_row END
   OUTER_SET ref = RESOLVE_STR_REF (@70196)
@@ -258,22 +298,27 @@ BEGIN
   COPY ~chriz-bg-magic/res/acidooz3.spl~ ~override/acidooz3.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/arow07.itm~ ~override/arow07.itm~
     SAY 0xc @70000
     SAY 0x54 @70001
     WRITE_LONG 0x292 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/aurstaf.itm~ ~override/aurstaf.itm~
+    WRITE_LONG 0x5ee cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x6e2 cbm_Haste
   COPY ~chriz-bg-magic/res/aurstaf.spl~ ~override/aurstaf.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ax1h19.itm~ ~override/ax1h19.itm~
     WRITE_LONG 0x3e2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/balth07.spl~ ~override/balth07.spl~
+    WRITE_LONG 0x2ae cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x312 cbm_Haste
   COPY ~chriz-bg-magic/res/balth07a.spl~ ~override/balth07a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdbarbde.spl~ ~override/bdbarbde.spl~
   COPY ~chriz-bg-magic/res/bdbelhia.itm~ ~override/bdbelhia.itm~
     WRITE_LONG 0x7a cbm_state_CONFUSION_IMMUNITY
@@ -283,8 +328,10 @@ BEGIN
     WRITE_LONG 0x13a cbm_state_CHARM_IMMUNITY
   COPY ~chriz-bg-magic/res/bdcrimsa.spl~ ~override/bdcrimsa.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/bdcrimsn.spl~ ~override/bdcrimsn.spl~
+    WRITE_LONG 0xfe cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x162 cbm_Slow
   COPY ~chriz-bg-magic/res/bddelen1.spl~ ~override/bddelen1.spl~
     WRITE_LONG 0xd2 cbm_DispelScreen
@@ -300,8 +347,10 @@ BEGIN
     WRITE_LONG 0x342 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/bdflesha.spl~ ~override/bdflesha.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/bdfleshr.spl~ ~override/bdfleshr.spl~
+    WRITE_LONG 0xfe cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x162 cbm_Slow
   COPY ~chriz-bg-magic/res/bdforcew.spl~ ~override/bdforcew.spl~
     WRITE_LONG 0xa2 cbm_state_FEEBLEMIND_IMMUNITY
@@ -311,10 +360,12 @@ BEGIN
     WRITE_LONG 0x162 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x192 cbm_state_CHARM_IMMUNITY
   COPY ~chriz-bg-magic/res/bdhalb03.spl~ ~override/bdhalb03.spl~
+    WRITE_LONG 0xce cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x132 cbm_Haste
   COPY ~chriz-bg-magic/res/bdhalb0a.spl~ ~override/bdhalb0a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdimp.itm~ ~override/bdimp.itm~
   COPY ~chriz-bg-magic/res/bdlich.itm~ ~override/bdlich.itm~
     WRITE_LONG 0x7a cbm_state_DISINTEGRATE_IMMUNITY
@@ -344,14 +395,17 @@ BEGIN
     WRITE_LONG 0x1fa cbm_state_CHARM_IMMUNITY
   COPY ~chriz-bg-magic/res/bdrunrua.spl~ ~override/bdrunrua.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/bdrunrun.spl~ ~override/bdrunrun.spl~
     WRITE_LONG 0xd2 cbm_Slow
   COPY ~chriz-bg-magic/res/bdsha06b.spl~ ~override/bdsha06b.spl~
+    WRITE_LONG 0xce cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x132 cbm_Haste
   COPY ~chriz-bg-magic/res/bdsha06d.spl~ ~override/bdsha06d.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdsha12a.spl~ ~override/bdsha12a.spl~
   COPY ~chriz-bg-magic/res/bdshld02.spl~ ~override/bdshld02.spl~
   COPY ~chriz-bg-magic/res/bdsper1b.spl~ ~override/bdsper1b.spl~
@@ -361,52 +415,77 @@ BEGIN
   COPY ~chriz-bg-magic/res/bdsw1h0a.spl~ ~override/bdsw1h0a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdsw1h25.spl~ ~override/bdsw1h25.spl~
     WRITE_LONG 0x1f2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/bdsw2h01.spl~ ~override/bdsw2h01.spl~
+    WRITE_LONG 0x12e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x192 cbm_Haste
   COPY ~chriz-bg-magic/res/bdsw2h0a.spl~ ~override/bdsw2h0a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdtr01.spl~ ~override/bdtr01.spl~
+    WRITE_LONG 0xce cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x132 cbm_Haste
   COPY ~chriz-bg-magic/res/bdtr01a.spl~ ~override/bdtr01a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdunslga.spl~ ~override/bdunslga.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bdunslgu.spl~ ~override/bdunslgu.spl~
     WRITE_LONG 0x192 cbm_Haste
   COPY ~chriz-bg-magic/res/bhaal2b.spl~ ~override/bhaal2b.spl~
+    WRITE_LONG 0x336 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x39a cbm_Haste
+    WRITE_LONG 0x546 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x5aa cbm_Haste
+    WRITE_LONG 0x756 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x7ba cbm_Haste
+    WRITE_LONG 0x966 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x9ca cbm_Haste
+    WRITE_LONG 0xb76 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0xbda cbm_Haste
+    WRITE_LONG 0xd86 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0xdea cbm_Haste
+    WRITE_LONG 0xf96 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0xffa cbm_Haste
+    WRITE_LONG 0x11a6 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x120a cbm_Haste
   COPY ~chriz-bg-magic/res/bhaal2ba.spl~ ~override/bhaal2ba.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0x1ba cbm_Slow
+    WRITE_LONG 0x246 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x2da cbm_Slow
+    WRITE_LONG 0x366 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x3fa cbm_Slow
+    WRITE_LONG 0x486 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x51a cbm_Slow
+    WRITE_LONG 0x5a6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x63a cbm_Slow
+    WRITE_LONG 0x6c6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x75a cbm_Slow
+    WRITE_LONG 0x7e6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x87a cbm_Slow
+    WRITE_LONG 0x906 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x99a cbm_Slow
+    WRITE_LONG 0xa26 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/blun14.itm~ ~override/blun14.itm~
+    WRITE_LONG 0x22e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x292 cbm_Haste
   COPY ~chriz-bg-magic/res/blun14.spl~ ~override/blun14.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/blun20.itm~ ~override/blun20.itm~
     WRITE_LONG 0x172 cbm_Haste
   COPY ~chriz-bg-magic/res/blun20.spl~ ~override/blun20.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/blun30.itm~ ~override/blun30.itm~
     WRITE_LONG 0xb2 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0xe2 cbm_state_HASTE_IMMUNITY
@@ -417,28 +496,34 @@ BEGIN
   COPY ~chriz-bg-magic/res/blun30.spl~ ~override/blun30.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/blun30c.itm~ ~override/blun30c.itm~
     WRITE_LONG 0x262 cbm_Haste
   COPY ~chriz-bg-magic/res/blun30c.spl~ ~override/blun30c.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/blun30d.itm~ ~override/blun30d.itm~
     WRITE_LONG 0x262 cbm_Haste
   COPY ~chriz-bg-magic/res/blun30d.spl~ ~override/blun30d.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bonedag.itm~ ~override/bonedag.itm~
     WRITE_LONG 0x1a2 cbm_Haste
   COPY ~chriz-bg-magic/res/bonedag.spl~ ~override/bonedag.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/boot11.itm~ ~override/boot11.itm~
   COPY ~chriz-bg-magic/res/bpdispel.spl~ ~override/bpdispel.spl~
     WRITE_LONG 0x942 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/brac16.itm~ ~override/brac16.itm~
+    WRITE_LONG 0xae cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x112 cbm_Slow
   COPY ~chriz-bg-magic/res/brac16.spl~ ~override/brac16.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/bull07.itm~ ~override/bull07.itm~
@@ -482,15 +567,19 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbhi700.spl~ ~override/cbhi700.spl~
   COPY ~chriz-bg-magic/res/cbhinvex.spl~ ~override/cbhinvex.spl~
   COPY ~chriz-bg-magic/res/cbhl415h.spl~ ~override/cbhl415h.spl~
+    WRITE_LONG 0x9e cbm_state_HOLD_IMMUNITY
   COPY ~chriz-bg-magic/res/cbhmk25.eff~ ~override/cbhmk25.eff~
   COPY ~chriz-bg-magic/res/cbhmk25a.eff~ ~override/cbhmk25a.eff~
   COPY ~chriz-bg-magic/res/cbhnhums.eff~ ~override/cbhnhums.eff~
   COPY ~chriz-bg-magic/res/cbhpdeva.spl~ ~override/cbhpdeva.spl~
+    WRITE_LONG 0xce cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/cbht40.itm~ ~override/cbht40.itm~
   COPY ~chriz-bg-magic/res/cbht70.itm~ ~override/cbht70.itm~
   COPY ~chriz-bg-magic/res/cbhw118d.spl~ ~override/cbhw118d.spl~
   COPY ~chriz-bg-magic/res/cbhw118e.spl~ ~override/cbhw118e.spl~
+    WRITE_LONG 0x9e cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/cbhw118g.spl~ ~override/cbhw118g.spl~
+    WRITE_LONG 0x9e cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/cbhwsty1.spl~ ~override/cbhwsty1.spl~
   COPY ~chriz-bg-magic/res/cbm412a.eff~ ~override/cbm412a.eff~
   COPY ~chriz-bg-magic/res/cbm412b.eff~ ~override/cbm412b.eff~
@@ -513,6 +602,7 @@ BEGIN
     WRITE_LONG 0xa2 cbm_prot_120_0_1
     SAY 0x27e @70004
   COPY ~chriz-bg-magic/res/cbmgbdom.spl~ ~override/cbmgbdom.spl~
+    WRITE_LONG 0x9e cbm_state_CHARM_IMMUNITY
   COPY ~chriz-bg-magic/res/cbmgcaco.eff~ ~override/cbmgcaco.eff~
   COPY ~chriz-bg-magic/res/cbmgfien.eff~ ~override/cbmgfien.eff~
   COPY ~chriz-bg-magic/res/cbmggate.eff~ ~override/cbmggate.eff~
@@ -612,6 +702,8 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmsmat.spl~ ~override/cbmsmat.spl~
     SAY 0x50 @70033
   COPY ~chriz-bg-magic/res/cbmsmaw.itm~ ~override/cbmsmaw.itm~
+    WRITE_LONG 0x412 cbm_state_STUN_IMMUNITY
+    WRITE_LONG 0x5f2 cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/cbmsnat.spl~ ~override/cbmsnat.spl~
   COPY ~chriz-bg-magic/res/cbmwa1.eff~ ~override/cbmwa1.eff~
   COPY ~chriz-bg-magic/res/cbmwa2.eff~ ~override/cbmwa2.eff~
@@ -638,6 +730,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/cdmindfl.itm~ ~override/cdmindfl.itm~
   COPY ~chriz-bg-magic/res/cdmiscba.spl~ ~override/cdmiscba.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/cdmiscbc.spl~ ~override/cdmiscbc.spl~
     WRITE_LONG 0x192 cbm_Slow
@@ -649,11 +742,13 @@ BEGIN
   COPY ~chriz-bg-magic/res/ch3draia.spl~ ~override/ch3draia.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ch3drain.spl~ ~override/ch3drain.spl~
     WRITE_LONG 0x282 cbm_Haste
   COPY ~chriz-bg-magic/res/ch3flasa.spl~ ~override/ch3flasa.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ch3flash.spl~ ~override/ch3flash.spl~
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/ch3weak.spl~ ~override/ch3weak.spl~
@@ -661,13 +756,16 @@ BEGIN
   COPY ~chriz-bg-magic/res/ch3weaka.spl~ ~override/ch3weaka.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/chan19.itm~ ~override/chan19.itm~
   COPY ~chriz-bg-magic/res/critical.itm~ ~override/critical.itm~
   COPY ~chriz-bg-magic/res/csiren.itm~ ~override/csiren.itm~
   COPY ~chriz-bg-magic/res/cuthide.spl~ ~override/cuthide.spl~
+    WRITE_LONG 0xfe cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x162 cbm_Slow
   COPY ~chriz-bg-magic/res/cuthidea.spl~ ~override/cuthidea.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/demilich.itm~ ~override/demilich.itm~
     WRITE_LONG 0x7a cbm_state_DISINTEGRATE_IMMUNITY
@@ -679,32 +777,40 @@ BEGIN
     WRITE_LONG 0x382 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/devaheal.spl~ ~override/devaheal.spl~
   COPY ~chriz-bg-magic/res/dogwawp.itm~ ~override/dogwawp.itm~
+    WRITE_LONG 0x16e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x1d2 cbm_Haste
   COPY ~chriz-bg-magic/res/dogwawp.spl~ ~override/dogwawp.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/druear.itm~ ~override/druear.itm~
   COPY ~chriz-bg-magic/res/drufir.itm~ ~override/drufir.itm~
   COPY ~chriz-bg-magic/res/dwfpsmsa.spl~ ~override/dwfpsmsa.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/dwfpsmsl.spl~ ~override/dwfpsmsl.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/dwfpwwha.spl~ ~override/dwfpwwha.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/dwfpwwhs.spl~ ~override/dwfpwwhs.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/dwwhip.itm~ ~override/dwwhip.itm~
     WRITE_LONG 0xe2 cbm_Haste
   COPY ~chriz-bg-magic/res/dwwhip.spl~ ~override/dwwhip.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/dwwhip01.itm~ ~override/dwwhip01.itm~
     WRITE_LONG 0xe2 cbm_Haste
   COPY ~chriz-bg-magic/res/dwwhip01.spl~ ~override/dwwhip01.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/earthrn.itm~ ~override/earthrn.itm~
   COPY ~chriz-bg-magic/res/elemchan.itm~ ~override/elemchan.itm~
     WRITE_LONG 0x2f2 cbm_DispelScreen
@@ -732,6 +838,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/gorwom4.spl~ ~override/gorwom4.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/hgber01.itm~ ~override/hgber01.itm~
     WRITE_LONG 0xb2 cbm_state_SILENCE_IMMUNITY
     WRITE_LONG 0xe2 cbm_state_PETRIFY_IMMUNITY
@@ -743,6 +850,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/hgber01.spl~ ~override/hgber01.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/immune1.itm~ ~override/immune1.itm~
   COPY ~chriz-bg-magic/res/immune10.itm~ ~override/immune10.itm~
   COPY ~chriz-bg-magic/res/immune2.itm~ ~override/immune2.itm~
@@ -753,16 +861,20 @@ BEGIN
   COPY ~chriz-bg-magic/res/jellmu1.spl~ ~override/jellmu1.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/jellmu2.itm~ ~override/jellmu2.itm~
     WRITE_LONG 0xe2 cbm_Haste
   COPY ~chriz-bg-magic/res/jellmu2.spl~ ~override/jellmu2.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/kuosper.itm~ ~override/kuosper.itm~
+    WRITE_LONG 0x13e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x1a2 cbm_Haste
   COPY ~chriz-bg-magic/res/kuosper.spl~ ~override/kuosper.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/leat23a.spl~ ~override/leat23a.spl~
   COPY ~chriz-bg-magic/res/lich.itm~ ~override/lich.itm~
     WRITE_LONG 0x7a cbm_state_DISINTEGRATE_IMMUNITY
@@ -770,10 +882,12 @@ BEGIN
     WRITE_LONG 0xda cbm_state_SLEEP_IMMUNITY
   COPY ~chriz-bg-magic/res/melfmet.itm~ ~override/melfmet.itm~
   COPY ~chriz-bg-magic/res/melis01.spl~ ~override/melis01.spl~
+    WRITE_LONG 0x24e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x2b2 cbm_Haste
   COPY ~chriz-bg-magic/res/melis01a.spl~ ~override/melis01a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/misc5c.itm~ ~override/misc5c.itm~
     WRITE_LONG 0x2f2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/ohbantim.spl~ ~override/ohbantim.spl~
@@ -786,10 +900,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/ohbbrvgr.itm~ ~override/ohbbrvgr.itm~
     WRITE_LONG 0x2c2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/ohbdgelu.itm~ ~override/ohbdgelu.itm~
+    WRITE_LONG 0xde cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x142 cbm_Haste
   COPY ~chriz-bg-magic/res/ohbdgelu.spl~ ~override/ohbdgelu.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ohbdtrai.itm~ ~override/ohbdtrai.itm~
     WRITE_LONG 0x7a cbm_state_CONFUSION_IMMUNITY
     WRITE_LONG 0xaa cbm_state_PANIC_IMMUNITY
@@ -799,10 +915,13 @@ BEGIN
   COPY ~chriz-bg-magic/res/ohbewwsa.spl~ ~override/ohbewwsa.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ohbewwsl.spl~ ~override/ohbewwsl.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/ohbinvul.spl~ ~override/ohbinvul.spl~
   COPY ~chriz-bg-magic/res/ohbjoke1.spl~ ~override/ohbjoke1.spl~
+    WRITE_LONG 0x9e cbm_state_CONFUSION_IMMUNITY
   COPY ~chriz-bg-magic/res/ohbprog.spl~ ~override/ohbprog.spl~
     WRITE_LONG 0x102 cbm_stat_224
   COPY ~chriz-bg-magic/res/ohbprog1.spl~ ~override/ohbprog1.spl~
@@ -814,15 +933,18 @@ BEGIN
     WRITE_LONG 0x252 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/ohbwi308.spl~ ~override/ohbwi308.spl~
   COPY ~chriz-bg-magic/res/ohhphrey.itm~ ~override/ohhphrey.itm~
+    WRITE_LONG 0x1fe cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x262 cbm_Haste
   COPY ~chriz-bg-magic/res/ohhphrey.spl~ ~override/ohhphrey.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ohnpotn1.itm~ ~override/ohnpotn1.itm~
     WRITE_LONG 0x172 cbm_Haste
   COPY ~chriz-bg-magic/res/ohnpotn1.spl~ ~override/ohnpotn1.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ohnwildx.spl~ ~override/ohnwildx.spl~
   COPY ~chriz-bg-magic/res/ohprgd10.spl~ ~override/ohprgd10.spl~
     WRITE_LONG 0x33a cbm_stat_224
@@ -857,10 +979,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/planetar.itm~ ~override/planetar.itm~
     WRITE_LONG 0x3e2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/plyjello.itm~ ~override/plyjello.itm~
+    WRITE_LONG 0x28e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x2f2 cbm_Haste
   COPY ~chriz-bg-magic/res/plyjello.spl~ ~override/plyjello.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/plyjelly.itm~ ~override/plyjelly.itm~
     SAY 0xafe @70035
     SAY 0xb2e @70035
@@ -869,22 +993,28 @@ BEGIN
   COPY ~chriz-bg-magic/res/plyjelly.spl~ ~override/plyjelly.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/plyspid.itm~ ~override/plyspid.itm~
   COPY ~chriz-bg-magic/res/polyjell.itm~ ~override/polyjell.itm~
     WRITE_LONG 0x922 cbm_Haste
   COPY ~chriz-bg-magic/res/polyjell.spl~ ~override/polyjell.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/potn14.itm~ ~override/potn14.itm~
+    WRITE_LONG 0xae cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x112 cbm_Slow
   COPY ~chriz-bg-magic/res/potn14.spl~ ~override/potn14.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/potn32.itm~ ~override/potn32.itm~
+    WRITE_LONG 0xae cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x112 cbm_Haste
   COPY ~chriz-bg-magic/res/potn32.spl~ ~override/potn32.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/projimag.spl~ ~override/projimag.spl~
   COPY ~chriz-bg-magic/res/ravag01.itm~ ~override/ravag01.itm~
     WRITE_LONG 0x2f2 cbm_DispelScreen
@@ -892,9 +1022,11 @@ BEGIN
     WRITE_LONG 0xb2 cbm_state_CHARM_IMMUNITY
     WRITE_LONG 0x4a2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/ring39.itm~ ~override/ring39.itm~
+    WRITE_LONG 0x506 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x56a cbm_Slow
   COPY ~chriz-bg-magic/res/ring39.spl~ ~override/ring39.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/ringdemn.itm~ ~override/ringdemn.itm~
@@ -906,6 +1038,7 @@ BEGIN
     WRITE_LONG 0xd2 cbm_Slow
   COPY ~chriz-bg-magic/res/runruna.spl~ ~override/runruna.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/scrl07.itm~ ~override/scrl07.itm~
     WRITE_LONG 0xcb2 cbm_state_SCROLL_OF_PROTECTION_FROM_MAGIC
@@ -1118,20 +1251,25 @@ BEGIN
   COPY ~chriz-bg-magic/res/sendai.spl~ ~override/sendai.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/senspihe.spl~ ~override/senspihe.spl~
   COPY ~chriz-bg-magic/res/sharswd.itm~ ~override/sharswd.itm~
     WRITE_LONG 0x292 cbm_Haste
   COPY ~chriz-bg-magic/res/sharswd.spl~ ~override/sharswd.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/simulacr.spl~ ~override/simulacr.spl~
   COPY ~chriz-bg-magic/res/spcl123.spl~ ~override/spcl123.spl~
+    WRITE_LONG 0x206 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x26a cbm_Haste
     WRITE_LONG 0x32a cbm_Haste
   COPY ~chriz-bg-magic/res/spcl123a.spl~ ~override/spcl123a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0x11a cbm_Slow
+    WRITE_LONG 0x1a6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x20a cbm_Slow
+    WRITE_LONG 0x296 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spcl231.spl~ ~override/spcl231.spl~
     WRITE_LONG 0x51a cbm_DispelScreen
     WRITE_LONG 0x6ca cbm_DispelScreen
@@ -1161,13 +1299,17 @@ BEGIN
   COPY ~chriz-bg-magic/res/spcl415b.spl~ ~override/spcl415b.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0x11a cbm_Slow
+    WRITE_LONG 0x1a6 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spcl422.spl~ ~override/spcl422.spl~
+    WRITE_LONG 0x44e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x4b2 cbm_Haste
   COPY ~chriz-bg-magic/res/spcl422a.spl~ ~override/spcl422a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xf2 cbm_Slow
+    WRITE_LONG 0x17e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spcl751a.spl~ ~override/spcl751a.spl~
     WRITE_LONG 0x152 cbm_state_JESTER_SONG
+    WRITE_LONG 0x1de cbm_state_CONFUSION_IMMUNITY
     WRITE_LONG 0x302 cbm_state_JESTER_SONG
     WRITE_LONG 0x422 cbm_Haste
     WRITE_LONG 0x4e2 cbm_state_JESTER_SONG
@@ -1175,7 +1317,9 @@ BEGIN
   COPY ~chriz-bg-magic/res/spcl751b.spl~ ~override/spcl751b.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xf2 cbm_Slow
+    WRITE_LONG 0x17e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x212 cbm_Slow
+    WRITE_LONG 0x29e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spcl821.spl~ ~override/spcl821.spl~
   COPY ~chriz-bg-magic/res/spcl920a.spl~ ~override/spcl920a.spl~
     WRITE_LONG 0x102 cbm_state_CONFUSION_IMMUNITY
@@ -1243,20 +1387,27 @@ BEGIN
   COPY ~chriz-bg-magic/res/spin550.spl~ ~override/spin550.spl~
     WRITE_LONG 0x6d2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spin566.spl~ ~override/spin566.spl~
+    WRITE_LONG 0x9e cbm_state_WEB_IMMUNITY
   COPY ~chriz-bg-magic/res/spin572.spl~ ~override/spin572.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spin572a.spl~ ~override/spin572a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/spin575.spl~ ~override/spin575.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spin575a.spl~ ~override/spin575a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin584.spl~ ~override/spin584.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spin584a.spl~ ~override/spin584a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/spin608.spl~ ~override/spin608.spl~
   COPY ~chriz-bg-magic/res/spin628.spl~ ~override/spin628.spl~
@@ -1264,14 +1415,17 @@ BEGIN
   COPY ~chriz-bg-magic/res/spin628a.spl~ ~override/spin628a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin646.spl~ ~override/spin646.spl~
     WRITE_LONG 0x282 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spin647.spl~ ~override/spin647.spl~
     WRITE_LONG 0x1f2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spin655.spl~ ~override/spin655.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spin655a.spl~ ~override/spin655a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin679.spl~ ~override/spin679.spl~
@@ -1292,67 +1446,108 @@ BEGIN
   COPY ~chriz-bg-magic/res/spin817a.spl~ ~override/spin817a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin818.spl~ ~override/spin818.spl~
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/spin818a.spl~ ~override/spin818a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin828.spl~ ~override/spin828.spl~
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x35a cbm_Slow
+    WRITE_LONG 0x386 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x3ea cbm_Slow
+    WRITE_LONG 0x416 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x47a cbm_Slow
+    WRITE_LONG 0x4a6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x50a cbm_Slow
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x59a cbm_Slow
+    WRITE_LONG 0x5c6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x62a cbm_Slow
+    WRITE_LONG 0x656 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x6ba cbm_Slow
+    WRITE_LONG 0x6e6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x74a cbm_Slow
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7da cbm_Slow
+    WRITE_LONG 0x806 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x86a cbm_Slow
+    WRITE_LONG 0x896 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x8fa cbm_Slow
+    WRITE_LONG 0x926 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x98a cbm_Slow
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xa1a cbm_Slow
+    WRITE_LONG 0xa46 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xaaa cbm_Slow
+    WRITE_LONG 0xad6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xb3a cbm_Slow
+    WRITE_LONG 0xb66 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xbca cbm_Slow
   COPY ~chriz-bg-magic/res/spin828a.spl~ ~override/spin828a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x32a cbm_Haste
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x56a cbm_Haste
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7aa cbm_Haste
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x9ea cbm_Haste
+    WRITE_LONG 0xbf6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xc2a cbm_Haste
+    WRITE_LONG 0xe36 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xe6a cbm_Haste
+    WRITE_LONG 0x1076 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x10aa cbm_Haste
+    WRITE_LONG 0x12b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x12ea cbm_Haste
+    WRITE_LONG 0x14f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x152a cbm_Haste
+    WRITE_LONG 0x1736 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x176a cbm_Haste
+    WRITE_LONG 0x1976 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x19aa cbm_Haste
+    WRITE_LONG 0x1bb6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1bea cbm_Haste
+    WRITE_LONG 0x1df6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1e2a cbm_Haste
+    WRITE_LONG 0x2036 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x206a cbm_Haste
+    WRITE_LONG 0x2276 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x22aa cbm_Haste
+    WRITE_LONG 0x24b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x24ea cbm_Haste
   COPY ~chriz-bg-magic/res/spin862.spl~ ~override/spin862.spl~
   COPY ~chriz-bg-magic/res/spin866.spl~ ~override/spin866.spl~
     WRITE_LONG 0x252 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spin934.spl~ ~override/spin934.spl~
+    WRITE_LONG 0xfe cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/spin943.spl~ ~override/spin943.spl~
     WRITE_LONG 0x102 cbm_stat_227
   COPY ~chriz-bg-magic/res/spin977.spl~ ~override/spin977.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spin977a.spl~ ~override/spin977a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin978.spl~ ~override/spin978.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spin978a.spl~ ~override/spin978a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/spin983.spl~ ~override/spin983.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spin983a.spl~ ~override/spin983a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin992.spl~ ~override/spin992.spl~
     WRITE_LONG 0x612 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spplan.eff~ ~override/spplan.eff~
@@ -1409,6 +1604,8 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr105.spl~ ~override/sppr105.spl~
     WRITE_LONG 0x50 12208
     PATCH_IF cbm_english BEGIN SAY 0x50 @70111 END
+    WRITE_LONG 0x2ae cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x2de cbm_state_ENTANGLE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr106.spl~ ~override/sppr106.spl~
     WRITE_LONG 0x50 12317
     PATCH_IF cbm_english BEGIN SAY 0x50 @70112 END
@@ -1609,20 +1806,94 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr211.spl~ ~override/sppr211.spl~
     WRITE_LONG 0x50 12211
     PATCH_IF cbm_english BEGIN SAY 0x50 @70119 END
+    WRITE_LONG 0x396 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x3c6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x546 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x576 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x6f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x726 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x8a6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x8d6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0xa56 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xa86 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0xc06 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xc36 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0xdb6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xde6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0xf66 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xf96 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1116 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1146 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x12c6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x12f6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1476 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x14a6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1626 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1656 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x17d6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1806 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1986 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x19b6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1b36 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1b66 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1ce6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1d16 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x1e96 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x1ec6 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x2046 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x2076 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x21f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x2226 cbm_state_SILENCE_IMMUNITY
+    WRITE_LONG 0x23a6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x23d6 cbm_state_SILENCE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr212.spl~ ~override/sppr212.spl~
   COPY ~chriz-bg-magic/res/sppr250.spl~ ~override/sppr250.spl~
+    WRITE_LONG 0x18e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x1f2 cbm_Haste
   COPY ~chriz-bg-magic/res/sppr250a.spl~ ~override/sppr250a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr302.spl~ ~override/sppr302.spl~
     WRITE_LONG 0x50 12212
     PATCH_IF cbm_english BEGIN SAY 0x50 @70120 END
+    WRITE_LONG 0x2f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x356 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x3b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x416 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x476 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x4d6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x536 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x596 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x5f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x656 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x6b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x716 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x776 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x7d6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x836 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x896 cbm_state_MINOR_GLOBE
   COPY ~chriz-bg-magic/res/sppr303.spl~ ~override/sppr303.spl~
     WRITE_LONG 0x252 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/sppr304.spl~ ~override/sppr304.spl~
     WRITE_LONG 0x50 12200
     PATCH_IF cbm_english BEGIN SAY 0x50 @70121 END
+    WRITE_LONG 0x2f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x356 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x3b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x416 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x476 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x4d6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x536 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x596 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x5f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x656 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x6b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x716 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x776 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x7d6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x836 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x896 cbm_state_MINOR_GLOBE
   COPY ~chriz-bg-magic/res/sppr308.spl~ ~override/sppr308.spl~
   COPY ~chriz-bg-magic/res/sppr309.spl~ ~override/sppr309.spl~
     WRITE_LONG 0x50 12221
@@ -1644,34 +1915,49 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr314.spl~ ~override/sppr314.spl~
     WRITE_LONG 0x50 4350
     PATCH_IF cbm_english BEGIN SAY 0x50 @70124 END
+    WRITE_LONG 0x2fe cbm_state_MINOR_GLOBE
     WRITE_LONG 0x422 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x482 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x53e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x662 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x6c2 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x77e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x8a2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x902 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x9be cbm_state_MINOR_GLOBE
     WRITE_LONG 0xae2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0xb42 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0xbfe cbm_state_MINOR_GLOBE
     WRITE_LONG 0xd22 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0xd82 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0xe3e cbm_state_MINOR_GLOBE
     WRITE_LONG 0xf62 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0xfc2 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x107e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x11a2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1202 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x12be cbm_state_MINOR_GLOBE
     WRITE_LONG 0x13e2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1442 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x14fe cbm_state_MINOR_GLOBE
     WRITE_LONG 0x1622 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1682 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x173e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x1862 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x18c2 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x197e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x1aa2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1b02 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x1bbe cbm_state_MINOR_GLOBE
     WRITE_LONG 0x1ce2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1d42 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x1dfe cbm_state_MINOR_GLOBE
     WRITE_LONG 0x1f22 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x1f82 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x203e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x2162 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x21c2 cbm_state_CBM_BONUS_TYPED
+    WRITE_LONG 0x227e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x23a2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x2402 cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/sppr315.spl~ ~override/sppr315.spl~
@@ -2038,6 +2324,18 @@ BEGIN
     PATCH_IF cbm_english BEGIN SAY 0x50 @70141 END
     WRITE_LONG 0xa2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr512.spl~ ~override/sppr512.spl~
+    WRITE_LONG 0x256 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x3d6 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x556 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x6d6 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x856 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x9d6 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xb56 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xcd6 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xe56 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xfd6 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1156 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x12d6 cbm_state_SLEEP_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr513.spl~ ~override/sppr513.spl~
     WRITE_LONG 0x50 7080
     PATCH_IF cbm_english BEGIN SAY 0x50 @70142 END
@@ -2059,6 +2357,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr517.spl~ ~override/sppr517.spl~
     WRITE_LONG 0x50 45051
     PATCH_IF cbm_english BEGIN SAY 0x50 @70144 END
+    WRITE_LONG 0x9e cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr517a.spl~ ~override/sppr517a.spl~
     WRITE_LONG 0xd2 cbm_prot_125_1_4
   COPY ~chriz-bg-magic/res/sppr517b.eff~ ~override/sppr517b.eff~
@@ -2089,11 +2388,13 @@ BEGIN
     PATCH_IF cbm_english BEGIN SAY 0x50 @70151 END
     WRITE_LONG 0xa2 cbm_prot_59_1_1
   COPY ~chriz-bg-magic/res/sppr609.spl~ ~override/sppr609.spl~
+    WRITE_LONG 0x15e cbm_state_CONFUSION_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr610.spl~ ~override/sppr610.spl~
     WRITE_LONG 0x132 cbm_Haste
   COPY ~chriz-bg-magic/res/sppr610a.spl~ ~override/sppr610a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr612.spl~ ~override/sppr612.spl~
     WRITE_LONG 0x50 38576
     PATCH_IF cbm_english BEGIN SAY 0x50 @70152 END
@@ -2112,9 +2413,20 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr706.spl~ ~override/sppr706.spl~
     WRITE_LONG 0x50 14320
     PATCH_IF cbm_english BEGIN SAY 0x50 @70156 END
+    WRITE_LONG 0x116 cbm_state_PANIC_IMMUNITY
+    WRITE_LONG 0x266 cbm_state_PANIC_IMMUNITY
+    WRITE_LONG 0x3b6 cbm_state_PANIC_IMMUNITY
+    WRITE_LONG 0x506 cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr708.spl~ ~override/sppr708.spl~
     WRITE_LONG 0x50 10897
     PATCH_IF cbm_english BEGIN SAY 0x50 @70157 END
+    WRITE_LONG 0x18e cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x2ae cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x3ce cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x4ee cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x60e cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x72e cbm_state_DEATH_IMMUNITY
+    WRITE_LONG 0x84e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr709.spl~ ~override/sppr709.spl~
     SAY 0x8 @70158
     SAY 0x50 @70159
@@ -2124,6 +2436,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr710a.spl~ ~override/sppr710a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr711.spl~ ~override/sppr711.spl~
     WRITE_LONG 0x50 10997
     PATCH_IF cbm_english BEGIN SAY 0x50 @70160 END
@@ -2149,6 +2462,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr715a.spl~ ~override/sppr715a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr717.spl~ ~override/sppr717.spl~
     WRITE_LONG 0x50 25751
     PATCH_IF cbm_english BEGIN SAY 0x50 @70162 END
@@ -2165,12 +2479,17 @@ BEGIN
     WRITE_LONG 0x50 45059
     PATCH_IF cbm_english BEGIN SAY 0x50 @70163 END
     WRITE_LONG 0x14a cbm_prot_131_1_4
+    WRITE_LONG 0x176 cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x32a cbm_prot_131_1_4
+    WRITE_LONG 0x356 cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x50a cbm_prot_131_1_4
+    WRITE_LONG 0x536 cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x6ea cbm_prot_131_1_4
+    WRITE_LONG 0x716 cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr719.spl~ ~override/sppr719.spl~
     WRITE_LONG 0x50 45058
     PATCH_IF cbm_english BEGIN SAY 0x50 @70164 END
+    WRITE_LONG 0x9e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr725.spl~ ~override/sppr725.spl~
     WRITE_LONG 0x50 63802
     PATCH_IF cbm_english BEGIN SAY 0x50 @70165 END
@@ -2204,50 +2523,122 @@ BEGIN
     WRITE_LONG 0x1762 cbm_state_BUFF_PRO_DAMAGE
     WRITE_LONG 0x18b2 cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/spra301.spl~ ~override/spra301.spl~
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x35a cbm_Slow
+    WRITE_LONG 0x386 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x3ea cbm_Slow
+    WRITE_LONG 0x416 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x47a cbm_Slow
+    WRITE_LONG 0x4a6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x50a cbm_Slow
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x59a cbm_Slow
+    WRITE_LONG 0x5c6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x62a cbm_Slow
+    WRITE_LONG 0x656 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x6ba cbm_Slow
+    WRITE_LONG 0x6e6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x74a cbm_Slow
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7da cbm_Slow
+    WRITE_LONG 0x806 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x86a cbm_Slow
+    WRITE_LONG 0x896 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x8fa cbm_Slow
+    WRITE_LONG 0x926 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x98a cbm_Slow
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xa1a cbm_Slow
+    WRITE_LONG 0xa46 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xaaa cbm_Slow
+    WRITE_LONG 0xad6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xb3a cbm_Slow
+    WRITE_LONG 0xb66 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xbca cbm_Slow
   COPY ~chriz-bg-magic/res/spra301a.spl~ ~override/spra301a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x32a cbm_Haste
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x56a cbm_Haste
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7aa cbm_Haste
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x9ea cbm_Haste
+    WRITE_LONG 0xbf6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xc2a cbm_Haste
+    WRITE_LONG 0xe36 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xe6a cbm_Haste
+    WRITE_LONG 0x1076 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x10aa cbm_Haste
+    WRITE_LONG 0x12b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x12ea cbm_Haste
+    WRITE_LONG 0x14f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x152a cbm_Haste
+    WRITE_LONG 0x1736 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x176a cbm_Haste
+    WRITE_LONG 0x1976 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x19aa cbm_Haste
+    WRITE_LONG 0x1bb6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1bea cbm_Haste
+    WRITE_LONG 0x1df6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1e2a cbm_Haste
+    WRITE_LONG 0x2036 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x206a cbm_Haste
+    WRITE_LONG 0x2276 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x22aa cbm_Haste
+    WRITE_LONG 0x24b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x24ea cbm_Haste
   COPY ~chriz-bg-magic/res/spwi010.spl~ ~override/spwi010.spl~
     WRITE_LONG 0x282 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi101.spl~ ~override/spwi101.spl~
     WRITE_LONG 0x50 12154
     PATCH_IF cbm_english BEGIN SAY 0x50 @70050 END
+    WRITE_SHORT 0x98 cbm_proj_cbmgr01
+    WRITE_SHORT 0xc0 cbm_proj_cbmgr02
+    WRITE_SHORT 0xe8 cbm_proj_cbmgr03
+    WRITE_SHORT 0x110 cbm_proj_cbmgr04
+    WRITE_SHORT 0x138 cbm_proj_cbmgr05
+    WRITE_SHORT 0x160 cbm_proj_cbmgr06
+    WRITE_SHORT 0x188 cbm_proj_cbmgr07
+    WRITE_SHORT 0x1b0 cbm_proj_cbmgr08
+    WRITE_SHORT 0x1d8 cbm_proj_cbmgr09
+    WRITE_SHORT 0x200 cbm_proj_cbmgr10
+    WRITE_SHORT 0x228 cbm_proj_cbmgr11
+    WRITE_SHORT 0x250 cbm_proj_cbmgr12
+    WRITE_SHORT 0x278 cbm_proj_cbmgr13
+    WRITE_SHORT 0x2a0 cbm_proj_cbmgr14
+    WRITE_SHORT 0x2c8 cbm_proj_cbmgr15
+    WRITE_SHORT 0x2f0 cbm_proj_cbmgr16
+    WRITE_SHORT 0x318 cbm_proj_cbmgr17
+    WRITE_SHORT 0x340 cbm_proj_cbmgr18
+    WRITE_SHORT 0x368 cbm_proj_cbmgr19
+    WRITE_SHORT 0x390 cbm_proj_cbmgr20
   COPY ~chriz-bg-magic/res/spwi105.spl~ ~override/spwi105.spl~
   COPY ~chriz-bg-magic/res/spwi106.spl~ ~override/spwi106.spl~
     WRITE_LONG 0x50 6622
     PATCH_IF cbm_english BEGIN SAY 0x50 @70060 END
   COPY ~chriz-bg-magic/res/spwi116.spl~ ~override/spwi116.spl~
+    WRITE_LONG 0x396 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x516 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x696 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x816 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x996 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xb16 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xc96 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xe16 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0xf96 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1116 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1296 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1416 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1596 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1716 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1896 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1a16 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1b96 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1d16 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x1e96 cbm_state_SLEEP_IMMUNITY
+    WRITE_LONG 0x2016 cbm_state_SLEEP_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi118.spl~ ~override/spwi118.spl~
     WRITE_LONG 0x50 12174
     PATCH_IF cbm_english BEGIN SAY 0x50 @70071 END
@@ -2257,12 +2648,19 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi124.spl~ ~override/spwi124.spl~
   COPY ~chriz-bg-magic/res/spwi125.spl~ ~override/spwi125.spl~
     WRITE_LONG 0x192 cbm_prot_118_0_3
+    WRITE_LONG 0x1ee cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0x372 cbm_prot_118_0_3
+    WRITE_LONG 0x3ce cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0x552 cbm_prot_118_0_3
+    WRITE_LONG 0x5ae cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0x732 cbm_prot_118_0_3
+    WRITE_LONG 0x78e cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0x912 cbm_prot_118_0_3
+    WRITE_LONG 0x96e cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0xaf2 cbm_prot_118_0_3
+    WRITE_LONG 0xb4e cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0xcd2 cbm_prot_118_0_3
+    WRITE_LONG 0xd2e cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi201.spl~ ~override/spwi201.spl~
     WRITE_LONG 0x50 6619
     PATCH_IF cbm_english BEGIN SAY 0x50 @70072 END
@@ -2393,6 +2791,7 @@ BEGIN
     WRITE_LONG 0x3f1a cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x3f7a cbm_state_CBM_BONUS_TYPED
   COPY ~chriz-bg-magic/res/spwi205.spl~ ~override/spwi205.spl~
+    WRITE_LONG 0xce cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi206.spl~ ~override/spwi206.spl~
     WRITE_LONG 0x50 2969
     PATCH_IF cbm_english BEGIN SAY 0x50 @70080 END
@@ -2409,6 +2808,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi213.spl~ ~override/spwi213.spl~
     WRITE_LONG 0x50 12181
     PATCH_IF cbm_english BEGIN SAY 0x50 @70082 END
+    WRITE_LONG 0x15e cbm_state_MINOR_GLOBE
   ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
   COPY ~chriz-bg-magic/res/spwi214.spl~ ~override/spwi214.spl~
     WRITE_LONG 0x50 12197
@@ -2476,9 +2876,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi215.spl~ ~override/spwi215.spl~
     WRITE_LONG 0x50 12184
     PATCH_IF cbm_english BEGIN SAY 0x50 @70084 END
+    WRITE_LONG 0x27e cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x2ae cbm_state_WEB_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi220.spl~ ~override/spwi220.spl~
     WRITE_LONG 0x50 7481
     PATCH_IF cbm_english BEGIN SAY 0x50 @70052 END
+    WRITE_LONG 0x18e cbm_state_SLEEP_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi298.spl~ ~override/spwi298.spl~
   COPY ~chriz-bg-magic/res/spwi301.spl~ ~override/spwi301.spl~
     WRITE_LONG 0x50 12159
@@ -2487,39 +2890,71 @@ BEGIN
     WRITE_LONG 0x222 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/spwi304.spl~ ~override/spwi304.spl~
   COPY ~chriz-bg-magic/res/spwi305.spl~ ~override/spwi305.spl~
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x35a cbm_Slow
+    WRITE_LONG 0x386 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x3ea cbm_Slow
+    WRITE_LONG 0x416 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x47a cbm_Slow
+    WRITE_LONG 0x4a6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x50a cbm_Slow
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x59a cbm_Slow
+    WRITE_LONG 0x5c6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x62a cbm_Slow
+    WRITE_LONG 0x656 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x6ba cbm_Slow
+    WRITE_LONG 0x6e6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x74a cbm_Slow
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7da cbm_Slow
+    WRITE_LONG 0x806 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x86a cbm_Slow
+    WRITE_LONG 0x896 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x8fa cbm_Slow
+    WRITE_LONG 0x926 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x98a cbm_Slow
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xa1a cbm_Slow
+    WRITE_LONG 0xa46 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xaaa cbm_Slow
+    WRITE_LONG 0xad6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xb3a cbm_Slow
+    WRITE_LONG 0xb66 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xbca cbm_Slow
   COPY ~chriz-bg-magic/res/spwi305a.spl~ ~override/spwi305a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x2f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x32a cbm_Haste
+    WRITE_LONG 0x536 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x56a cbm_Haste
+    WRITE_LONG 0x776 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x7aa cbm_Haste
+    WRITE_LONG 0x9b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x9ea cbm_Haste
+    WRITE_LONG 0xbf6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xc2a cbm_Haste
+    WRITE_LONG 0xe36 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xe6a cbm_Haste
+    WRITE_LONG 0x1076 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x10aa cbm_Haste
+    WRITE_LONG 0x12b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x12ea cbm_Haste
+    WRITE_LONG 0x14f6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x152a cbm_Haste
+    WRITE_LONG 0x1736 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x176a cbm_Haste
+    WRITE_LONG 0x1976 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x19aa cbm_Haste
+    WRITE_LONG 0x1bb6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1bea cbm_Haste
+    WRITE_LONG 0x1df6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x1e2a cbm_Haste
+    WRITE_LONG 0x2036 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x206a cbm_Haste
+    WRITE_LONG 0x2276 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x22aa cbm_Haste
+    WRITE_LONG 0x24b6 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x24ea cbm_Haste
   COPY ~chriz-bg-magic/res/spwi307.spl~ ~override/spwi307.spl~
     WRITE_LONG 0x8 12019
@@ -2531,13 +2966,31 @@ BEGIN
     WRITE_LONG 0x50 12179
     PATCH_IF cbm_english BEGIN SAY 0x50 @70039 END
   COPY ~chriz-bg-magic/res/spwi312.spl~ ~override/spwi312.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spwi312a.spl~ ~override/spwi312a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi313.spl~ ~override/spwi313.spl~
     WRITE_LONG 0x50 17647
     PATCH_IF cbm_english BEGIN SAY 0x50 @70040 END
+    WRITE_LONG 0x2f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x3b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x476 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x536 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x5f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x6b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x776 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x836 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x8f6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0x9b6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xa76 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xb36 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xbf6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xcb6 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xd76 cbm_state_MINOR_GLOBE
+    WRITE_LONG 0xe36 cbm_state_MINOR_GLOBE
   COPY ~chriz-bg-magic/res/spwi315.spl~ ~override/spwi315.spl~
     WRITE_LONG 0x7ba cbm_stat_223
     WRITE_LONG 0xd2a cbm_stat_223
@@ -2583,6 +3036,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi401.spl~ ~override/spwi401.spl~
     WRITE_LONG 0x50 12166
     PATCH_IF cbm_english BEGIN SAY 0x50 @70041 END
+    WRITE_LONG 0x166 cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x2b6 cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x406 cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x556 cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x6a6 cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x7f6 cbm_state_CONFUSION_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi403.spl~ ~override/spwi403.spl~
     WRITE_LONG 0x51a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x54a cbm_state_BUFF_PRO_DAMAGE
@@ -2627,19 +3086,33 @@ BEGIN
     WRITE_LONG 0x3fca cbm_state_BUFF_PRO_DAMAGE
     WRITE_LONG 0x3ffa cbm_state_BLUE_FIRESHIELD
   COPY ~chriz-bg-magic/res/spwi411b.spl~ ~override/spwi411b.spl~
+    WRITE_LONG 0x2a6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x33a cbm_state_HOPELESSNESS
+    WRITE_LONG 0x3c6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x45a cbm_state_HOPELESSNESS
+    WRITE_LONG 0x4e6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x57a cbm_state_HOPELESSNESS
+    WRITE_LONG 0x606 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x69a cbm_state_HOPELESSNESS
+    WRITE_LONG 0x726 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x7ba cbm_state_HOPELESSNESS
+    WRITE_LONG 0x846 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x8da cbm_state_HOPELESSNESS
+    WRITE_LONG 0x966 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x9fa cbm_state_HOPELESSNESS
+    WRITE_LONG 0xa86 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0xb1a cbm_state_HOPELESSNESS
+    WRITE_LONG 0xba6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0xc3a cbm_state_HOPELESSNESS
+    WRITE_LONG 0xcc6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0xd5a cbm_state_HOPELESSNESS
+    WRITE_LONG 0xde6 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0xe7a cbm_state_HOPELESSNESS
+    WRITE_LONG 0xf06 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0xf9a cbm_state_HOPELESSNESS
+    WRITE_LONG 0x1026 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x10ba cbm_state_HOPELESSNESS
+    WRITE_LONG 0x1146 cbm_state_SLEEP_IMMUNITY
     WRITE_LONG 0x11da cbm_state_HOPELESSNESS
   COPY ~chriz-bg-magic/res/spwi413a.spl~ ~override/spwi413a.spl~
     WRITE_LONG 0x9a2 cbm_state_OTILUKES_RESILIENT_SPHERE
@@ -2710,10 +3183,14 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi502.spl~ ~override/spwi502.spl~
     WRITE_LONG 0x50 12175
     PATCH_IF cbm_english BEGIN SAY 0x50 @70042 END
+    WRITE_LONG 0x12e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi503.spl~ ~override/spwi503.spl~
   COPY ~chriz-bg-magic/res/spwi508.spl~ ~override/spwi508.spl~
     WRITE_LONG 0x50 22611
     PATCH_IF cbm_english BEGIN SAY 0x50 @70172 END
+    WRITE_LONG 0xee cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x35e cbm_state_CONFUSION_IMMUNITY
+    WRITE_LONG 0x5ce cbm_state_CONFUSION_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi510.spl~ ~override/spwi510.spl~
     WRITE_LONG 0x8 25912
     PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
@@ -2837,6 +3314,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi612.spl~ ~override/spwi612.spl~
     WRITE_LONG 0x50 7779
     PATCH_IF cbm_english BEGIN SAY 0x50 @70063 END
+    WRITE_LONG 0x9e cbm_state_SILENCE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi613.spl~ ~override/spwi613.spl~
     WRITE_LONG 0x8 25937
     PATCH_IF cbm_english BEGIN SAY 0x8 @70064 END
@@ -2882,6 +3360,7 @@ BEGIN
     WRITE_LONG 0x50 7622
     PATCH_IF cbm_english BEGIN SAY 0x50 @70066 END
   COPY ~chriz-bg-magic/res/spwi616.spl~ ~override/spwi616.spl~
+    WRITE_LONG 0xfe cbm_state_DISINTEGRATE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi617.spl~ ~override/spwi617.spl~
     WRITE_LONG 0x50 25943
     PATCH_IF cbm_english BEGIN SAY 0x50 @70067 END
@@ -2914,10 +3393,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi713.spl~ ~override/spwi713.spl~
     WRITE_LONG 0x50 7672
     PATCH_IF cbm_english BEGIN SAY 0x50 @70078 END
+    WRITE_LONG 0x9e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi715.spl~ ~override/spwi715.spl~
     WRITE_LONG 0x50 7782
     PATCH_IF cbm_english BEGIN SAY 0x50 @70079 END
     WRITE_LONG 0xd2 cbm_prot_131_1_4
+    WRITE_LONG 0xfe cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi802.spl~ ~override/spwi802.spl~
   ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
   COPY ~chriz-bg-magic/res/spwi804.spl~ ~override/spwi804.spl~
@@ -2951,6 +3432,9 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi811.spl~ ~override/spwi811.spl~
     WRITE_LONG 0x50 17362
     PATCH_IF cbm_english BEGIN SAY 0x50 @70090 END
+    WRITE_LONG 0xee cbm_state_PANIC_IMMUNITY
+    WRITE_LONG 0x23e cbm_state_PANIC_IMMUNITY
+    WRITE_LONG 0x38e cbm_state_PANIC_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi812.spl~ ~override/spwi812.spl~
   COPY ~chriz-bg-magic/res/spwi815.spl~ ~override/spwi815.spl~
     WRITE_LONG 0x50 7784
@@ -2959,11 +3443,15 @@ BEGIN
     WRITE_LONG 0x50 39957
     PATCH_IF cbm_english BEGIN SAY 0x50 @70098 END
     WRITE_LONG 0x122 cbm_prot_131_1_4
+    WRITE_LONG 0x14e cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x302 cbm_prot_131_1_4
+    WRITE_LONG 0x32e cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x4e2 cbm_prot_131_1_4
+    WRITE_LONG 0x50e cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi817.spl~ ~override/spwi817.spl~
     WRITE_LONG 0x50 39967
     PATCH_IF cbm_english BEGIN SAY 0x50 @70097 END
+    WRITE_LONG 0x9e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi903.spl~ ~override/spwi903.spl~
     WRITE_LONG 0x50 26315
     PATCH_IF cbm_english BEGIN SAY 0x50 @70092 END
@@ -2982,6 +3470,7 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi912.spl~ ~override/spwi912.spl~
     WRITE_LONG 0x50 18140
     PATCH_IF cbm_english BEGIN SAY 0x50 @70096 END
+    WRITE_LONG 0x9e cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi916.spl~ ~override/spwi916.spl~
     WRITE_LONG 0x50 26362
     PATCH_IF cbm_english BEGIN SAY 0x50 @70189 END
@@ -3009,26 +3498,33 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwish21.spl~ ~override/spwish21.spl~
     WRITE_LONG 0xd2 cbm_stat_233
   COPY ~chriz-bg-magic/res/spwish25.spl~ ~override/spwish25.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spwish26.spl~ ~override/spwish26.spl~
   COPY ~chriz-bg-magic/res/spwish28.spl~ ~override/spwish28.spl~
   COPY ~chriz-bg-magic/res/spwish2a.spl~ ~override/spwish2a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwish36.spl~ ~override/spwish36.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spwish37.spl~ ~override/spwish37.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spwish38.spl~ ~override/spwish38.spl~
   COPY ~chriz-bg-magic/res/spwish3a.spl~ ~override/spwish3a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwish3b.spl~ ~override/spwish3b.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwish40.spl~ ~override/spwish40.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spwish41.spl~ ~override/spwish41.spl~
   COPY ~chriz-bg-magic/res/spwish42.spl~ ~override/spwish42.spl~
@@ -3038,34 +3534,43 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwish46.spl~ ~override/spwish46.spl~
   COPY ~chriz-bg-magic/res/spwish4a.spl~ ~override/spwish4a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
     WRITE_LONG 0x162 cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwm112.spl~ ~override/spwm112.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spwm112a.spl~ ~override/spwm112a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwm115.spl~ ~override/spwm115.spl~
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x102 cbm_Slow
   COPY ~chriz-bg-magic/res/spwm115a.spl~ ~override/spwm115a.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/spwm126.spl~ ~override/spwm126.spl~
     WRITE_LONG 0xa2 cbm_state_MINOR_GLOBE
   COPY ~chriz-bg-magic/res/spwm164.spl~ ~override/spwm164.spl~
+    WRITE_LONG 0x9e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x102 cbm_Haste
   COPY ~chriz-bg-magic/res/spwm164a.spl~ ~override/spwm164a.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spwm168.spl~ ~override/spwm168.spl~
   COPY ~chriz-bg-magic/res/staf11.itm~ ~override/staf11.itm~
     WRITE_LONG 0x122 cbm_state_CHARM_IMMUNITY
     WRITE_LONG 0x7e2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/sw1h27.itm~ ~override/sw1h27.itm~
     WRITE_LONG 0xea cbm_state_HOLD_IMMUNITY
+    WRITE_LONG 0x326 cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x38a cbm_Slow
   COPY ~chriz-bg-magic/res/sw1h27.spl~ ~override/sw1h27.spl~
     WRITE_BYTE 0x27 cbm_Haste
+    WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0xd2 cbm_Haste
   COPY ~chriz-bg-magic/res/sw2h10.itm~ ~override/sw2h10.itm~
     WRITE_LONG 0x38a cbm_DispelScreen
@@ -3077,10 +3582,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/trollsp.itm~ ~override/trollsp.itm~
   COPY ~chriz-bg-magic/res/trollspi.itm~ ~override/trollspi.itm~
   COPY ~chriz-bg-magic/res/trolltor.itm~ ~override/trolltor.itm~
+    WRITE_LONG 0x1ce cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x232 cbm_Haste
   COPY ~chriz-bg-magic/res/trolltor.spl~ ~override/trolltor.spl~
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
+    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/wolfgr.itm~ ~override/wolfgr.itm~
   ACTION_IF NOT FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
   COPY ~chriz-bg-magic/res/without-eeex/sppr312a.spl~ ~override/sppr312a.spl~

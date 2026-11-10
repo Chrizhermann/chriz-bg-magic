@@ -95,24 +95,6 @@
      "save": 0,
      "bonus": 0,
      "special": 0
-    },
-    {
-     "opcode": 142,
-     "target": 1,
-     "power": 0,
-     "p1": 0,
-     "p2": 207,
-     "timing": 0,
-     "dispel": 0,
-     "duration": 2,
-     "prob1": 100,
-     "prob2": 0,
-     "resource": "",
-     "dice": 0,
-     "sides": 0,
-     "save": 0,
-     "bonus": 0,
-     "special": 0
     }
    ]
   }

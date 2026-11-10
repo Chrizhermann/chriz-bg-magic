@@ -91,7 +91,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 128,
+     "p1": {
+      "state": "STUN_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -294,7 +296,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 128,
+     "p1": {
+      "state": "STUN_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -497,7 +501,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 128,
+     "p1": {
+      "state": "STUN_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
@@ -700,7 +706,9 @@
      "opcode": 324,
      "target": 2,
      "power": 0,
-     "p1": 128,
+     "p1": {
+      "state": "STUN_IMMUNITY"
+     },
      "p2": 110,
      "timing": 0,
      "dispel": 1,
