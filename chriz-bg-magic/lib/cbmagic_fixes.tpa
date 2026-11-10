@@ -106,3 +106,20 @@ BEGIN
     LAF cbmagic_patch_spell_and_payloads STR_VAR spell mode = ~emotion_icon~ label = ~Emotion: Hopelessness~ END
   END
 END
+
+// Dispel Magic, Remove Magic and the abilities built like them destroy a summoned Nishruu or
+// Hakeashar: their effect looks for SPECIFIC 25. The two creatures get that value here, so it
+// holds on every game and not only where another mod has set it.
+DEFINE_ACTION_FUNCTION cbmagic_nishruu_hakeashar
+BEGIN
+  ACTION_FOR_EACH creature IN ~haksu~ ~nishrusu~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%creature%.cre~ BEGIN
+      COPY_EXISTING ~%creature%.cre~ ~override~
+        PATCH_IF (BUFFER_LENGTH > 0x274) BEGIN WRITE_BYTE 0x274 25 END
+      BUT_ONLY
+    END
+  END
+  ACTION_IF FILE_EXISTS_IN_GAME ~specific.ids~ BEGIN
+    APPEND ~specific.ids~ ~25 NISHRUU_HAKEASHAR~ UNLESS ~^25[^0-9]~
+  END
+END

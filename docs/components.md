@@ -738,6 +738,15 @@ descriptions still describe the old behaviour.
   The files had the game's names, which called every water elemental "Greater Water Elemental"
   and every earth and fire elemental plainly by its element.
 
+## Dispels destroy a summoned Nishruu or Hakeashar (`cbmagic_nishruu_hakeashar`)
+
+Dispel Magic (wizard and priest), Remove Magic, the Inquisitor's Dispel Magic and the Dispel
+Magic of `spin112` carry an effect that destroys a creature with `SPECIFIC = 25`. The base game
+gives that value to nothing; EE Fixpack gives it to the two summoned creatures. The installer
+writes it into `haksu.cre` and `nishrusu.cre` itself and adds `25 NISHRUU_HAKEASHAR` to
+`specific.ids` unless value 25 has a line already, so the result is the same with and without
+EE Fixpack. A creature the game lacks is left out. The spell descriptions do not mention it.
+
 ## The main character as a statue or imprisoned (`cbmagic_main_character`, `lua/M_CBMP1.lua`)
 
 Needs EEex; without it nothing here is installed and the game ends as before. Seen working in a

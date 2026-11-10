@@ -243,9 +243,12 @@ No game was started for these; files were read after an install into the BG2:EE 
 - Texts: the 23 new descriptions and the eight completed ones are in the game's strings, and the
   game's own scrolls of Fireball, Haste, Breach and Tenser's Transformation point at the same
   string as their spell.
-- Left as they are: Dispel Magic and Remove Magic destroy a creature with `SPECIFIC = 25`. Only
-  EE Fixpack gives that value to the summoned Nishruu and Hakeashar, so without it the effect
-  does nothing. Files of Baldur's Gate and Siege of Dragonspear (`BD*`, some items) are written
+- Dispel Magic and Remove Magic destroy a creature with `SPECIFIC = 25`. Only EE Fixpack gave
+  that value to the summoned Nishruu and Hakeashar; since 2026-11-10 the installer writes it
+  itself (`cbmagic_nishruu_hakeashar`). Read back after an install into the plain BG2:EE lab
+  folder: both files differ from the game's only in that byte, and `specific.ids` ends with the new
+  line.
+- Left as they are: files of Baldur's Gate and Siege of Dragonspear (`BD*`, some items) are written
   on plain BG2:EE as well, where nothing uses them; their names are EET string numbers.
 - Not seen in a game: Grease's duration by level, the icons, the texts on screen.
 

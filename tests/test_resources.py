@@ -507,6 +507,45 @@ def find_familiar_keeps_the_game_s_summoning(work, weidu):
 
 
 @test
+def dispel_reaches_summoned_nishruu_and_hakeashar(work, weidu):
+    """The dispels destroy what carries SPECIFIC 25, and the install gives that value to the two
+    summoned creatures itself: on a game where nothing has, and where it stands already."""
+    for name in ("spwi302.spl", "sppr303.spl", "spwi326.spl", "spin112.spl", "spcl231.spl"):
+        for number, ability in enumerate(definitions()[name]["abilities"]):
+            hits = [e for e in ability["effects"] if e["opcode"] == 177 and e["p2"] == 6]
+            check([(e["p1"], e["resource"]) for e in hits] == [(25, "destself")],
+                  f"{name} ability {number}: {hits}")
+
+    def creature(specific):
+        data = bytearray(b"CRE V1.0" + bytes(range(256)) * 3)
+        data[0x274] = specific
+        return bytes(data)
+
+    def marked(g, name):
+        data = g.file(f"override/{name}")
+        plain = creature(0)
+        return data is not None and data[0x274] == 25 and data[:0x274] + data[0x275:] == plain[:0x274] + plain[0x275:]
+
+    base = [(1, "NORMAL"), (101, "MAGIC"), (250, "SPIRIT")]
+    plain = fg.FakeGame(work / "plain", weidu, tlk=fx.tlk(), biff=fx.game(
+        HAKSU_CRE=creature(0), NISHRUSU_CRE=creature(7), SPECIFIC_IDS=ie.make_ids(base, header="5")))
+    install(plain)
+    check(marked(plain, "haksu.cre") and marked(plain, "nishrusu.cre"), "the creatures are not marked")
+    lines = plain.file("override/specific.ids").decode("ascii").split()
+    check(lines.count("NISHRUU_HAKEASHAR") == 1 and lines[lines.index("NISHRUU_HAKEASHAR") - 1] == "25",
+          f"specific.ids: {lines}")
+
+    # Value 25 has a line already, here under another name, and one creature is not in the game.
+    other = fg.FakeGame(work / "other", weidu, tlk=fx.tlk(), biff=fx.game(
+        NISHRUSU_CRE=creature(25), SPECIFIC_IDS=ie.make_ids([*base, (25, "SOMETHING_ELSE"), (251, "LAST")])))
+    install(other)
+    check(other.file("override/haksu.cre") is None, "a creature the game lacks was written")
+    check(other.file("override/nishrusu.cre") is None or marked(other, "nishrusu.cre"), "Nishruu lost its mark")
+    table = other.file("override/specific.ids")
+    check(table is None or b"NISHRUU_HAKEASHAR" not in table, "a second line for value 25")
+
+
+@test
 def overwrite_whatever_stood_there(work, weidu):
     """A hand edit, other text, other effect counts, garbage and nothing at all: each ends as
     defined, and the install runs through without a warning. Second install and uninstall too."""

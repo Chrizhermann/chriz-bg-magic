@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Dispel Magic and Remove Magic destroy a summoned Nishruu or Hakeashar on every install. Until
+  now that only worked where EE Fixpack had marked the two creatures; the installer marks them
+  itself.
 - Texts: 23 spells whose rules changed now describe those rules (among them Haste and Slow,
   Mirror Image and Reflected Image, Fireball, Cone of Cold, Sleep, Dispel Magic, Remove Magic,
   Breach, Tenser's Transformation), and eight older texts name who is immune, what wakes a
