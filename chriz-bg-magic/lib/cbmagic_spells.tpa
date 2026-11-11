@@ -420,10 +420,6 @@ BEGIN
   END
 END
 
-// --- Find Familiar --------------------------------------------------------------------------
-// Each game keeps its own way of calling the familiar, which is what gives it the Hit Points of the
-// campaign: EET picks by chapter, BG2:EE has only Shadows of Amn and Throne of Bhaal. The mod writes
-// the spell's school and its description.
 // Lesser Restoration's callback (lua/M_CBMRST.lua). Blood Rage's own weakness afterwards stays:
 // its resref is whatever slot this game gave the spell.
 DEFINE_ACTION_FUNCTION cbmagic_lesser_restoration
@@ -503,12 +499,36 @@ BEGIN
   END
 END
 
+// --- Find Familiar --------------------------------------------------------------------------
+// Each game keeps its own way of calling the familiar, which is what gives it the Hit Points of the
+// campaign: EET picks by chapter, BG2:EE has only Shadows of Amn and Throne of Bhaal. The mod sets
+// Universal school, clears specialist exclusions on the spell and its scrolls, and writes its text.
 DEFINE_ACTION_FUNCTION cbmagic_find_familiar
 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN
     COPY_EXISTING ~spwi123.spl~ ~override~
-      PATCH_IF (BUFFER_LENGTH >= 0x26) BEGIN WRITE_BYTE 0x25 0 END
+      PATCH_IF (BUFFER_LENGTH >= 0x26) BEGIN
+        READ_SHORT 0x1e excl
+        WRITE_SHORT 0x1e (excl BAND 0xc03f)
+        WRITE_BYTE 0x25 0
+      END
     BUT_ONLY
+    LAF cbmagic_scrolls_of STR_VAR spell = ~spwi123~ RET scrolls END
+    OUTER_PATCH_SAVE remaining ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE scroll ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      COPY_EXISTING ~%scroll%.itm~ ~override~
+        PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
+          READ_BYTE 0x2d kit_usab3
+          READ_BYTE 0x2f kit_usab4
+          SET want_u3 = kit_usab3 BAND 0xc0
+          SET want_u4 = kit_usab4 BAND 0x3f
+          PATCH_IF (kit_usab3 != want_u3) BEGIN WRITE_BYTE 0x2d want_u3 END
+          PATCH_IF (kit_usab4 != want_u4) BEGIN WRITE_BYTE 0x2f want_u4 END
+        END
+      BUT_ONLY
+    END
     OUTER_SET text = RESOLVE_STR_REF (@60105)
     LAF cbmagic_write_text INT_VAR text STR_VAR spell = ~spwi123~ END
   END ELSE BEGIN

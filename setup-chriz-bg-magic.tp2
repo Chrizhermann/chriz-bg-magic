@@ -31,8 +31,8 @@ LAF cbmagic_check_spell_revisions END
 LAF cbmagic_write_resources END
 LAF cbmagic_elemental_names END
 LAF cbmagic_nishruu_hakeashar END
-LAF cbmagic_find_familiar END
 LAM cbmagic_index_scrolls
+LAF cbmagic_find_familiar END
 LAF cbmagic_scroll_texts END
 LAF cbmagic_iwd_spells END
 LAF cbmagic_lesser_restoration END

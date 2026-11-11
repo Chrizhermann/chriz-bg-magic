@@ -493,17 +493,30 @@ def creature_files_hold_together(work, weidu):
 
 @test
 def find_familiar_keeps_the_game_s_summoning(work, weidu):
-    """School and description are written; what calls the familiar stays each game's own."""
+    """School, specialist exclusions and description are written; what calls the familiar stays each game's own."""
     summon = fx.fx(opcode=177, target=1, p2=2, timing=1, resource="K#FAMSUM")
+    raw_spell = bytearray(ie.make_spl(1, 1, [{"target": 4, "effects": [summon]}], school=2))
+    struct.pack_into("<H", raw_spell, 0x1E, 0x0102)  # Diviner exclusion 0x0100 + Evil alignment 0x0002
+    raw_scroll = bytearray(ie.make_itm([[fx.fx(opcode=147, target=1, timing=1, resource="SPWI123")]], desc=1))
+    raw_scroll[0x2D] = 0x81  # Diviner exclusion 0x01 + unrelated bit 0x80
+    raw_scroll[0x2F] = 0xC1  # Abjurer/Conjurer exclusions 0xC0 + unrelated bit 0x01
     g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=fx.game(
-        SPWI123_SPL=ie.make_spl(1, 1, [{"target": 4, "effects": [summon]}], school=2)))
+        SPWI123_SPL=bytes(raw_spell), XXFAM_ITM=bytes(raw_scroll)))
     install(g)
+    check_every_resource(g)
     spell = g.file("override/spwi123.spl")
     check(spell[0x25] == 0, f"Find Familiar school {spell[0x25]}")
+    excl = struct.unpack_from("<H", spell, 0x1E)[0]
+    check(excl == 0x0002, f"Find Familiar exclusions {excl:#06x}")
+    scroll = g.file("override/XXFAM.ITM")
+    check((scroll[0x2D], scroll[0x2F]) == (0x80, 0x01),
+          f"Find Familiar scroll usability {(scroll[0x2D], scroll[0x2F])}")
     effects = ie.parse_spl(spell)["abilities"][0]["effects"]
     check([e["resource"] for e in effects] == ["K#FAMSUM"], f"summoning changed: {effects}")
     text = ie.tlk_text(g.file("lang/en_us/dialog.tlk"), struct.unpack_from("<i", spell, 0x50)[0])
     check("48 in Throne of Bhaal" in text and "9 in Baldur's Gate" in text, text[-300:])
+    scroll_text = ie.tlk_text(g.file("lang/en_us/dialog.tlk"), struct.unpack_from("<i", scroll, 0x54)[0])
+    check(scroll_text == text, "Find Familiar scroll text differs from spell text")
 
 
 @test
