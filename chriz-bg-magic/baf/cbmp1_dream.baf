@@ -1,9 +1,9 @@
-// No dream while the main character is a statue or imprisoned (lua/M_CBMP1.lua keeps the global). A
-// dream that did not run keeps its own variable unset, so it comes at the first rest after he is
-// free.
+// No dream while the main character is a statue or imprisoned (lua/M_CBMP1.lua keeps the global).
+// An empty RESPONSE stops CAIScript::Find before later dream blocks (keeping their variables unset
+// for the first rest after he is free) while leaving m_actionList empty so CInfGame::RestParty still
+// rests the party; even NoAction() counts as a dream action and aborts resting.
 IF
   Global("CBM_P1_OUT","GLOBAL",1)
 THEN
   RESPONSE #100
-    NoAction()
 END

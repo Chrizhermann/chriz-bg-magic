@@ -17,9 +17,10 @@ PARTY_RESTED, GLOBAL = 16531, 0x400F
 EEEX = {
     "M___EEex.lua": b"-- synthetic EEex bootstrap\n",
     "TRIGGER.IDS": ie.make_ids([(0x410E, "EEex_LuaTrigger(S:Chunk*)"), (PARTY_RESTED, "PartyRested()"),
-                                (GLOBAL, "Global(S:Name*,S:Area*,I:Value*)"), (0x40D5, "ActuallyInCombat()")]),
+                                (GLOBAL, "Global(S:Name*,S:Area*,I:Value*)"), (0x40D5, "ActuallyInCombat()"),
+                                (0x40E0, "NextTriggerObject(O:Object*)")]),
     "ACTION.IDS": ie.make_ids([(0, "NoAction()"), (366, "GameOver(I:StrRef*)")]),
-    "OBJECT.IDS": ie.make_ids([(1, "Myself")]),
+    "OBJECT.IDS": ie.make_ids([(1, "Myself"), (21, "Player1")]),
 }
 NULL_OB = b'0 0 0 0 0 0 0 0 0 0 0 0 ""OB\n'
 # AR4000: one block, PartyRested() -> NoAction(), as the Solar's call after a rest starts.
@@ -112,16 +113,22 @@ def player1_without_and_with_eeex(work, weidu):
     for value, symbol in zip(found.groups(), ("CBM_P1_NET", "CBM_P1_OUT", "CBM_P1_STATUE", "CBM_P1_PRISON")):
         check(re.search(rf"^{value}\s+{symbol}\s*$", ids, re.M) and int(value) <= 255, f"{symbol} = {value}")
     check(g.file("EEex_scripts/extra_pattern_dbs/CBMP1.db") == (fg.MOD / "eeex/CBMP1.db").read_bytes(), "patterns")
+    p1_combat = (str(0x40E0).encode() + b' 0 0 0 0 "" "" OB\n0 0 0 0 0 0 0 21 0 0 0 0 ""OB\nTR\nTR\n'
+                 + str(0x40D5).encode() + b' 0 1 0 0 "" "" OB\n')
     for world in ("BALDUR", "BALDUR25"):
         script = g.file(f"override/{world}.BCS")
         check(script is not None and script.count(b"CBMP1_Tick") == 1 and script.count(b"CBMP1_Stuck") == 1
-              and script.count(b'"GLOBALCBM_P1_STUCK"') == 1, f"{world}: the tick and the dead-end clock")
+              and script.count(b'"GLOBALCBM_P1_STUCK"') == 1 and script.count(p1_combat) == 1,
+              f"{world}: the tick and the dead-end clock")
     check(g.file("override/BDBALDUR.BCS") is None, "a world script the game does not have")
     # Scripts read the global the tick keeps: a prisoner's spell states are not kept up.
+    # Dream scripts must compile to an empty RESPONSE #100 (no AC node), otherwise RestParty aborts rest.
     guard = str(GLOBAL).encode() + b' 1 0 0 0 "GLOBALCBM_P1_OUT"'
     for dream in ("PLAYER1D", "AERIED", "AERIE25D"):
         script = g.file(f"override/{dream}.BCS")
-        check(script is not None and script.count(guard) == 1, f"{dream}: no dream while he is out")
+        check(script is not None and script.count(guard) == 1
+              and b"RS\nRE\n100RE\nRS\n" in script.replace(b"\r\n", b"\n") and b"AC\n" not in script.replace(b"\r\n", b"\n"),
+              f"{dream}: no dream while he is out, without aborting rest")
     solar = g.file("override/AR4000.BCS")
     check(solar is not None and solar.count(str(GLOBAL).encode() + b' 1 1 0 0 "GLOBALCBM_P1_OUT"') == 1
           and solar.count(str(PARTY_RESTED).encode() + b" 0 0 ") == 1, "the Solar waits too")

@@ -7,9 +7,11 @@ THEN
     GameOver(-1)
 END
 
-// A dead end and no cure: the clock runs while nobody fights.
+// A dead end and no cure: the clock runs while nobody fights. ActuallyInCombat() reads the trigger
+// object's area, which on a world script is the master area rather than the party's area.
 IF
   Global("CBM_P1_STUCK","GLOBAL",1)
+  NextTriggerObject(Player1)
   !ActuallyInCombat()
   EEex_LuaTrigger("return CBMP1_Stuck()")
 THEN
