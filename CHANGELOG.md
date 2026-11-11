@@ -73,8 +73,9 @@
   external effects are isolated before patching. Optional IWD spells are found by symbol
   and skipped with an informational line when absent.
 - The mod brings the helper spells its changes call, so they work on plain BG2:EE and on EET,
-  with or without EE Fixpack. Find Familiar keeps each game's own way of calling the familiar and
-  names the Hit Points of all three campaigns.
+  with or without EE Fixpack. Find Familiar keeps each game's own way of calling the familiar,
+  clears specialist exclusions on both the spell and its scroll (`SCRL6D`), syncs the scroll's
+  text, and names the Hit Points of all three campaigns.
 - Transformation and Regeneration spells form separate exclusive families: higher spell
   level wins; a new casting replaces an equal-level member. These rules work without EEex.
 - Champion's Strength now removes and blocks Draw Upon Divine Might for its duration, while

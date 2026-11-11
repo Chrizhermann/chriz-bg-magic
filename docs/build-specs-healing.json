@@ -4,31 +4,31 @@
   "divine.cure_wounds_progression": {
    "resrefs": ["SPPR103", "SPPR217", "SPPR315", "SPPR401", "SPPR502"],
    "parts": [
-    {"spec": "Cure Light Wounds is 1d8 + 5 with casting time 4; optional IWD Cure Moderate Wounds is 2d8 + 4 with casting time one shorter; Cure Medium, Serious and Critical Wounds are respectively 2d8 + 7 at 4, 3d8 + 7 at 6, and 4d8 + 12 at 7. Unrelated abilities and effects stay intact; descriptions and actual scroll descriptions match.", "status": "done"}
+    {"spec": "Cure Light Wounds is 1d8 + 5 with casting time 4; optional IWD Cure Moderate Wounds is 2d8 + 4 with casting time one shorter; Cure Medium, Serious and Critical Wounds are respectively 2d8 + 7 at 4, 3d8 + 7 at 6, and 4d8 + 12 at 7. Unrelated abilities and effects stay intact; descriptions and actual scroll descriptions match.", "status": "lab-checked"}
    ]
   },
   "divine.mass_cure": {
    "resrefs": ["SPPR514"],
    "parts": [
-    {"spec": "Mass Cure keeps its effect exactly as it is and has casting time 4; its description and actual scroll descriptions match.", "status": "done"}
+    {"spec": "Mass Cure keeps its effect exactly as it is and has casting time 4; its description and actual scroll descriptions match.", "status": "lab-checked"}
    ]
   },
   "divine.cause_wounds_progression": {
    "resrefs": ["SPPR114", "SPPR220", "SPPR330", "SPPR414", "SPPR510"],
    "parts": [
-    {"spec": "Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll (1d8 + 5, 2d8 + 4, 2d8 + 7, 3d8 + 7, 4d8 + 12) and their decided shorter casting times. Each heals undead with that same roll instead of damaging them, while keeping its normal direct or touch-charge delivery, save and unrelated effects for other targets; descriptions and actual scroll descriptions match.", "status": "done"}
+    {"spec": "Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll (1d8 + 5, 2d8 + 4, 2d8 + 7, 3d8 + 7, 4d8 + 12) and their decided shorter casting times. Each heals undead with that same roll instead of damaging them, while keeping its normal direct or touch-charge delivery, save and unrelated effects for other targets; descriptions and actual scroll descriptions match.", "status": "lab-checked"}
    ]
   },
   "iwd.cleric_mass_cause_light_wounds": {
    "resrefs": ["SPPR523"],
    "parts": [
-    {"spec": "Optional IWD Mass Cause Light Wounds keeps its native per-ability damage roll, casting time and save rule. It heals undead with the corresponding roll instead of damaging them; description and actual scroll descriptions match.", "status": "done"}
+    {"spec": "Optional IWD Mass Cause Light Wounds keeps its native per-ability damage roll, casting time and save rule. It heals undead with the corresponding roll instead of damaging them; description and actual scroll descriptions match.", "status": "lab-checked"}
    ]
   },
   "divine.harm": {
    "resrefs": ["SPPR608"],
    "parts": [
-    {"spec": "Harm keeps its existing effect on non-undead, has casting time 7, and heals undead completely as Heal does. Its description and actual scroll descriptions match.", "status": "done"}
+    {"spec": "Harm keeps its existing effect on non-undead, has casting time 7, and heals undead completely as Heal does. Its description and actual scroll descriptions match.", "status": "lab-checked"}
    ]
   }
  }

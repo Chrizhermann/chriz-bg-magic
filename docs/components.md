@@ -34,8 +34,9 @@ The function names in the headings below name where a change was first built; th
 lives in `defs/`.
 
 The target is BG2:EE and EET 2.7.3.0. Comparing typed bonuses and the new Pierce Magic
-resistance rule need EEex v1.3.1. The remaining changes work without EEex. The bonus batch
-has offline coverage; its in-game acceptance checks are still pending.
+resistance rule need EEex v1.3.1. The remaining changes work without EEex. Both offline and
+disposable-lab in-game checks cover plain BG2:EE and BG2:EE with IWDification (see
+`docs/evidence/2026-11-08-decided-spells.md`).
 
 ## Spell bonus types (`cbmagic_bonus`)
 
@@ -78,16 +79,17 @@ Changed linked payloads use private copies, preserving other users of the origin
 
 The EEex listener verifies a per-rebuild marker before changing statistics and stops
 after ten errors. Without EEex, correction is inactive and different spells accumulate
-normally; self-refresh still works. This batch has synthetic installer and Lua runtime
-coverage, not completed live acceptance.
+normally; self-refresh still works.
 
 External effects need an additional runtime step: the game keeps their delivery wrapper
 on the creature and executes the payload internally. The listener reads the payload only
 after the wrapper reports successful execution, retaining the game's eligibility checks.
-The wrapper also determines the payload's effective lifetime. This path was checked
-against the 2.7.3.0 executable and independent mocks; its live acceptance is pending.
-It reads the installed payload amounts: a separate EEex mutator that changes only the
-transient decoded child's amount is outside this path's verified compatibility.
+The wrapper also determines the payload's effective lifetime. This path is verified both
+against the 2.7.3.0 executable with independent mocks and in-game (for example Unholy
+Blight's evil-only Curse payload against Doom, and Righteous Wrath of the Faithful's
+same-alignment bonus sub-spell). It reads the installed payload amounts: a separate EEex
+mutator that changes only the transient decoded child's amount is outside this path's
+verified compatibility.
 
 ## Exclusive spell families (`cbmagic_family`)
 
@@ -126,14 +128,17 @@ one timed reduction; it does not recalculate the reduction during its duration.
 `tests/test_bonus.py` covers the installer with fabricated data shaped like the supported
 spells, including alternate symbol assignments, effect layouts and shared external
 payloads. `tests/bonus_runtime.lua` runs under both LuaJIT and Lua 5.3 through `lupa`.
-The disposable-lab runner `tests/lab/run_batches.py --only bonus` adds installed-spell
-checks using the runner's normal path arguments. It has not been run for this batch.
+The disposable-lab runners `tests/lab/run_batches.py` (`--only bonus`, `--only attacks`)
+and `tests/lab/run_player1.py` verify the installed spells in-game on BG2:EE 2.7.3.0
+(25 of 25 `bonus` checks plus cold `SaveGame(0)` reload, area transition, 60-second
+stability and 8-hour rest with overlapping typed buffs) and BG2:EE with IWDification
+(55 of 55 `bonus` checks and 4 of 4 `attacks` checks, including Blood Rage Morale
+non-stacking, all ten Transformation family pairs and Lawful exclusion).
 
-The report keeps save/reload, rest, area transitions, an actual equipped item, normal
-spellbook casting/projectiles, a character-sheet screenshot and a separate installation
-without EEex as explicit manual checks. Direct spell application and an untyped synthetic
-modifier do not establish those cases. No game or reference installation is modified by
-the offline tests.
+Manual UI spellbook projectile targeting, a character-sheet screenshot, a live game
+launch without EEex (covered offline) and EET gameplay beyond early BG1 levels remain
+manual checks, along with interaction with Chriz BG Rebalance component 360 (True Time
+Stop). No game or reference installation is modified by the offline tests.
 
 ## Healing (`cbmagic_healing.tpa`)
 
@@ -152,9 +157,9 @@ the offline tests.
   parent spell. A charge item shared by another spell is privately cloned and only this
   spell's creation effect is retargeted. Harm retains its effect on non-undead, has casting
   time 7, and heals undead completely.
-- Optional IWD symbols absent from `SPELL.IDS` log a normal skip. Every changed English
-  spell description and every actual scroll description must match the expected base text;
-  a mismatch stops the install rather than leaving a false description.
+- Optional IWD symbols absent from `SPELL.IDS` log a normal skip. Changed spells and their
+  scrolls receive the decided English descriptions unconditionally, without checking old
+  text.
 
 ## Spell Revisions installed
 
@@ -265,8 +270,10 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
   `0x2d` bit `0x08` on its scrolls), and its description and scroll say `(Enchantment/Charm)`.
 
 
-Find Familiar is the one spell of these written field by field: each game keeps its own way of
-calling the familiar. EET picks the familiar by chapter, so it has the Hit Points of its campaign;
+Find Familiar (`SPWI123`) is the one spell of these patched field by field (school `0`,
+exclusion flags `0x1e = 0`, complete description), so each game keeps its own way of calling the
+familiar while its scroll (`SCRL6D`) ships whole from `defs/` with Universal usability and the
+same description. EET picks the familiar by chapter, so it has the Hit Points of its campaign;
 BG2:EE has only Shadows of Amn and Throne of Bhaal. The description names all three campaigns.
 
 ## Grease (`cbmagic_vanilla_grease`)
@@ -790,9 +797,10 @@ that is left out for now, to be judged in play (a block could cut the way to a c
   up after a Freedom, and pulls him after the party when a script moved everyone else away.
 - **Dead ends.** Where the party cannot leave by its own choice and carries no cure for what holds
   him, the game ends after 30 seconds without combat, as it always did (`CBMP1_Stuck`, a second
-  block in the world scripts behind `!ActuallyInCombat()`; the clock is the global `CBM_P1_CLOCK`,
-  so a fight, a pause or a scene stops it without clearing it). In doubt nothing counts as a dead
-  end or as "no cure":
+  block in the world scripts behind `NextTriggerObject(Player1)` and `!ActuallyInCombat()`, because
+  `ActuallyInCombat()` checks the trigger object's area and a world script sits on the master area;
+  the clock is the global `CBM_P1_CLOCK`, so a fight, a pause or a scene stops it without clearing
+  it). In doubt nothing counts as a dead end or as "no cure":
   - Dead ends are only what the game's data proves (no working exit, no way onto the world map,
     the scripts that move the party out wait for the story): the circus tent under Kalah's
     illusion, Spellhold's dungeon, maze and tests, Hell, the start of Throne of Bhaal, the Pocket
@@ -812,8 +820,10 @@ that is left out for now, to be judged in play (a block could cut the way to a c
 - **Dreams wait** while he is out (`baf/cbmp1_dream.baf`, on the global): his own dream script
   (`PLAYER1D`), every companion's dream script from the campaigns' dialog tables (`PDIALOG`,
   `25DIALOG`, `BGDIALOG`, `BDDIALOG`) and the Solar's calls after a rest in Throne of Bhaal
-  (`PartyRested()` in `AR4000`). A dream that did not run keeps its variable unset and comes at
-  the first rest after he is free.
+  (`PartyRested()` in `AR4000`). The dream-script guard uses an empty `RESPONSE #100` (without
+  `NoAction()`) so `CAIScript::Find` stops before later dream blocks without returning a dream
+  action that would make `CInfGame::RestParty` skip resting; any dream that did not run keeps its
+  variable unset and comes at the first rest after he is free.
 
 ## Celestial summons (`cbmagic_main`)
 

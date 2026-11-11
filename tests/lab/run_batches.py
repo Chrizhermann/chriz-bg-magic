@@ -24,7 +24,7 @@ EXTRA = HERE / "probe_batches.lua"
 WRATH = ""
 AIR, LANCE = "", ""
 GAME = Path(".")
-GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor", "polymorph", "shapechange", "touch")
+GROUPS = ("haste", "curse", "control", "strength", "mr", "image", "sword", "newspells", "breathless", "insects", "nature", "fiends", "sequencer", "record", "live", "bonus", "attacks", "smoke", "decided", "iwdbatch", "celestials", "celweapons", "restoration", "simulacrum", "floor", "polymorph", "shapechange", "touch", "unseen")
 
 
 def lua_list(values):
@@ -1436,10 +1436,267 @@ def smoke(c, check):
     check("Every changed spell was cast once and the game kept answering", True, casts=len(done), skipped=skipped)
 
 
+SPELLS_6B0D6A9 = (
+    "SPPR105", "SPPR303", "SPPR409", "SPPR412", "SPPR507", "SPPR512", "SPPR513",
+    "SPWI101", "SPWI105", "SPWI116", "SPWI120", "SPWI125", "SPWI212", "SPWI213",
+    "SPWI215", "SPWI220", "SPWI302", "SPWI304", "SPWI305", "SPWI312", "SPWI315",
+    "SPWI326", "SPWI403", "SPWI418", "SPWI503", "SPWI511", "SPWI513", "SPWI603",
+    "SPWI605", "SPWI616", "SPWI812",
+)
+
+ELEMENTAL_NAMES = (
+    ("cbmwla", "Lesser Air Elemental"), ("cbmwa1", "Air Elemental"), ("cbmair1", "Air Elemental"),
+    ("cbmwa2", "Greater Air Elemental"), ("cbmair2", "Greater Air Elemental"),
+    ("cbmwa3", "Elder Air Elemental"), ("cbmair3", "Elder Air Elemental"),
+    ("cbmwle", "Lesser Earth Elemental"), ("cbmwe1", "Earth Elemental"),
+    ("cbmwe2", "Greater Earth Elemental"), ("cbmwe3", "Elder Earth Elemental"),
+    ("cbmwlf", "Lesser Fire Elemental"), ("cbmwf1", "Fire Elemental"),
+    ("cbmwf2", "Greater Fire Elemental"), ("cbmwf3", "Elder Fire Elemental"),
+    ("cbmwlw", "Lesser Water Elemental"), ("cbmww1", "Water Elemental"),
+    ("cbmww2", "Greater Water Elemental"), ("cbmww3", "Elder Water Elemental"),
+)
+
+
+def scrolls_for_spells(game_dir, spells):
+    """Scroll ITM resrefs in override/ whose opcode-147 effect learns one of `spells`."""
+    wanted = {s.upper() for s in spells}
+    found = {}
+    for path in sorted((game_dir / "override").glob("*.itm")):
+        data = path.read_bytes()
+        if len(data) < 0x72 or data[:8] != b"ITM V1  ":
+            continue
+        ab_off, ab_cnt, fx_off = struct.unpack_from("<IHI", data, 0x64)
+        for a in range(ab_cnt):
+            ab = ab_off + a * 0x38
+            if ab + 0x22 > len(data):
+                break
+            cnt, first = struct.unpack_from("<HH", data, ab + 0x1E)
+            for k in range(cnt):
+                fx = fx_off + (first + k) * 0x30
+                if fx + 0x30 <= len(data) and struct.unpack_from("<H", data, fx)[0] == 147:
+                    target = data[fx + 0x14:fx + 0x1C].split(b"\0", 1)[0].decode("latin-1").upper()
+                    if target in wanted:
+                        found[path.stem.upper()] = target
+    return found
+
+
+def unseen(c, check):
+    # 1. Grease (SPWI101): 3 rounds + 1 round/level via cbmgr01..cbmgr20 (4, 13, 23 pulses at 100-tick spacing).
+    orig_level = c.p("un-gr-lvl0", "level(1)")
+    c.p("un-gr-clear1", "remove_all_others()")
+    time.sleep(1)
+    c.p("un-gr-spawn1", 'spawn("TASLOI01", 140, 0)')
+    time.sleep(2)
+    c.p("un-gr-pin1", 'pin("Tasloi", 400)')
+    c.p("un-gr-take0", "take_grease_log()")
+    c.p("un-gr-watch1", 'grease_watch("Tasloi", 60)')
+    at1 = c.p("un-gr-at1", 'creature("Tasloi")')
+    c.p("un-gr-lvl1", "set_level(1, 1)")
+    c.p("un-gr-cast1", f'cast_point(1, "SPWI101", {at1["x"]}, {at1["y"]})')
+    time.sleep(32)
+    ticks1 = [e["tick"] for e in (c.p("un-gr-log1", "take_grease_log()") or []) if e["who"] == "Tasloi"]
+    span1 = (ticks1[-1] - ticks1[0]) if len(ticks1) >= 2 else -1
+    check("Grease at caster level 1: 4 rounds (4 pulses, ~300 ticks)",
+          len(ticks1) == 4 and 285 <= span1 <= 315, pulses=len(ticks1), span=span1, ticks=ticks1)
+
+    c.p("un-gr-clear2", "remove_all_others()")
+    time.sleep(1.5)
+    c.p("un-gr-spawn10", 'spawn("HOBGOB01", -240, 0)')
+    c.p("un-gr-spawn20", 'spawn("GNOLL01", 140, 0)')
+    time.sleep(2.5)
+    c.p("un-gr-pin10", 'pin("Gerg", 400)')
+    c.p("un-gr-pin20", 'pin("Gnoll", 400)')
+    c.p("un-gr-watch10", 'grease_watch("Gerg", 220)')
+    c.p("un-gr-watch20", 'grease_watch("Gnoll", 220)')
+    at10 = c.p("un-gr-at10", 'creature("Gerg")')
+    at20 = c.p("un-gr-at20", 'creature("Gnoll")')
+    c.p("un-gr-lvl10", "set_level(1, 10)")
+    c.p("un-gr-cast10", f'cast_point(1, "SPWI101", {at10["x"]}, {at10["y"]})')
+    time.sleep(2.5)
+    c.p("un-gr-lvl20", "set_level(1, 20)")
+    c.p("un-gr-cast20", f'cast_point(1, "SPWI101", {at20["x"]}, {at20["y"]})')
+    time.sleep(162)
+    c.p("un-gr-lvl-restore", f"set_level(1, {orig_level})")
+    log2 = c.p("un-gr-log2", "take_grease_log()") or []
+    ticks10 = [e["tick"] for e in log2 if e["who"] == "Gerg"]
+    ticks20 = [e["tick"] for e in log2 if e["who"] == "Gnoll"]
+    span10 = (ticks10[-1] - ticks10[0]) if len(ticks10) >= 2 else -1
+    span20 = (ticks20[-1] - ticks20[0]) if len(ticks20) >= 2 else -1
+    check("Grease at caster level 10: 13 rounds (13 pulses, ~1200 ticks)",
+          len(ticks10) == 13 and 1170 <= span10 <= 1230, pulses=len(ticks10), span=span10)
+    check("Grease at caster level 20: 23 rounds (23 pulses, ~2200 ticks)",
+          len(ticks20) == 23 and 2160 <= span20 <= 2240, pulses=len(ticks20), span=span20)
+    c.p("un-gr-tidy", "remove_all_others()")
+    time.sleep(1)
+
+    # 2. Unholy Blight (SPPR314): portrait icon is Cursed (row 35), not Aid / row 208.
+    c.p("un-ub-spawn", 'spawn("ACOLYTE2", 120, 0)')
+    time.sleep(2)
+    others = c.p("un-ub-who", "others()") or []
+    good = others[0]["name"] if others else "Dawnbringer Alvanna"
+    c.p("un-ub-pin", f'pin("{good}", 120)')
+    c.p("un-ub-live", f'fx("{good}", 208, 1, 0, 120)')
+    c.p("un-ub-saves", f'set_saves("{good}", {{spell = 20, breath = 20, death = 20}}, 120)')
+    time.sleep(0.8)
+    c.p("un-ub-cast", f'self_apply("{good}", "SPPR314")')
+    time.sleep(2)
+    ub_raw = c.p("un-ub-icons", f'icons("{good}")') or []
+    ub_rows = sorted(RECORD.get(r, str(r)) for r in ub_raw)
+    check("Unholy Blight shows Cursed and not Aid on a good target",
+          "Cursed" in ub_rows and "Aid" not in ub_rows and 208 not in ub_raw, raw=ub_raw, rows=ub_rows)
+    c.p("un-ub-tidy", "remove_all_others()")
+    time.sleep(1)
+
+    # 3. Form weapons of Polymorph Self (SPWI416) and Shapechange (SPWI916) carry no unwanted portrait icon.
+    allowed_form_icons = {
+        "Increased Movement Rate", "Regenerating", "Protection From Poison",
+        "Resist Fear", "Mind Shield", "Negative Plane Protection",
+    }
+    c.p("un-fw-korgan", 'spawn("KORGAN15", 60, 0)')
+    time.sleep(2.5)
+    for level in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+        c.p(f"un-fw-scr-{level}", f"""order("korgan", 'ChangeAIScript("",{level})')""")
+    c.p("un-fw-strip", """order("korgan", 'DestroyAllEquipment()')""")
+    time.sleep(2)
+    unwanted_icons, missing_weapons = {}, []
+    for spell, home, table in (("SPWI416", "CBMPNAT", FORMS), ("SPWI916", "CBMSNAT", SHAPES)):
+        c.p(f"un-fw-cast-{spell}", f'cast_now("korgan", "{spell}")')
+        time.sleep(2)
+        for form, (_, _, _, _, _, weapon, _) in table.items():
+            c.p(f"un-fw-{form}", f'cast_now("korgan", "{form}")')
+            time.sleep(2)
+            st = c.p(f"un-fw-st-{form}", 'form_state("korgan")')
+            raw = c.p(f"un-fw-ic-{form}", 'icons("korgan")') or []
+            if weapon not in st["items"]:
+                missing_weapons.append((form, weapon, st["items"]))
+            bad = [RECORD.get(r, f"ROW_{r}") for r in raw if r == 207 or RECORD.get(r, f"ROW_{r}") not in allowed_form_icons]
+            if bad:
+                unwanted_icons[form] = bad
+        c.p(f"un-fw-home-{spell}", f'cast_now("korgan", "{home}")')
+        time.sleep(2.5)
+    check("Polymorph Self and Shapechange form weapons show no unwanted portrait or record icon",
+          not missing_weapons and not unwanted_icons, missing_weapons=missing_weapons, unwanted_icons=unwanted_icons)
+    c.p("un-fw-tidy", "remove_all_others()")
+    time.sleep(1.5)
+
+    # 4. Dispel Magic (SPWI326, SPPR303) and Remove Magic (SPWI302) destroy Nishruu and Hakeashar.
+    p0 = c.p("un-nh-party", "party()")[0]
+    for summon, name, dispel, caster, hostile in (
+        ("SPWI624", "Nishruu", "SPWI326", 1, False),
+        ("SPWI719", "Hakeashar", "SPPR303", 2, False),
+        ("SPWI624", "Nishruu", "SPWI302", 1, True),
+        ("SPWI719", "Hakeashar", "SPWI302", 1, True),
+    ):
+        tag = f"{dispel}-{name[:4]}"
+        c.p(f"un-nh-sum-{tag}", f'cast_point(1, "{summon}", {p0["x"] + 120}, {p0["y"]})')
+        time.sleep(6.5)
+        for lvl in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+            c.p(f"un-nh-scr-{tag}-{lvl}", f"""order("{name}", 'ChangeAIScript("",{lvl})')""")
+        if hostile:
+            c.p(f"un-nh-foe-{tag}", f"""order("{name}", 'ChangeEnemyAlly(Myself,ENEMY)')""")
+            time.sleep(1.5)
+        where = c.p(f"un-nh-pin-{tag}", f'pin("{name}", 120)')
+        info = c.p(f"un-nh-be-{tag}", f'being("{name}")')
+        c.p(f"un-nh-disp-{tag}", f'cast_point({caster}, "{dispel}", {where["x"]}, {where["y"]})')
+        time.sleep(4.5)
+        left = [o for o in (c.p(f"un-nh-left-{tag}", "others()") or []) if o["name"] == name]
+        label = "Remove Magic (SPWI302)" if hostile else f"Dispel Magic ({dispel})"
+        check(f"{label} destroys {'hostile ' if hostile else ''}summoned {name} (specific 25)",
+              bool(info) and info["specific"] == 25 and not left, specific=info and info["specific"], left=left)
+        c.p(f"un-nh-tidy-{tag}", "remove_all_others()")
+        time.sleep(1)
+
+    # 5. Live Spellbook UI (MAGE and PRIEST), Find Familiar (SPWI123 / SCRL6D), synced scrolls, and elementals.
+    defs_dir = HERE.parents[1] / "defs"
+    norm = lambda s: (s or "").replace("\r\n", "\n").strip()  # noqa: E731
+
+    def desc_pattern(template):
+        parts = []
+        for token in re.split(r"(<[A-Z0-9_]+>|[^\x00-\x7f]+)", norm(template)):
+            if not token:
+                continue
+            if token.startswith("<") and token.endswith(">"):
+                parts.append(r"[A-Za-z']+")
+            elif any(ord(ch) > 127 for ch in token):
+                parts.append(r"\S+")
+            else:
+                parts.append(re.escape(token))
+        return re.compile("^" + "".join(parts) + "$", re.S)
+
+    expected_desc, expected_re = {}, {}
+    for res in SPELLS_6B0D6A9:
+        raw = json.loads((defs_dir / f"{res.lower()}.spl.json").read_text(encoding="utf-8"))
+        expected_desc[res] = norm(raw["header"]["description"]["text"])
+        expected_re[res] = desc_pattern(expected_desc[res])
+    scrl6d_def = json.loads((defs_dir / "scrl6d.itm.json").read_text(encoding="utf-8"))
+    expected_desc["SPWI123"] = norm(scrl6d_def["header"]["description_identified"]["text"])
+    expected_re["SPWI123"] = desc_pattern(expected_desc["SPWI123"])
+
+    wiz_spells = sorted(r for r in expected_desc if r.startswith("SPWI"))
+    pri_spells = sorted(r for r in expected_desc if r.startswith("SPPR"))
+    c.p("un-bk-learnw", f"learn_wizard(1, {lua_strings(wiz_spells)})")
+    c.p("un-bk-learnp", f"learn_priest(2, {lua_strings(pri_spells)})")
+    time.sleep(1)
+    c.p("un-bk-openw", 'book_open("mage", 1)')
+    time.sleep(1.2)
+    mage_book = c.p("un-bk-readw", 'book_read("mage")') or {}
+    time.sleep(0.8)
+    c.p("un-bk-openp", 'book_open("priest", 2)')
+    time.sleep(1.2)
+    priest_book = c.p("un-bk-readp", 'book_read("priest")') or {}
+    time.sleep(0.8)
+
+    bad_book = {}
+    for res in wiz_spells:
+        entry = mage_book.get(res)
+        if not entry or norm(entry["desc"]) != norm(entry["pane"]) or not expected_re[res].match(norm(entry["pane"])):
+            bad_book[res] = None if not entry else {"got": norm(entry["pane"])[:120]}
+    for res in pri_spells:
+        entry = priest_book.get(res)
+        if not entry or norm(entry["desc"]) != norm(entry["pane"]) or not expected_re[res].match(norm(entry["pane"])):
+            bad_book[res] = None if not entry else {"got": norm(entry["pane"])[:120]}
+    check("Mage Book and Priest Scroll show the new descriptions for all 31 spells and Find Familiar",
+          not bad_book, checked=len(expected_desc), mismatches=bad_book)
+
+    scroll_map = scrolls_for_spells(GAME, wiz_spells)
+    meta = c.p("un-meta", f"res_meta({lua_strings(sorted(expected_desc))}, {lua_strings(sorted(scroll_map))})")
+    bad_scrolls = {}
+    for scrl, target in scroll_map.items():
+        got_itm = meta["items"].get(scrl)
+        got_spl = meta["spells"].get(target)
+        if (not got_itm or not got_spl or norm(got_itm["desc"]) != norm(got_spl["desc"])
+                or not expected_re[target].match(norm(got_itm["desc"]))):
+            bad_scrolls[scrl] = {"spell": target, "present": bool(got_itm)}
+    ff_spl = meta["spells"].get("SPWI123") or {}
+    ff_itm = meta["items"].get("SCRL6D") or {}
+    check("Synced scrolls match their wizard spell descriptions in the running game",
+          bool(scroll_map) and "SCRL6D" in scroll_map and not bad_scrolls,
+          scrolls=len(scroll_map), mismatches=bad_scrolls)
+    check("Find Familiar and SCRL6D: Universal school, specialist exclusions cleared, 3-campaign text",
+          ff_spl.get("school") == 0 and (ff_spl.get("excl", 0xFFFF) & 0x3FC0) == 0
+          and (ff_itm.get("u3", 0xFF) & 0x3F) == 0 and (ff_itm.get("u4", 0xFF) & 0xC0) == 0
+          and "Baldur's Gate and Siege of Dragonspear" in norm(ff_spl.get("desc"))
+          and norm(ff_spl.get("desc")) == norm(ff_itm.get("desc")),
+          spwi123={k: ff_spl.get(k) for k in ("school", "excl")},
+          scrl6d={k: ff_itm.get(k) for k in ("u3", "u4")})
+
+    bad_elem = {}
+    for cre, wanted in ELEMENTAL_NAMES:
+        c.p(f"un-el-sp-{cre}", f'spawn("{cre.upper()}", 120, 0)')
+        time.sleep(0.9)
+        seen = [o["name"] for o in (c.p(f"un-el-ot-{cre}", "others()") or [])]
+        if seen != [wanted]:
+            bad_elem[cre] = {"wanted": wanted, "seen": seen}
+        c.p(f"un-el-rm-{cre}", "remove_all_others()")
+        time.sleep(0.5)
+    check("All 19 summoned elemental creatures carry their size-by-HD names in the game",
+          not bad_elem, checked=len(ELEMENTAL_NAMES), mismatches=bad_elem)
+
+
 BONUS_SYMBOLS = {
     "bless": "CLERIC_BLESS", "prayer": "CLERIC_PRAYER", "recitation": "CLERIC_RECITATION",
     "hope": "WIZARD_EMOTION_HOPE", "luck": "WIZARD_LUCK", "doom": "CLERIC_DOOM",
-    "curse": "CLERIC_CURSE", "pierce": "WIZARD_PIERCE_MAGIC",
+    "curse": "CLERIC_CURSE", "blight": "CLERIC_UNHOLY_BLIGHT", "pierce": "WIZARD_PIERCE_MAGIC",
     "tenser": "WIZARD_TENSERS_TRANSFORMATION", "divine": "CLERIC_HOLY_POWER",
     "righteous": "CLERIC_RIGHTEOUS_MAGIC", "champion": "CLERIC_CHAMPIONS_STRENGTH",
     "blood": "CLERIC_BLOOD_RAGE", "animal": "CLERIC_ANIMAL_RAGE",
@@ -1560,20 +1817,19 @@ def bonus(c, check, report):
     report["bonus_resources"] = BONUS
     report.setdefault("manual_checks", []).extend([
         {"group": "bonus", "check": "Save and reload a disposable save with overlapping typed effects; "
-         "rest and change areas, then compare fresh CBMP.bonus_snapshot(0) values for 60 seconds.", "status": "not_run"},
-        {"group": "bonus", "check": "Equip an actual item granting +1 to a tested value and confirm it adds "
-         "to the corrected spell total; the scripted untagged effect is only an arithmetic control.", "status": "not_run"},
+         "rest and change areas, then compare fresh CBMP.bonus_snapshot(0) values for 60 seconds "
+         "(automated in tests/lab/run_player1.py).", "status": "covered_in_run_player1"},
+        {"group": "bonus", "check": "Equip an actual item granting +1 to a tested value (RING06) and confirm "
+         "it adds to the corrected spell total.", "status": "automated"},
         {"group": "bonus", "check": "Capture the character sheet with the five-spell combination and after "
          "Recitation expires, showing the corrected totals.", "status": "not_run"},
         {"group": "bonus", "check": "In a separate disposable installation without EEex, verify ordinary "
          "stacking and self-refresh and one Lua fallback message. This EEex-console runner cannot run there.", "status": "not_run"},
         {"group": "bonus", "check": "Verify ordinary spellbook casting and projectile targeting; direct "
          "ApplySpellRES below tests installed effects and nested delivery only.", "status": "not_run"},
-        {"group": "bonus", "check": "Apply Unholy Blight and Doom to the same eligible enemy in a disposable lab. "
-         "Confirm the active opcode-177 EFF penalty appears in bonus_snapshot external metadata, only the worst "
-         "Curse penalty affects THAC0 and saves, and the weaker penalty resumes when the stronger expires. "
-         "Also check an ineligible target and a delayed or expired wrapper contribute no external payload. "
-         "The external-EFF runtime path still needs live verification.", "status": "not_run"},
+        {"group": "bonus", "check": "Apply Unholy Blight, Doom, and a weaker Curse penalty to an eligible good "
+         "target and verify non-stacking, expiry fallback, and evil-target exclusion (SPPR314 delivers direct "
+         "CBTCURSE effects; M_CBMBON.lua's opcode-177 external-EFF path is covered by offline Lua unit tests).", "status": "automated"},
     ])
     available = c.lua("bo-runtime", "return type(CBMBonus) == 'table' and type(CBMBonus.Listener) == 'function' "
                       "and type(CBMBPM) == 'function'")
@@ -1719,8 +1975,7 @@ def bonus(c, check, report):
             c.p("bo-mr-clear", 'bonus_clear(0, {"CBMQLAB"})')
         clear(0, ("pierce",))
 
-    # IWDification's Blood Rage keeps itself off this lab party through its own conditions, so its
-    # place in the family is covered offline only.
+    # Blood Rage requires an allied non-lawful humanoid, so its family pairs run on KORGAN15 below.
     for family, keys in (("Transformation", ("tenser", "divine", "righteous", "champion", "animal")),
                          ("Regeneration", ("regenerate", "mass", "troll"))):
         present = [k for k in keys if k in BONUS]
@@ -1740,6 +1995,176 @@ def bonus(c, check, report):
                       and bool(relevant(after, winner)) and not relevant(after, loser),
                       levels={old: BONUS[old]["level"], new: BONUS[new]["level"]}, effects=after["effects"])
         clear(0, present)
+
+    # Real equipped item (+1 saves and AC from RING06) adds to the corrected Favor spell total.
+    if need("bless"):
+        clear(0, all_keys)
+        base = snap(0)
+        apply(0, "bless")
+        if "recitation" in BONUS:
+            apply(0, "recitation")
+        else:
+            c.p("bo-ring-fav2", f'bonus_fx(0, 325, 2, 0, "CBTFAVOR", {state}, 180)')
+        typed = snap(0)
+        c.p("bo-ring-give", """order_party(0, 'CreateItem("RING06",1,0,0)')""")
+        time.sleep(1.2)
+        c.p("bo-ring-eq", """order_party(0, 'XEquipItem("RING06",Myself,SLOT_RING_LEFT,EQUIP)')""")
+        time.sleep(2.2)
+        items_on = c.p("bo-ring-items", "form_state(0)")["items"]
+        equipped = snap(0)
+        check("Bonus: real equipped RING06 (+1 saves, +1 AC) stacks with highest Favor +2",
+              "RING06" in items_on
+              and typed["saves"] == [v - 2 for v in base["saves"]]
+              and equipped["saves"] == [v - 1 for v in typed["saves"]]
+              and equipped["ac"] == typed["ac"] - 1,
+              items=items_on, base=bonus_values(base), typed=bonus_values(typed), equipped=bonus_values(equipped))
+        c.p("bo-ring-drop", """order_party(0, 'DestroyItem("RING06")')""")
+        time.sleep(1.5)
+        c.p("bo-ring-fxclear", 'bonus_clear(0, {"CBMQLAB"})')
+        clear(0, tuple(k for k in ("bless", "recitation") if k in BONUS))
+
+    # Unholy Blight (SPPR314), Doom (SPPR113), and a weaker -1 Curse on an eligible good target vs evil target.
+    if need("blight", "doom"):
+        blight_res = BONUS["blight"]["res"]
+        c.p("bo-ub-clear0", "remove_all_others()")
+        time.sleep(1)
+        c.p("bo-ub-spawn", 'spawn("ACOLYTE2", 120, 0)')
+        time.sleep(2)
+        others = c.p("bo-ub-who", "others()") or []
+        good = others[0]["name"] if others else "Dawnbringer Alvanna"
+        for lvl in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+            c.p(f"bo-ub-scr-{lvl}", f"""order({json.dumps(good)}, 'ChangeAIScript("",{lvl})')""")
+        time.sleep(1)
+        c.p("bo-ub-pin", f'pin({json.dumps(good)}, 600)')
+        c.p("bo-ub-live", f'fx({json.dumps(good)}, 208, 1, 0, 600)')
+        c.p("bo-ub-saves", f'set_saves({json.dumps(good)}, {{spell = 20}}, 600)')
+        time.sleep(1)
+        base_g = snap(good)
+        if "curse" in BONUS:
+            apply(good, "curse")
+        else:
+            c.p("bo-ub-c1", f'bonus_fx({json.dumps(good)}, 54, -1, 0, "CBTCURSE", {state}, 180)')
+            c.p("bo-ub-c2", f'bonus_fx({json.dumps(good)}, 325, -1, 0, "CBTCURSE", {state}, 180)')
+        weaker_g = snap(good)
+        for _ in range(4):
+            apply(good, "doom")
+            with_doom = snap(good)
+            if relevant(with_doom, "doom"):
+                break
+        for _ in range(4):
+            c.p("bo-ub-cast", f'self_apply({json.dumps(good)}, {json.dumps(blight_res)})')
+            time.sleep(2.2)
+            all_three = snap(good)
+            if relevant(all_three, "blight"):
+                break
+        check("Bonus: Unholy Blight, Doom, and Curse on a good target apply only the worst -2 Curse",
+              bool(relevant(all_three, "blight")) and bool(relevant(all_three, "doom"))
+              and weaker_g["thac0"] == base_g["thac0"] + 1
+              and weaker_g["saves"][1:3] == [v + 1 for v in base_g["saves"][1:3]]
+              and all_three["thac0"] == base_g["thac0"] + 2
+              and all_three["saves"][1:3] == [v + 2 for v in base_g["saves"][1:3]],
+              has_blight=bool(relevant(all_three, "blight")), has_doom=bool(relevant(all_three, "doom")),
+              thac0=[base_g["thac0"], weaker_g["thac0"], all_three["thac0"]],
+              wand_poly=[base_g["saves"][1:3], weaker_g["saves"][1:3], all_three["saves"][1:3]])
+        changed_b = expire(good, "blight")
+        changed_d = expire(good, "doom")
+        resumed_g = snap(good)
+        check("Bonus: weaker -1 Curse resumes when Unholy Blight and Doom expire",
+              changed_b > 0 and changed_d > 0
+              and not relevant(resumed_g, "blight") and not relevant(resumed_g, "doom")
+              and resumed_g["thac0"] == weaker_g["thac0"]
+              and resumed_g["saves"][1:3] == weaker_g["saves"][1:3],
+              changed=[changed_b, changed_d],
+              thac0=[all_three["thac0"], resumed_g["thac0"]], saves=resumed_g["saves"][1:3])
+        c.p("bo-ub-tidy1", "remove_all_others()")
+        time.sleep(1)
+
+        c.p("bo-ub-evil", 'spawn("TASLOI01", 120, 0)')
+        time.sleep(2)
+        c.p("bo-ub-epin", 'pin("Tasloi", 300)')
+        c.p("bo-ub-elive", 'fx("Tasloi", 208, 1, 0, 300)')
+        c.p("bo-ub-esaves", 'set_saves("Tasloi", {spell = 20}, 300)')
+        time.sleep(1)
+        evil_base = snap("Tasloi")
+        c.p("bo-ub-ecast", f'self_apply("Tasloi", {json.dumps(blight_res)})')
+        time.sleep(2.2)
+        evil_after = snap("Tasloi")
+        check("Bonus: Unholy Blight adds no Curse payload on an ineligible evil target",
+              not relevant(evil_after, "blight") and bonus_values(evil_after) == bonus_values(evil_base),
+              before=bonus_values(evil_base), after=bonus_values(evil_after))
+        c.p("bo-ub-tidy2", "remove_all_others()")
+        time.sleep(1)
+
+    # Live Blood Rage (IWDification SPPR421): requires an allied non-lawful humanoid (KORGAN15).
+    if "blood" in BONUS:
+        c.p("bo-br-clear0", "remove_all_others()")
+        time.sleep(1)
+        c.p("bo-br-spawn", 'spawn("KORGAN15", 180, 0)')
+        time.sleep(2.5)
+        for lvl in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+            c.p(f"bo-br-scr-{lvl}", f"""order("korgan", 'ChangeAIScript("",{lvl})')""")
+        c.p("bo-br-strip", """order("korgan", 'DestroyAllEquipment()')""")
+        c.p("bo-br-ally", """order("korgan", 'ChangeEnemyAlly(Myself,ALLY)')""")
+        c.p("bo-br-live", 'fx("korgan", 208, 1, 0, 900)')
+        c.p("bo-br-slow", 'fx("korgan", 126, 0, 1, 900)')
+        time.sleep(2)
+
+        if "hope" in BONUS:
+            c.p("bo-br-str25", 'bonus_fx("korgan", 44, 25, 1, "", nil, 600)')
+            time.sleep(1)
+            base_k = snap("korgan")
+            c.p("bo-br-hope", f'cast_now("korgan", {json.dumps(BONUS["hope"]["res"])})')
+            time.sleep(2)
+            hope_k = snap("korgan")
+            c.p("bo-br-cast", f'cast_now("korgan", {json.dumps(BONUS["blood"]["res"])})')
+            time.sleep(2.5)
+            both_k = snap("korgan")
+            check("Bonus: Blood Rage lands on an allied non-lawful target and does not stack Morale with Emotion: Hope",
+                  bool(relevant(hope_k, "hope")) and bool(relevant(both_k, "hope")) and bool(relevant(both_k, "blood"))
+                  and hope_k["thac0"] == base_k["thac0"] - 2 and hope_k["dmg"] == base_k["dmg"] + 2
+                  and both_k["thac0"] == base_k["thac0"] - 2 and both_k["dmg"] == base_k["dmg"] + 3,
+                  base=bonus_values(base_k), hope=bonus_values(hope_k), both=bonus_values(both_k))
+            clear("korgan", ("hope", "blood"))
+            c.p("bo-br-unstr", 'bonus_clear("korgan", {"CBMQLAB"})')
+
+        tr_keys = [k for k in ("tenser", "divine", "righteous", "champion", "blood", "animal") if k in BONUS]
+        for other in tr_keys:
+            if other == "blood":
+                continue
+            for old, new in (("blood", other), (other, "blood")):
+                clear("korgan", tr_keys)
+                c.p(f"bo-br-old-{old}-{new}", f'cast_now("korgan", {json.dumps(BONUS[old]["res"])})')
+                time.sleep(2.2)
+                before_k = snap("korgan")
+                c.p(f"bo-br-new-{old}-{new}", f'cast_now("korgan", {json.dumps(BONUS[new]["res"])})')
+                time.sleep(2.2)
+                after_k = snap("korgan")
+                winner = new if BONUS[new]["level"] >= BONUS[old]["level"] else old
+                loser = old if winner == new else new
+                check(f"Transformation (Blood Rage): {old} then {new} keeps {winner}",
+                      bool(relevant(before_k, old)) and bool(relevant(after_k, winner))
+                      and not relevant(after_k, loser),
+                      levels={old: BONUS[old]["level"], new: BONUS[new]["level"]})
+        clear("korgan", tr_keys)
+        c.p("bo-br-tidy1", "remove_all_others()")
+        time.sleep(1)
+
+        c.p("bo-br-keld", 'spawn("KELDOR10", 180, 0)')
+        time.sleep(2.5)
+        for lvl in ("OVERRIDE", "CLASS", "RACE", "GENERAL", "DEFAULT"):
+            c.p(f"bo-br-kscr-{lvl}", f"""order("keldorn", 'ChangeAIScript("",{lvl})')""")
+        c.p("bo-br-kally", """order("keldorn", 'ChangeEnemyAlly(Myself,ALLY)')""")
+        c.p("bo-br-klive", 'fx("keldorn", 208, 1, 0, 300)')
+        time.sleep(2)
+        keld_info = c.p("bo-br-kinfo", 'being("keldorn")')
+        c.p("bo-br-lawcast", f'cast_now("keldorn", {json.dumps(BONUS["blood"]["res"])})')
+        time.sleep(2.2)
+        lawful_k = snap("keldorn")
+        check("Blood Rage spares an allied Lawful target",
+              keld_info["alignment"] == 0x11 and not relevant(lawful_k, "blood"),
+              alignment=keld_info["alignment"], ea=keld_info["ea"], effects=lawful_k["effects"])
+        c.p("bo-br-tidy", "remove_all_others()")
+        time.sleep(1)
 
 
 def lua_strings(values):
@@ -1801,7 +2226,7 @@ def main():
         LANCE = added_spell(game, "CLERIC_CBMAGIC_ICELANCE")
     if "attacks" in selected and "--game" in args:
         WRATH = wrath_payload(Path(args[args.index("--game") + 1]))
-    if {"record", "live"} & set(selected) and "--game" in args:
+    if {"record", "live", "unseen"} & set(selected) and "--game" in args:
         record_rows(Path(args[args.index("--game") + 1]))
     sys.argv = [sys.argv[0], *args]
     rp.GROUPS = GROUPS

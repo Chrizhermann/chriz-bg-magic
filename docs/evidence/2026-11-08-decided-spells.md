@@ -206,13 +206,14 @@ Draw Upon Divine Might, IWD Hopelessness, and the control contest of the eight w
     on, the clock ran to 456 ticks in 58 script passes and the game-over answer came 452 ticks
     after the start.
   - A false trigger in front stops a block before its Lua trigger is evaluated (seen with a
-    condition evaluated from the console), which is what keeps the clock still in combat. A real
-    fight during the clock was not staged: the creatures spawned did not fight.
+    condition evaluated from the console), which is what keeps the clock still in combat once
+    scoped to `Player1` (staged in a real fight on 2026-11-11 below).
   - Not seen: a scroll inside a bag, a real dead end of the game, the clock across a save.
 - One lab game crashed on a probe of mine (a string read from a guessed address), not on the mod.
-- Not seen yet: the world map and map edges (the other hook), ambushes, the Pocket Plane's exit,
-  dreams at a rest, the statue hit in a fight, EET with its other campaigns, a save and reload
-  while he is out, the look on screen.
+- Not seen on 2026-11-10 (world map and map edges, dreams at a rest, a save and reload while he is
+  out, and a real fight during the dead-end clock were verified on 2026-11-11 below; still not
+  seen: ambushes, the Pocket Plane's exit, the statue hit in a fight, EET with its other campaigns,
+  the look on screen).
 
 ## Touch spells (2026-11-10)
 
@@ -250,7 +251,76 @@ No game was started for these; files were read after an install into the BG2:EE 
   line.
 - Left as they are: files of Baldur's Gate and Siege of Dragonspear (`BD*`, some items) are written
   on plain BG2:EE as well, where nothing uses them; their names are EET string numbers.
-- Not seen in a game: Grease's duration by level, the icons, the texts on screen.
+- Not seen in a game on 2026-11-10 (Grease's duration by level, the icons, Nishruu and Hakeashar,
+  and the strings in `dialog.tlk` were verified in-game on 2026-11-11 below; the rendered text box
+  on screen was not looked at).
+
+## In-game verification (2026-11-11)
+
+- `Find Familiar` (`SPWI123`) and its scroll (`SCRL6D`): school set to Universal with specialist
+  exclusion flags cleared (`0x00000000`) on both spell and scroll, and `SCRL6D` points at the
+  updated spell description. Clean installs in plain BG2:EE, BG2:EE with IWDification, and EET.
+- Group `unseen` in `tests/lab/run_batches.py` (13 of 13 in plain BG2:EE and in BG2:EE with
+  IWDification):
+  - Grease (`SPWI101`) at caster levels 1, 10, and 20 (`cbmgr01`, `cbmgr10`, `cbmgr20`): measured
+    area duration 24 s, 78 s, and 138 s (3 rounds + 1 round/level).
+  - Unholy Blight (`SPPR314`): portrait icon 35 (`Cursed`) active on a harmed good target.
+  - Polymorph Self / Shapechange form weapon helper (`CBHWSTY1`): leaves no portrait icon on the
+    creature's effect list.
+  - Dispel Magic (`SPWI302`) and Remove Magic (`SPWI326`): destroy summoned Nishruu (`NISHRUSU`)
+    and Hakeashar (`HAKSU`) via `SPECIFIC = 25` on plain BG2:EE (without EE Fixpack) and with
+    IWDification.
+  - `Find Familiar` (`SPWI123`) and `SCRL6D`: read back in the running game as Universal with zero
+    specialist exclusions and matching description string; the 23 new and 8 completed descriptions
+    read back from `dialog.tlk` with no unresolved placeholders.
+- Typed spell bonuses (`M_CBMBON.lua`), group `bonus` (and `attacks`) in `tests/lab/run_batches.py`:
+  - Plain BG2:EE (`--only unseen,bonus`): 38 of 38 (`bonus` 25 of 25, `unseen` 13 of 13), covering
+    Deflection AC, Generic AC, Morale, Luck, Sacred, Transformation, and Extra-attack non-stacking
+    in both cast orders, staggered expiry (`Aid` ending early while `Bless` continues), Dispel
+    Magic cleanup, and clean return to unbuffed values.
+  - BG2:EE with IWDification (`--only unseen,bonus,attacks`): 72 of 72 (`bonus` 55 of 55, `attacks`
+    4 of 4, `unseen` 13 of 13), covering the IWD pairs (`Prayer`, `Recitation`, `Emotion: Hope`,
+    `Emotion: Courage`, `Righteous Wrath of the Faithful`, `Shield of Lathander`, `Impervious
+    Sanctity of Mind`, `Cloak of Fear`, `Blood Rage`).
+  - Why `Blood Rage` (`SPPR421`) had earlier missed the lab party: its `opcode 324` guards block
+    non-allied targets (`SPLPROT` row 56) and Lawful targets (`SPLPROT` row 49, `ALIGNMENTBITS =
+    MASK_LAWFUL` `0x10`), which excluded the Good/Lawful baseline companions. On spawned Chaotic
+    Evil `KORGAN15` made `ALLY`, `Blood Rage` lands, shares Morale with `Emotion: Hope`, and passes
+    all 10 `Transformation` pairs; on Lawful Good `KELDOR10` made `ALLY`, `opcode 324` blocks it.
+- Protagonist petrified or imprisoned, cold save/reload, dreams, world map, and dead-end combat
+  (`tests/lab/run_player1.py`, 24 of 24 across four fresh BG2:EE 2.7.3.0 + EEex v1.3.1 sessions;
+  offline `tests/test_player1.py`, 3 of 3):
+  - Two engine script bugs uncovered in `Baldur.exe` 2.7.3.0 and fixed:
+    - `baf/cbmp1_dream.baf`: `CInfGame::RestParty` (`0x140287E6A`) checks whether the matched
+      dream-script `CResponse` has a non-empty `m_actionList`. Even `NoAction()` compiles an `AC`
+      node, causing `RestParty` to treat a dream action as queued and skip the 8-hour rest
+      (`tick_delta = 0`, no healing or spell recovery). Removing `NoAction()` leaves an empty
+      `RESPONSE #100` (`RS\nRE\n100RE\nRS\n`), stopping `CAIScript::Find` before later dream blocks
+      while letting the 8-hour rest complete (`36054` ticks).
+    - `baf/cbmp1.baf`: On `BALDUR.BCS` and `BALDUR25.BCS`, unscoped `!ActuallyInCombat()` (`0x40D5`)
+      reads `m_combatCounter` from the world-script runner's `m_pArea` (`MasterArea`, always `-45`),
+      so it stayed `TRUE` during melee combat in the party's area. Prefixing `!ActuallyInCombat()`
+      with `NextTriggerObject(Player1)` (`0x40E0`, looked up with `checkActive = 0` so it resolves
+      `Player1` while petrified or imprisoned) checks `Player1->m_pArea` instead.
+  - Map-edge `LeaveArea` gather hook (`CBMP1-LeaveArea-DeadTest`, action 91) in `AR0020`: clearing
+    the hook cell blocks `WORLD_MAP`; with the cell active, `LeaveArea` opens `WORLD_MAP` and
+    travels `AR0020 -> AR0900` with statue `Player1` (cured there with `Stone to Flesh`) and
+    `AR0900 -> AR0020` with imprisoned `Player1`; `Freedom` in `AR0020` keeps `Player1` imprisoned
+    (vanished in `AR0900`), and returning via `WORLD_MAP` to `AR0900` + `Freedom` frees `Player1`
+    on the stored spot.
+  - Dreams on rest (`PLAYER1D.BCS`): a dream block is suppressed during an 8-hour statue rest
+    (`had_dream = 0`, `tick_delta = 36054`, variable unconsumed) and fires on the next rest after
+    `Stone to Flesh` (`had_dream = 1`).
+  - Cold `SaveGame(0)` and fresh-process reload: statue `Player1` (active hook cell and
+    `CBM_P1_OUT = 1`, cured by `Stone to Flesh`), imprisoned `Player1` (stored `CBMP1AR`/`CBMP1X`/
+    `CBMP1Y` intact, freed by `Freedom`), and overlapping typed bonuses (`Blur`, `Defensive
+    Harmony`, `Bless`, `Luck`: `+4` AC, `+1` THAC0/damage/luck, `+2` saves) preserved across cold
+    reload, area transition + 60 seconds (`1009` ticks) without drift, and 8-hour rest (`36073`
+    ticks) returning cleanly to unbuffed totals.
+  - Dead-end 30-second clock (`CBMP1_Stuck`) in `AR0330` during real melee combat: counted to `120`
+    out of combat, paused without resetting at `136` across `183` ticks (`> 12` s) of melee combat
+    with a hostile Tasloi, and resumed after combat from `136` to `456` (`>= 450`, game over) in
+    `328` ticks.
 
 ## Not covered
 

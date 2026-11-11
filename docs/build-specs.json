@@ -1,148 +1,4356 @@
 {
- "about": "English specs and build status of the decided changes that are built, by decision-page row. tools/build_list.py merges this into docs/build-list.json. A part is todo until built, done when built, lab-checked once a disposable lab install checked it (docs/evidence), later when it is only a possible later change on Christopher's list.",
+ "about": "English specs and build status of the decided changes, by decision-page row. tools/build_list.py merges this into docs/build-list.json. A part is todo until built, done when built, lab-checked once a disposable lab install checked it (docs/evidence), later when it is only a possible later change on Christopher's list.",
  "rows": {
-  "arcane.level4.spirit_armor": {
-   "resrefs": ["SPWI414"],
+  "arcane.detect_alignment_relocation": {
+   "resrefs": [],
    "parts": [
-    {"spec": "Stays vanilla, with one fix: casting Spirit Armor again on a creature that has it replaces the earlier casting, so its +3 to saves vs. spell and its expiry damage no longer stack. Mage Armor and Ghost Armor need nothing: all three set the base AC and the best one counts.", "status": "lab-checked"}
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
    ]
   },
-  "arcane.spell_deflection_progression": {
-   "resrefs": ["SPWI318"],
+  "arcane.dimension_jump_relocation": {
+   "resrefs": [],
    "parts": [
-    {"spec": "Minor Spell Deflection stops only spells of levels 1-4 (vanilla: 1-7, so a level-3 spell also absorbed Breach and priest spells up to level 7). Its description says so. The rest of the Spell Deflection and Spell Turning line stays vanilla.", "status": "lab-checked"},
-    {"spec": "Later: look at Spell Turning's reflection, and whether Minor Spell Deflection stays fully vanilla after all.", "status": "todo"}
+    {
+     "spec": "Spell Revisions' Dimension Jump relocation is dropped.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: possible custom teleport spell above level 1.",
+     "status": "later"
+    }
    ]
   },
-  "arcane.level3.fireball": {
-   "resrefs": ["SPWI304"],
-   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half damage, no penalty.", "status": "lab-checked"}]
-  },
-  "arcane.level7.delayed_blast_fireball": {
-   "resrefs": ["SPWI712"],
-   "parts": [{"spec": "Vanilla damage, save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"}]
-  },
-  "arcane.level5.cone_of_cold": {
-   "resrefs": ["SPWI503"],
-   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
-  },
-  "divine.flame_strike": {
-   "resrefs": ["SPPR503"],
-   "parts": [{"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"}]
-  },
-  "arcane.level3.skull_trap": {
-   "resrefs": ["SPWI313"],
+  "arcane.elemental_protection_progression": {
+   "resrefs": [
+    "SPWI319",
+    "SPWI320",
+    "SPWI512",
+    "SPWI517",
+    "SPWI606",
+    "SPWI702",
+    "SPWI803"
+   ],
    "parts": [
-    {"spec": "Save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"},
-    {"spec": "Damage capped at 12d6 (SCS-like, built ourselves).", "status": "todo"}
+    {
+     "spec": "Spell Revisions' elemental protection progression is dropped; wizard elemental protection spells stay at their vanilla levels and values.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: polish description wording on vanilla wizard Protection From Fire (SPWI319) so normal vs. magical protection reads unambiguously.",
+     "status": "later"
+    }
    ]
   },
-  "divine.glyph_of_warding": {
-   "resrefs": ["SPPR304"],
+  "arcane.haste_slow": {
+   "resrefs": [
+    "SPWI305",
+    "SPWI312",
+    "SPWI613",
+    "SCRL7Q"
+   ],
    "parts": [
-    {"spec": "Save vs. breath instead of vs. spell; as in vanilla, a successful save avoids the damage.", "status": "lab-checked"},
-    {"spec": "The rest of the SCS-like decision.", "status": "todo"}
+    {
+     "spec": "Haste and Slow cancel each other across spells and items as in SCS (haste_cancels_slow.tpa): Haste on a slowed target displays 'Slow cancelled by Haste', removes the Slow (sectype cbm_Slow), and does not start Haste or its fatigue; Slow on a hasted target displays 'Haste cancelled by Slow', removes the Haste (sectype cbm_Haste), and does not start Slow. Haste stays vanilla in every other way (bonus, duration, fatigue).",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Improved Haste (SPWI613 and scroll SCRL7Q) becomes the party buff of Spell Revisions, built cleanly without opcode 16 so there is no second speed clock: keeps all 9 ability headers (min_level 1, 13..20), Area target (4), range 30, casting time 6, party-friendly 15-ft radius projectile 158 (INAREAPA), duration 1 turn (60s), dispellable (sectype 13 NON-COMBAT, resist_dispel 3), granting +6 movement rate (opcode 176), +1 APR (opcode 1, CBTAPR), +2 THAC0 (opcode 54), +2 AC (opcode 0), +2 Saving Throws vs. Breath (opcode 36), curing any active Slow (opcode 221 cbm_Slow + opcode 240 icon 41), granting immunity to Slow for 60s (opcode 101 p2=40, opcode 169 p2=41, opcode 267 strings, opcode 206 against Slow spells, and HASTE_IMMUNITY splstate blocking extracted Slow subspells), and preventing stacking with Haste and itself.",
+     "status": "lab-checked"
+    }
    ]
   },
-  "arcane.level8.incendiary_cloud": {
-   "resrefs": ["SPWI810"],
+  "arcane.imprisonment_freedom": {
+   "resrefs": [
+    "SPWI910",
+    "SPWI917"
+   ],
    "parts": [
-    {"spec": "Vanilla, with save vs. breath instead of vs. spell for half (decision page overview: save type by logic).", "status": "lab-checked"},
-    {"spec": "School Conjuration, like all clouds.", "status": "todo"}
+    {
+     "spec": "With EEex installed (M_CBMP1.lua), imprisoning Player1 no longer ends the game immediately while a living companion remains: Player1 is held in an underground prison recoverable via Freedom (SPWI917 or scroll), with a 30-second combat-paused dead-end clock when no companion can free Player1.",
+     "status": "lab-checked"
+    }
    ]
   },
-  "arcane.level3.lightning_bolt": {
-   "resrefs": ["SPWI308"],
-   "parts": [{"spec": "Classic bouncing bolt as in vanilla, with save vs. breath instead of vs. spell for half.", "status": "lab-checked"}]
+  "arcane.level1.armor": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
   },
-  "arcane.level9.meteor_swarm": {
-   "resrefs": ["SPWI911"],
-   "parts": [{"spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.", "status": "later"}]
+  "arcane.level1.burning_hands": {
+   "resrefs": [
+    "SPWI103"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
   },
-  "divine.fire_storm": {
-   "resrefs": ["SPPR705"],
-   "parts": [{"spec": "Stays as in the base game for now, without a save. A save vs. breath is on the list of possible later changes.", "status": "later"}]
+  "arcane.level1.charm_person": {
+   "resrefs": [
+    "SPWI104"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
   },
-  "arcane.level1.sleep": {
-   "resrefs": ["SPWI116"],
-   "parts": [{"spec": "Vanilla, but damage wakes the sleepers.", "status": "lab-checked"}]
+  "arcane.level1.chill_touch": {
+   "resrefs": [
+    "SPWI117"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.chromatic_orb": {
+   "resrefs": [
+    "SPWI118"
+   ],
+   "parts": [
+    {
+     "spec": "IWD/SCS progression without the +6 save bonus, range 50 ft., and Conjurer exclusion bit (0x0080) cleared: level 1 deals 1d4 magic damage + blind for 1 round (save vs. spell negates secondary effect); level 2 deals 1d6 fire damage + -1 AC/THAC0 for 1 round; level 3 deals 1d8 magic + 1d3 fire damage (no save); level 4 deals 1d10 magic damage + blind for 4 rounds; level 5 deals 1d12 magic damage + stun for 3 rounds (Free Action protects against the stun); level 7+ deals 2d8 magic damage + hold for 13 rounds (Free Action protects). Hit lighting and sounds use op141 (p2=25) and EFF_E05/EFF_M83.",
+     "status": "lab-checked"
+    }
+   ]
   },
   "arcane.level1.color_spray": {
-   "resrefs": ["SPWI105"],
-   "parts": [{"spec": "Vanilla, but damage wakes the unconscious.", "status": "lab-checked"}]
-  },
-  "arcane.level2.stinking_cloud": {
-   "resrefs": ["SPWI213"],
+   "resrefs": [
+    "SPWI105"
+   ],
    "parts": [
-    {"spec": "Damage wakes the creatures it knocked out.", "status": "lab-checked"},
-    {"spec": "Creatures without breath (undead, golems, elementals, slimes) immune; school Conjuration.", "status": "todo"}
+    {
+     "spec": "Vanilla, but damage wakes the unconscious.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.expeditious_retreat": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.find_familiar": {
+   "resrefs": [
+    "SPWI123",
+    "SCRL6D"
+   ],
+   "parts": [
+    {
+     "spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls (including SCRL6D.ITM) so all specialist mages can learn and cast it; spell and scroll descriptions list the Baldur's Gate, Siege of Dragonspear, Shadows of Amn, and Throne of Bhaal familiars.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: EET BG1 familiar balance (the familiar list comes from the GAM, where BG1 versions exist as FAM*_ with half the HP).",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.level1.grease": {
+   "resrefs": [
+    "SPWI101"
+   ],
+   "parts": [
+    {
+     "spec": "Lasts 3 rounds + 1 round per caster level (4 to 23 rounds via projectiles cbmgr01..cbmgr20), switches its save from vs. spell to vs. breath (keeping the +2 bonus), and makes flying, incorporeal and dragon creatures immune by race (WYVERN, BEHOLDER, MEPHIT, SPECTRE, WRAITH, SHADOW, MIST, DRAGON); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.identify": {
+   "resrefs": [
+    "SPWI110"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.larlochs_minor_drain": {
+   "resrefs": [
+    "SPWI119"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.magic_missile": {
+   "resrefs": [
+    "SPWI112"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.monster_summoning_i": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.nahals_reckless_dweomer": {
+   "resrefs": [
+    "SPWI124"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except it loses Aura Cleansing: ability target is changed from 7 (Caster, instant, ignore aura and casting time) to 5 (Caster, normal spell action) so casting Nahal's Reckless Dweomer obeys the normal 1-spell-per-round aura timer, and any explicit opcode 188 (Cleanse Aura) effect is removed.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.obscuring_mist": {
+   "resrefs": [
+    "SPWI106"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Obscuring Mist replacement is dropped; Blindness stays as Blindness with its duration shortened from 2 hours to 1 round per 2 caster levels (minimum 2 rounds at levels 1-5, 3 rounds at 6-7, 4 rounds at 8-9, maximum 5 rounds at 10+); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.protection_from_evil": {
+   "resrefs": [
+    "SPWI113"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.reflected_image": {
+   "resrefs": [
+    "SPWI120"
+   ],
+   "parts": [
+    {
+     "spec": "Refreshes itself via leading opcode 321 and does not stack with Mirror Image (SPWI212, SPWI298).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.shield": {
+   "resrefs": [
+    "SPWI114"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.shocking_grasp": {
+   "resrefs": [
+    "SPWI115"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level1.sleep": {
+   "resrefs": [
+    "SPWI116"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla, but damage wakes the sleepers.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.spook": {
+   "resrefs": [
+    "SPWI125"
+   ],
+   "parts": [
+    {
+     "spec": "Undead (SPLPROT row 1) and creatures protected by True Seeing (stat 118 TRUE_SIGHT > 0) are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level1.true_strike": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level10.comet": {
+   "resrefs": [
+    "SPWI925"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla for now. Splitting damage into physical and fire is a possible later change.",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.level10.dragons_breath": {
+   "resrefs": [
+    "SPWI922"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level10.energy_blades": {
+   "resrefs": [
+    "SPWI920"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level10.improved_alacrity": {
+   "resrefs": [
+    "SPWI921"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level10.summon_dark_planetar": {
+   "resrefs": [
+    "SPWI924"
+   ],
+   "parts": [
+    {
+     "spec": "Summons a Dark Planetar (PLANEVIL) for 5 rounds + 1 round/level with SR celestial avatar, stats, vorpal dispelling sword, and vanilla-equivalent spellbook, subject to a 1-planetar party cap shared with Summon Planetar.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level10.summon_planetar": {
+   "resrefs": [
+    "SPWI923"
+   ],
+   "parts": [
+    {
+     "spec": "Summons a Planetar (PLANGOOD) for 5 rounds + 1 round/level with SR celestial avatar, stats, vorpal dispelling sword, and vanilla-equivalent spellbook, subject to a 1-planetar party cap shared with Summon Dark Planetar.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.agannazars_scorcher": {
+   "resrefs": [
+    "SPWI217"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.battering_ram": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.blur": {
+   "resrefs": [
+    "SPWI201"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Blur stays vanilla, with its +3 AC and +1 saving throws carrying the Dodge bonus type via cbmagic_bonus.tpa and M_CBMBON.lua.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.chaos_shield": {
+   "resrefs": [
+    "SPWI222"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.detect_invisibility": {
+   "resrefs": [
+    "SPWI203"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: consider repeating invisibility detection pulses each round.",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.level2.ghoul_touch": {
+   "resrefs": [
+    "SPWI218"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.glitterdust": {
+   "resrefs": [
+    "SPWI224"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (already school Conjuration in BG2:EE 2.7.3.0, and Spell Immunity: Divination blocks only Divination spells).",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.horror": {
+   "resrefs": [
+    "SPWI205"
+   ],
+   "parts": [
+    {
+     "spec": "Undead (SPLPROT row 1) are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.invisibility": {
+   "resrefs": [
+    "SPWI206"
+   ],
+   "parts": [
+    {
+     "spec": "Duration is 8 hours (2400 seconds) instead of 24 hours (7200 seconds). Its description and scroll say so.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.know_opponent": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.luck": {
+   "resrefs": [
+    "SPWI209"
+   ],
+   "parts": [
+    {
+     "spec": "Keeps vanilla's +1 bonus to luck and skill checks (Luck bonus type on luck and saves), lasts 15 rounds (90 seconds) instead of 3 rounds, and replaces an earlier casting on the same target.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.melfs_acid_arrow": {
+   "resrefs": [
+    "SPWI211"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.mirror_image": {
+   "resrefs": [
+    "SPWI212",
+    "SPWI298",
+    "SPWI120"
+   ],
+   "parts": [
+    {
+     "spec": "Mirror Image (SPWI212 and Contingency SPWI298) refreshes itself and removes any active Reflected Image (SPWI120) via leading opcode 321, and blocks Reflected Image for its duration via opcode 206.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.monster_summoning_ii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
    ]
   },
   "arcane.level2.power_word_sleep": {
-   "resrefs": ["SPWI220"],
+   "resrefs": [
+    "SPWI220"
+   ],
    "parts": [
-    {"spec": "Damage wakes the sleeper. Vanilla does this already (its sleep has wake-on-damage on); nothing changed, confirmed in play.", "status": "lab-checked"},
-    {"spec": "School Enchantment; elf resistance; undead, dragons and elementals immune (SCS-like).", "status": "todo"}
+    {
+     "spec": "Damage wakes the sleeper (confirmed in play).",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "School set to Enchantment (Invoker exclusion 0x0800 on the spell and kit usability byte 0x2d bit 0x08 on its scrolls), elf and half-elf resistance as in Sleep, and undead, dragons and elementals are immune; description updated.",
+     "status": "lab-checked"
+    }
    ]
   },
-  "divine.command": {
-   "resrefs": ["SPPR102"],
+  "arcane.level2.ray_of_enfeeblement": {
+   "resrefs": [
+    "SPWI221"
+   ],
    "parts": [
-    {"spec": "Damage wakes the sleeper.", "status": "lab-checked"},
-    {"spec": "The rest of the decision (Spell Revisions' version of the spell, built ourselves).", "status": "todo"}
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
    ]
   },
-  "divine.greater_command": {
-   "resrefs": ["SPPR512"],
+  "arcane.level2.resist_fear": {
+   "resrefs": [
+    "SPWI210"
+   ],
    "parts": [
-    {"spec": "Vanilla, but damage wakes the sleepers.", "status": "lab-checked"},
-    {"spec": "Maybe a harder save.", "status": "later"}
+    {
+     "spec": "Stays vanilla (Mummy Despair exists only in Spell Revisions' own mummy summon, not in the base game).",
+     "status": "done"
+    }
    ]
   },
-  "arcane.level4.emotion_despair": {
-   "resrefs": ["SPWI411"],
+  "arcane.level2.sound_burst": {
+   "resrefs": [
+    "SPWI223"
+   ],
    "parts": [
-    {"spec": "Damage ends the sleep of the base game's Emotion: Hopelessness; its other effects run out as before. The IWD version replaces this spell when the IWD spells are built.", "status": "lab-checked"}
+    {
+     "spec": "Spell Revisions' Sound Burst replacement is dropped; Deafness stays vanilla for now.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level2.stinking_cloud": {
+   "resrefs": [
+    "SPWI213"
+   ],
+   "parts": [
+    {
+     "spec": "Damage wakes the creatures it knocked out.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "School set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) and creatures without breath (undead, golems, elementals, slimes) are immune; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.strength": {
+   "resrefs": [
+    "SPWI214"
+   ],
+   "parts": [
+    {
+     "spec": "Casting time reduced from 9 to 5, and with EEex installed (M_CBMSTR.lua) sets a Strength floor of 18/50 (+50 exceptional Strength on existing 18/xx up to 18/00, never lowering Strength 19+); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level2.vocalize": {
+   "resrefs": [
+    "SPWI219"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
    ]
   },
   "arcane.level2.web": {
-   "resrefs": ["SPWI215"],
+   "resrefs": [
+    "SPWI215"
+   ],
    "parts": [
-    {"spec": "Save vs. breath instead of vs. spell (the vanilla -2 stays). Its description says so.", "status": "lab-checked"},
-    {"spec": "Spiders (race SPIDER) and amorphous creatures (race SLIME: slimes, jellies, oozes, puddings) are immune.", "status": "lab-checked"},
-    {"spec": "Dragons and the very obvious flying and incorporeal creatures are immune, by race: DRAGON; WYVERN, BEHOLDER, MEPHIT; SPECTRE, WRAITH, SHADOW, MIST. Giants and ettins are not.", "status": "lab-checked"},
-    {"spec": "Maybe other creatures: imps and quasits, genies, devas and planetars, bats, birds and will-o'-wisps (no race of their own), golems, big elementals. Fire elementals burn, so a web holding them makes little sense.", "status": "later"},
-    {"spec": "Web may be too strong in the base game; its -2 stays for now.", "status": "later"},
-    {"spec": "An idea, far off: webs that can catch fire, but not easily, say from someone standing in one with a fire shield for a round or two. It needs a mechanic of its own first.", "status": "later"},
-    {"spec": "Smaller radius (maybe, like SR); school Conjuration.", "status": "todo"}
+    {
+     "spec": "Save vs. breath instead of vs. spell (keeping the vanilla -2). Its description says so.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Spiders (race SPIDER) and amorphous creatures (race SLIME: slimes, jellies, oozes, puddings) are immune.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Dragons and obvious flying and incorporeal creatures are immune by race: DRAGON, WYVERN, BEHOLDER, MEPHIT, SPECTRE, WRAITH, SHADOW, MIST. Giants and ettins are not.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "School set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls); description updated.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Maybe other creatures later (imps, quasits, genies, devas, planetars, bats, birds, will-o'-wisps, golems, fire/large elementals), smaller radius, or fire-shield web ignition.",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.level3.clairvoyance": {
+   "resrefs": [
+    "SPWI301"
+   ],
+   "parts": [
+    {
+     "spec": "Usable indoors and outdoors; grants the caster dispellable immunity to backstab for 3 rounds at level 5 plus 1 round per 2 caster levels up to 10 rounds at level 19 instead of revealing the outdoor map.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.detect_illusion": {
+   "resrefs": [
+    "SPWI322"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.dire_charm": {
+   "resrefs": [
+    "SPWI316"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.dispel_magic": {
+   "resrefs": [
+    "SPWI326"
+   ],
+   "parts": [
+    {
+     "spec": "Stays separate from Remove Magic as in vanilla, uses opcode 58 high word 2 for level-checked magical-weapon dispelling, and destroys summoned Nishruu and Hakeashar (specific 25); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.fireball": {
+   "resrefs": [
+    "SPWI304"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla, with save vs. breath instead of vs. spell for half damage, no penalty, and area damage bypassing Mirror Image.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.flame_arrow": {
+   "resrefs": [
+    "SPWI303"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.ghost_armor": {
+   "resrefs": [
+    "SPWI317"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.hold_person": {
+   "resrefs": [
+    "SPWI306"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.hold_undead": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.icelance": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' wizard relocation is dropped (wizard Icelance comes from IWDification); druids, shamans, and rangers receive a standalone level-3 priest Icelance (CLERIC_CBMAGIC_ICELANCE).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.invisibility_sphere": {
+   "resrefs": [
+    "SPWI307"
+   ],
+   "parts": [
+    {
+     "spec": "Renamed Invisibility Sphere in spell and scroll names and descriptions, casting time is 1 (from 9), duration is 1 turn (60 seconds, from 24 hours), and uses an ally-only radius-110 projectile (cbminv10.pro via ADD_PROJECTILE).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.lightning_bolt": {
+   "resrefs": [
+    "SPWI308"
+   ],
+   "parts": [
+    {
+     "spec": "Classic bouncing bolt as in vanilla, with save vs. breath instead of vs. spell for half.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.melfs_minute_meteors": {
+   "resrefs": [
+    "SPWI325",
+    "MELFMET"
+   ],
+   "parts": [
+    {
+     "spec": "Resolved via WIZARD_MELF_METEOR (SPWI325): the created meteor weapon (MELFMET.ITM) has +2 enchantment instead of +5.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.monster_summoning_iii": {
+   "resrefs": [
+    "SPWI309"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD Monster Summoning I progression via IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.non_detection": {
+   "resrefs": [
+    "SPWI310"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.protection_from_missiles": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level3.remove_magic": {
+   "resrefs": [
+    "SPWI302"
+   ],
+   "parts": [
+    {
+     "spec": "Stays separate from Dispel Magic as in vanilla, uses opcode 58 high word 2 for level-checked magical-weapon dispelling, and destroys hostile summoned Nishruu and Hakeashar (specific 25); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.skull_trap": {
+   "resrefs": [
+    "SPWI313"
+   ],
+   "parts": [
+    {
+     "spec": "Save vs. breath instead of vs. spell for half, no penalty.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Damage capped at 12d6 in place across all abilities.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level3.vampiric_touch": {
+   "resrefs": [
+    "SPWI314"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.break_enchantment": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.confusion": {
+   "resrefs": [
+    "SPWI401"
+   ],
+   "parts": [
+    {
+     "spec": "Duration is 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6 rounds (36s) at level 20+, preserving existing ability breakpoints. Save vs. Spell at -2 and everything else stay vanilla.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.contagion": {
+   "resrefs": [
+    "SPWI409"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.emotion_despair": {
+   "resrefs": [
+    "SPWI411"
+   ],
+   "parts": [
+    {
+     "spec": "Damage ends the sleep of the base game's Emotion: Hopelessness (and optional IWD Emotion: Hopelessness and Symbol, Hopelessness when installed); its other effects run out as before.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.enchanted_weapon": {
+   "resrefs": [
+    "SPWI417"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.farsight": {
+   "resrefs": [
+    "SPWI424"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.fire_shield_red": {
+   "resrefs": [
+    "SPWI418",
+    "SPWI403"
+   ],
+   "parts": [
+    {
+     "spec": "Fire Shield (Red) and Fire Shield (Blue) stay at their vanilla levels and mechanics, and remove and block Summon Insects, Insect Plague, and Creeping Doom swarms; descriptions updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.greater_malison": {
+   "resrefs": [
+    "SPWI412"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Greater Malison stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.ice_storm": {
+   "resrefs": [
+    "SPWI404"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.improved_invisibility": {
+   "resrefs": [
+    "SPWI405"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.minor_globe_of_invulnerability": {
+   "resrefs": [
+    "SPWI406"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.monster_summoning_iv_relocation": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.otilukes_resilient_sphere": {
+   "resrefs": [
+    "SPWI413"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.polymorph_other": {
+   "resrefs": [
+    "SPWI415"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.polymorph_self": {
+   "resrefs": [
+    "SPWI416"
+   ],
+   "parts": [
+    {
+     "spec": "Lasts 1 turn + 3 rounds per caster level and grants innate shifting into seven forms (Flind, Mustard Jelly, Ogre, Spider, Brown Bear, Black Bear, Wolf) plus return to natural form (CBMPNAT), with M_CBMPOL.lua managing form weapons and ability-bar locks and form weapons free of unwanted portrait icons.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.simbuls_spell_matrix": {
+   "resrefs": [
+    "SPWI420"
+   ],
+   "parts": [
+    {
+     "spec": "Minor Sequencer belongs to the Universal school (0) with specialist exclusions cleared on the spell and its scrolls; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.spirit_armor": {
+   "resrefs": [
+    "SPWI414"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla, with one fix: casting Spirit Armor again on a creature that has it replaces the earlier casting, so its +3 to saves vs. spell (Deflection bonus type) and its expiry damage no longer stack. Mage Armor and Ghost Armor need nothing: all three set the base AC and the best one counts.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.stoneskin": {
+   "resrefs": [
+    "SPWI408"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.teleport_field": {
+   "resrefs": [
+    "SPWI421"
+   ],
+   "parts": [
+    {
+     "spec": "Range is 30 ft. (from 40 ft.) and allows a Save vs. Spell at -4 to avoid being teleported (vanilla: no save). Its description and scroll say so.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level4.vitriolic_sphere": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Vitriolic Sphere is dropped; the IWD version comes from IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level4.wizard_eye": {
+   "resrefs": [
+    "SPWI425"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.cloudkill": {
+   "resrefs": [
+    "SPWI502"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except school is set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like all cloud spells; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level5.cone_of_cold": {
+   "resrefs": [
+    "SPWI503"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla, with save vs. breath instead of vs. spell for half.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level5.conjure_lesser_air_elemental": {
+   "resrefs": [
+    "SPWI520"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.conjure_lesser_earth_elemental": {
+   "resrefs": [
+    "SPWI521"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.conjure_lesser_fire_elemental": {
+   "resrefs": [
+    "SPWI516"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.domination": {
+   "resrefs": [
+    "SPWI506"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.feeblemind": {
+   "resrefs": [
+    "SPWI509"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.fireburst": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.hold_monster": {
+   "resrefs": [
+    "SPWI507"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.lower_resistance": {
+   "resrefs": [
+    "SPWI514"
+   ],
+   "parts": [
+    {
+     "spec": "Lowers magic resistance by 30% + 1% per caster level (was 10% + 1% per level), and no longer bypasses spell protections (power level restored to 5 on magic-resistance reduction effects).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level5.monster_summoning_v": {
+   "resrefs": [
+    "SPWI504"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD Monster Summoning III progression via IWDification.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.oracle": {
+   "resrefs": [
+    "SPWI515"
+   ],
+   "parts": [
+    {
+     "spec": "Dispels illusion spells up to 9th level (from 5th) in a 30-ft (radius 450) enemy-only area centered on the caster (range 1, projectile cbmoracl.pro via ADD_PROJECTILE), and lists the affected high-level illusions in its description.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level5.phantom_blade": {
+   "resrefs": [
+    "SPWI518"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (school Evocation).",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.protection_from_normal_weapons": {
+   "resrefs": [
+    "SPWI511"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla, and normal-weapon immunity (opcode 120 p2=2, including SPWI511 and Wraithform SPWI315) removes and blocks insect swarms; descriptions updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level5.shadow_door": {
+   "resrefs": [
+    "SPWI505"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.summon_shadow": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level5.waves_of_fatigue": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Waves of Fatigue is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.acid_fog": {
+   "resrefs": [
+    "SPWI614"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Acid Fog replacement is dropped; Death Fog stays as Death Fog with its school set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) and description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.animate_skeleton_warrior": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.banishment": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.chain_lightning": {
+   "resrefs": [
+    "SPWI615"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.conjure_air_elemental": {
+   "resrefs": [
+    "SPWI621"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level using windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100]: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%), with size-by-HD creature names; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.conjure_earth_elemental": {
+   "resrefs": [
+    "SPWI622"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level using windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100]: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%), with size-by-HD creature names; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.conjure_fire_elemental": {
+   "resrefs": [
+    "SPWI620"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (with mental combat) except the 12/16/24 HD elemental probabilities scale with caster level using windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100]: 64%/35%/1% at level 12, 60%/35%/5% at level 16, and 56%/35%/9% at level 20+ (+1% to 24 HD and -1% from 12 HD per level, 16 HD stays 35%), with size-by-HD creature names; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.contingency": {
+   "resrefs": [
+    "SPWI617"
+   ],
+   "parts": [
+    {
+     "spec": "Contingency belongs to the Universal school (0) with specialist exclusions cleared on the spell and its scrolls; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.disintegrate": {
+   "resrefs": [
+    "SPWI616"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla save-or-die (Death Ward already protects against opcode 238 in vanilla). Its Mordenkainen's Sword counter is built on arcane.level7.mordenkainens_sword.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.globe_of_invulnerability": {
+   "resrefs": [
+    "SPWI602"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.invisible_stalker": {
+   "resrefs": [
+    "SPWI601"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.mislead": {
+   "resrefs": [
+    "SPWI607"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Mislead stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.monster_summoning_vi": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.power_word_silence": {
+   "resrefs": [
+    "SPWI612"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 instead of Diviner 0x0100 on the spell; kit usability byte 0x2d bit 0x08 instead of 0x01 on its scrolls).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.protection_from_magical_weapons": {
+   "resrefs": [
+    "SPWI611"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level6.tensers_transformation": {
+   "resrefs": [
+    "SPWI603"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla at wizard level 6 and leads the Transformation family (removing and blocking Divine Power, Righteous Magic, Champion's Strength, Blood Rage, and Animal Rage while active).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level6.true_seeing": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.chaos": {
+   "resrefs": [
+    "SPWI508",
+    "SPWI711"
+   ],
+   "parts": [
+    {
+     "spec": "Chaos (SPWI508, level 5) keeps its Save vs. Spell at -4 and enemy-only area, with duration set to 4 rounds (24s) at levels 1-14, 5 rounds (30s) at levels 15-19, and 6 rounds (36s) at level 20+.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Sphere of Chaos (SPWI711, level 7) keeps its name, level 7, point targeting within range 40 ft., and 10-round enemy-only field. Each round, enemies in the area save vs. Spell at -4 or suffer one of 5 random effects for 1 round (6s): feeblemind (20%), confusion (20%), panic (20%), sleep waking on damage (20%), or hold (20%).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.control_undead": {
+   "resrefs": [
+    "SPWI720"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.delayed_blast_fireball": {
+   "resrefs": [
+    "SPWI712"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla damage, save vs. breath instead of vs. spell for half, no penalty.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.finger_of_death": {
+   "resrefs": [
+    "SPWI713"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except its slay effect allows a save vs. death with no penalty instead of vs. spell at -2; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.improved_chaos_shield": {
+   "resrefs": [
+    "SPWI723"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.limited_wish": {
+   "resrefs": [
+    "SPWI722"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.mass_invisibility": {
+   "resrefs": [
+    "SPWI721"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.monster_summoning_vii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.mordenkainens_sword": {
+   "resrefs": [
+    "SPWI716",
+    "SPWI616"
+   ],
+   "parts": [
+    {
+     "spec": "Mordenkainen's Sword stays vanilla, and Disintegrate (SPWI616) destroys it instantly without a save (targeting race SWORD via DESTSELF.EFF before the normal disintegrate effect).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.power_word_stun": {
+   "resrefs": [
+    "SPWI715"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); creatures under Free Action are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.prismatic_mantle": {
+   "resrefs": [
+    "SPWI708"
+   ],
+   "parts": [
+    {
+     "spec": "Mantle stays in the slot (no Prismatic Mantle replacement) and protects against weapons up to +3 enchantment (was +2).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.prismatic_spray": {
+   "resrefs": [
+    "SPWI714"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.project_image": {
+   "resrefs": [
+    "SPWI703",
+    "PROJIMAG"
+   ],
+   "parts": [
+    {
+     "spec": "Projected images (PROJIMAG.SPL) have quick-slot items (buttons 9, 11, 12) and innate abilities (button 13) disabled.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.simbuls_spell_sequencer": {
+   "resrefs": [
+    "SPWI710"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Sequencer belongs to the Universal school (0) with specialist exclusions cleared on the spell and its scrolls; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.summon_death_knight": {
+   "resrefs": [
+    "SPWI707"
+   ],
+   "parts": [
+    {
+     "spec": "Cacofiend stays in the slot; the summoned fiend matches caster alignment: Bone Fiend (baatezu, with species combat script CBMGBONF.BCS) for lawful casters, and Nabassu (tanar'ri) for neutral and chaotic casters.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level7.summon_djinni": {
+   "resrefs": [
+    "SPWI718"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level7.summon_efreeti": {
+   "resrefs": [
+    "SPWI717"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.abi_dalzims_horrid_wilting": {
+   "resrefs": [
+    "SPWI812"
+   ],
+   "parts": [
+    {
+     "spec": "Undead, golems, animated swords, and air/earth/fire elementals are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.bigbys_icy_grasp": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.ghostform": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.incendiary_cloud": {
+   "resrefs": [
+    "SPWI810"
+   ],
+   "parts": [
+    {
+     "spec": "Save vs. breath instead of vs. spell for half.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "School set to Conjuration (Diviner exclusion 0x0100 on the spell and kit usability byte 0x2d bit 0x01 on its scrolls) like all clouds; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.maze": {
+   "resrefs": [
+    "SPWI813"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.mind_blank": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.moment_of_prescience": {
+   "resrefs": [
+    "SPWI808"
+   ],
+   "parts": [
+    {
+     "spec": "Improved Mantle stays in the slot (no Moment of Prescience replacement) and protects against weapons up to +4 enchantment (was +3).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.monster_summoning_viii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level8.power_word_blind": {
+   "resrefs": [
+    "SPWI815"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); affects a single target (projectile 1) instead of an area.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.simbuls_spell_trigger": {
+   "resrefs": [
+    "SPWI809"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Trigger belongs to the Universal school (0) with specialist exclusions cleared on the spell and its scrolls; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.simulacrum": {
+   "resrefs": [
+    "SPWI804",
+    "SIMULACR"
+   ],
+   "parts": [
+    {
+     "spec": "Simulacra (SIMULACR.SPL) have quick-slot items (buttons 9, 11, 12) disabled while keeping innate abilities (button 13) enabled, and M_CBMSIM.lua dynamically strips high-level abilities (HLAs) when the simulacrum's drained effective level is below 18.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.summon_fiend": {
+   "resrefs": [
+    "SPWI807"
+   ],
+   "parts": [
+    {
+     "spec": "The summoned fiend matches caster alignment: Cornugon (baatezu, with species combat script CBMGCORN.BCS) for lawful casters, and Glabrezu (tanar'ri) for neutral and chaotic casters.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.symbol_of_death": {
+   "resrefs": [
+    "SPWI817"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies (matching the NPC symbol projectile).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.symbol_of_stunning": {
+   "resrefs": [
+    "SPWI816"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies; creatures under Free Action are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level8.symbol_of_weakness": {
+   "resrefs": [
+    "SPWI811"
+   ],
+   "parts": [
+    {
+     "spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.absolute_immunity": {
+   "resrefs": [
+    "SPWI907"
+   ],
+   "parts": [
+    {
+     "spec": "Protects against weapons up to +6 enchantment (was +5).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.bigbys_crushing_hand": {
+   "resrefs": [
+    "SPWI918"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.black_blade_of_disaster": {
+   "resrefs": [
+    "SPWI915"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.chain_contingency": {
+   "resrefs": [
+    "SPWI908"
+   ],
+   "parts": [
+    {
+     "spec": "Chain Contingency belongs to the Universal school (0) with specialist exclusions cleared on the spell and its scrolls; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.gate": {
+   "resrefs": [
+    "SPWI905"
+   ],
+   "parts": [
+    {
+     "spec": "The gated fiend matches caster alignment: Pit Fiend (baatezu) for lawful casters, and Balor (tanar'ri, with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.larlochs_energy_drain": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.meteor_swarm": {
+   "resrefs": [
+    "SPWI911"
+   ],
+   "parts": [
+    {
+     "spec": "Stays as in the base game without a save.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: consider adding a save vs. breath.",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.level9.power_word_kill": {
+   "resrefs": [
+    "SPWI912"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.shapechange": {
+   "resrefs": [
+    "SPWI916"
+   ],
+   "parts": [
+    {
+     "spec": "Lasts 1 turn + 2 rounds per caster level and grants innate shifting into seven forms (Mind Flayer, Iron Golem, Giant Troll, Greater Wolfwere, Fire Elemental, Greater Basilisk, Marilith) plus return to natural form (CBMSNAT), with M_CBMPOL.lua managing form weapons and ability-bar locks and form weapons free of unwanted portrait icons.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.level9.spell_trap": {
+   "resrefs": [
+    "SPWI902"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.time_stop": {
+   "resrefs": [
+    "SPWI909"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla; base game already matches the decided mechanics and duration.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.wail_of_the_banshee": {
+   "resrefs": [
+    "SPWI913"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.level9.wish": {
+   "resrefs": [
+    "SPWI919"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except school is set to Universal (0) with specialist exclusions cleared on the spell and its scrolls.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.mestils_acid_sheath_relocation": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "arcane.petrification": {
+   "resrefs": [
+    "SPWI604",
+    "SPWI625"
+   ],
+   "parts": [
+    {
+     "spec": "With EEex installed (M_CBMP1.lua), petrifying Player1 no longer ends the game immediately while a living companion remains: Player1 becomes a frozen statue recoverable via Stone to Flesh or Greater Restoration, with a 30-second combat-paused dead-end clock when no companion can restore Player1.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.spell_deflection_progression": {
+   "resrefs": [
+    "SPWI318"
+   ],
+   "parts": [
+    {
+     "spec": "Minor Spell Deflection stops only spells of levels 1-4 (vanilla: 1-7, so a level-3 spell also absorbed Breach and priest spells up to level 7). Its description says so, and M_CBMREC.lua gives Minor Spell Deflection, Spell Deflection, Minor Spell Turning, and Shield of the Archons their own character-record labels.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: look at Spell Turning's reflection, and whether Minor Spell Deflection stays fully vanilla after all.",
+     "status": "later"
+    }
+   ]
+  },
+  "arcane.spell_shield_anti_magic": {
+   "resrefs": [
+    "SPWI510",
+    "SPWI590",
+    "SPWI591",
+    "SPWI592",
+    "SPWI593",
+    "SPWI594",
+    "SPWI595",
+    "SPWI596",
+    "SPWI597",
+    "SPWI513",
+    "SPWI513B",
+    "SPWI513C",
+    "SPWI608",
+    "SPWI805",
+    "SPWI903",
+    "SCRL6S",
+    "SCRL9A",
+    "SCRL9M"
+   ],
+   "parts": [
+    {
+     "spec": "Dispelling Screen replaces Spell Immunity (SPWI510) on Wizard level 5 (and its scroll SCRL6S.ITM): lasts 5 turns (300 seconds), protects the caster and allies in a 15-ft party-only area (projectile 158 INAREAPA) against one Dispel/Remove Magic (opcode 58) or one Breach (SPWI513, split into SPWI513B payload and SPWI513C secondary-type removal), and is removed by Pierce Shield (SPWI805) and Spellstrike (SPWI903) without absorbing them. Spell Immunity's school-selection menu is removed and its 8 school subspells (SPWI590..SPWI597) redirect to SPWI510 so existing scripts and creatures cast Dispelling Screen.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Pierce Magic (SPWI608): with EEex installed, reduces target Magic Resistance by floor(MR / 2) clamped between 10 and 40 percentage points for 5 rounds (30s) via CBMBPM; Spell Shield and the other spell-protection removers stay vanilla.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "arcane.summon_nishruu_relocation": {
+   "resrefs": [
+    "SPWI624",
+    "SPWI719"
+   ],
+   "parts": [
+    {
+     "spec": "Summon Nishruu and Summon Hakeashar stay at their vanilla spell levels, and Dispel Magic (SPWI326, SPPR303) and Remove Magic (SPWI302) destroy summoned Nishruu and Hakeashar via specific 25.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.aerial_servant": {
+   "resrefs": [
+    "SPPR601"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.aid": {
+   "resrefs": [
+    "SPPR201"
+   ],
+   "parts": [
+    {
+     "spec": "Replaces the opcode-129 Aid payload with a hit-point-only bonus (opcode 18, min(L,10) + 1d8 with L = max(ability level, 3)), lasting 1 turn per level (60*L seconds), refreshing on recast, and displaying its own portrait icon via STATDESC.2DA (BAM SPPR150D).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.animal_growth": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animal_summoning_i": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animal_summoning_ii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animal_summoning_iii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animal_summoning_iv": {
+   "resrefs": [
+    "SPPR402"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Animal Summoning I stays vanilla and is restricted to druids and rangers.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.animal_summoning_v": {
+   "resrefs": [
+    "SPPR501"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Animal Summoning II stays vanilla and is restricted to druids and rangers.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.animal_summoning_vi": {
+   "resrefs": [
+    "SPPR602"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Animal Summoning III stays vanilla and is restricted to druids and rangers.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.animal_summoning_vii": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animate_dead": {
+   "resrefs": [
+    "SPPR301"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.animate_skeleton_warrior": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.armor_of_faith": {
+   "resrefs": [
+    "SPPR111"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: revisit physical damage resistance scaling or stacking rules if needed.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.aura_of_flaming_death": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.banishment": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.barkskin": {
+   "resrefs": [
+    "SPPR202"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla and is restricted to druids and rangers.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Saving throw bonus carries the Deflection bonus type via cbmagic_bonus.tpa and M_CBMBON.lua (while base AC uses engine best-value).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.blade_barrier": {
+   "resrefs": [
+    "SPPR603",
+    "SPPR603D",
+    "SPPR698D"
+   ],
+   "parts": [
+    {
+     "spec": "Casting time reduced from 9 to 6; aura payloads (SPPR603D, SPPR698D, discovered via op177/.EFF) affect only enemies and a successful save vs. spell halves the damage instead of negating it (with SPPR698D also updated to range 6 and 8d8 damage).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.bless": {
+   "resrefs": [
+    "SPPR101"
+   ],
+   "parts": [
+    {
+     "spec": "Casting time is 5 (from 9), duration is 30 seconds + 1 round per caster level across 20 abilities (levels 1-20, 36-150 seconds), usable by clerics and druids as in vanilla. Its description says so.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Favor bonus-type non-stacking (+1 THAC0, damage, and saves against Fear) via cbmagic_bonus.tpa and M_CBMBON.lua.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.bolt_of_glory": {
+   "resrefs": [
+    "SPPR612"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla with casting time reduced from 9 to 6; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.break_enchantment": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.call_lightning": {
+   "resrefs": [
+    "SPPR302"
+   ],
+   "parts": [
+    {
+     "spec": "Duration increased to 1 round per caster level up to 11 rounds/bolts (projectiles 85..91); outdoor-only restriction and vanilla 2d8 + 1d8/level damage stay.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.call_woodland_beings": {
+   "resrefs": [
+    "SPPR410"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.cause_wounds_progression": {
+   "resrefs": [
+    "SPPR114",
+    "SPPR220",
+    "SPPR330",
+    "SPPR414",
+    "SPPR510"
+   ],
+   "parts": [
+    {
+     "spec": "Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll (1d8 + 5, 2d8 + 4, 2d8 + 7, 3d8 + 7, 4d8 + 12) and their decided shorter casting times. Each heals undead with that same roll instead of damaging them, while keeping its normal direct or touch-charge delivery, save and unrelated effects for other targets; descriptions and actual scroll descriptions match.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.champions_strength": {
+   "resrefs": [
+    "SPPR507"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' rework is dropped; Champion's Strength keeps its vanilla mechanics with an 18/00 Strength floor via M_CBMSTR.lua, removes and blocks Draw Upon Holy Might (SPPR214), and participates in Transformation-family mutual exclusion at level 5.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: revisit whether Champion's Strength needs a distinct role beyond its vanilla trade-off.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.chant": {
+   "resrefs": [
+    "SPPR203"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; replaced by the IWD version via IWDification, with Favor (saves) and Luck (luck) bonus-type non-stacking via cbmagic_bonus.tpa and M_CBMBON.lua.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.chaos": {
+   "resrefs": [
+    "SPPR709"
+   ],
+   "parts": [
+    {
+     "spec": "Priest level-7 Confusion (SPPR709) becomes priest Sphere of Chaos, matching wizard Sphere of Chaos (SPWI711): 10-round enemy-only field within range 40 ft. where enemies save vs. Spell at -4 each round or suffer one of 5 random 1-round effects (feeblemind, confusion, panic, sleep waking on damage, or hold).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.chaotic_commands": {
+   "resrefs": [
+    "SPPR508"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla; base game SPPR508 is already usable by both clerics and druids and already protects against Maze.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.charm_person_or_animal": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.cloak_of_fear": {
+   "resrefs": [
+    "SPPR416"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.command": {
+   "resrefs": [
+    "SPPR102"
+   ],
+   "parts": [
+    {
+     "spec": "Damage wakes the sleeper.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Allows a Save vs. Spell at every hit-die level to negate 1-round sleep, with the save penalty scaling by -1 per two caster levels after 1st up to -4 at level 9.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.conjure_air_elemental": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "New level-6 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL): summons an Air Elemental for 1 turn per level without mental combat, scaling 12/16/24 HD chances from 64%/35%/1% at level 11 (61%/37%/2% at 12, 52%/42%/6% at 15) to 37%/51%/12% at level 20+, with size-by-HD creature names.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.conjure_animals_deprecated": {
+   "resrefs": [
+    "SPPR604"
+   ],
+   "parts": [
+    {
+     "spec": "Conjure Animals stays in the game as vanilla and is restricted to druids and rangers.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.conjure_earth_elemental": {
+   "resrefs": [
+    "SPPR702"
+   ],
+   "parts": [
+    {
+     "spec": "Stays at priest level 7; 12/16/24 HD elemental probabilities scale with caster level using windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100] from 64%/35%/1% at level 11 (61%/37%/2% at 12, 52%/42%/6% at 15) to 37%/51%/12% at level 20+, with size-by-HD creature names; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.conjure_fire_elemental": {
+   "resrefs": [
+    "SPPR605"
+   ],
+   "parts": [
+    {
+     "spec": "Stays at priest level 6; 12/16/24 HD elemental probabilities scale with caster level using windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100] from 64%/35%/1% at level 11 (61%/37%/2% at 12, 52%/42%/6% at 15) to 37%/51%/12% at level 20+, with size-by-HD creature names; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.contagion": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.cure_disease": {
+   "resrefs": [
+    "SPPR317"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.cure_wounds_progression": {
+   "resrefs": [
+    "SPPR103",
+    "SPPR217",
+    "SPPR315",
+    "SPPR401",
+    "SPPR502"
+   ],
+   "parts": [
+    {
+     "spec": "Cure Light Wounds is 1d8 + 5 with casting time 4; optional IWD Cure Moderate Wounds is 2d8 + 4 with casting time one shorter; Cure Medium, Serious and Critical Wounds are respectively 2d8 + 7 at 4, 3d8 + 7 at 6, and 4d8 + 12 at 7. Unrelated abilities and effects stay intact; descriptions and actual scroll descriptions match.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.death_ward": {
+   "resrefs": [
+    "SPPR409"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla, and protects against Nature's Beauty's humanoid slay; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.defensive_harmony": {
+   "resrefs": [
+    "SPPR406"
+   ],
+   "parts": [
+    {
+     "spec": "Restricted to clerics/paladins (priest usability word at 0x20 set to 0x8000); general AC bonus (op0 p2=0) increased from +2 to +4 (Dodge bonus type).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.detect_alignment": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.dispel_magic": {
+   "resrefs": [
+    "SPPR303"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except opcode 58 uses high word 2 for level-checked magical-weapon dispelling and destroys summoned Nishruu and Hakeashar (specific 25); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.divine_power": {
+   "resrefs": [
+    "SPPR412"
+   ],
+   "parts": [
+    {
+     "spec": "Renamed Divine Power in name and description, casting time 4 (from 6), grants single/multi-class non-fighter clerics dispellable fighter bonus attacks per round (+1/2 APR at levels 7-12, +1 APR at level 13+), 18/00 Strength floor via M_CBMSTR.lua, and Transformation-family mutual exclusion.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.dolorous_decay": {
+   "resrefs": [
+    "SPPR610"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; Dolorous Decay stays vanilla and participates in Slow/Haste cancellation (cbm_Slow).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.doom": {
+   "resrefs": [
+    "SPPR113"
+   ],
+   "parts": [
+    {
+     "spec": "Casting time is 1 (from 9), imposes -2 to THAC0, damage rolls, and all saving throws (Curse bonus type, no AC penalty), and allows a Save vs. Spell to negate, with the save penalty scaling from 0 at level 1 to -4 at level 9 (steps at levels 1, 3, 5, 7, and 9).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.draw_upon_divine_might": {
+   "resrefs": [
+    "SPPR214"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Draw upon Divine Might is dropped; Draw Upon Holy Might stays vanilla (opcode 132 already prevents stacking with itself, and Champion's Strength removes and blocks it).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.earth_elemental_transformation": {
+   "resrefs": [
+    "SPPR732"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.earthquake": {
+   "resrefs": [
+    "SPPR720"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.elemental_prince_call": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.elemental_protections": {
+   "resrefs": [
+    "SPPR306",
+    "SPPR407"
+   ],
+   "parts": [
+    {
+     "spec": "Base-game priest Protection from Fire (SPPR306, level 3) and Protection from Lightning (SPPR407, level 4) stay at their vanilla levels; two new priest spells for clerics and druids are added via ADD_SPELL: Protection From Cold on level 3 (CLERIC_CBMAGIC_PROTECTION_FROM_COLD, built like SPPR306 with +100% normal cold resistance op 28 and +80% magical cold resistance op 85 for 3 rounds + 1 round/level across levels 1-20, icons SPWI320C/SPWI320B, portrait icon 25, visual ICrmpari) and Protection From Acid on level 4 (CLERIC_CBMAGIC_PROTECTION_FROM_ACID, built like SPPR407 with 100% acid resistance op 27 p2=1 for 5 rounds/level across levels 1 and 8-18, icons SPWI517C/SPWI517B, portrait icon 24, visual ICrmpari).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.elemental_swarm": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.energy_blades": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.entangle": {
+   "resrefs": [
+    "SPPR105"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except the save switches from vs. spell to vs. breath (keeping the vanilla +3 bonus), and flying, incorporeal, elemental, giant/ettin and dragon creatures are immune by race (WYVERN, BEHOLDER, MEPHIT, SPECTRE, WRAITH, SHADOW, MIST, ELEMENTAL, GIANT, ETTIN, DRAGON); description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.faerie_fire": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "New level-1 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_FAERIE_FIRE), using base-game icons SPPR309C/SPPR309B and ability location 2. Hostile 5-ft (radius 75) enemy-only area (cbmffir.pro via ADD_PROJECTILE), casting time 1, range 20, duration 4 rounds (24s), Save vs. Spell negates: -2 AC penalty, cures and prevents invisibility, and outlines targets in a violet glow.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.false_dawn": {
+   "resrefs": [
+    "SPPR609"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla, with area-of-effect damage flagged to bypass Mirror Image (bit 24).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.farsight": {
+   "resrefs": [
+    "SPPR415"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.find_traps": {
+   "resrefs": [
+    "SPPR205"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.finger_of_death": {
+   "resrefs": [
+    "SPPR708"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla except its slay effect allows a save vs. death with no penalty instead of vs. spell at -2; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.fire_elemental_transformation": {
+   "resrefs": [
+    "SPPR731"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.fire_seeds": {
+   "resrefs": [
+    "SPPR606"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla with casting time reduced from 9 to 6; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.fire_storm": {
+   "resrefs": [
+    "SPPR705"
+   ],
+   "parts": [
+    {
+     "spec": "Stays as in the base game without a save.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: consider adding a save vs. breath.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.fire_trap": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.flame_blade": {
+   "resrefs": [
+    "SPPR206",
+    "FBLADE"
+   ],
+   "parts": [
+    {
+     "spec": "Restricted to druids and rangers, and its created blade (FBLADE.ITM) is flagged as a magical weapon (+1 enchantment if unenchanted) so it can strike creatures requiring magical weapons; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.flame_strike": {
+   "resrefs": [
+    "SPPR503"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla damage with casting time reduced from 8 to 5 and save vs. breath instead of vs. spell for half.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.free_action": {
+   "resrefs": [
+    "SPPR403"
+   ],
+   "parts": [
+    {
+     "spec": "Usable by druids and rangers as well as clerics, lasts 1 turn/level (60s/level across all timed protections and companion state/stat/visual effects), protects against Stun, and no longer blocks Haste or movement bonuses.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.globe_of_blades": {
+   "resrefs": [
+    "SPPR725",
+    "SPPR725D"
+   ],
+   "parts": [
+    {
+     "spec": "Aura payload (SPPR725D, discovered via op177/.EFF) affects only enemies and a successful save vs. spell halves the damage instead of negating it.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.glyph_of_warding": {
+   "resrefs": [
+    "SPPR304"
+   ],
+   "parts": [
+    {
+     "spec": "Save vs. breath instead of vs. spell.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Casting time reduced from 9 to 5, and a successful save halves the damage instead of negating it.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.goodberry": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.greater_command": {
+   "resrefs": [
+    "SPPR512"
+   ],
+   "parts": [
+    {
+     "spec": "Vanilla, but damage wakes the sleepers.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Maybe a harder save.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.greater_restoration": {
+   "resrefs": [
+    "SPPR713"
+   ],
+   "parts": [
+    {
+     "spec": "Keeps vanilla cures, casting time (3), and caster fatigue drawback, and additionally cures Hold, Stun, Sleep, Petrification (before the full heal), Polymorph, curses, Blindness, Deafness, and ability-score drain (via M_CBMRES.lua).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.harm": {
+   "resrefs": [
+    "SPPR608"
+   ],
+   "parts": [
+    {
+     "spec": "Harm keeps its existing effect on non-undead, has casting time 7, and heals undead completely as Heal does. Its description and actual scroll descriptions match.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.harpers_call": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.heal": {
+   "resrefs": [
+    "SPPR607"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla with casting time reduced from 9 to 6; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.hold_person": {
+   "resrefs": [
+    "SPPR208"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.hold_person_or_animal": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.holy_smite": {
+   "resrefs": [
+    "SPPR313"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.holy_word": {
+   "resrefs": [
+    "SPPR710"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla for now.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: revisit Holy Word balance and whether neutral targets should be affected.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.ice_storm": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.icelance": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Added via ADD_SPELL (CLERIC_CBMAGIC_ICELANCE) on priest level 3 for druids, shamans, and rangers: deals 5d6 cold damage and stuns for 3 rounds on a failed Save vs. Spell (blocked by Free Action and stun immunity).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.implosion": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.insects_and_gust_of_wind": {
+   "resrefs": [
+    "SPPR319",
+    "SPPR517",
+    "SPPR717",
+    "SPWI605"
+   ],
+   "parts": [
+    {
+     "spec": "Summon Insects, Insect Plague, and Creeping Doom deliver all repeating damage and secondary effects through their subspells (removing opcode 272 and FLPR717A from the main spells): per-round save vs. breath against spell failure (at 0 / -2 / -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them via op206; Stoneskin holds off the secondary effects while skins remain; items and spells granting immunity to normal weapons (op120 p2=2) block and remove them; Death Spell (SPWI605) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help. Zone of Sweet Air stays vanilla.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: additional logical counters (e.g. wind spells).",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.invisibility_purge": {
+   "resrefs": [
+    "SPPR309"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla with casting time reduced from 8 to 3; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.know_opponent": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.lesser_restoration": {
+   "resrefs": [
+    "SPPR417"
+   ],
+   "parts": [
+    {
+     "spec": "Restricted to clerics/paladins as in vanilla (0x20 = 0x8000), casting time 3, removes caster fatigue drawback, and cures level drain, feeblemind, Blood Rage fatigue, and ability-score drain (via M_CBMRES.lua with EEex).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.magic_circle_against_evil": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.magic_fang": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.magic_resistance": {
+   "resrefs": [
+    "SPPR509"
+   ],
+   "parts": [
+    {
+     "spec": "Adds to Magic Resistance (opcode 166 parameter 2 = 0) instead of setting it, refreshes itself via leading opcode 321 so repeated casts do not stack, and has its casting time reduced from 9 to 5; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.magical_stone": {
+   "resrefs": [
+    "SPPR106"
+   ],
+   "parts": [
+    {
+     "spec": "Deals 3d4 crushing damage (6d4 against undead) instead of 1d4 via non-dispellable .EFF files (0x5c = 0).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.mass_cure": {
+   "resrefs": [
+    "SPPR514"
+   ],
+   "parts": [
+    {
+     "spec": "Mass Cure keeps its effect exactly as it is and has casting time 4; its description and actual scroll descriptions match.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.mass_raise_dead": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.mass_regenerate": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "New level-5 druid-only spell added via ADD_SPELL (CLERIC_CBMAGIC_MASS_REGENERATE), using base-game icons SPPR711C/SPPR711B and ability location 2. Sight-range party-only area centered on the caster (projectile cbmmreg.pro via ADD_PROJECTILE, radius 452), casting time 5, regenerates 2 HP per round (1 HP per 3s) for 1 turn + 2 rounds/level (up to 30 rounds at level 10), replaces an earlier casting of itself, and participates in Regeneration-family mutual exclusion.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.mental_domination": {
+   "resrefs": [
+    "SPPR405"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.miscast_magic": {
+   "resrefs": [
+    "SPPR310"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.natures_beauty": {
+   "resrefs": [
+    "SPPR704"
+   ],
+   "parts": [
+    {
+     "spec": "Both humanoid slay (opcode 55, save vs. spell +3) and blindness are moved into a single schoolless area subspell (CBMGNB1.SPL, target 5, projectile 159 INAREANP, so True Sight's school-based illusion removal does not dispel it and a single effect list decides both death and blindness): on a failed save vs. spell (+3), humanoids die and all targets suffer permanent blindness (timing 0, duration 999999) and skip the 3-round blindness via op318; on a successful save, targets are blinded for 3 rounds.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.negative_plane_protection": {
+   "resrefs": [
+    "SPPR413"
+   ],
+   "parts": [
+    {
+     "spec": "Lasts 1 turn per level (420-1200 seconds across levels 7-20), usable by both clerics and druids, otherwise vanilla.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.neutralize_poison": {
+   "resrefs": [
+    "SPPR404"
+   ],
+   "parts": [
+    {
+     "spec": "Cures poison and grants immunity to poison for 1 turn/level (420-1200s across levels 7-20); no longer heals 10 HP or cures disease, paralysis, blindness, or deafness (removing non-self opcode 321 disease/paralysis resource removals).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.obscuring_mist": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.physical_mirror": {
+   "resrefs": [
+    "SPPR613"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.pixie_dust": {
+   "resrefs": [
+    "SPPR516"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.poison": {
+   "resrefs": [
+    "SPPR411"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.polymorph_other": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.protection_from_evil": {
+   "resrefs": [
+    "SPPR107"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.raise_dead": {
+   "resrefs": [
+    "SPPR504"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.regenerate_critical_wounds": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.regenerate_light_wounds": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.regenerate_moderate_wounds": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.regenerate_serious_wounds": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.regeneration": {
+   "resrefs": [
+    "SPPR711"
+   ],
+   "parts": [
+    {
+     "spec": "Restricted to druids, stays level 7, heals 2 HP per second (from 3) for 1 round per level (from 1 round per 2 levels), replaces an earlier casting on the same target, and leads the Regeneration family.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.regeneration_druid": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' level-6 druid copy of Regeneration is dropped; druids use level-7 Regeneration.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.remove_paralysis": {
+   "resrefs": [
+    "SPPR308"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.repulsion": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.resist_elements": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.resist_fear": {
+   "resrefs": [
+    "SPPR108"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (Mummy Despair exists only in Spell Revisions' own mummy summon, not in the base game).",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.resurrection": {
+   "resrefs": [
+    "SPPR712"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.righteous_fury": {
+   "resrefs": [
+    "SPPR513"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' Righteous Fury is dropped; Righteous Magic stays vanilla with its casting time reduced from 9 to 5, 18/00 Strength floor via M_CBMSTR.lua, and description updated.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Mutual exclusion in the Transformation family (level 5, replacing and replaced by equal-level Champion's Strength and yielding to level-6 Tenser's Transformation).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.rigid_thinking_description": {
+   "resrefs": [
+    "SPPR311"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.sanctuary": {
+   "resrefs": [
+    "SPPR109"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.shield_of_the_archons": {
+   "resrefs": [
+    "SPPR701"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla (with its own character-record icon label via M_CBMREC.lua).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.shillelagh": {
+   "resrefs": [
+    "SPPR110"
+   ],
+   "parts": [
+    {
+     "spec": "Keeps vanilla mechanics and is restricted to druids (cleric/paladin usability excluded).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.silence": {
+   "resrefs": [
+    "SPPR211"
+   ],
+   "parts": [
+    {
+     "spec": "Silence 15' Radius affects enemies only (projectile SPARBLNP instead of all-creatures SPKLARBL). Its description says so.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.slay_living": {
+   "resrefs": [
+    "SPPR511"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.slow_poison": {
+   "resrefs": [
+    "SPPR212"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.sols_searing_orb": {
+   "resrefs": [
+    "SPPR614"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.spike_growth": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.spiritual_hammer": {
+   "resrefs": [
+    "SPPR213"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.stoneskin": {
+   "resrefs": [
+    "SPPR506"
+   ],
+   "parts": [
+    {
+     "spec": "Iron Skins is named Stoneskin, has casting time 1 (from 9), and keeps vanilla's skin progression and duration.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.storm_of_vengeance": {
+   "resrefs": [
+    "SPPR722"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.storm_shield": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.strength_of_one": {
+   "resrefs": [
+    "SPPR312",
+    "SPPR312A"
+   ],
+   "parts": [
+    {
+     "spec": "Strength of One no longer lowers a party member's higher Strength (> 18 or 18/75+): the Strength and portrait icon payload moves to SPPR312A.SPL cast via opcode 146 (p2=1), guarded by two opcode 318 checks on SPLPROT rows for STR (stat 36) > 18 and STREXTRA (stat 37) >= 75; description updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.strength_of_stone": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.summon_death_knight": {
+   "resrefs": [
+    "SPPR703"
+   ],
+   "parts": [
+    {
+     "spec": "Gate stays in the slot; the gated fiend matches caster alignment: Pit Fiend for lawful casters, and Balor (with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: good (and possibly neutral) priests may receive a separate summon.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.summon_deva": {
+   "resrefs": [
+    "SPPR726"
+   ],
+   "parts": [
+    {
+     "spec": "Summons a Deva (DEVAIMO / CBHPDEVA) for 5 rounds + 1 round/level with SR celestial avatar, stats, mace, and vanilla-equivalent priest/innate spellbook, subject to a 1-deva party cap shared with Summon Fallen Deva.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.summon_fallen_deva": {
+   "resrefs": [
+    "SPPR727"
+   ],
+   "parts": [
+    {
+     "spec": "Summons a Fallen Deva (DEVAEVIL / CBHPDEVA) for 5 rounds + 1 round/level with SR celestial avatar, stats, mace, and vanilla-equivalent priest/innate spellbook, subject to a 1-deva party cap shared with Summon Deva.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.summon_shambling_mound": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.sunray": {
+   "resrefs": [
+    "SPPR707"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.sunscorch": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' added or relocated spell is dropped.",
+     "status": "done"
+    }
+   ]
+  },
+  "divine.symbol_of_death": {
+   "resrefs": [
+    "SPPR719"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.symbol_of_stunning": {
+   "resrefs": [
+    "SPPR718"
+   ],
+   "parts": [
+    {
+     "spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies; creatures under Free Action are immune.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.symbol_of_weakness": {
+   "resrefs": [
+    "SPPR706"
+   ],
+   "parts": [
+    {
+     "spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.true_seeing": {
+   "resrefs": [
+    "SPPR505",
+    "SPWI609"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla with casting time reduced from 8 to 6 on both priest True Seeing (SPPR505) and wizard True Sight (SPWI609); descriptions updated.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "divine.unholy_blight": {
+   "resrefs": [
+    "SPPR314"
+   ],
+   "parts": [
+    {
+     "spec": "Imposes -2 to all saving throws and THAC0 as a Curse bonus type (non-stacking with Doom and Curse via cbmagic_bonus.tpa and M_CBMBON.lua) on good targets who fail their save, and shows the Cursed portrait icon (row 35) instead of Aid (row 208).",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: revisit whether neutral targets should also be affected in some form.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.unholy_word": {
+   "resrefs": [
+    "SPPR715"
+   ],
+   "parts": [
+    {
+     "spec": "Stays vanilla for now.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: revisit Unholy Word balance and whether neutral targets should be affected.",
+     "status": "later"
+    }
+   ]
+  },
+  "divine.wondrous_recall": {
+   "resrefs": [
+    "SPPR611"
+   ],
+   "parts": [
+    {
+     "spec": "Spell Revisions' change is dropped; stays vanilla.",
+     "status": "done"
+    }
+   ]
+  },
+  "iwd.cleric_animal_rage": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Animal Rage, cbmagic_bonus.tpa and M_CBMSTR.lua apply Morale bonus-type tags, Transformation-family mutual exclusion, and a Strength floor of 19.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_blood_rage": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Blood Rage, cbmagic_bonus.tpa applies Morale bonus-type tags and Transformation-family mutual exclusion, and Lesser Restoration cures its fatigue.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cause_critical_wounds_iwd": {
+   "resrefs": [
+    "SPPR510"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides IWD Cause Critical Wounds, cbmagic_healing.tpa sets its roll to 4d8 + 12, shortens casting time, heals undead by the same roll instead of damaging them, and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cause_light_wounds": {
+   "resrefs": [
+    "SPPR114"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Cause Light Wounds, cbmagic_healing.tpa sets its roll to 1d8 + 5, shortens casting time, heals undead by the same roll instead of damaging them, and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cause_medium_wounds": {
+   "resrefs": [
+    "SPPR330"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Cause Medium Wounds, cbmagic_healing.tpa sets its roll to 2d8 + 7, shortens casting time, heals undead by the same roll instead of damaging them, and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cause_moderate_wounds": {
+   "resrefs": [
+    "SPPR220"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Cause Moderate Wounds, cbmagic_healing.tpa sets its roll to 2d8 + 4, shortens casting time, heals undead by the same roll instead of damaging them, and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cause_serious_wounds_iwd": {
+   "resrefs": [
+    "SPPR414"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides IWD Cause Serious Wounds, cbmagic_healing.tpa sets its roll to 3d8 + 7, shortens casting time, heals undead by the same roll instead of damaging them, and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_chant": {
+   "resrefs": [
+    "SPPR203"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides IWD Chant, cbmagic_bonus.tpa converts and tags its saves as Favor and its luck as Luck.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_cure_moderate_wounds": {
+   "resrefs": [
+    "SPPR217"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Cure Moderate Wounds, cbmagic_healing.tpa sets healing to 2d8 + 4, shortens casting time by 1, and updates spell and scroll descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_curse": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Curse, cbmagic_bonus.tpa tags its THAC0 and saving throw penalties as Curse.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_entropy_shield": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Entropy Shield, cbmagic_bonus.tpa tags its AC and saving throw bonuses as Deflection.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_mass_cause_light_wounds": {
+   "resrefs": [
+    "SPPR523"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Mass Cause Light Wounds, cbmagic_healing.tpa heals undead with its per-ability roll instead of damaging them and updates descriptions.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_prayer": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Prayer, cbmagic_bonus.tpa tags its friendly bonuses and hostile penalties as Favor.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_recitation": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Recitation, cbmagic_bonus.tpa tags its bonuses and penalties as Favor and updates its description.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_righteous_wrath_of_the_faithful": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Righteous Wrath of the Faithful, cbmagic_bonus.tpa tags its combat/save bonuses as Morale and its extra attack as CBTAPR (non-stacking with Haste and Improved Haste without cancelling them).",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.cleric_symbol_hopelessness": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Symbol, Hopelessness, cbmagic_iwd_hopelessness makes damage wake sleepers while other effects continue.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_conjure_lesser_air_elemental": {
+   "resrefs": [
+    "SPWI520"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Conjure Lesser Air Elemental, cbmagic_iwd_wizard_elementals adds the 3-round mental-combat contest (15% hostile roll) and size-by-HD elemental names.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_conjure_lesser_earth_elemental": {
+   "resrefs": [
+    "SPWI521"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Conjure Lesser Earth Elemental, cbmagic_iwd_wizard_elementals adds the 3-round mental-combat contest (15% hostile roll) and size-by-HD elemental names.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_conjure_lesser_fire_elemental": {
+   "resrefs": [
+    "SPWI516"
+   ],
+   "parts": [
+    {
+     "spec": "When IWDification provides Conjure Lesser Fire Elemental, cbmagic_iwd_wizard_elementals adds the 3-round mental-combat contest (15% hostile roll) and size-by-HD elemental names.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_conjure_lesser_water_elemental": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Conjure Lesser Water Elemental, cbmagic_iwd_wizard_elementals adds the 3-round mental-combat contest (15% hostile roll) and size-by-HD elemental names.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_conjure_water_elemental": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Conjure Water Elemental, cbmagic_iwd_wizard_elementals adds 12/16/24 HD probability scaling, the 3-round mental-combat contest, and size-by-HD elemental names.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_emotion_courage": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Emotion: Courage, cbmagic_bonus.tpa tags its THAC0, damage, and save bonuses as Morale.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_emotion_hope": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Emotion: Hope, cbmagic_bonus.tpa tags its THAC0, damage, and save bonuses as Morale.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_emotion_hopelessness": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Emotion: Hopelessness, cbmagic_iwd_hopelessness makes damage wake sleepers while other effects continue.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_icelance": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Priest Icelance (CLERIC_CBMAGIC_ICELANCE) is built natively for druids, shamans, and rangers with Free Action stun immunity verified; wizard Icelance comes from IWDification.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "iwd.wizard_trollish_fortitude": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "When IWDification provides Trollish Fortitude, cbmagic_bonus.tpa places it in the Regeneration family.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Native bundling of IWD spells without IWDification belongs to the post-0.1.0 IWD component.",
+     "status": "todo"
+    }
+   ]
+  },
+  "k.10": {
+   "resrefs": [
+    "SPPR726",
+    "SPPR727",
+    "SPWI923",
+    "SPWI924"
+   ],
+   "parts": [
+    {
+     "spec": "Deva, Fallen Deva, Planetar, and Dark Planetar use Spell Revisions' celestial avatars, stats, weapons, and vanilla-equivalent spellbooks, capped at one Deva/Fallen Deva and one Planetar/Dark Planetar active simultaneously for the party.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: revisit whether allowing one Deva and one Planetar simultaneously is too strong.",
+     "status": "later"
+    }
+   ]
+  },
+  "k.20": {
+   "resrefs": [
+    "SPPR609",
+    "OHBWI308",
+    "BDSHA12A",
+    "LEAT23A"
+   ],
+   "parts": [
+    {
+     "spec": "Damage effects (opcode 12) on spells and items whose ability uses an area-of-effect projectile (PRO type 3) get the bypass Mirror Image save flag (bit 24). Single-target rays and melee items stay untouched.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "k.30": {
+   "resrefs": [
+    "SPWI302",
+    "SPWI326",
+    "SPPR303",
+    "SPCL231"
+   ],
+   "parts": [
+    {
+     "spec": "Level-checked Dispel/Remove Magic spells use high word 2 on opcode 58 so magically created weapons are dispelled by the same caster-level check as other effects rather than unconditionally via opcode 112, and destroy summoned Nishruu and Hakeashar (specific 25).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "k.55": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' component 55 (Spell Deflection stops area spells) is dropped.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: revisit if needed.",
+     "status": "later"
+    }
+   ]
+  },
+  "k.65": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' warrior HLA overrides are not applied in the spell mod (Hardiness and warrior HLAs stay vanilla here and belong to kit/HLA scope).",
+     "status": "done"
+    },
+    {
+     "spec": "Later: optional warrior HLA component in kit/HLA scope.",
+     "status": "later"
+    }
+   ]
+  },
+  "k.70": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Spell Revisions' component 70 (revised saving throws) is dropped.",
+     "status": "done"
+    },
+    {
+     "spec": "Later: review creature saving throw tables separately if needed.",
+     "status": "later"
+    }
+   ]
+  },
+  "k.80": {
+   "resrefs": [
+    "SPWI308"
+   ],
+   "parts": [
+    {
+     "spec": "Lightning Bolt keeps its classic bouncing bolt behavior with save vs. breath for half damage.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "k.refresh": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Fork component dropped; self-refresh on recast is built directly into our spells and typed-bonus module.",
+     "status": "done"
+    }
+   ]
+  },
+  "x.beschreibungen": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "All spells and scrolls modified by the mod carry complete, accurate English descriptions written whole (including typed-bonus lines and character-record buff icon labels via M_CBMREC.lua).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "x.buff-dauern": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Buff durations are set per spell (1 turn/level for Free Action, Neutralize Poison, Negative Plane Protection, Aid; 30s + 1 round/level for Bless; 15 rounds for Luck; 8 hours for Invisibility; 1 turn for Invisibility Sphere and Improved Haste).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "x.buff-stacking": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Typed bonuses (Morale, Favor, Luck, Dodge, Deflection, Curse) and extra attacks (CBTAPR across Haste, Improved Haste, and Righteous Wrath of the Faithful) keep only the strongest bonus and strongest penalty per stat via cbmagic_bonus.tpa and M_CBMBON.lua, resuming weaker active spells on expiry and stacking cleanly with equipment.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Transformation (Tenser's Transformation, Divine Power, Righteous Magic, Champion's Strength, Blood Rage, Animal Rage) and Regeneration (Regenerate, Mass Regenerate, Trollish Fortitude) enforce level-based mutual exclusion; Strength floors on Strength, Strength of One, Divine Power, Champion's Strength, Righteous Magic, and Animal Rage never lower higher Strength (M_CBMSTR.lua).",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Later: temporary HP stacking between Emotion: Courage and Righteous Wrath, and character-sheet source breakdown text.",
+     "status": "later"
+    }
+   ]
+  },
+  "x.druiden-kleriker": {
+   "resrefs": [],
+   "parts": [
+    {
+     "spec": "Priest spell lists stay close to vanilla with targeted class splits: Barkskin, Flame Blade, Shillelagh, Regeneration, Animal Summoning I-III, Conjure Animals, Faerie Fire, Mass Regenerate, Conjure Air Elemental, and priest Icelance for druids; Defensive Harmony and Lesser Restoration for clerics.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  "x.universal": {
+   "resrefs": [
+    "SPWI123",
+    "SPWI420",
+    "SPWI617",
+    "SPWI710",
+    "SPWI809",
+    "SPWI908",
+    "SPWI919"
+   ],
+   "parts": [
+    {
+     "spec": "Find Familiar, Minor Sequencer, Contingency, Spell Sequencer, Spell Trigger, Chain Contingency, and Wish belong to the Universal school (0) with specialist exclusions cleared on both spells and scrolls.",
+     "status": "lab-checked"
+    }
    ]
   }
  },
  "chat": [
-  {"id": "chat.save_type_by_logic",
+  {
+   "id": "chat.save_type_by_logic",
    "title": "Save vs. breath for dodgeable explosions and area damage",
-   "rows": ["arcane.level3.fireball", "arcane.level7.delayed_blast_fireball", "arcane.level5.cone_of_cold", "divine.flame_strike", "arcane.level3.skull_trap", "divine.glyph_of_warding", "arcane.level8.incendiary_cloud", "arcane.level3.lightning_bolt", "arcane.level9.meteor_swarm", "divine.fire_storm"],
-   "resrefs": ["SPWI304", "SPWI712", "SPWI523", "SPWI523D", "SPWI503", "SPPR503", "SPWI313", "SPPR304", "SPWI810", "SPWI308"],
+   "rows": [
+    "arcane.level3.fireball",
+    "arcane.level7.delayed_blast_fireball",
+    "arcane.level5.cone_of_cold",
+    "divine.flame_strike",
+    "arcane.level3.skull_trap",
+    "divine.glyph_of_warding",
+    "arcane.level8.incendiary_cloud",
+    "arcane.level3.lightning_bolt",
+    "arcane.level9.meteor_swarm",
+    "divine.fire_storm"
+   ],
+   "resrefs": [
+    "SPWI304",
+    "SPWI712",
+    "SPWI523",
+    "SPWI523D",
+    "SPWI503",
+    "SPPR503",
+    "SPWI313",
+    "SPPR304",
+    "SPWI810",
+    "SPWI308"
+   ],
    "parts": [
-    {"spec": "Fireball, Delayed Blast Fireball, Sunfire, Cone of Cold, Flame Strike, Skull Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt: the damage allows a save vs. breath instead of vs. spell, without extra penalties; the damage stays. Descriptions that named the save say so. Chain Lightning, mind and transmutation spells keep save vs. spell.", "status": "lab-checked"},
-    {"spec": "Meteor Swarm and Fire Storm have no save at all in the base game and stay that way for now; a save vs. breath is on the list of possible later changes.", "status": "later"}
-   ]},
-  {"id": "chat.damage_wakes_sleepers",
+    {
+     "spec": "Fireball, Delayed Blast Fireball, Sunfire, Cone of Cold, Flame Strike, Skull Trap, Glyph of Warding, Incendiary Cloud and Lightning Bolt: the damage allows a save vs. breath instead of vs. spell, without extra penalties; the damage stays. Descriptions that named the save say so. Chain Lightning, mind and transmutation spells keep save vs. spell.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Meteor Swarm and Fire Storm have no save at all in the base game and stay that way for now; a save vs. breath is on the list of possible later changes.",
+     "status": "later"
+    }
+   ]
+  },
+  {
+   "id": "chat.damage_wakes_sleepers",
    "title": "Damage wakes sleepers",
-   "rows": ["arcane.level1.sleep", "arcane.level1.color_spray", "arcane.level2.stinking_cloud", "arcane.level2.power_word_sleep", "divine.command", "divine.greater_command", "arcane.level4.emotion_despair"],
-   "resrefs": ["SPWI116", "SPWI105", "SPWI213", "SPWI220", "SPPR102", "SPPR512", "SPWI411"],
+   "rows": [
+    "arcane.level1.sleep",
+    "arcane.level1.color_spray",
+    "arcane.level2.stinking_cloud",
+    "arcane.level2.power_word_sleep",
+    "divine.command",
+    "divine.greater_command",
+    "arcane.level4.emotion_despair"
+   ],
+   "resrefs": [
+    "SPWI116",
+    "SPWI105",
+    "SPWI213",
+    "SPWI220",
+    "SPPR102",
+    "SPPR512",
+    "SPWI411"
+   ],
    "parts": [
-    {"spec": "Sleep, Color Spray, Stinking Cloud, Power Word: Sleep, Command, Greater Command and Emotion: Hopelessness: damage ends the sleep.", "status": "lab-checked"},
-    {"spec": "The IWD spells that put creatures to sleep or knock them out get the same when they are built.", "status": "todo"}
-   ]},
-  {"id": "chat.other_spell_mods",
+    {
+     "spec": "Sleep, Color Spray, Stinking Cloud, Power Word: Sleep, Command, Greater Command, base-game Emotion: Hopelessness, and optional IWD Emotion: Hopelessness and Symbol, Hopelessness: damage ends the sleep.",
+     "status": "lab-checked"
+    },
+    {
+     "spec": "Remaining IWD sleep/unconsciousness spells (such as Great Shout) get wake-on-damage when the native IWD spell component is built.",
+     "status": "todo"
+    }
+   ]
+  },
+  {
+   "id": "chat.other_spell_mods",
    "title": "Spell Revisions and SCS",
    "rows": [],
    "resrefs": [],
    "parts": [
-    {"spec": "Not together with Spell Revisions: the README says so and the installer warns plainly and carries on. No work goes into making them fit.", "status": "done"},
-    {"spec": "Declare the two incompatible outright at some later step.", "status": "later"},
-    {"spec": "At some later step: when installed after SCS, Chriz BG Magic may overwrite SCS's changes.", "status": "later"}
-   ]}
+    {
+     "spec": "Not together with Spell Revisions: the README says so and the installer warns plainly and carries on. No work goes into making them fit.",
+     "status": "done"
+    },
+    {
+     "spec": "Declare the two incompatible outright at some later step.",
+     "status": "later"
+    },
+    {
+     "spec": "When installed after SCS, Chriz BG Magic overwrites decided spells and items whole from its own definitions.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.elemental_scaling",
+   "title": "Elemental summoning 12/16/24 HD probability scaling",
+   "rows": [
+    "arcane.level6.conjure_fire_elemental",
+    "arcane.level6.conjure_air_elemental",
+    "arcane.level6.conjure_earth_elemental",
+    "divine.conjure_fire_elemental",
+    "divine.conjure_air_elemental",
+    "divine.conjure_earth_elemental"
+   ],
+   "resrefs": [
+    "SPWI620",
+    "SPWI621",
+    "SPWI622",
+    "SPPR605",
+    "SPPR702"
+   ],
+   "parts": [
+    {
+     "spec": "Wizard Conjure Fire/Air/Earth Elemental scale their 12/16/24 HD chances from 64/35/1 at level 12 to 60/35/5 at level 16 and 56/35/9 at level 20+ using probability windows [0, c12-1], [c12, c12+c16-1], [c12+c16, 100]. Druid Conjure Fire/Air/Earth Elemental scale from 64/35/1 at level 11 (61/37/2 at level 12, 52/42/6 at level 15) to 37/51/12 at level 20+, with size-by-HD creature names across all summoned elementals.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.druid_only_class_lists",
+   "title": "Druid-only and cleric-only priest spells",
+   "rows": [
+    "divine.barkskin",
+    "divine.flame_blade",
+    "divine.shillelagh",
+    "divine.regeneration",
+    "divine.animal_summoning_iv",
+    "divine.animal_summoning_v",
+    "divine.animal_summoning_vi",
+    "divine.conjure_animals_deprecated",
+    "divine.defensive_harmony",
+    "divine.lesser_restoration"
+   ],
+   "resrefs": [
+    "SPPR202",
+    "SPPR206",
+    "SPPR110",
+    "SPPR711",
+    "SPPR402",
+    "SPPR501",
+    "SPPR602",
+    "SPPR604",
+    "SPPR406",
+    "SPPR417"
+   ],
+   "parts": [
+    {
+     "spec": "Barkskin, Flame Blade, Shillelagh, Regeneration, Animal Summoning I-III (SPPR402, SPPR501, SPPR602) and Conjure Animals (SPPR604) are restricted to druids and rangers, while Defensive Harmony (SPPR406) and Lesser Restoration (SPPR417) are restricted to clerics and paladins via the priest class flags at SPL offset 0x20.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.casting_times",
+   "title": "Per-spell casting time reductions",
+   "rows": [
+    "divine.righteous_fury",
+    "divine.true_seeing",
+    "divine.invisibility_purge",
+    "divine.fire_seeds",
+    "divine.magic_resistance"
+   ],
+   "resrefs": [
+    "SPPR101",
+    "SPPR503",
+    "SPPR607",
+    "SPPR603",
+    "SPPR612",
+    "SPPR509",
+    "SPPR513",
+    "SPPR505",
+    "SPWI609",
+    "SPPR304",
+    "SPPR309",
+    "SPWI214",
+    "SPPR606"
+   ],
+   "parts": [
+    {
+     "spec": "Casting times reduced: Bless (9 to 5), Flame Strike (8 to 5), Heal (9 to 6), Blade Barrier (9 to 6), Bolt of Glory (9 to 6), Magic Resistance (9 to 5), Righteous Magic (9 to 5), True Seeing / True Sight (8 to 6 on SPPR505 and SPWI609), Glyph of Warding (9 to 5), Invisibility Purge (8 to 3), Strength (9 to 5) and Fire Seeds (9 to 6).",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.bonus_types",
+   "title": "Typed bonuses, extra attacks, Strength floors, and mutually exclusive buff families",
+   "rows": [
+    "x.buff-stacking",
+    "arcane.haste_slow",
+    "divine.champions_strength",
+    "arcane.level2.strength",
+    "divine.strength_of_one"
+   ],
+   "resrefs": [
+    "SPWI608",
+    "SPWI305",
+    "SPWI613",
+    "SPWI214",
+    "SPPR312",
+    "SPPR412",
+    "SPPR507",
+    "SPPR513",
+    "SPPR711"
+   ],
+   "parts": [
+    {
+     "spec": "Morale, Favor, Luck, Dodge, Deflection, Curse, and CBTAPR extra-attack bonuses keep only the strongest bonus and strongest penalty per stat via M_CBMBON.lua while weaker spells remain ready to resume on expiry; Transformation and Regeneration families enforce level-based mutual exclusion; Strength floors never lower higher Strength via M_CBMSTR.lua; Pierce Magic reduces current MR proportionally via CBMBPM.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.character_record_icons",
+   "title": "Accurate character-record buff and state labels",
+   "rows": [
+    "x.beschreibungen",
+    "arcane.spell_deflection_progression",
+    "arcane.level1.reflected_image",
+    "arcane.level2.mirror_image"
+   ],
+   "resrefs": [
+    "SPWI120",
+    "SPWI206",
+    "SPWI212",
+    "SPWI318",
+    "SPWI405",
+    "SPWI522",
+    "SPWI618",
+    "SPPR109",
+    "SPPR701"
+   ],
+   "parts": [
+    {
+     "spec": "M_CBMREC.lua lists Invisible, Improved Invisibility, Sanctuary, Mirror Image, Reflected Image, Minor Spell Deflection, Spell Deflection, Minor Spell Turning, and Shield of the Archons under their own names on the character record while active.",
+     "status": "lab-checked"
+    }
+   ]
+  },
+  {
+   "id": "chat.player1_petrification_imprisonment",
+   "title": "Player1 petrification and imprisonment without instant game over",
+   "rows": [
+    "arcane.petrification",
+    "arcane.imprisonment_freedom"
+   ],
+   "resrefs": [
+    "SPWI604",
+    "SPWI625",
+    "SPWI910",
+    "SPWI917"
+   ],
+   "parts": [
+    {
+     "spec": "M_CBMP1.lua intercepts petrification and Imprisonment on Player1 while a living companion remains, allowing recovery via Stone to Flesh / Greater Restoration or Freedom, preserving area travel, rest dreams, and cold save reloads, and running a 30-second combat-paused dead-end clock when no companion can rescue Player1.",
+     "status": "lab-checked"
+    }
+   ]
+  }
  ]
 }

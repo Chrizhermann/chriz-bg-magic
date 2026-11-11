@@ -465,4 +465,151 @@ function P.record_read()
     return out
 end
 
+-- Sets a single-class caster's first class level and rebuilds derived stats so ability min_level uses it.
+function P.set_level(who, level)
+    local s = type(who) == "number" and party(who) or named(who)
+    s.m_baseStats.m_level1 = level
+    P.bonus_rebuild(who)
+    return EEex_Sprite_GetStat(s, 34)
+end
+
+-- Logs every Grease (SPWI101) opcode-158 pulse before saving throws roll, with the game tick.
+CBMP.grease_log = {}
+CBMGRLOG = function(op403, effect, sprite)
+    pcall(function()
+        local src = effect.m_sourceRes:get():upper()
+        if src == "SPWI101" and effect.m_effectId == 158 then
+            CBMP.grease_log[#CBMP.grease_log + 1] = {
+                who = EEex_Sprite_GetName(sprite),
+                tick = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_worldTime.m_gameTime,
+            }
+        end
+    end)
+    return false
+end
+
+function P.grease_watch(who, seconds)
+    local s = type(who) == "number" and party(who) or named(who)
+    EEex_GameObject_ApplyEffect(s, { effectID = 403, res = "CBMGRLOG", durationType = 0,
+        duration = seconds or 200, sourceID = s.m_id, sourceTarget = s.m_id })
+    return true
+end
+
+function P.take_grease_log()
+    local out = CBMP.grease_log
+    CBMP.grease_log = {}
+    return out
+end
+
+-- Teaches wizard spells (opcode 147, no XP, ignore cap/school) so the Mage Book UI lists them.
+function P.learn_wizard(who, spells)
+    local s = party(who)
+    for _, res in ipairs(spells) do
+        EEex_GameObject_ApplyEffect(s, { effectID = 147, dwFlags = 5, res = res, durationType = 1,
+            sourceID = s.m_id, sourceTarget = s.m_id })
+    end
+    return true
+end
+
+-- Teaches priest spells (opcode 171, skipping already-known ones) so the Priest Scroll UI lists Druid spells too.
+function P.learn_priest(who, spells)
+    local s = party(who)
+    local known = {}
+    for _, _, r in s:getKnownPriestSpellsIterator() do known[r:upper()] = true end
+    for _, res in ipairs(spells) do
+        if not known[res:upper()] then
+            EEex_GameObject_ApplyEffect(s, { effectID = 171, res = res, durationType = 1,
+                sourceID = s.m_id, sourceTarget = s.m_id })
+            known[res:upper()] = true
+        end
+    end
+    return true
+end
+
+-- Opens the Mage Book ("mage") or Priest Scroll ("priest") while keeping EEexRemote.Poll active.
+function P.book_open(kind, who)
+    P.book_console()
+    if not CBMP_PRIEST_PAGE and type(priestPageInfo) == "function" then
+        CBMP_PRIEST_PAGE = priestPageInfo
+        priestPageInfo = function()
+            EEexRemote.Poll()
+            return CBMP_PRIEST_PAGE()
+        end
+    end
+    Infinity_OnPortraitLClick(who)
+    e:GetActiveEngine():OnLeftPanelButtonClick(kind == "priest" and 6 or 5)
+    return true
+end
+
+function P.book_read(kind)
+    local out = {}
+    local char = characters and characters[id]
+    local table_key = kind == "priest" and "priestSpells" or "mageSpells"
+    local max_lvl = kind == "priest" and 7 or 9
+    if char and char[table_key] then
+        for lvl = 1, max_lvl do
+            if kind == "priest" and type(setPriestBookLevel) == "function" then
+                pcall(setPriestBookLevel, lvl)
+            elseif kind ~= "priest" and type(setMageBookLevel) == "function" then
+                pcall(setMageBookLevel, lvl)
+            end
+            local list = char[table_key][lvl]
+            if list then
+                for idx, entry in pairs(list) do
+                    if type(entry) == "table" and entry.resref then
+                        currentBookSpell = idx
+                        local pane = ""
+                        if kind == "priest" and type(priestBookDescription) == "function" then
+                            pane = priestBookDescription() or ""
+                        elseif kind ~= "priest" and type(mageBookDescription) == "function" then
+                            pane = mageBookDescription() or ""
+                        end
+                        out[entry.resref:upper()] = {
+                            level = lvl,
+                            name = Infinity_FetchString(entry.name),
+                            desc = Infinity_FetchString(entry.description),
+                            pane = pane,
+                        }
+                    end
+                end
+            end
+        end
+    end
+    e:SelectEngine(worldScreen)
+    return out
+end
+
+-- Live resource headers and fetched TLK strings from the running engine.
+function P.res_meta(spells, items)
+    local out = { spells = {}, items = {} }
+    for _, res in ipairs(spells or {}) do
+        local h = EEex_Resource_Demand(res, "SPL")
+        if h then
+            local ptr = EEex_UDToPtr(h)
+            out.spells[res:upper()] = {
+                name = Infinity_FetchString(EEex_Read32(ptr + 0x08)),
+                desc = Infinity_FetchString(EEex_Read32(ptr + 0x50)),
+                school = EEex_ReadU8(ptr + 0x25),
+                excl = EEex_ReadU16(ptr + 0x1E),
+                level = EEex_Read32(ptr + 0x34),
+            }
+        end
+    end
+    for _, res in ipairs(items or {}) do
+        local h = EEex_Resource_Demand(res, "ITM")
+        if h then
+            local ptr = EEex_UDToPtr(h)
+            local id_desc = EEex_Read32(ptr + 0x54)
+            local gen_desc = EEex_Read32(ptr + 0x50)
+            out.items[res:upper()] = {
+                desc = Infinity_FetchString(id_desc >= 0 and id_desc or gen_desc),
+                gen_desc = gen_desc >= 0 and Infinity_FetchString(gen_desc) or "",
+                u3 = EEex_ReadU8(ptr + 0x2D),
+                u4 = EEex_ReadU8(ptr + 0x2F),
+            }
+        end
+    end
+    return out
+end
+
 return true

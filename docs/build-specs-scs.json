@@ -4,217 +4,215 @@
   "arcane.level1.chromatic_orb": {
    "resrefs": ["SPWI118"],
    "parts": [
-    {"spec": "IWD/SCS progression without the +6 save bonus, range 50 ft., and Conjurer exclusion bit (0x0080) cleared: level 1 deals 1d4 magic damage + blind for 1 round (save vs. spell negates secondary effect); level 2 deals 1d6 fire damage + -1 AC/THAC0 for 1 round; level 3 deals 1d8 magic + 1d3 fire damage (no save); level 4 deals 1d10 magic damage + blind for 4 rounds; level 5 deals 1d12 magic damage + stun for 3 rounds (Free Action protects against the stun); level 7+ deals 2d8 magic damage + hold for 13 rounds (Free Action protects). Hit lighting and sounds use op141 (p2=25) and EFF_E05/EFF_M83.", "status": "done"}
+    {"spec": "IWD/SCS progression without the +6 save bonus, range 50 ft., and Conjurer exclusion bit (0x0080) cleared: level 1 deals 1d4 magic damage + blind for 1 round (save vs. spell negates secondary effect); level 2 deals 1d6 fire damage + -1 AC/THAC0 for 1 round; level 3 deals 1d8 magic + 1d3 fire damage (no save); level 4 deals 1d10 magic damage + blind for 4 rounds; level 5 deals 1d12 magic damage + stun for 3 rounds (Free Action protects against the stun); level 7+ deals 2d8 magic damage + hold for 13 rounds (Free Action protects). Hit lighting and sounds use op141 (p2=25) and EFF_E05/EFF_M83.", "status": "lab-checked"}
    ]
   },
   "arcane.level3.melfs_minute_meteors": {
    "resrefs": ["SPWI325", "MELFMET"],
    "parts": [
-    {"spec": "Resolved via WIZARD_MELF_METEOR (SPWI325): the created meteor weapon (MELFMET.ITM) has +2 enchantment instead of +5.", "status": "done"}
+    {"spec": "Resolved via WIZARD_MELF_METEOR (SPWI325): the created meteor weapon (MELFMET.ITM) has +2 enchantment instead of +5.", "status": "lab-checked"}
    ]
   },
   "arcane.level3.skull_trap": {
    "resrefs": ["SPWI313"],
    "parts": [
     {"spec": "Save vs. breath instead of vs. spell for half, no penalty.", "status": "lab-checked"},
-    {"spec": "Damage capped at 12d6 in place across all abilities (preserving higher-level abilities and any unrelated effects on them).", "status": "done"}
+    {"spec": "Damage capped at 12d6 in place across all abilities (preserving higher-level abilities and any unrelated effects on them).", "status": "lab-checked"}
    ]
   },
   "arcane.level4.polymorph_self": {
    "resrefs": ["SPWI416"],
    "parts": [
-    {"spec": "Deferred for later: SCS uses native Infinity Engine weapon-token and shapeshift machinery, which is large and self-contained.", "status": "later"}
+    {"spec": "Lasts 1 turn + 3 rounds per caster level and grants innate shifting into seven forms (Flind, Mustard Jelly, Ogre, Spider, Brown Bear, Black Bear, Wolf) plus return to natural form (CBMPNAT), with M_CBMPOL.lua managing form weapons and ability-bar locks and form weapons free of unwanted portrait icons.", "status": "lab-checked"}
    ]
   },
   "arcane.level5.lower_resistance": {
    "resrefs": ["SPWI514"],
    "parts": [
-    {"spec": "Lowers magic resistance by 30% + 1% per caster level (was 10% + 1% per level), and no longer bypasses spell protections (power level restored to 5 on magic-resistance reduction effects).", "status": "done"}
+    {"spec": "Lowers magic resistance by 30% + 1% per caster level (was 10% + 1% per level), and no longer bypasses spell protections (power level restored to 5 on magic-resistance reduction effects).", "status": "lab-checked"}
    ]
   },
   "arcane.level6.power_word_silence": {
    "resrefs": ["SPWI612"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 instead of Diviner 0x0100 on the spell; kit usability byte 0x2d bit 0x08 instead of 0x01 on its scrolls).", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 instead of Diviner 0x0100 on the spell; kit usability byte 0x2d bit 0x08 instead of 0x01 on its scrolls).", "status": "lab-checked"}
    ]
   },
   "arcane.level7.power_word_stun": {
    "resrefs": ["SPWI715"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); creatures under Free Action are immune.", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); creatures under Free Action are immune.", "status": "lab-checked"}
    ]
   },
   "arcane.level7.prismatic_mantle": {
    "resrefs": ["SPWI708"],
    "parts": [
-    {"spec": "Mantle stays in the slot (no Prismatic Mantle replacement) and protects against weapons up to +3 enchantment (was +2).", "status": "done"}
+    {"spec": "Mantle stays in the slot (no Prismatic Mantle replacement) and protects against weapons up to +3 enchantment (was +2).", "status": "lab-checked"}
    ]
   },
   "arcane.level7.project_image": {
    "resrefs": ["SPWI703", "PROJIMAG"],
    "parts": [
-    {"spec": "Projected images (PROJIMAG.SPL) have quick-slot items (buttons 9, 11, 12) and innate abilities (button 13) disabled.", "status": "done"}
+    {"spec": "Projected images (PROJIMAG.SPL) have quick-slot items (buttons 9, 11, 12) and innate abilities (button 13) disabled.", "status": "lab-checked"}
    ]
   },
   "arcane.level7.summon_death_knight": {
    "resrefs": ["SPWI707"],
    "parts": [
-    {"spec": "Cacofiend stays in the slot; the summoned fiend matches caster alignment: Bone Fiend (baatezu, with species combat script CBMGBONF.BCS) for lawful casters, and Nabassu (tanar'ri) for neutral and chaotic casters.", "status": "done"}
+    {"spec": "Cacofiend stays in the slot; the summoned fiend matches caster alignment: Bone Fiend (baatezu, with species combat script CBMGBONF.BCS) for lawful casters, and Nabassu (tanar'ri) for neutral and chaotic casters.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.abi_dalzims_horrid_wilting": {
    "resrefs": ["SPWI812"],
    "parts": [
-    {"spec": "Undead, golems, animated swords, and air/earth/fire elementals are immune.", "status": "done"}
+    {"spec": "Undead, golems, animated swords, and air/earth/fire elementals are immune.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.moment_of_prescience": {
    "resrefs": ["SPWI808"],
    "parts": [
-    {"spec": "Improved Mantle stays in the slot (no Moment of Prescience replacement) and protects against weapons up to +4 enchantment (was +3).", "status": "done"}
+    {"spec": "Improved Mantle stays in the slot (no Moment of Prescience replacement) and protects against weapons up to +4 enchantment (was +3).", "status": "lab-checked"}
    ]
   },
   "arcane.level8.power_word_blind": {
    "resrefs": ["SPWI815"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); affects a single target (projectile 1) instead of an area.", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls); affects a single target (projectile 1) instead of an area.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.simulacrum": {
    "resrefs": ["SPWI804", "SIMULACR"],
    "parts": [
-    {"spec": "Simulacra (SIMULACR.SPL) have quick-slot items (buttons 9, 11, 12) disabled without removing any existing button restrictions before the level-aware filter exists.", "status": "done"},
-    {"spec": "Later (needs EEex): filter simulacrum innate abilities and spells dynamically by the simulacrum's effective level before re-enabling innate button 13.", "status": "todo"}
+    {"spec": "Simulacra (SIMULACR.SPL) have quick-slot items (buttons 9, 11, 12) disabled while keeping innate abilities (button 13) enabled, and M_CBMSIM.lua dynamically strips high-level abilities (HLAs) when the simulacrum's drained effective level is below 18.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.summon_fiend": {
    "resrefs": ["SPWI807"],
    "parts": [
-    {"spec": "The summoned fiend matches caster alignment: Cornugon (baatezu, with species combat script CBMGCORN.BCS) for lawful casters, and Glabrezu (tanar'ri) for neutral and chaotic casters.", "status": "done"}
+    {"spec": "The summoned fiend matches caster alignment: Cornugon (baatezu, with species combat script CBMGCORN.BCS) for lawful casters, and Glabrezu (tanar'ri) for neutral and chaotic casters.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.symbol_of_death": {
    "resrefs": ["SPWI817"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies (matching the NPC symbol projectile).", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies (matching the NPC symbol projectile).", "status": "lab-checked"}
    ]
   },
   "arcane.level8.symbol_of_stunning": {
    "resrefs": ["SPWI816"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies; creatures under Free Action are immune.", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies; creatures under Free Action are immune.", "status": "lab-checked"}
    ]
   },
   "arcane.level8.symbol_of_weakness": {
    "resrefs": ["SPWI811"],
    "parts": [
-    {"spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies.", "status": "done"}
+    {"spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls, and description updated); explosion projectile affects only enemies.", "status": "lab-checked"}
    ]
   },
   "arcane.level9.absolute_immunity": {
    "resrefs": ["SPWI907"],
    "parts": [
-    {"spec": "Protects against weapons up to +6 enchantment (was +5).", "status": "done"}
+    {"spec": "Protects against weapons up to +6 enchantment (was +5).", "status": "lab-checked"}
    ]
   },
   "arcane.level9.gate": {
    "resrefs": ["SPWI905"],
    "parts": [
-    {"spec": "The gated fiend matches caster alignment: Pit Fiend (baatezu) for lawful casters, and Balor (tanar'ri, with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "done"}
+    {"spec": "The gated fiend matches caster alignment: Pit Fiend (baatezu) for lawful casters, and Balor (tanar'ri, with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "lab-checked"}
    ]
   },
   "arcane.level9.power_word_kill": {
    "resrefs": ["SPWI912"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls).", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (Invoker exclusion 0x0800 on the spell, kit usability byte 0x2d bit 0x08 on its scrolls).", "status": "lab-checked"}
    ]
   },
   "arcane.level9.shapechange": {
    "resrefs": ["SPWI916"],
    "parts": [
-    {"spec": "Deferred for later: SCS uses native Infinity Engine weapon-token and shapeshift machinery, which is large and self-contained, and Hill Giant art is not in the base game.", "status": "later"}
+    {"spec": "Lasts 1 turn + 2 rounds per caster level and grants innate shifting into seven forms (Mind Flayer, Iron Golem, Giant Troll, Greater Wolfwere, Fire Elemental, Greater Basilisk, Marilith) plus return to natural form (CBMSNAT), with M_CBMPOL.lua managing form weapons and ability-bar locks and form weapons free of unwanted portrait icons.", "status": "lab-checked"}
    ]
   },
   "divine.blade_barrier": {
    "resrefs": ["SPPR603", "SPPR603D", "SPPR698D"],
    "parts": [
-    {"spec": "Casting time reduced from 9 to 6; aura payloads (SPPR603D, SPPR698D, discovered via op177/.EFF) affect only enemies and a successful save vs. spell halves the damage instead of negating it (with SPPR698D also updated to range 6 and 8d8 damage).", "status": "done"}
+    {"spec": "Casting time reduced from 9 to 6; aura payloads (SPPR603D, SPPR698D, discovered via op177/.EFF) affect only enemies and a successful save vs. spell halves the damage instead of negating it (with SPPR698D also updated to range 6 and 8d8 damage).", "status": "lab-checked"}
    ]
   },
   "divine.call_lightning": {
    "resrefs": ["SPPR302"],
    "parts": [
-    {"spec": "Duration increased to 1 round per caster level up to 11 rounds/bolts (projectiles 85..91); outdoor-only restriction and vanilla 2d8 + 1d8/level damage stay.", "status": "done"}
+    {"spec": "Duration increased to 1 round per caster level up to 11 rounds/bolts (projectiles 85..91); outdoor-only restriction and vanilla 2d8 + 1d8/level damage stay.", "status": "lab-checked"}
    ]
   },
   "divine.defensive_harmony": {
    "resrefs": ["SPPR406"],
    "parts": [
-    {"spec": "Restricted to clerics/paladins (priest usability word at 0x20 set to 0x8000); general AC bonus (op0 p2=0) increased from +2 to +4.", "status": "done"}
+    {"spec": "Restricted to clerics/paladins (priest usability word at 0x20 set to 0x8000); general AC bonus (op0 p2=0) increased from +2 to +4 (Dodge bonus type).", "status": "lab-checked"}
    ]
   },
   "divine.globe_of_blades": {
    "resrefs": ["SPPR725", "SPPR725D"],
    "parts": [
-    {"spec": "Aura payload (SPPR725D, discovered via op177/.EFF) affects only enemies and a successful save vs. spell halves the damage instead of negating it.", "status": "done"}
+    {"spec": "Aura payload (SPPR725D, discovered via op177/.EFF) affects only enemies and a successful save vs. spell halves the damage instead of negating it.", "status": "lab-checked"}
    ]
   },
   "divine.glyph_of_warding": {
    "resrefs": ["SPPR304"],
    "parts": [
     {"spec": "Save vs. breath instead of vs. spell.", "status": "lab-checked"},
-    {"spec": "Casting time reduced from 9 to 5, and a successful save halves the damage instead of negating it.", "status": "done"}
+    {"spec": "Casting time reduced from 9 to 5, and a successful save halves the damage instead of negating it.", "status": "lab-checked"}
    ]
   },
   "divine.lesser_restoration": {
    "resrefs": ["SPPR417"],
    "parts": [
-    {"spec": "Stays cleric-only as in vanilla (0x20 = 0x8000) and otherwise vanilla for now.", "status": "done"},
-    {"spec": "later: remove attribute drain through EEex (opcode 402 reading the timed effect list), no file rewriting", "status": "later"}
+    {"spec": "Restricted to clerics/paladins as in vanilla (0x20 = 0x8000), casting time 3, removes caster fatigue drawback, and cures level drain, feeblemind, Blood Rage fatigue, and ability-score drain (via M_CBMRES.lua with EEex).", "status": "lab-checked"}
    ]
   },
   "divine.magical_stone": {
    "resrefs": ["SPPR106"],
    "parts": [
-    {"spec": "Deals 3d4 crushing damage (6d4 against undead) instead of 1d4 via non-dispellable .EFF files (0x5c = 0).", "status": "done"}
+    {"spec": "Deals 3d4 crushing damage (6d4 against undead) instead of 1d4 via non-dispellable .EFF files (0x5c = 0).", "status": "lab-checked"}
    ]
   },
   "divine.summon_death_knight": {
    "resrefs": ["SPPR703"],
    "parts": [
-    {"spec": "Gate stays in the slot; the gated fiend matches caster alignment: Pit Fiend for lawful casters, and Balor (with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "done"},
+    {"spec": "Gate stays in the slot; the gated fiend matches caster alignment: Pit Fiend for lawful casters, and Balor (with species combat script CBMGBALR.BCS: guarded hostility transition, 6-second area fear aura, 30-second Stoneskin renewal, and innate fiend Domination CBMGBDOM.SPL) for neutral and chaotic casters.", "status": "lab-checked"},
     {"spec": "Later: good (and possibly neutral) priests may receive a separate summon.", "status": "later"}
    ]
   },
   "divine.symbol_of_death": {
    "resrefs": ["SPPR719"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.", "status": "lab-checked"}
    ]
   },
   "divine.symbol_of_stunning": {
    "resrefs": ["SPPR718"],
    "parts": [
-    {"spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies; creatures under Free Action are immune.", "status": "done"}
+    {"spec": "School changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies; creatures under Free Action are immune.", "status": "lab-checked"}
    ]
   },
   "divine.symbol_of_weakness": {
    "resrefs": ["SPPR706"],
    "parts": [
-    {"spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.", "status": "done"}
+    {"spec": "Symbol, Fear stays in the slot (no Symbol of Weakness replacement); school changed from Conjuration to Enchantment (preserving priest usability flags at 0x1e..0x21 and updating the description); explosion projectile affects only enemies.", "status": "lab-checked"}
    ]
   },
   "divine.insects_and_gust_of_wind": {
    "resrefs": ["SPPR319", "SPPR517", "SPPR717", "SPWI605"],
    "parts": [
-    {"spec": "Summon Insects, Insect Plague, and Creeping Doom deliver all repeating damage and secondary effects through their subspells (removing opcode 272 and FLPR717A from the main spells): per-round save vs. breath against spell failure (at 0 / -2 / -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them via op206; Stoneskin holds off the secondary effects while skins remain; items and spells granting immunity to normal weapons (op120 p2=2) block and remove them; Death Spell (SPWI605) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help. Zone of Sweet Air stays vanilla.", "status": "done"},
+    {"spec": "Summon Insects, Insect Plague, and Creeping Doom deliver all repeating damage and secondary effects through their subspells (removing opcode 272 and FLPR717A from the main spells): per-round save vs. breath against spell failure (at 0 / -2 / -2); Fire Shields (Red, Blue, Aura of Flaming Death) remove active swarms and block them via op206; Stoneskin holds off the secondary effects while skins remain; items and spells granting immunity to normal weapons (op120 p2=2) block and remove them; Death Spell (SPWI605) disperses active swarms in its area; undead are immune; magic resistance and Dispel Magic do not help. Zone of Sweet Air stays vanilla.", "status": "lab-checked"},
     {"spec": "Later: additional logical counters (e.g. wind spells).", "status": "later"}
    ]
   },
   "divine.natures_beauty": {
    "resrefs": ["SPPR704"],
    "parts": [
-    {"spec": "Both humanoid slay (opcode 55, save vs. spell +3) and blindness are moved into a single schoolless area subspell (CBMGNB1.SPL, target 5, projectile 159 INAREANP, so True Sight's school-based illusion removal does not dispel it and a single effect list decides both death and blindness): on a failed save vs. spell (+3), humanoids die and all targets suffer permanent blindness (timing 0, duration 999999) and skip the 3-round blindness via op318; on a successful save, targets are blinded for 3 rounds.", "status": "done"}
+    {"spec": "Both humanoid slay (opcode 55, save vs. spell +3) and blindness are moved into a single schoolless area subspell (CBMGNB1.SPL, target 5, projectile 159 INAREANP, so True Sight's school-based illusion removal does not dispel it and a single effect list decides both death and blindness): on a failed save vs. spell (+3), humanoids die and all targets suffer permanent blindness (timing 0, duration 999999) and skip the 3-round blindness via op318; on a successful save, targets are blinded for 3 rounds.", "status": "lab-checked"}
    ]
   }
  }
