@@ -321,6 +321,16 @@ No game was started for these; files were read after an install into the BG2:EE 
     out of combat, paused without resetting at `136` across `183` ticks (`> 12` s) of melee combat
     with a hostile Tasloi, and resumed after combat from `136` to `456` (`>= 450`, game over) in
     `328` ticks.
+- Priest `Slow Poison` (`SPPR212`) and campaign familiar Hit Points (`Find Familiar`, `SPWI123`):
+  - `SPPR212` cures poison immediately like Bhaalspawn `Slow Poison` (`SPIN102`) through `opcode 146`
+    -> `CBHCPSN` (no `opcode 329` slowing), clearing `Dolorous Decay`'s `Decaying`/`Poisoned` record
+    rows (`record`, 34 of 34) and stopping an active 2-HP/s `opcode 25` poison on `Player1` at once
+    (`hp = [112, 106, 106, 106]`, `unseen`, 15 of 15; combined `--only unseen,record`: 49 of 49).
+  - `cbmagic_find_familiar` pins `current_hp` and `max_hp` (`0x24`/`0x26`) on all 24 campaign
+    familiar `.CRE`s (`famcat_`..`famrab_` 12, `famimp_` 9; `famcat`..`famrab` 24, `famimp` 18;
+    `famcat25`..`famrab25` 48) while leaving every other byte (including EET's `K#FAMKIL` and
+    campaign dialogs) untouched; verified across plain BG2:EE, BG2:EE with IWDification, EET, and
+    the 54-test offline suite (`54 of 54`).
 
 ## Not covered
 

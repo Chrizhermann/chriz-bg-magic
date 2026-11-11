@@ -768,10 +768,18 @@ def record(c, check):
     c.p("rc-strong", 'fx("Tasloi", 44, 19, 1, 60)')
     time.sleep(0.5)
     apply("SPPR312")
-    left_out = c.p("rc-strength", 'ops("Tasloi", {328})') or []
+    states_312 = c.p("rc-strength", 'ops("Tasloi", {328})') or []
+    info_312 = c.p("rc-str-be", 'being("Tasloi")') or {}
     rows = shown()
-    check("Strength of One: who is left out gets neither entry nor spell state", "Strength" not in rows and not left_out,
-          rows=rows, effects=left_out)
+    has_floor = bool(GAME and (GAME / "override" / "splstate.ids").exists()
+                     and "CBM_STR_FLOOR" in (GAME / "override" / "splstate.ids").read_text(encoding="latin-1"))
+    if has_floor:
+        check("Strength of One: a stronger target gets the floor entry and keeps Strength 19",
+              "Strength" in rows and bool(states_312) and (info_312.get("attributes") or [0])[0] == 19,
+              rows=rows, str=(info_312.get("attributes") or [None])[0], effects=states_312)
+    else:
+        check("Strength of One: who is left out gets neither entry nor spell state",
+              "Strength" not in rows and not states_312, rows=rows, effects=states_312)
     done()
     # Errors of the base game.
     for res, wanted, unwanted in (("SPWI315", "Wraithform", "Invulnerable"), ("SPWI802", "Spell Deflection", "Protection From Magic"),
@@ -1658,8 +1666,14 @@ def unseen(c, check):
     check("Mage Book and Priest Scroll show the new descriptions for all 31 spells and Find Familiar",
           not bad_book, checked=len(expected_desc), mismatches=bad_book)
 
+    fam_hp = {
+        **{f"FAM{k}_": 12 for k in ("CAT", "DUST", "FAIR", "FER", "PSD", "QUAS", "RAB")}, "FAMIMP_": 9,
+        **{f"FAM{k}": 24 for k in ("CAT", "DUST", "FAIR", "FER", "PSD", "QUAS", "RAB")}, "FAMIMP": 18,
+        **{f"FAM{k}25": 48 for k in ("CAT", "DUS", "FAI", "FER", "IMP", "PSD", "QUA", "RAB")},
+    }
     scroll_map = scrolls_for_spells(GAME, wiz_spells)
-    meta = c.p("un-meta", f"res_meta({lua_strings(sorted(expected_desc))}, {lua_strings(sorted(scroll_map))})")
+    meta = c.p("un-meta", f"res_meta({lua_strings(sorted(expected_desc))}, {lua_strings(sorted(scroll_map))}, "
+                          f"{lua_strings(sorted(fam_hp))})")
     bad_scrolls = {}
     for scrl, target in scroll_map.items():
         got_itm = meta["items"].get(scrl)
@@ -1680,6 +1694,21 @@ def unseen(c, check):
           spwi123={k: ff_spl.get(k) for k in ("school", "excl")},
           scrl6d={k: ff_itm.get(k) for k in ("u3", "u4")})
 
+    bad_fam_cre = {cre: got for cre, got in (meta.get("cres") or {}).items()
+                   if (got["cur_hp"], got["max_hp"]) != (fam_hp[cre], fam_hp[cre])}
+    spawned_fam = {}
+    for cre in ("FAMIMP", "FAMPSD", "FAMPSD25"):
+        c.p(f"un-fam-sp-{cre}", f'spawn("{cre}", 120, 0)')
+        time.sleep(0.9)
+        others = c.p(f"un-fam-ot-{cre}", "others()") or []
+        spawned_fam[cre] = others[0]["hp"] if others else None
+        c.p(f"un-fam-rm-{cre}", "remove_all_others()")
+        time.sleep(0.5)
+    check("Campaign familiar creatures have their pinned Hit Points in the game",
+          len(meta.get("cres") or {}) >= 16 and not bad_fam_cre
+          and spawned_fam == {"FAMIMP": 18, "FAMPSD": 24, "FAMPSD25": 48},
+          checked=len(meta.get("cres") or {}), mismatches=bad_fam_cre, spawned=spawned_fam)
+
     bad_elem = {}
     for cre, wanted in ELEMENTAL_NAMES:
         c.p(f"un-el-sp-{cre}", f'spawn("{cre.upper()}", 120, 0)')
@@ -1691,6 +1720,27 @@ def unseen(c, check):
         time.sleep(0.5)
     check("All 19 summoned elemental creatures carry their size-by-HD names in the game",
           not bad_elem, checked=len(ELEMENTAL_NAMES), mismatches=bad_elem)
+
+    # 6. Priest Slow Poison (SPPR212): cures active opcode-25 poison immediately instead of slowing it.
+    c.p("un-sp-heal0", 'on_member(0, "SPPR607")')
+    time.sleep(1.5)
+    hp_start = c.p("un-sp-hp0", "stats(0)")["hp"]
+    c.p("un-sp-psn", "fx(0, 25, 2, 2, 30)")
+    time.sleep(2.5)
+    hp_poisoned = c.p("un-sp-hp1", "stats(0)")["hp"]
+    ops_before = c.p("un-sp-ops0", "ops(0, {25, 329})") or []
+    c.p("un-sp-cure", 'on_member(0, "SPPR212")')
+    time.sleep(1.5)
+    hp_cured = c.p("un-sp-hp2", "stats(0)")["hp"]
+    ops_after = c.p("un-sp-ops1", "ops(0, {25, 329})") or []
+    time.sleep(4.0)
+    hp_later = c.p("un-sp-hp3", "stats(0)")["hp"]
+    c.p("un-sp-heal1", 'on_member(0, "SPPR607")')
+    time.sleep(1.2)
+    check("Slow Poison (SPPR212) cures active poison immediately with no opcode-329 slowing",
+          hp_poisoned <= hp_start - 2 and any(e["op"] == 25 for e in ops_before)
+          and not ops_after and hp_later == hp_cured,
+          hp=[hp_start, hp_poisoned, hp_cured, hp_later], before=ops_before, after=ops_after)
 
 
 BONUS_SYMBOLS = {

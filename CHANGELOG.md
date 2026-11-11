@@ -73,9 +73,12 @@
   external effects are isolated before patching. Optional IWD spells are found by symbol
   and skipped with an informational line when absent.
 - The mod brings the helper spells its changes call, so they work on plain BG2:EE and on EET,
-  with or without EE Fixpack. Find Familiar keeps each game's own way of calling the familiar,
-  clears specialist exclusions on both the spell and its scroll (`SCRL6D`), syncs the scroll's
-  text, and names the Hit Points of all three campaigns.
+  with or without EE Fixpack. Priest Slow Poison (`SPPR212`) cures poison immediately like the
+  base game (through `CBHCPSN`) instead of slowing it. Find Familiar keeps each game's own way of
+  calling the familiar, pins the Hit Points of the 24 campaign familiar creatures (`12`/`9` in
+  BG1/SoD, `24`/`18` in Shadows of Amn, `48` in Throne of Bhaal), clears specialist exclusions on
+  both the spell and its scroll (`SCRL6D`), syncs the scroll's text, and names the Hit Points of
+  all three campaigns.
 - Transformation and Regeneration spells form separate exclusive families: higher spell
   level wins; a new casting replaces an equal-level member. These rules work without EEex.
 - Champion's Strength now removes and blocks Draw Upon Divine Might for its duration, while

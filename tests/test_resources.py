@@ -343,6 +343,15 @@ def decided_phase_one_spell_definitions(work, weidu):
     for name in ("sppr102.spl", "spwi508.spl", "spwi711.spl", "sppr709.spl", "cbmair.spl", "cbmlance.spl"):
         check("text" in defs[name]["header"]["description"], f"{name}: complete English description")
 
+    slow_poison = defs["sppr212.spl"]["abilities"][0]["effects"]
+    check(slow_poison == defs["spin102.spl"]["abilities"][0]["effects"],
+          "priest and innate Slow Poison carry the same effects")
+    check(any(e["opcode"] == 146 and e["resource"] == "CBHCPSN" for e in slow_poison),
+          "Slow Poison cures poison immediately through CBHCPSN")
+    check(not any(e["opcode"] == 329 for defn in defs.values()
+                  for ab in defn.get("abilities", []) for e in ab.get("effects", [])),
+          "no spell definition slows poison via opcode 329")
+
 
 @test
 def definitions_lean_on_no_other_mod(work, weidu):
@@ -493,15 +502,25 @@ def creature_files_hold_together(work, weidu):
 
 @test
 def find_familiar_keeps_the_game_s_summoning(work, weidu):
-    """School, specialist exclusions and description are written; what calls the familiar stays each game's own."""
+    """School, specialist exclusions, familiar Hit Points and description are written; what calls the familiar stays each game's own."""
+    def fam_cre(cur_hp, max_hp):
+        data = bytearray(b"CRE V1.0" + bytes(range(256)) * 3 + b"K#FAMKIL")
+        struct.pack_into("<HH", data, 0x24, cur_hp, max_hp)
+        return bytes(data)
+
     summon = fx.fx(opcode=177, target=1, p2=2, timing=1, resource="K#FAMSUM")
     raw_spell = bytearray(ie.make_spl(1, 1, [{"target": 4, "effects": [summon]}], school=2))
     struct.pack_into("<H", raw_spell, 0x1E, 0x0102)  # Diviner exclusion 0x0100 + Evil alignment 0x0002
     raw_scroll = bytearray(ie.make_itm([[fx.fx(opcode=147, target=1, timing=1, resource="SPWI123")]], desc=1))
     raw_scroll[0x2D] = 0x81  # Diviner exclusion 0x01 + unrelated bit 0x80
     raw_scroll[0x2F] = 0xC1  # Abjurer/Conjurer exclusions 0xC0 + unrelated bit 0x01
-    g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=fx.game(
-        SPWI123_SPL=bytes(raw_spell), XXFAM_ITM=bytes(raw_scroll)))
+    biff = {**fx.game(
+        SPWI123_SPL=bytes(raw_spell), XXFAM_ITM=bytes(raw_scroll),
+        FAMPSD_CRE=fam_cre(99, 111), FAMIMP_CRE=fam_cre(77, 88),
+        FAMPSD25_CRE=fam_cre(99, 111), FAMCAT_CRE=fam_cre(24, 24)),
+        "FAMPSD_.CRE": fam_cre(99, 111)}
+    g = fg.FakeGame(work, weidu, tlk=fx.tlk(), biff=biff,
+                    override={"FAMIMP_.CRE": fam_cre(77, 88)})
     install(g)
     check_every_resource(g)
     spell = g.file("override/spwi123.spl")
@@ -517,6 +536,11 @@ def find_familiar_keeps_the_game_s_summoning(work, weidu):
     check("48 in Throne of Bhaal" in text and "9 in Baldur's Gate" in text, text[-300:])
     scroll_text = ie.tlk_text(g.file("lang/en_us/dialog.tlk"), struct.unpack_from("<i", scroll, 0x54)[0])
     check(scroll_text == text, "Find Familiar scroll text differs from spell text")
+    for cre, hp in (("fampsd_.cre", 12), ("famimp_.cre", 9), ("fampsd.cre", 24), ("famimp.cre", 18), ("fampsd25.cre", 48)):
+        actual = g.file(f"override/{cre}")
+        check(actual == fam_cre(hp, hp), f"{cre}: Hit Points or embedded effects differ")
+    check(g.file("override/famcat.cre") is None, "an unchanged familiar creature was copied to override")
+    check(g.file("override/famfer_.cre") is None, "a missing familiar creature was created")
 
 
 @test
@@ -577,6 +601,7 @@ def overwrite_whatever_stood_there(work, weidu):
                                casting=[fx.fx(opcode=139, p1=5)] * 3)
     garbage = bytes(range(256)) * 3
     override = {"SPPR103.SPL": edited("sppr103.spl", heal_five_more),      # Cure Light Wounds, by hand
+                "SPPR212.SPL": ie.make_spl(2, 2, [{"effects": [fx.fx(opcode=329, p1=10)]}]),  # Slow Poison, slowed
                 "SPWI201.SPL": edited("spwi201.spl", other_text),          # Blur, which the bonus types visit
                 "SPPR101.SPL": garbage,                                    # Bless
                 "SPWI608.SPL": b"SPL V1  ",                                # Pierce Magic, cut off

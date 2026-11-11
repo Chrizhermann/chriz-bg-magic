@@ -502,7 +502,22 @@ END
 // --- Find Familiar --------------------------------------------------------------------------
 // Each game keeps its own way of calling the familiar, which is what gives it the Hit Points of the
 // campaign: EET picks by chapter, BG2:EE has only Shadows of Amn and Throne of Bhaal. The mod sets
-// Universal school, clears specialist exclusions on the spell and its scrolls, and writes its text.
+// Universal school, clears specialist exclusions on the spell and its scrolls, pins the Hit Points
+// of the campaign familiar creatures (12/9, 24/18, 48), and writes its text.
+DEFINE_ACTION_FUNCTION cbmagic_familiar_hp
+  INT_VAR hp = 0
+  STR_VAR creature = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%creature%.cre~ BEGIN
+    COPY_EXISTING ~%creature%.cre~ ~override~
+      PATCH_IF (BUFFER_LENGTH >= 0x28) BEGIN
+        WRITE_SHORT 0x24 hp
+        WRITE_SHORT 0x26 hp
+      END
+    BUT_ONLY
+  END
+END
+
 DEFINE_ACTION_FUNCTION cbmagic_find_familiar
 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~spwi123.spl~ BEGIN
@@ -522,12 +537,21 @@ BEGIN
         PATCH_IF (BUFFER_LENGTH >= 0x72) BEGIN
           READ_BYTE 0x2d kit_usab3
           READ_BYTE 0x2f kit_usab4
-          SET want_u3 = kit_usab3 BAND 0xc0
-          SET want_u4 = kit_usab4 BAND 0x3f
-          PATCH_IF (kit_usab3 != want_u3) BEGIN WRITE_BYTE 0x2d want_u3 END
-          PATCH_IF (kit_usab4 != want_u4) BEGIN WRITE_BYTE 0x2f want_u4 END
+          WRITE_BYTE 0x2d (kit_usab3 BAND 0xc0)
+          WRITE_BYTE 0x2f (kit_usab4 BAND 0x3f)
         END
       BUT_ONLY
+    END
+    ACTION_FOR_EACH creature IN ~famcat_~ ~famdust_~ ~famfair_~ ~famfer_~ ~fampsd_~ ~famquas_~ ~famrab_~ BEGIN
+      LAF cbmagic_familiar_hp INT_VAR hp = 12 STR_VAR creature END
+    END
+    LAF cbmagic_familiar_hp INT_VAR hp = 9 STR_VAR creature = ~famimp_~ END
+    ACTION_FOR_EACH creature IN ~famcat~ ~famdust~ ~famfair~ ~famfer~ ~fampsd~ ~famquas~ ~famrab~ BEGIN
+      LAF cbmagic_familiar_hp INT_VAR hp = 24 STR_VAR creature END
+    END
+    LAF cbmagic_familiar_hp INT_VAR hp = 18 STR_VAR creature = ~famimp~ END
+    ACTION_FOR_EACH creature IN ~famcat25~ ~famdus25~ ~famfai25~ ~famfer25~ ~famimp25~ ~fampsd25~ ~famqua25~ ~famrab25~ BEGIN
+      LAF cbmagic_familiar_hp INT_VAR hp = 48 STR_VAR creature END
     END
     OUTER_SET text = RESOLVE_STR_REF (@60105)
     LAF cbmagic_write_text INT_VAR text STR_VAR spell = ~spwi123~ END

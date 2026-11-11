@@ -580,8 +580,8 @@ function P.book_read(kind)
 end
 
 -- Live resource headers and fetched TLK strings from the running engine.
-function P.res_meta(spells, items)
-    local out = { spells = {}, items = {} }
+function P.res_meta(spells, items, cres)
+    local out = { spells = {}, items = {}, cres = {} }
     for _, res in ipairs(spells or {}) do
         local h = EEex_Resource_Demand(res, "SPL")
         if h then
@@ -606,6 +606,16 @@ function P.res_meta(spells, items)
                 gen_desc = gen_desc >= 0 and Infinity_FetchString(gen_desc) or "",
                 u3 = EEex_ReadU8(ptr + 0x2D),
                 u4 = EEex_ReadU8(ptr + 0x2F),
+            }
+        end
+    end
+    for _, res in ipairs(cres or {}) do
+        local h = EEex_Resource_Demand(res, "CRE")
+        if h then
+            local ptr = EEex_UDToPtr(h)
+            out.cres[res:upper()] = {
+                cur_hp = EEex_ReadU16(ptr + 0x24),
+                max_hp = EEex_ReadU16(ptr + 0x26),
             }
         end
     end

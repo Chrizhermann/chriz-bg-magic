@@ -5,7 +5,7 @@
    "resrefs": ["SPWI123", "SCRL6D"],
    "parts": [
     {"spec": "School set to Universal (0) with specialist exclusions cleared on the spell and its scrolls (including SCRL6D.ITM) so all specialist mages can learn and cast it; spell and scroll descriptions list the Baldur's Gate, Siege of Dragonspear, Shadows of Amn, and Throne of Bhaal familiars.", "status": "lab-checked"},
-    {"spec": "Later: EET BG1 familiar balance (the familiar list comes from the GAM, where BG1 versions exist as FAM*_ with half the HP).", "status": "later"}
+    {"spec": "Each game keeps its own campaign familiar summoning (including EET's chapter-switched K#FAMSUM/K#FAMKIL), and all 24 campaign familiar CREs have their Hit Points pinned to 12 (9 for FAMIMP_) in Baldur's Gate and Siege of Dragonspear, 24 (18 for FAMIMP) in Shadows of Amn, and 48 in Throne of Bhaal.", "status": "lab-checked"}
    ]
   },
   "arcane.level1.grease": {

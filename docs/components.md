@@ -271,10 +271,18 @@ Greater Command and Emotion: Hopelessness ends when the sleeper takes damage.
 
 
 Find Familiar (`SPWI123`) is the one spell of these patched field by field (school `0`,
-exclusion flags `0x1e = 0`, complete description), so each game keeps its own way of calling the
-familiar while its scroll (`SCRL6D`) ships whole from `defs/` with Universal usability and the
-same description. EET picks the familiar by chapter, so it has the Hit Points of its campaign;
-BG2:EE has only Shadows of Amn and Throne of Bhaal. The description names all three campaigns.
+exclusion flags `0x1e &= 0xc03f`, complete description), so each game keeps its own way of calling
+the familiar while its scroll (`SCRL6D`) ships whole from `defs/` with Universal usability and the
+same description, and any other scroll teaching `SPWI123` has its specialist usability bits
+cleared. EET picks the familiar by chapter, so it has the Hit Points of its campaign; BG2:EE has
+only Shadows of Amn and Throne of Bhaal. The installer also pins the Hit Points (`0x24`/`0x26`) of
+the 24 campaign familiar `.CRE` files (`FAM*_` to `12` or `9` for `FAMIMP_`, `FAM*` to `24` or
+`18` for `FAMIMP`, and `FAM*25` to `48`), preserving each game's embedded effects and dialogs. The
+description names all three campaigns.
+
+Priest Slow Poison (`SPPR212`) cures poison immediately like the base game (calling `CBHCPSN`,
+opcode 11 plus poison-resource and portrait-icon cleanup, matching innate `SPIN102`) rather than
+slowing poison via opcode 329.
 
 ## Grease (`cbmagic_vanilla_grease`)
 
