@@ -1,0 +1,2941 @@
+{
+  "mod": {
+    "name": "Chriz BG Magic",
+    "version": "0.1.0",
+    "targetGames": "BG2:EE & EET 2.7.3.0 (EEex v1.3.1 recommended)",
+    "repoUrl": "https://github.com/Chrizhermann/chriz-bg-magic",
+    "releaseUrl": "https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.0"
+  },
+  "bonusTypes": [
+    {
+      "type": "Morale",
+      "spells": [
+        "Emotion: Courage",
+        "Emotion: Hope",
+        "Righteous Wrath of the Faithful",
+        "Blood Rage",
+        "Animal Rage"
+      ],
+      "affectedValues": "THAC0, damage, and saving throws",
+      "notes": "Temporary HP from Courage and Righteous Wrath still accumulate; only one extra attack from Haste, Improved Haste, or Righteous Wrath counts at a time (EEex)."
+    },
+    {
+      "type": "Favor",
+      "spells": [
+        "Bless",
+        "Prayer",
+        "Recitation",
+        "Chant (saving throws)"
+      ],
+      "affectedValues": "THAC0, damage, and saving throws where supplied (including penalties)",
+      "notes": "Bless keeps its +5 morale modifier separately."
+    },
+    {
+      "type": "Luck",
+      "spells": [
+        "Luck",
+        "Chant (Luck modifier)"
+      ],
+      "affectedValues": "Luck and Luck saving throw modifiers (including penalties)",
+      "notes": "Luck lasts 15 rounds and refreshes on recast."
+    },
+    {
+      "type": "Dodge",
+      "spells": [
+        "Blur",
+        "Defensive Harmony"
+      ],
+      "affectedValues": "Positive AC bonuses and saving throws",
+      "notes": "Stacks with Deflection, Spirit Armor AC, Barkskin base AC, and equipment."
+    },
+    {
+      "type": "Deflection",
+      "spells": [
+        "Entropy Shield",
+        "Aura of Flaming Death",
+        "Spirit Armor (saves)",
+        "Barkskin (saves)"
+      ],
+      "affectedValues": "Positive AC modifiers and saving throws (Spirit Armor and Barkskin contribute their saves)",
+      "notes": "Spirit Armor (base AC 1) and Barkskin base AC still follow the game's best-base-AC rule."
+    },
+    {
+      "type": "Curse",
+      "spells": [
+        "Doom",
+        "Curse",
+        "Unholy Blight"
+      ],
+      "affectedValues": "Negative THAC0, damage, saving throw, and Luck modifiers",
+      "notes": "Strongest penalty per stat wins without wiping weaker dormant effects."
+    }
+  ],
+  "exclusiveFamilies": [
+    {
+      "family": "Transformation",
+      "members": [
+        "Tenser's Transformation",
+        "Divine Power",
+        "Righteous Magic",
+        "Champion's Strength",
+        "Blood Rage",
+        "Animal Rage"
+      ],
+      "rule": "Higher-level castings replace and temporarily block lower-level members; equal level refreshes cleanly, including linked payloads."
+    },
+    {
+      "family": "Champion's Strength vs. Draw Upon Divine Might",
+      "members": [
+        "Champion's Strength",
+        "Draw Upon Holy Might (Draw Upon Divine Might)"
+      ],
+      "rule": "Champion's Strength removes and blocks Draw Upon Divine Might while active; Draw Upon Divine Might otherwise coexists with Transformation buffs."
+    },
+    {
+      "family": "Regeneration",
+      "members": [
+        "Regenerate",
+        "Mass Regenerate",
+        "Trollish Fortitude"
+      ],
+      "rule": "Higher-level regeneration replaces lower-level members for its full duration."
+    }
+  ],
+  "highlights": [
+    {
+      "id": "celestials",
+      "title": "Celestial Summons (Devas & Planetars)",
+      "badge": "Open for Community Feedback",
+      "summary": "Rebalanced 3e-grounded Devas and Planetars without permanent Haste, clearer spellbooks, player spell selection, and a 1 Deva + 1 Planetar party cap.",
+      "bullets": [
+        "Casting time is 1 round (9), range 30 ft., lasting 3 turns for Devas and 2 turns for Planetars.",
+        "Planetars have 18 HD and 171 HP (instead of permanent Haste); Devas have 14 HD and 136 HP; every listed weapon hit/status matches in-game numbers.",
+        "Both carry BOTH gender so Death Spell cannot kill a creature listed as death-magic immune, and you control which spells they cast.",
+        "Party cap allows up to one Deva (or Fallen Deva) and one Planetar (or Dark Planetar) simultaneously across Clerics, Paladins, and Wizards."
+      ],
+      "openQuestions": [
+        "Are the new 3e-inspired stats, 2–3 turn durations, and removal of permanent Planetar Haste strong enough against high-level ToB encounters without trivializing fights?",
+        "Should any spells be swapped on the Deva or Planetar level-by-level spell lists, or should the 1 Deva + 1 Planetar limit work differently?"
+      ]
+    },
+    {
+      "id": "typed-buffs",
+      "title": "Typed Buff Stacking & Exclusive Families",
+      "badge": "EEex Powered",
+      "summary": "Six clear buff types (Morale, Favor, Luck, Dodge, Deflection, Curse) plus exclusive Transformation and Regeneration families end bloated additive stacking while keeping recasts smooth.",
+      "bullets": [
+        "For each stat and type, the strongest bonus and strongest penalty apply together; suppressed buffs stay on the target and resume if the stronger buff expires.",
+        "Haste, Improved Haste, and Righteous Wrath of the Faithful coexist peacefully: only one extra attack counts at a time (EEex).",
+        "Strength-setting spells (Strength, Strength of One, Divine Power, Righteous Magic, Champion's Strength, Blood/Animal Rage) set a minimum floor instead of erasing gear Strength."
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "healing-overhaul",
+      "title": "Healing & Cause Wounds Scaling",
+      "badge": "Core Balance",
+      "summary": "Cure and Cause Wounds scale with real die-plus-flat healing, streamlined casting times, and clean undead reciprocity.",
+      "bullets": [
+        "Cure Light (1d8+5, CT 4), Moderate (2d8+4, CT 4), Medium (2d8+7, CT 4), Serious (3d8+7, CT 6), Critical (4d8+12, CT 7), and Mass Cure (1d8+1/level, CT 4).",
+        "Heal drops to casting time 6 (full HP + disease/blindness/Feeblemind cure); Mass Regenerate adds 2 HP/round (1 HP/3s) party regeneration at level 5.",
+        "Cause Wounds mirror Cure Wounds numbers and heal undead instead of harming them; Slow Poison keeps instant poison removal like the base game."
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "magic-resistance",
+      "title": "Pierce Magic, Magic Resistance & Dispelling Screen",
+      "badge": "Caster Duels",
+      "summary": "Pierce Magic scales off half the target's current MR, Dispelling Screen absorbs one Breach or Dispel, and Protection vs. Breach follows clear rules.",
+      "bullets": [
+        "Pierce Magic reduces target Magic Resistance by half its current value rounded down (min 10, max 40 points) for 5 rounds when EEex is active.",
+        "Dispelling Screen blocks one Dispel/Remove Magic or Breach (stripping the screen first) across arcane and divine dispel abilities.",
+        "Minor Spell Deflection caps cleanly at spell level 4; Dispel Magic & Remove Magic also destroy summoned Nishruu and Hakeashar and dispellable created weapons."
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "forms-and-controls",
+      "title": "Polymorph Self, Shapechange & Crowd Control Rules",
+      "badge": "Tactical Play",
+      "summary": "6 rebuilt Polymorph Self forms and 6 Shapechange forms with exact combat numbers, plus Wake on Damage on sleep/stun effects and Breath saves on big AoE blasts.",
+      "bullets": [
+        "Polymorph Self forms (Hill Giant, Ogre Mage, Giant Spider, Mustard Jelly, Hell Hound, Rat) & Shapechange forms (Greater Wolfwere, Iron Golem, Mind Flayer, Earth Elemental, Death Knight, Greater Basilisk) list exact AC, THAC0, APR, damage, resistances, and special abilities.",
+        "Sleep, Color Spray, Command, Greater Command, Power Word: Sleep, Stinking Cloud, Sphere of Chaos, and Emotion: Hopelessness wake victims when damaged.",
+        "Fireball, Delayed Blast Fireball, and Cone of Cold roll against Breath instead of Spell; Web, Grease, Entangle, and Stinking Cloud enforce logical creature immunities."
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "protagonist-survival",
+      "title": "Protagonist Petrification/Imprisonment, Simulacrum & Familiars",
+      "badge": "EEex & Quality of Life",
+      "summary": "Petrification or Imprisonment on the main character no longer triggers an instant game over while companions remain active, plus cleaner Simulacrum and EET Find Familiar.",
+      "bullets": [
+        "If companions remain able to act and carry or can reach a real cure (Stone to Flesh / Freedom), the party can carry on and rescue the protagonist; real dead ends still end cleanly.",
+        "Simulacrum clones keep their real class/kit innates and HLAs (under EEex) instead of empty or infinite-item exploits; Project Image disables quick-slot items and innates.",
+        "Find Familiar belongs to Universal so specialists can cast it, with campaign HP tiers clearly listed across BG1, SoD, SoA, and ToB."
+      ],
+      "openQuestions": []
+    }
+  ],
+  "systemRules": [
+    {
+      "title": "AoE Damage Bypasses Mirror Image",
+      "summary": "Area-of-effect spell and item damage (Fireball, Skull Trap, Horrid Wilting, Breath weapons, Traps, etc.) ignores Mirror Image decoys while single-target rays still strip images.",
+      "tags": [
+        "save-mechanics"
+      ]
+    },
+    {
+      "title": "Dispel Destroys Created Weapons & Nishruu/Hakeashar",
+      "summary": "Dispel Magic, Remove Magic, Inquisitor Dispel, and Magic-Eating dispels now strip created spell weapons (Flame Blade, Phantom Blade, Minute Meteors, etc.) and destroy summoned Nishruu/Hakeashar.",
+      "tags": [
+        "dispel-protection"
+      ]
+    },
+    {
+      "title": "Universal Utility Schools & Specialist Access",
+      "summary": "Find Familiar, Minor Sequencer, Contingency, Spell Sequencer, Spell Trigger, and Chain Contingency belong to the Universal school with specialist exclusions cleared on spells and scrolls. Cloud spells move to Conjuration; Power Word: Sleep moves to Enchantment.",
+      "tags": [
+        "save-mechanics"
+      ]
+    },
+    {
+      "title": "Web, Grease, Entangle & Stinking Cloud Immunities",
+      "summary": "Incorporeal spirits, dragons, true beholders, mephits, ethereal/huge threats follow clearer terrain and cloud immunities; undead, constructs, oozes, and poison-immune creatures ignore Stinking Cloud.",
+      "tags": [
+        "save-mechanics"
+      ]
+    },
+    {
+      "title": "Druid Sphere & Three New Druid Spells",
+      "summary": "Barkskin, Shillelagh, Flame Blade, Animal Summoning I–III, and Conjure Animals are restricted to Druids and Rangers; Faerie Fire (L1), Icelance (L3), and Conjure Air Elemental (L6) expand the druid repertoire.",
+      "tags": [
+        "druid",
+        "summon"
+      ]
+    },
+    {
+      "title": "Simulacrum & Project Image Restrictions",
+      "summary": "Projected images cannot abuse quick-slot items or innates. Under EEex, Simulacrum clones keep accurate class/kit innates and HLAs based on their actual clone level rather than dropping them.",
+      "tags": [
+        "eeex"
+      ]
+    }
+  ],
+  "internalResrefs": [
+    "cbmfrem",
+    "cbmg605a",
+    "cbmg605b",
+    "cbmgbdom",
+    "cbmgnb1",
+    "cbmiwhe",
+    "cbmiwhs",
+    "cbmneg16",
+    "cbmneg40",
+    "cbmp1cu",
+    "cbmp1fr",
+    "cbmp1im",
+    "cbmp1nt",
+    "cbmp1st",
+    "cbmpend",
+    "cbmphg",
+    "cbmphgg",
+    "cbmphgr",
+    "cbmphh",
+    "cbmphhb",
+    "cbmphhg",
+    "cbmpnat",
+    "cbmpom",
+    "cbmprt",
+    "cbmprtg",
+    "cbmprth",
+    "cbmpspg",
+    "cbmpspw",
+    "cbmsba",
+    "cbmsbag",
+    "cbmsbaz",
+    "cbmsend",
+    "cbmsflg",
+    "cbmsflh",
+    "cbmsfpb",
+    "cbmsgob",
+    "cbmsgoc",
+    "cbmsgog",
+    "cbmsis",
+    "cbmsisi",
+    "cbmsisl",
+    "cbmsma",
+    "cbmsmag",
+    "cbmsmat",
+    "cbmsnat",
+    "sppr250a",
+    "sppr319a",
+    "sppr319b",
+    "sppr319c",
+    "sppr517a",
+    "sppr517b",
+    "sppr517c",
+    "sppr603d",
+    "sppr610a",
+    "sppr698d",
+    "sppr710a",
+    "sppr715a",
+    "sppr717a",
+    "sppr717b",
+    "sppr717c",
+    "sppr725d",
+    "spwi010",
+    "spwi298",
+    "spwi305a",
+    "spwi312a",
+    "spwi411b",
+    "spwi413a",
+    "spwi513b",
+    "spwi513c",
+    "spwi523d",
+    "spwi590",
+    "spwi591",
+    "spwi592",
+    "spwi593",
+    "spwi594",
+    "spwi595",
+    "spwi596",
+    "spwi597",
+    "spwi802",
+    "spwi954",
+    "spwi955",
+    "spwish07",
+    "spwish08",
+    "spwish20",
+    "spwish21",
+    "spwish25",
+    "spwish26",
+    "spwish28",
+    "spwish2a",
+    "spwish36",
+    "spwish37",
+    "spwish38",
+    "spwish3a",
+    "spwish3b",
+    "spwish40",
+    "spwish41",
+    "spwish42",
+    "spwish43",
+    "spwish44",
+    "spwish45",
+    "spwish46",
+    "spwish4a"
+  ],
+  "spells": [
+    {
+      "slug": "wizard-grease",
+      "resref": "SPWI101",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi101",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Lists creature immunities clearly and prevents catching flying, incorporeal, or inherently slippery/massive foes."
+    },
+    {
+      "slug": "wizard-color-spray",
+      "resref": "SPWI105",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi105",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Creatures put unconscious by Color Spray now wake upon taking damage; description updated to match."
+    },
+    {
+      "slug": "wizard-blindness",
+      "resref": "SPWI106",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi106",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Range 40 ft., casting time 2, duration 1 round/2 levels (2–5 rounds); applies -4 THAC0 and -4 AC on failed Save vs. Spell."
+    },
+    {
+      "slug": "wizard-sleep",
+      "resref": "SPWI116",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi116",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Targets put to sleep wake when damaged; description updated."
+    },
+    {
+      "slug": "wizard-chromatic-orb",
+      "resref": "SPWI118",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi118",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Damage and effect scaling updated cleanly with consistent saving-throw and stun/petrification rules."
+    },
+    {
+      "slug": "wizard-reflected-image",
+      "resref": "SPWI120",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi120",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Reflected Image and Mirror Image no longer combine simultaneously; live Character Record displays active state cleanly."
+    },
+    {
+      "slug": "wizard-find-familiar",
+      "resref": "SPWI123",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "bg2ee:SPWI123",
+      "origin": "modified",
+      "tags": [
+        "summon",
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school (castable by any specialist) with cleared scroll specialist locks and campaign-tiered familiar HP across BG1, SoD, SoA, and ToB.",
+      "descriptionTra": "tra:60105"
+    },
+    {
+      "slug": "wizard-nahals-reckless-dweomer",
+      "resref": "SPWI124",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi124",
+      "origin": "modified",
+      "tags": [
+        "eeex"
+      ],
+      "summary": "Wild surge handling and Character Record status tracking cleaned up; surge outcomes obey updated wake-on-damage/control rules.",
+      "access": "Wild Mage"
+    },
+    {
+      "slug": "wizard-spook",
+      "resref": "SPWI125",
+      "tradition": "wizard",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:spwi125",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Clearly states interaction with True Sight / True Seeing and illusion/mind protections; Character Record state cleaned up."
+    },
+    {
+      "slug": "wizard-blur",
+      "resref": "SPWI201",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi201",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "eeex"
+      ],
+      "summary": "AC and saving-throw bonuses belong to the Dodge type (stacking cleanly without doubling Defensive Harmony); Character Record state added.",
+      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Defensive Harmony)."
+    },
+    {
+      "slug": "wizard-horror",
+      "resref": "SPWI205",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi205",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Fear effects and Character Record state cleanup updated consistently."
+    },
+    {
+      "slug": "wizard-invisibility",
+      "resref": "SPWI206",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi206",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Duration adjusted to 8 hours (instead of 24 hours) with Character Record tracking."
+    },
+    {
+      "slug": "wizard-luck",
+      "resref": "SPWI209",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi209",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "eeex"
+      ],
+      "summary": "Duration extended to 15 rounds (from 3), refreshes cleanly on recast, and Luck modifiers are typed so Chant does not double-stack.",
+      "typedNote": "Luck bonus (does not stack with Chant's Luck bonus)."
+    },
+    {
+      "slug": "wizard-mirror-image",
+      "resref": "SPWI212",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi212",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection",
+        "save-mechanics"
+      ],
+      "summary": "Does not combine with Reflected Image, area-of-effect spell damage bypasses images cleanly, and Character Record shows active state."
+    },
+    {
+      "slug": "wizard-stinking-cloud",
+      "resref": "SPWI213",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi213",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Conjuration/Summoning; unconscious targets wake on damage, and poison-immune/non-breathing/incorporeal foes are immune."
+    },
+    {
+      "slug": "wizard-strength",
+      "resref": "SPWI214",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi214",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "eeex"
+      ],
+      "summary": "Casting time lowered from 9 to 5 and sets a minimum Strength floor rather than erasing higher Strength from items."
+    },
+    {
+      "slug": "wizard-web",
+      "resref": "SPWI215",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi215",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Conjuration/Summoning; incorporeal monsters, dragons, true beholders, and mephits are properly immune while spiders stay immune."
+    },
+    {
+      "slug": "wizard-power-word-sleep",
+      "resref": "SPWI220",
+      "tradition": "wizard",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:spwi220",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Enchantment/Charm and updated so taking damage wakes sleeping targets."
+    },
+    {
+      "slug": "wizard-clairvoyance",
+      "resref": "SPWI301",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi301",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Works indoors and outdoors and grants dispellable backstab immunity for 3 rounds + 1 round per 2 levels (up to 10 rounds at level 19)."
+    },
+    {
+      "slug": "wizard-remove-magic",
+      "resref": "SPWI302",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi302",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Strips Dispelling Screen first, removes dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+    },
+    {
+      "slug": "wizard-fireball",
+      "resref": "SPWI304",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi304",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image as an area-of-effect spell."
+    },
+    {
+      "slug": "wizard-haste",
+      "resref": "SPWI305",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi305",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics",
+        "eeex"
+      ],
+      "summary": "Cancels and opposes Slow cleanly and no longer terminates Improved Haste or Righteous Wrath; extra attacks follow the single-bonus-attack cap (EEex)."
+    },
+    {
+      "slug": "wizard-invisibility-sphere",
+      "resref": "SPWI307",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi307",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Renamed to Invisibility Sphere, casting time reduced from 9 to 1, duration set to 1 turn, using an ally-only radius."
+    },
+    {
+      "slug": "wizard-lightning-bolt",
+      "resref": "SPWI308",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi308",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Area damage and bouncing bolt rules updated cleanly (bypasses Mirror Image)."
+    },
+    {
+      "slug": "wizard-slow",
+      "resref": "SPWI312",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi312",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Cancels and is cancelled by Haste/Improved Haste cleanly with consistent EEex tracking."
+    },
+    {
+      "slug": "wizard-skull-trap",
+      "resref": "SPWI313",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi313",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "AoE detonation damage properly bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-wraithform",
+      "resref": "SPWI315",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi315",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Clearly protects against normal weapons and insect swarms while active."
+    },
+    {
+      "slug": "wizard-minor-spell-deflection",
+      "resref": "SPWI318",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi318",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Fixed to absorb spells only up to 4th level (was 7th) with live Character Record tracking."
+    },
+    {
+      "slug": "wizard-dispel-magic",
+      "resref": "SPWI326",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:spwi326",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+    },
+    {
+      "slug": "wizard-icelance",
+      "resref": "SPWI327",
+      "tradition": "wizard",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "iwd:SPWI327",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "save-mechanics"
+      ],
+      "summary": "Deals 5d6 guaranteed cold damage within 100 ft.; Save vs. Spell negates only the 3-round stun, never the cold damage."
+    },
+    {
+      "slug": "wizard-confusion",
+      "resref": "SPWI401",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi401",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Duration scales evenly from 4 rounds (levels 1–14) to 5 rounds (15–19) and 6 rounds (level 20+), keeping the -2 Save vs. Spell."
+    },
+    {
+      "slug": "wizard-fireshield-blue",
+      "resref": "SPWI403",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi403",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Updated description and protection interactions against insect swarms and retaliation procs."
+    },
+    {
+      "slug": "wizard-emotion-hopelessness",
+      "resref": "SPWI411",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "iwd:SPWI411",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "save-mechanics"
+      ],
+      "summary": "IWD Emotion: Hopelessness stuns failed targets for 60 seconds and breaks immediately when the target takes damage.",
+      "descriptionTra": "tra:60106"
+    },
+    {
+      "slug": "wizard-spirit-armor",
+      "resref": "SPWI414",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi414",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "save-mechanics"
+      ],
+      "summary": "Grants base AC 1 and +3 saves vs. Spell; saving-throw bonus is typed Deflection, and the self-damage on cast/expiry does not interrupt or hurt allies.",
+      "typedNote": "Saves count as Deflection; base AC 1 follows the engine's best-base-AC rule."
+    },
+    {
+      "slug": "wizard-polymorph-self",
+      "resref": "SPWI416",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi416",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Rebuilt into 6 balanced combat forms (Hill Giant, Ogre Mage, Giant Spider, Mustard Jelly, Hell Hound, Rat) with exact stats; Spider and Mustard Jelly forms have private innate abilities (`spwi495`, `spwi496`).",
+      "relatedResrefs": [
+        "SPWI495",
+        "SPWI496"
+      ]
+    },
+    {
+      "slug": "wizard-fireshield-red",
+      "resref": "SPWI418",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi418",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Updated description and protection interactions against insect swarms and retaliation procs."
+    },
+    {
+      "slug": "wizard-minor-sequencer",
+      "resref": "SPWI420",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi420",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can memorize and cast it."
+    },
+    {
+      "slug": "wizard-teleport-field",
+      "resref": "SPWI421",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:spwi421",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Range set to 30 ft. (from 40 ft.) and enemies inside now receive a Save vs. Spell at -4 each round to resist teleportation."
+    },
+    {
+      "slug": "wizard-emotion-courage",
+      "resref": "SPWI427",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "iwd:SPWI427",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "THAC0, damage, and save bonuses belong to the Morale type; temporary Hit Points stack normally.",
+      "typedNote": "Morale bonus (THAC0, damage, saves; does not stack with Hope, Righteous Wrath, Blood Rage, or Animal Rage)."
+    },
+    {
+      "slug": "wizard-emotion-hope",
+      "resref": "SPWI429",
+      "tradition": "wizard",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "iwd:SPWI429",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "THAC0, damage, and save bonuses belong to the Morale type and stack cleanly without doubling Courage or Righteous Wrath.",
+      "typedNote": "Morale bonus (THAC0, damage, saves; stacks temporary HP cleanly with other sources)."
+    },
+    {
+      "slug": "wizard-cloudkill",
+      "resref": "SPWI502",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi502",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and skips Mirror Image as an area cloud."
+    },
+    {
+      "slug": "wizard-cone-of-cold",
+      "resref": "SPWI503",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi503",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-chaos",
+      "resref": "SPWI508",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi508",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Duration scales 4 / 5 / 6 rounds (levels 1 / 15 / 20+) while preserving its automatic low-HD and -4 save branches."
+    },
+    {
+      "slug": "wizard-dispelling-screen",
+      "resref": "SPWI510",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi510",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Reworked Protection From Magic Energy slot into Dispelling Screen: party-wide single-use shield that absorbs one Breach or Dispel/Remove Magic before collapsing."
+    },
+    {
+      "slug": "wizard-protection-from-normal-weapons",
+      "resref": "SPWI511",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi511",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Also protects reliably against insect swarm damage while active; description updated."
+    },
+    {
+      "slug": "wizard-breach",
+      "resref": "SPWI513",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi513",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Absorbed once by Dispelling Screen (stripping the screen cleanly via split payloads) before stripping combat protections."
+    },
+    {
+      "slug": "wizard-lower-resistance",
+      "resref": "SPWI514",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi514",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Magic resistance reduction stacks reliably without wiping unrelated protections."
+    },
+    {
+      "slug": "wizard-oracle",
+      "resref": "SPWI515",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi515",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Dispels illusion spells up to 9th level (from 5th) across a 30-ft. enemy-only radius around the caster."
+    },
+    {
+      "slug": "wizard-conjure-lesser-fire-elemental",
+      "resref": "SPWI516",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi516",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Standardized 8 HD Lesser Fire Elemental naming and clean summoning rules."
+    },
+    {
+      "slug": "wizard-conjure-lesser-air-elemental",
+      "resref": "SPWI520",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi520",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Standardized 8 HD Lesser Air Elemental naming and clean summoning rules."
+    },
+    {
+      "slug": "wizard-conjure-lesser-earth-elemental",
+      "resref": "SPWI521",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:spwi521",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Standardized 8 HD Lesser Earth Elemental naming and clean summoning rules."
+    },
+    {
+      "slug": "wizard-conjure-lesser-water-elemental",
+      "resref": "CBMLWAT",
+      "tradition": "wizard",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:cbmlwat",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "summon"
+      ],
+      "summary": "Summons an 8 HD Lesser Water Elemental with the 3-round control contest (15% hostile chance on contest failure) and standardized elemental name.",
+      "name": "Conjure Lesser Water Elemental"
+    },
+    {
+      "slug": "wizard-tensers-transformation",
+      "resref": "SPWI603",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi603",
+      "origin": "modified",
+      "tags": [
+        "family"
+      ],
+      "summary": "Top-tier member of the Transformation family (replaces/blocks lower divine combat buffs); description lists family interactions.",
+      "typedNote": "Transformation family (highest arcane/divine combat transformation)."
+    },
+    {
+      "slug": "wizard-death-spell",
+      "resref": "SPWI605",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi605",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics",
+        "summon"
+      ],
+      "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom) in addition to slaying low-HD creatures and summons (Devas/Planetars remain immune)."
+    },
+    {
+      "slug": "wizard-pierce-magic",
+      "resref": "SPWI608",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi608",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection",
+        "eeex"
+      ],
+      "summary": "Under EEex, reduces target Magic Resistance by floor(current MR / 2), min 10 and max 40 percentage points for 5 rounds, after stripping one spell protection."
+    },
+    {
+      "slug": "wizard-true-sight",
+      "resref": "SPWI609",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi609",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time lowered from 8 to 6 and interacts cleanly with updated illusion rules (including Spook)."
+    },
+    {
+      "slug": "wizard-power-word-silence",
+      "resref": "SPWI612",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi612",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated Power Word: Silence mechanics and description consistency."
+    },
+    {
+      "slug": "wizard-improved-haste",
+      "resref": "SPWI613",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi613",
+      "origin": "modified",
+      "tags": [
+        "eeex"
+      ],
+      "summary": "Coexists peacefully with Haste and Righteous Wrath of the Faithful while capping bonus attacks to one active source (EEex).",
+      "typedNote": "Attack-per-round cap shared with Haste and Righteous Wrath of the Faithful (EEex)."
+    },
+    {
+      "slug": "wizard-death-fog",
+      "resref": "SPWI614",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi614",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and area damage bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-disintegrate",
+      "resref": "SPWI616",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi616",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Destroys summoned Mordenkainen's Swords cleanly (without item/save exploits) alongside standard disintegration rules."
+    },
+    {
+      "slug": "wizard-contingency",
+      "resref": "SPWI617",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi617",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school on spell and scroll so every specialist mage can learn and cast it."
+    },
+    {
+      "slug": "wizard-conjure-fire-elemental",
+      "resref": "SPWI620",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi620",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+    },
+    {
+      "slug": "wizard-conjure-air-elemental",
+      "resref": "SPWI621",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi621",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+    },
+    {
+      "slug": "wizard-conjure-earth-elemental",
+      "resref": "SPWI622",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:spwi622",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+    },
+    {
+      "slug": "wizard-conjure-water-elemental",
+      "resref": "CBMWATER",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:cbmwater",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "summon"
+      ],
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD Water Elementals (64/35/1% at level 12 -> 56/35/9% at level 20), 3-round control contest, and standardized name.",
+      "name": "Conjure Water Elemental"
+    },
+    {
+      "slug": "wizard-trollish-fortitude",
+      "resref": "SPWI632",
+      "tradition": "wizard",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "iwd:SPWI632",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "family",
+        "healing"
+      ],
+      "summary": "Belongs to the Regeneration family so higher-level Regenerate or Mass Regenerate replaces it cleanly.",
+      "typedNote": "Regeneration family."
+    },
+    {
+      "slug": "wizard-project-image",
+      "resref": "SPWI703",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "bg2ee:SPWI703",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Projected images cannot use quick-slot items or innate special abilities while active (`PROJIMAG.SPL`).",
+      "relatedResrefs": [
+        "PROJIMAG"
+      ]
+    },
+    {
+      "slug": "wizard-cacofiend",
+      "resref": "SPWI707",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi707",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Demon summoning interactions and descriptions standardized cleanly."
+    },
+    {
+      "slug": "wizard-mantle",
+      "resref": "SPWI708",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi708",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Mantle weapon protection effects and description aligned with weapon-enchantment tiers."
+    },
+    {
+      "slug": "wizard-spell-sequencer",
+      "resref": "SPWI710",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi710",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school on both spell and scroll so specialists keep access."
+    },
+    {
+      "slug": "wizard-sphere-of-chaos",
+      "resref": "SPWI711",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi711",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Enemy-only 10-round field at 40 ft. range; enemies save vs. Spell at -4 each round or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold for 1 round."
+    },
+    {
+      "slug": "wizard-delayed-blast-fireball",
+      "resref": "SPWI712",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi712",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-finger-of-death",
+      "resref": "SPWI713",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi713",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated death-magic protection checks and saving throw behavior consistently."
+    },
+    {
+      "slug": "wizard-power-word-stun",
+      "resref": "SPWI715",
+      "tradition": "wizard",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:spwi715",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated HP-threshold stun behavior and Character Record feedback."
+    },
+    {
+      "slug": "wizard-simulacrum",
+      "resref": "SPWI804",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi804",
+      "origin": "modified",
+      "tags": [
+        "eeex"
+      ],
+      "summary": "Clones cannot abuse quick-slot items; under EEex (`M_CBMSIM.lua`), Simulacra keep accurate class/kit innates and HLAs matching their actual clone level (`simulacr`).",
+      "relatedResrefs": [
+        "SIMULACR"
+      ]
+    },
+    {
+      "slug": "wizard-pierce-shield",
+      "resref": "SPWI805",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi805",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Protection removal and MR reduction behavior cleaned up cleanly."
+    },
+    {
+      "slug": "wizard-summon-fiend",
+      "resref": "SPWI807",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi807",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Fiend summoning rules and descriptions updated consistently."
+    },
+    {
+      "slug": "wizard-improved-mantle",
+      "resref": "SPWI808",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi808",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Improved Mantle weapon enchantment immunity and Character Record indicators updated."
+    },
+    {
+      "slug": "wizard-spell-trigger",
+      "resref": "SPWI809",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi809",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school on spell and scroll so all specialist mages can memorize it."
+    },
+    {
+      "slug": "wizard-incendiary-cloud",
+      "resref": "SPWI810",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi810",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded) and cloud fire damage bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-symbol-fear",
+      "resref": "SPWI811",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi811",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated Symbol fear effects and Character Record state consistency."
+    },
+    {
+      "slug": "wizard-abi-dalzims-horrid-wilting",
+      "resref": "SPWI812",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi812",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Explicitly lists all immune creature types (undead, constructs, water/non-living creatures) and bypasses Mirror Image."
+    },
+    {
+      "slug": "wizard-power-word-blind",
+      "resref": "SPWI815",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi815",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Applies unified -4 THAC0 / -4 AC Blindness penalties matching Blindness."
+    },
+    {
+      "slug": "wizard-symbol-stun",
+      "resref": "SPWI816",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi816",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated Symbol stun effects and duration consistency."
+    },
+    {
+      "slug": "wizard-symbol-death",
+      "resref": "SPWI817",
+      "tradition": "wizard",
+      "level": 8,
+      "levelLabel": "Level 8",
+      "source": "defs:spwi817",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated death-threshold handling and protections cleanly."
+    },
+    {
+      "slug": "wizard-spellstrike",
+      "resref": "SPWI903",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi903",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Spell protection stripping order and description cleaned up."
+    },
+    {
+      "slug": "wizard-gate",
+      "resref": "SPWI905",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi905",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Pit Fiend summoning rules and description updated consistently."
+    },
+    {
+      "slug": "wizard-absolute-immunity",
+      "resref": "SPWI907",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi907",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Protection vs. enchanted weapons and non-weapon protections verified cleanly."
+    },
+    {
+      "slug": "wizard-chain-contingency",
+      "resref": "SPWI908",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi908",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can cast it."
+    },
+    {
+      "slug": "wizard-power-word-kill",
+      "resref": "SPWI912",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi912",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated death-magic immunity checks cleanly."
+    },
+    {
+      "slug": "wizard-shapechange",
+      "resref": "SPWI916",
+      "tradition": "wizard",
+      "level": 9,
+      "levelLabel": "Level 9",
+      "source": "defs:spwi916",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Rebuilt into 6 balanced forms (Greater Wolfwere, Iron Golem, Mind Flayer, Earth Elemental, Death Knight, Greater Basilisk) with exact weapon enchants, APR, resistances, and special powers."
+    },
+    {
+      "slug": "wizard-summon-planetar",
+      "resref": "SPWI923",
+      "tradition": "wizard",
+      "level": 10,
+      "levelLabel": "HLA",
+      "source": "defs:spwi923",
+      "origin": "modified",
+      "tags": [
+        "celestial",
+        "summon"
+      ],
+      "summary": "No permanent Haste; 18 HD / 171 HP elf mage Planetar with updated 3e-grounded stats, controlled spellcasting, BOTH gender, and shared 1-Planetar party cap.",
+      "access": "Wizard HLA"
+    },
+    {
+      "slug": "wizard-summon-dark-planetar",
+      "resref": "SPWI924",
+      "tradition": "wizard",
+      "level": 10,
+      "levelLabel": "HLA",
+      "source": "defs:spwi924",
+      "origin": "modified",
+      "tags": [
+        "celestial",
+        "summon"
+      ],
+      "summary": "No permanent Haste; 18 HD / 171 HP Dark Planetar with Fire/Unholy loadout, controlled spellcasting, BOTH gender, and shared 1-Planetar party cap.",
+      "access": "Wizard HLA"
+    },
+    {
+      "slug": "divine-bless",
+      "resref": "SPPR101",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr101",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "casting-time",
+        "eeex"
+      ],
+      "summary": "Casting time lowered 9 -> 5, duration scales 30s + 1 round/level across levels 1–20, and THAC0/damage bonuses count as Favor (keeps separate +5 morale modifier).",
+      "typedNote": "Favor bonus (THAC0, damage, saves; does not stack with Prayer, Recitation, or Chant saves). Keeps its separate +5 morale modifier."
+    },
+    {
+      "slug": "divine-command",
+      "resref": "SPPR102",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr102",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Applies 1-round sleep within 30 ft., wakes on damage, and imposes a scaling save penalty (-1 per 2 levels after 1st, max -4 at 9th)."
+    },
+    {
+      "slug": "divine-cure-light-wounds",
+      "resref": "SPPR103",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr103",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 4; heals 1d8 + 5 HP cleanly with updated description."
+    },
+    {
+      "slug": "divine-entangle",
+      "resref": "SPPR105",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr105",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "Explicitly lists immune creature types (giant, flying, incorporeal, elemental, etc.) matching tactical terrain rules.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-magical-stone",
+      "resref": "SPPR106",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr106",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Created magical stones can now be removed by Dispel/Remove Magic like other created spell weapons."
+    },
+    {
+      "slug": "divine-shillelagh",
+      "resref": "SPPR110",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr110",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "dispel-protection"
+      ],
+      "summary": "Restricted to Druids/Shamans/Rangers and its created club can be removed by Dispel/Remove Magic.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-faerie-fire",
+      "resref": "SPPR112",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr112",
+      "origin": "new",
+      "tags": [
+        "druid",
+        "dispel-protection"
+      ],
+      "summary": "New level-1 druid spell (casting time 1, 5-ft. enemy radius): targets that fail Save vs. Spell take -2 AC, lose invisibility, cannot turn invisible, and glow violet for 4 rounds.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-curse",
+      "resref": "SPPR112",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "iwd:SPPR112",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "IWD Curse penalties (THAC0, damage, saves, Luck) are typed Curse so they do not double-stack with Doom or Unholy Blight.",
+      "access": "Cleric",
+      "typedNote": "Curse penalty (THAC0, damage, saves, Luck; strongest Curse penalty applies)."
+    },
+    {
+      "slug": "divine-doom",
+      "resref": "SPPR113",
+      "tradition": "divine",
+      "level": 1,
+      "levelLabel": "Level 1",
+      "source": "defs:sppr113",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "casting-time",
+        "save-mechanics"
+      ],
+      "summary": "Casting time lowered 9 -> 1, applies -2 THAC0, damage, and saves (no AC penalty) with Save vs. Spell negating (scaling 0 to -4 at level 9); counts as Curse.",
+      "typedNote": "Curse penalty (-2 THAC0, -2 damage, -2 saves; does not stack with Curse or Unholy Blight penalties)."
+    },
+    {
+      "slug": "divine-aid",
+      "resref": "SPPR201",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr201",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "typed-bonus"
+      ],
+      "summary": "Replaced combined Bless effect with pure HP boost (1d8 + min(L, 10) for max(L, 3), 1 turn/level), refreshes on recast, and shows its own portrait icon."
+    },
+    {
+      "slug": "divine-barkskin",
+      "resref": "SPPR202",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr202",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "typed-bonus"
+      ],
+      "summary": "Restricted to Druids and Rangers; its saving-throw bonus counts as Deflection while base AC keeps the engine's best-base-AC rule.",
+      "access": "Druid / Ranger",
+      "typedNote": "Saves count as Deflection; base AC still follows the engine's best-base-AC rule."
+    },
+    {
+      "slug": "divine-chant",
+      "resref": "SPPR203",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "bg2ee:SPPR203",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "eeex"
+      ],
+      "summary": "Decomposed so its saving-throw modifiers count as Favor and its Luck modifiers count as Luck (both allies and enemies).",
+      "access": "Cleric",
+      "typedNote": "Favor saving-throw bonus/penalty + Luck modifier; decomposed into separate typed effects."
+    },
+    {
+      "slug": "divine-flame-blade",
+      "resref": "SPPR206",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr206",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "dispel-protection"
+      ],
+      "summary": "Restricted to Druids/Rangers, lasts cleanly, and the created Flame Blade can be dispelled by Dispel/Remove Magic.",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-silence-15-radius",
+      "resref": "SPPR211",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr211",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated casting/save timing and Character Record state clarity."
+    },
+    {
+      "slug": "divine-slow-poison",
+      "resref": "SPPR212",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr212",
+      "origin": "modified",
+      "tags": [
+        "healing"
+      ],
+      "summary": "Keeps the base game's immediate poison cure + poison icon/resource cleanup (not delayed slow-poison opcode 329)."
+    },
+    {
+      "slug": "divine-draw-upon-holy-might",
+      "resref": "SPPR214",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "bg2ee:SPPR214",
+      "origin": "modified",
+      "tags": [
+        "family"
+      ],
+      "summary": "Paired with Champion's Strength (Champion's Strength removes and blocks Draw Upon Divine Might while active) while coexisting with other Transformation buffs.",
+      "typedNote": "Exclusive pair with Champion's Strength (Champion's Strength replaces and blocks Draw Upon Holy Might while active)."
+    },
+    {
+      "slug": "divine-cure-moderate-wounds",
+      "resref": "SPPR217",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "iwd:SPPR217",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "healing"
+      ],
+      "summary": "IWD Cure Moderate Wounds lowered to casting time 4 and heals 2d8 + 4 HP (text updated).",
+      "descriptionTra": "tra:60100"
+    },
+    {
+      "slug": "divine-cause-moderate-wounds",
+      "resref": "SPPR220",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "iwd:SPPR220",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "healing"
+      ],
+      "summary": "IWD Cause Moderate Wounds lowered to casting time 4, dealing 2d8 + 4 magic damage (save half) or healing undead for 2d8 + 4.",
+      "access": "Cleric",
+      "descriptionTra": "tra:60101"
+    },
+    {
+      "slug": "divine-writhing-fog",
+      "resref": "SPPR250",
+      "tradition": "divine",
+      "level": 2,
+      "levelLabel": "Level 2",
+      "source": "defs:sppr250",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "Area-of-effect cold damage bypasses Mirror Image cleanly.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-call-lightning",
+      "resref": "SPPR302",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr302",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "Bolt damage updated for consistent Mirror Image / save behavior.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-dispel-magic",
+      "resref": "SPPR303",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr303",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+    },
+    {
+      "slug": "divine-glyph-of-warding",
+      "resref": "SPPR304",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr304",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "save-mechanics"
+      ],
+      "summary": "Casting time lowered 9 -> 5 and AoE trap damage bypasses Mirror Image.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-remove-paralysis",
+      "resref": "SPPR308",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr308",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Also clears the 'Webbed' Character Record state properly in EET alongside paralysis removal.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-invisibility-purge",
+      "resref": "SPPR309",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr309",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time lowered from 8 to 3 and clears invisibility reliably across illusion protections.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-strength-of-one",
+      "resref": "SPPR312",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr312",
+      "origin": "modified",
+      "tags": [
+        "eeex"
+      ],
+      "summary": "Sets a minimum 18/75 Strength floor on the party instead of overriding higher item Strength (under EEex).",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-unholy-blight",
+      "resref": "SPPR314",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr314",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "save-mechanics"
+      ],
+      "summary": "Area damage bypasses Mirror Image, and its evil-target penalty counts as Curse so it does not double-stack with Doom or Curse.",
+      "access": "Cleric",
+      "typedNote": "Curse penalty on evil-path/matching targets; does not stack with Doom or Curse penalties."
+    },
+    {
+      "slug": "divine-cure-medium-wounds",
+      "resref": "SPPR315",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr315",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 4 and heals 2d8 + 7 HP cleanly."
+    },
+    {
+      "slug": "divine-protection-from-cold",
+      "resref": "SPPR316",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr316",
+      "origin": "new",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "New level-3 priest spell (matching Wizard 3): grants 100% cold resistance to one creature for 1 turn per caster level."
+    },
+    {
+      "slug": "divine-prayer",
+      "resref": "SPPR316",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "iwd:SPPR316",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "Allies' +1 and enemies' -1 THAC0, damage, and saving-throw modifiers count as Favor (shared with Bless, Recitation, and Chant saves).",
+      "access": "Cleric",
+      "typedNote": "Favor bonus/penalty (+1 allies / -1 enemies on THAC0, damage, saves)."
+    },
+    {
+      "slug": "divine-icelance",
+      "resref": "CBMLANCE",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:cbmlance",
+      "origin": "new",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "New level-3 druid spell: deals 5d6 cold damage automatically within 100 ft.; Save vs. Spell negates only the 3-round stun.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-summon-insects",
+      "resref": "SPPR319",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "defs:sppr319",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Swarm dispersion interactions with Death Spell and normal-weapon/fire immunity effects cleaned up cleanly.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-cause-medium-wounds",
+      "resref": "SPPR330",
+      "tradition": "divine",
+      "level": 3,
+      "levelLabel": "Level 3",
+      "source": "iwd:SPPR330",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "healing"
+      ],
+      "summary": "IWD Cause Medium Wounds lowered to casting time 4, dealing 2d8 + 7 magic damage (save half) or healing undead for 2d8 + 7.",
+      "access": "Cleric",
+      "descriptionTra": "tra:60102"
+    },
+    {
+      "slug": "divine-cure-serious-wounds",
+      "resref": "SPPR401",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr401",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 6 and heals 3d8 + 7 HP cleanly."
+    },
+    {
+      "slug": "divine-animal-summoning-i",
+      "resref": "SPPR402",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr402",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-free-action",
+      "resref": "SPPR403",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr403",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Blocks movement/action hampers reliably and handles upgraded Web/Hold/Slow rules cleanly."
+    },
+    {
+      "slug": "divine-neutralize-poison",
+      "resref": "SPPR404",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr404",
+      "origin": "modified",
+      "tags": [
+        "healing"
+      ],
+      "summary": "Cleanses poison, disease, blindness/deafness where applicable, and restores clean Character Record state."
+    },
+    {
+      "slug": "divine-defensive-harmony",
+      "resref": "SPPR406",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr406",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus"
+      ],
+      "summary": "AC bonus belongs to the Dodge type (does not double-stack with Blur; stacks cleanly with Deflection spells).",
+      "access": "Cleric",
+      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Blur's Dodge bonus)."
+    },
+    {
+      "slug": "divine-death-ward",
+      "resref": "SPPR409",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr409",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time set cleanly to 1 and protects reliably against death-magic effects with unified Character Record icon."
+    },
+    {
+      "slug": "divine-divine-power",
+      "resref": "SPPR412",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr412",
+      "origin": "modified",
+      "tags": [
+        "family",
+        "eeex"
+      ],
+      "summary": "Member of the Transformation family and uses a Strength 19 floor instead of erasing gear Strength (EEex).",
+      "access": "Cleric",
+      "typedNote": "Transformation family (replaced/blocked by higher-level Transformation buffs; keeps floor Strength 19)."
+    },
+    {
+      "slug": "divine-negative-plane-protection",
+      "resref": "SPPR413",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr413",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Level-drain protection updated cleanly with clear duration and Character Record state."
+    },
+    {
+      "slug": "divine-cause-serious-wounds",
+      "resref": "SPPR414",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr414",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 6; touch attack deals 3d8 + 7 damage (no save; heals undead for 3d8 + 7 HP).",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-lesser-restoration",
+      "resref": "SPPR417",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr417",
+      "origin": "modified",
+      "tags": [
+        "healing"
+      ],
+      "summary": "Restores drained levels cleanly without lingering penalty icons.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-protection-from-acid",
+      "resref": "SPPR418",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "defs:sppr418",
+      "origin": "new",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "New level-4 priest spell: grants 100% acid resistance to one creature for 1 turn per caster level."
+    },
+    {
+      "slug": "divine-recitation",
+      "resref": "SPPR421",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "iwd:SPPR421",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "Applies +2 ally / -2 enemy THAC0 & saves in a 25-ft. radius around the caster, explicitly typed as Favor.",
+      "access": "Cleric",
+      "descriptionTra": "tra:50101",
+      "typedNote": "Favor bonus/penalty (+2 allies / -2 enemies on THAC0 and saving throws)."
+    },
+    {
+      "slug": "divine-blood-rage",
+      "resref": "SPPR422",
+      "tradition": "divine",
+      "level": 4,
+      "levelLabel": "Level 4",
+      "source": "iwd:SPPR422",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus",
+        "family",
+        "eeex"
+      ],
+      "summary": "THAC0 and damage bonuses count as Morale; belongs to the Transformation family and sets Strength floor 19 (replaces base-strength overwrite).",
+      "access": "Cleric",
+      "typedNote": "Morale bonus (THAC0/damage) + Transformation family (Strength floor 19)."
+    },
+    {
+      "slug": "divine-animal-summoning-ii",
+      "resref": "SPPR501",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr501",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-cure-critical-wounds",
+      "resref": "SPPR502",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr502",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 7 and heals 4d8 + 12 HP cleanly."
+    },
+    {
+      "slug": "divine-flame-strike",
+      "resref": "SPPR503",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr503",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "save-mechanics"
+      ],
+      "summary": "Casting time lowered from 8 to 5 and AoE fire damage bypasses Mirror Image cleanly.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-true-seeing",
+      "resref": "SPPR505",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr505",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time lowered from 8 to 6 and dispels/counters illusions including Spook cleanly."
+    },
+    {
+      "slug": "divine-stoneskin",
+      "resref": "SPPR506",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr506",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "dispel-protection"
+      ],
+      "summary": "Updated skin absorption/visuals and Character Record indicator cleanly.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-champions-strength",
+      "resref": "SPPR507",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr507",
+      "origin": "modified",
+      "tags": [
+        "family",
+        "eeex"
+      ],
+      "summary": "Member of Transformation family, replaces/blocks Draw Upon Holy Might while active, and sets a minimum Strength 19 floor instead of lowering gear Strength.",
+      "access": "Cleric",
+      "typedNote": "Transformation family + excludes/replaces Draw Upon Holy Might while active (Strength floor 19)."
+    },
+    {
+      "slug": "divine-magic-resistance",
+      "resref": "SPPR509",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr509",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time lowered from 9 to 5."
+    },
+    {
+      "slug": "divine-cause-critical-wounds",
+      "resref": "SPPR510",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr510",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 7; touch attack deals 4d8 + 12 damage (no save; heals undead for 4d8 + 12 HP).",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-greater-command",
+      "resref": "SPPR512",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr512",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Targets put to sleep now wake upon taking damage; description updated.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-righteous-magic",
+      "resref": "SPPR513",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr513",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "family",
+        "eeex"
+      ],
+      "summary": "Casting time lowered 9 -> 5; belongs to Transformation family and uses Strength floor 19 + caster bonus instead of erasing gear Strength.",
+      "access": "Cleric",
+      "typedNote": "Transformation family (replaces/blocks lower-level Transformation buffs; Strength floor 19 +1/+2 size)."
+    },
+    {
+      "slug": "divine-mass-cure",
+      "resref": "SPPR514",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr514",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered to 4 and heals party allies within 15 ft. for 1d8 + 1 HP/caster level."
+    },
+    {
+      "slug": "divine-insect-plague",
+      "resref": "SPPR517",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr517",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Insect swarm dispersed by Death Spell and blocked cleanly by Fire Shield / Protection From Normal Weapons / Wraithform.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-mass-regenerate",
+      "resref": "SPPR518",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "defs:sppr518",
+      "origin": "new",
+      "tags": [
+        "druid",
+        "healing",
+        "family"
+      ],
+      "summary": "New level-5 priest spell (Regeneration family): grants party allies within sight 2 HP/round (1 HP every 3s) for 1 turn + 2 rounds/level (max 30 rounds).",
+      "access": "Druid / Shaman / Ranger",
+      "typedNote": "Regeneration family (replaces lower-level Regeneration buffs)."
+    },
+    {
+      "slug": "divine-righteous-wrath-of-the-faithful",
+      "resref": "SPPR518",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "iwd:SPPR518",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus",
+        "eeex"
+      ],
+      "summary": "THAC0, damage, and saves count as Morale; temporary HP still stack; extra attack coexists with Haste/Improved Haste under the single-extra-attack cap (EEex).",
+      "access": "Cleric",
+      "descriptionTra": "tra:50100",
+      "typedNote": "Morale bonus (THAC0, damage, saves) + single-extra-attack cap with Haste and Improved Haste (EEex)."
+    },
+    {
+      "slug": "divine-animal-rage",
+      "resref": "SPPR522",
+      "tradition": "divine",
+      "level": 5,
+      "levelLabel": "Level 5",
+      "source": "iwd:SPPR522",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus",
+        "family",
+        "druid",
+        "eeex"
+      ],
+      "summary": "Save bonus counts as Morale; belongs to the Transformation family and sets a minimum Strength 19 floor cleanly.",
+      "access": "Druid / Shaman / Ranger",
+      "descriptionTra": "tra:60108",
+      "typedNote": "Morale bonus (saving throws) + Transformation family (Strength floor 19)."
+    },
+    {
+      "slug": "divine-animal-summoning-iii",
+      "resref": "SPPR602",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr602",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-blade-barrier",
+      "resref": "SPPR603",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr603",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "save-mechanics"
+      ],
+      "summary": "Casting time lowered from 9 to 6 and blade barrier damage bypasses Mirror Image cleanly.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-conjure-animals",
+      "resref": "SPPR604",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr604",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-conjure-fire-elemental",
+      "resref": "SPPR605",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr605",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20), standardized elemental naming, and Character Record tracking.",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-conjure-air-elemental",
+      "resref": "CBMAIR",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:cbmair",
+      "origin": "new",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "New level-6 druid spell: summons a 12 / 16 / 24 HD Air Elemental (64/35/1% at 11 -> 37/51/12% at 20) for 1 turn/level (max 20) with no control contest.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-fire-seeds",
+      "resref": "SPPR606",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr606",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "casting-time",
+        "dispel-protection"
+      ],
+      "summary": "Casting time lowered 9 -> 6, AoE blast bypasses Mirror Image, and created Fire Seeds can be removed by Dispel/Remove Magic.",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-heal",
+      "resref": "SPPR607",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr607",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "casting-time"
+      ],
+      "summary": "Casting time lowered from 9 to 6; restores full HP and cures disease, blindness, and Feeblemind cleanly."
+    },
+    {
+      "slug": "divine-harm",
+      "resref": "SPPR608",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr608",
+      "origin": "modified",
+      "tags": [
+        "healing"
+      ],
+      "summary": "Casting time 7 touch attack reduces target to 1 HP (or heals undead completely) with private touch-item cleanup."
+    },
+    {
+      "slug": "divine-false-dawn",
+      "resref": "SPPR609",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr609",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "AoE sun damage bypasses Mirror Image and enemy confusion state reports cleanly in Character Record.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-dolorous-decay",
+      "resref": "SPPR610",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr610",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "Updated Slow/decay interaction and Character Record indicator cleanly.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-bolt-of-glory",
+      "resref": "SPPR612",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr612",
+      "origin": "modified",
+      "tags": [
+        "casting-time",
+        "save-mechanics"
+      ],
+      "summary": "Casting time lowered from 9 to 6 with consistent radiant damage delivery.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-physical-mirror",
+      "resref": "SPPR613",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "defs:sppr613",
+      "origin": "modified",
+      "tags": [
+        "dispel-protection"
+      ],
+      "summary": "Adds Character Record live state tracking alongside missile reflection."
+    },
+    {
+      "slug": "divine-entropy-shield",
+      "resref": "SPPR615",
+      "tradition": "divine",
+      "level": 6,
+      "levelLabel": "Level 6",
+      "source": "iwd:SPPR615",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "typed-bonus"
+      ],
+      "summary": "AC and saving-throw bonuses count as Deflection so they do not double-stack with Aura of Flaming Death or Spirit Armor/Barkskin saves.",
+      "access": "Cleric",
+      "typedNote": "Deflection AC and saving-throw bonus (does not stack with Aura of Flaming Death or Spirit Armor/Barkskin saves)."
+    },
+    {
+      "slug": "divine-conjure-earth-elemental",
+      "resref": "SPPR702",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr702",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20) and standardized elemental names.",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-gate",
+      "resref": "SPPR703",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr703",
+      "origin": "modified",
+      "tags": [
+        "summon"
+      ],
+      "summary": "Pit Fiend summoning rules and descriptions standardized cleanly.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-natures-beauty",
+      "resref": "SPPR704",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr704",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "save-mechanics"
+      ],
+      "summary": "Updated Blindness (-4 THAC0 / -4 AC) and death/save interactions cleanly.",
+      "access": "Druid / Ranger"
+    },
+    {
+      "slug": "divine-symbol-fear",
+      "resref": "SPPR706",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr706",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated fear effects and Character Record state consistency.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-finger-of-death",
+      "resref": "SPPR708",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr708",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated death-magic immunity checks cleanly.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-sphere-of-chaos",
+      "resref": "SPPR709",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr709",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Replaced Priest Confusion with Sphere of Chaos: 10-round enemy-only field where foes save vs. Spell at -4 or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold."
+    },
+    {
+      "slug": "divine-holy-word",
+      "resref": "SPPR710",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr710",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated deafness/slow/dispel/spell-failure interactions and Character Record consistency.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-regeneration",
+      "resref": "SPPR711",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr711",
+      "origin": "modified",
+      "tags": [
+        "healing",
+        "family"
+      ],
+      "summary": "Highest-tier member of the Regeneration family (replaces/blocks Mass Regenerate and Trollish Fortitude while active).",
+      "access": "Druid / Shaman / Ranger",
+      "typedNote": "Regeneration family (highest-level priest Regeneration wins)."
+    },
+    {
+      "slug": "divine-greater-restoration",
+      "resref": "SPPR713",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr713",
+      "origin": "modified",
+      "tags": [
+        "healing"
+      ],
+      "summary": "Restores drained levels, heals cleanly, and clears lingering status/web/record flags reliably.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-unholy-word",
+      "resref": "SPPR715",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr715",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated deafness/slow/dispel/spell-failure interactions and Character Record consistency.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-symbol-hopelessness",
+      "resref": "SPPR716",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "iwd:SPPR716",
+      "origin": "iwd-optional",
+      "tags": [
+        "iwd-optional",
+        "save-mechanics"
+      ],
+      "summary": "Applies 120-second hopeless stun on failed -2 saves; taking damage immediately frees affected enemies.",
+      "access": "Cleric",
+      "descriptionTra": "tra:60107"
+    },
+    {
+      "slug": "divine-creeping-doom",
+      "resref": "SPPR717",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr717",
+      "origin": "modified",
+      "tags": [
+        "druid",
+        "summon"
+      ],
+      "summary": "Dispersion by Death Spell and protection interactions (Fire Shield, Normal Weapons, Wraithform) updated cleanly.",
+      "access": "Druid / Shaman / Ranger"
+    },
+    {
+      "slug": "divine-symbol-stun",
+      "resref": "SPPR718",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr718",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated Symbol stun effects and duration consistency.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-symbol-death",
+      "resref": "SPPR719",
+      "tradition": "divine",
+      "level": 7,
+      "levelLabel": "Level 7",
+      "source": "defs:sppr719",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Updated death-threshold handling and protections cleanly.",
+      "access": "Cleric"
+    },
+    {
+      "slug": "divine-globe-of-blades",
+      "resref": "SPPR725",
+      "tradition": "divine",
+      "level": 10,
+      "levelLabel": "Quest / HLA",
+      "source": "defs:sppr725",
+      "origin": "modified",
+      "tags": [
+        "save-mechanics"
+      ],
+      "summary": "Area blade damage bypasses Mirror Image cleanly.",
+      "access": "Cleric Quest"
+    },
+    {
+      "slug": "divine-summon-deva",
+      "resref": "SPPR726",
+      "tradition": "divine",
+      "level": 10,
+      "levelLabel": "Quest / HLA",
+      "source": "defs:sppr726",
+      "origin": "modified",
+      "tags": [
+        "celestial",
+        "summon"
+      ],
+      "summary": "Rebuilt 14 HD / 136 HP Deva (`SPPR726` / Paladin HLA `SPCL923`) with full controllable spellbook (levels 1–7), 2 APR Heavy Mace +3 (undead slay / 50% stun), BOTH gender, and shared 1-Deva party cap.",
+      "access": "Cleric Quest & Paladin HLA",
+      "relatedResrefs": [
+        "SPCL923"
+      ]
+    },
+    {
+      "slug": "divine-summon-fallen-deva",
+      "resref": "SPPR727",
+      "tradition": "divine",
+      "level": 10,
+      "levelLabel": "Quest / HLA",
+      "source": "defs:sppr727",
+      "origin": "modified",
+      "tags": [
+        "celestial",
+        "summon"
+      ],
+      "summary": "Rebuilt 14 HD / 136 HP Fallen Deva (`SPPR727` / Paladin HLA `SPCL935`) with Long Sword +3 (1d8+10 + 1d8 fire + bleed), full dark spellbook, BOTH gender, and shared 1-Deva party cap.",
+      "access": "Cleric Quest & Paladin HLA",
+      "relatedResrefs": [
+        "SPCL935"
+      ]
+    },
+    {
+      "slug": "divine-aura-of-flaming-death",
+      "resref": "SPPR730",
+      "tradition": "divine",
+      "level": 10,
+      "levelLabel": "Quest / HLA",
+      "source": "defs:sppr730",
+      "origin": "modified",
+      "tags": [
+        "typed-bonus",
+        "dispel-protection"
+      ],
+      "summary": "AC and saving-throw bonuses belong to the Deflection type (does not double-stack with Entropy Shield) while fire shield protections stay clear.",
+      "access": "Cleric Quest",
+      "typedNote": "Deflection AC and saving-throw bonus."
+    }
+  ]
+}

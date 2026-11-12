@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 - 2026-11-13
 
 - Dispel Magic and Remove Magic destroy a summoned Nishruu or Hakeashar on every install. Until
   now that only worked where EE Fixpack had marked the two creatures; the installer marks them
