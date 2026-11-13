@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Harm\n(Necromancy)\n\nLevel: 6\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 7\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is the reverse of Heal. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell reduces the target to 1 Hit Point. Undead are healed completely instead. The next attack that the priest makes will inflict this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw.",
+   "text": "Harm\n(Necromancy)\n\nLevel: 6\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 6\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is the reverse of Heal. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell reduces the target to 1 Hit Point. Undead are healed completely instead. The next attack that the priest makes will inflict this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw.",
    "old": 11202
   },
   "description_identified": 9999999,
@@ -39,7 +39,7 @@
    "target_count": 0,
    "range": 1,
    "min_level": 1,
-   "casting_time": 7,
+   "casting_time": 6,
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,

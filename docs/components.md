@@ -142,21 +142,23 @@ Stop). No game or reference installation is modified by the offline tests.
 
 ## Healing (`cbmagic_healing.tpa`)
 
-- Cure Light Wounds is `1d8 + 5` at casting time 4; optional IWD Cure Moderate Wounds is
-  `2d8 + 4` and one casting-time unit faster; Cure Medium, Serious and Critical Wounds are
-  `2d8 + 7` at 4, `3d8 + 7` at 6, and `4d8 + 12` at 7. Mass Cure keeps its effect and has
-  casting time 4.
-- Cause Light, Moderate, Medium, Serious and Critical Wounds use the matching Cure roll
-  and their decided faster casting times. Their ordinary targets keep the original direct
-  spell or touch-charge delivery, saving throw and unrelated effects. The optional IWD
-  Mass Cause Light Wounds keeps its native roll, casting time and save rule.
+- Cure Light Wounds is `1d8 + 5` at casting time 1 and 10 ft. range; optional IWD Cure
+  Moderate Wounds is `2d8 + 4` at casting time 2 and 10 ft. range; Cure Medium, Serious
+  and Critical Wounds are `2d8 + 7` at casting time 3, `3d8 + 7` at casting time 4, and
+  `4d8 + 12` at casting time 5, all at 10 ft. range (synced across both the spells and any
+  scrolls casting them). Mass Cure keeps its effect, casting time 4, and self-centered
+  20-ft. radius.
+- Cause Moderate, Medium, Serious and Critical Wounds use the matching Cure rolls at
+  casting times 2, 3, 4 and 5 while keeping Touch range. Their ordinary targets keep the
+  original direct spell or touch-charge delivery, saving throw and unrelated effects. The
+  optional IWD Mass Cause Light Wounds keeps its native roll, casting time and save rule.
 - Cause Wounds, IWD Mass Cause Light Wounds and Harm heal undead instead of damaging them.
   The source damage is blocked for undead before it can run (opcode 324, `GENERAL =
   UNDEAD`); a private healing payload is then cast only for undead through the complementary
   opcode-318 guard. For touch spells this happens in the created charge item, not in the
   parent spell. A charge item shared by another spell is privately cloned and only this
-  spell's creation effect is retargeted. Harm retains its effect on non-undead, has casting
-  time 7, and heals undead completely.
+  spell's creation effect is retargeted. Harm retains its effect on non-undead, keeps Touch
+  range, has casting time 6, and heals undead completely.
 - Optional IWD symbols absent from `SPELL.IDS` log a normal skip. Changed spells and their
   scrolls receive the decided English descriptions unconditionally, without checking old
   text.
@@ -679,8 +681,8 @@ Every decided SCS-style spell change is implemented in our own library (`cbmagic
   - Level 2: 1d6 fire damage + pain (-1 AC and THAC0) for 1 round.
   - Level 3: 1d8 magic damage + 1d3 fire damage (no save).
   - Level 4: 1d10 magic damage + blind for 4 rounds.
-  - Level 5: 1d12 magic damage + stun for 3 rounds (Free Action protects against the stun).
-  - Level 7+: 2d8 magic damage + hold for 13 rounds (Free Action protects).
+  - Level 5: 1d12 magic damage + stun for 3 rounds (Free Action and `STUN_IMMUNITY` protect against the stun).
+  - Level 7+: 2d8 magic damage + hold for 13 rounds (`HOLD_IMMUNITY` protects against the hold).
 - **Melf's Minute Meteors (`cbmagic_scs_melfs_minute_meteors`):** resolved via `WIZARD_MELF_METEOR`; the created meteor weapon (`MELFMET.ITM`) strikes as a +2 weapon instead of +5.
 - **Skull Trap (`cbmagic_scs_skull_trap`):** damage is capped at 12d6 in place across all abilities (preserving higher-level abilities and any unrelated effects on them).
 - **Lower Resistance (`cbmagic_scs_lower_resistance`):** lowers magic resistance by 30% + 1% per caster level (was 10% + 1% per level) and sets power level to 5 on its resistance-lowering effects so spell protections block it normally.
@@ -721,7 +723,7 @@ Every decided SCS-style spell change is implemented in our own library (`cbmagic
 - **Nahal's Reckless Dweomer (`cbmagic_more_nahals_reckless_dweomer`):**
   - Stays a very strong spell as in the base game, except it loses Aura Cleansing: ability target is changed from `7` (caster-instant, bypassing `CGameSprite::Spell`'s round aura check) to `5` (caster, normal spell action) across all abilities so casting Nahal's Reckless Dweomer obeys the normal 1-spell-per-round aura timer, and any explicit `opcode 188` (Cleanse Aura) effect is removed while preserving all other effects and ability breakpoints.
 - **Improved Haste (`cbmagic_more_improved_haste`) and Haste / Slow mutual cancellation (`cbmagic_more_haste_cancels_slow`):**
-  - **Improved Haste (`SPWI613`, scroll `SCRL7Q.ITM`)**: becomes the party buff of Spell Revisions, built cleanly without `opcode 16` so there is no second speed clock. Keeps all 9 ability headers (`min_level` 1, 13..20), uses Area target (`4`), range 30 ft., casting time 6, party-friendly 15-ft radius projectile `158` (`INAREAPA`), and lasts 1 turn (60 seconds), dispellable (`sectype = 13` `NON-COMBAT`, `resist_dispel = 3`). Grants +6 movement rate (`opcode 176`), +1 attack per round (`opcode 1`), +2 THAC0 (`opcode 54`), +2 Armor Class (`opcode 0`), and +2 Saving Throws vs. Breath (`opcode 36`), with portrait icon `110` (`Improved Haste`), status string `14023` (`Hasted`), Alteration visual, RGB fade, and sounds `EFF_M28` / `EFF_M29`. Ends any running Slow (`opcode 221` for `cbm_Slow` + `opcode 240` for icon 41) or normal Haste (`opcode 221` for `cbm_Haste` + `opcode 240` for icon 38), makes recipients immune to Slow for its duration (`opcode 101` against `opcode 40`, `opcode 169` for icon 41, `opcode 267` for Slow strings, `opcode 206` against Slow spells, and `HASTE_IMMUNITY` in `SPLSTATE.IDS` blocking extracted Slow subspells), and prevents cumulative stacking with Haste and itself (`opcode 206` + `HASTE_IMMUNITY`).
+  - **Improved Haste (`SPWI613`, scroll `SCRL7Q.ITM`)**: becomes the party buff of Spell Revisions, built cleanly without `opcode 16` so there is no second speed clock. Keeps all 9 ability headers (`min_level` 1, 13..20), uses Area target (`4`), range 30 ft., casting time 6, party-friendly 15-ft radius projectile `158` (`INAREAPA`), and lasts 3 rounds + 1 round/level (90-138 seconds across caster levels 12-20), dispellable (`sectype = 13` `NON-COMBAT`, `resist_dispel = 3`). Grants +6 movement rate (`opcode 176`), +1 attack per round (`opcode 1`), +2 THAC0 (`opcode 54`), +2 Armor Class (`opcode 0`), and +2 Saving Throws vs. Breath (`opcode 36`), with portrait icon `110` (`Improved Haste`), status string `14023` (`Hasted`), Alteration visual, RGB fade, and sounds `EFF_M28` / `EFF_M29`. Ends any running Slow (`opcode 221` for `cbm_Slow` + `opcode 240` for icon 41) or normal Haste (`opcode 221` for `cbm_Haste` + `opcode 240` for icon 38), makes recipients immune to Slow for its duration (`opcode 101` against `opcode 40`, `opcode 169` for icon 41, `opcode 267` for Slow strings, `opcode 206` against Slow spells, and `HASTE_IMMUNITY` in `SPLSTATE.IDS` blocking extracted Slow subspells), and prevents cumulative stacking with Haste and itself (`opcode 206` + `HASTE_IMMUNITY`).
   - **Haste and Slow cancel each other (`cbmagic_more_haste_cancels_slow`)**: follows SCS `haste_cancels_slow.tpa` across all spells and items with timed `opcode 16` (Haste) or `opcode 40` (Slow) in their abilities. Haste payloads (including `opcode 93` fatigue and companion icons/strings/sounds) are extracted into `cbm_Haste`-sectype subspells and Slow payloads (including AC/THAC0 penalties and companion icons/strings/sounds) into `cbm_Slow`-sectype subspells. Haste on a slowed target displays `"Slow cancelled by Haste"` (`CBMNEG40.SPL`), blocks the Haste (and its fatigue) from starting, and removes `cbm_Slow`; Slow on a hasted target displays `"Haste cancelled by Slow"` (`CBMNEG16.SPL`), blocks the Slow from starting, and removes `cbm_Haste`. Normal Haste stays vanilla in every other way (bonus, duration, fatigue).
 
 ## Descriptions

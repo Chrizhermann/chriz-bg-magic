@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Cure Medium Wounds\n(Necromancy)\n\nLevel: 3\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 4\nArea of Effect: 1 creature\nSaving Throw: None\n\nBy casting this spell and laying <PRO_HISHER> hand upon a creature, the priest heals 2d8 + 7 points of wound or other injury damage from the creature's body. This healing cannot affect creatures without corporeal bodies, nor can it cure wounds of creatures not living or of extraplanar origin. Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal—or can be cured—just as any normal injury.",
+   "text": "Cure Medium Wounds\n(Necromancy)\n\nLevel: 3\nSphere: Healing\nRange: 10 ft.\nDuration: Permanent\nCasting Time: 3\nArea of Effect: 1 creature\nSaving Throw: None\n\nBy casting this spell on a creature within range, the priest heals 2d8 + 7 points of wound or other injury damage from the creature's body. This healing cannot affect creatures without corporeal bodies, nor can it cure wounds of creatures not living or of extraplanar origin. Curing is permanent only insofar as the creature does not sustain further damage; caused wounds will heal—or can be cured—just as any normal injury.",
    "old": 3807
   },
   "description_identified": 9999999,
@@ -37,9 +37,9 @@
    "icon": "SPPR315B",
    "target": 1,
    "target_count": 0,
-   "range": 0,
+   "range": 10,
    "min_level": 1,
-   "casting_time": 4,
+   "casting_time": 3,
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,

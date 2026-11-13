@@ -352,6 +352,64 @@ def decided_phase_one_spell_definitions(work, weidu):
                   for ab in defn.get("abilities", []) for e in ab.get("effects", [])),
           "no spell definition slows poison via opcode 329")
 
+    haste = defs["spwi613.spl"]
+    haste_levels = [1, 13, 14, 15, 16, 17, 18, 19, 20]
+    haste_durs = [90, 96, 102, 108, 114, 120, 126, 132, 138]
+    check([a["min_level"] for a in haste["abilities"]] == haste_levels, "Improved Haste level breaks")
+    for ab, dur in zip(haste["abilities"], haste_durs):
+        check({e["duration"] for e in ab["effects"] if e["duration"]} == {dur},
+              f"Improved Haste min_level {ab['min_level']}: duration {dur}")
+    haste_text = haste["header"]["description"]["text"]
+    check("Duration: 3 rounds + 1 round/level" in haste_text and "1 turn" not in haste_text,
+          "Improved Haste description duration")
+    check(defs["scrl7q.itm"]["header"]["description_identified"]["text"] == haste_text,
+          "Improved Haste scroll description sync")
+
+    for name, ct in (("sppr103.spl", 1), ("sppr315.spl", 3), ("sppr401.spl", 4), ("sppr502.spl", 5)):
+        spl = defs[name]
+        ab = spl["abilities"][0]
+        check((ab["casting_time"], ab["range"]) == (ct, 10), f"{name}: delivery")
+        text = spl["header"]["description"]["text"]
+        check("Range: 10 ft." in text and f"Casting Time: {ct}" in text, f"{name}: description")
+    for scroll in ("scrl56.itm", "scrl61.itm"):
+        rng = struct.unpack_from("<H", bytes.fromhex(defs[scroll]["abilities"][0]["raw_00"]), 0x0E)[0]
+        check(rng == 10, f"{scroll}: range 10")
+        spell_name = {"scrl56.itm": "sppr401.spl", "scrl61.itm": "sppr502.spl"}[scroll]
+        check(defs[scroll]["header"]["description_identified"]["text"] == defs[spell_name]["header"]["description"]["text"],
+              f"{scroll}: description matches spell")
+    for name, ct in (("sppr414.spl", 4), ("sppr510.spl", 5), ("sppr608.spl", 6)):
+        spl = defs[name]
+        ab = spl["abilities"][0]
+        check((ab["casting_time"], ab["range"]) == (ct, 1), f"{name}: delivery")
+        text = spl["header"]["description"]["text"]
+        check("Range: Touch" in text and f"Casting Time: {ct}" in text, f"{name}: description")
+    heal = defs["sppr607.spl"]
+    check((heal["abilities"][0]["casting_time"], heal["abilities"][0]["range"]) == (6, 0), "Heal delivery")
+    check("Range: Touch" in heal["header"]["description"]["text"]
+          and "Casting Time: 6" in heal["header"]["description"]["text"], "Heal description")
+
+    check({"cbhi118a.spl", "cbhw118d.spl", "cbhw118e.spl", "cbhw118g.spl"}.isdisjoint(defs),
+          "dead Chromatic Orb Fixpack wrappers removed")
+    orb = defs["spwi118.spl"]
+    check(all(ab["range"] == 50 for ab in orb["abilities"]), "Chromatic Orb range")
+    check(not any(e["opcode"] == 146 for ab in orb["abilities"] for e in ab["effects"]),
+          "Chromatic Orb has no Fixpack subspell calls")
+    check(any(e["opcode"] == 324 and e["p1"] == {"state": "STUN_IMMUNITY"} for e in orb["abilities"][4]["effects"]),
+          "Chromatic Orb L5 STUN_IMMUNITY guard")
+    check(any(e["opcode"] == 324 and e["p1"] == {"state": "HOLD_IMMUNITY"} for e in orb["abilities"][5]["effects"]),
+          "Chromatic Orb L7 HOLD_IMMUNITY guard")
+    orb_text = orb["header"]["description"]["text"]
+    check("Range: 50 ft." in orb_text and orb_text.count("1st Level:") == 1 and "+6" not in orb_text,
+          "Chromatic Orb description")
+    check(defs["scrl83.itm"]["header"]["description_identified"]["text"] == orb_text,
+          "Chromatic Orb scroll description sync")
+    for cure_helper in ("cbhcbld.spl", "cbhcstn.spl", "cbhchol.spl"):
+        fx321 = [e["resource"].lower() for ab in defs[cure_helper]["abilities"]
+                 for e in ab["effects"] if e["opcode"] == 321]
+        check("spwi118" in fx321, f"{cure_helper}: clears spwi118")
+        check(not any(r in {"cbhi118a", "cbhw118d", "cbhw118e", "cbhw118g"} for r in fx321),
+              f"{cure_helper}: no stale 118 wrappers")
+
 
 @test
 def definitions_lean_on_no_other_mod(work, weidu):
@@ -832,13 +890,26 @@ def iwd_spells_are_patched_on_top_of_what_ships(work, weidu):
     check(druid[0x3A:0x42] == b"SPWI323C" and druid[ability + 4:ability + 12] == b"SPWI323B", "druid Icelance icons")
     check(struct.unpack_from("<H", druid, ability + 0x26)[0] == 348, "druid Icelance missile")
 
+    sppr215 = g.file("override/sppr215.spl")
+    ab215 = struct.unpack_from("<I", sppr215, 0x64)[0]
+    check((struct.unpack_from("<H", sppr215, ab215 + 0x12)[0],
+           struct.unpack_from("<H", sppr215, ab215 + 0x0E)[0]) == (2, 10), "Cure Moderate delivery")
     roll = next(e for e in effects_of(g, "SPPR215") if e["opcode"] == 17)
     check((roll["p1"], roll["dice"], roll["sides"]) == (4, 2, 8), f"Cure Moderate: {roll}")
-    for spell, payload_roll in (("SPPR219", (4, 2, 8)), ("SPPR321", (7, 2, 8))):
+    for spell, ct, payload_roll in (("SPPR219", 2, (4, 2, 8)), ("SPPR321", 3, (7, 2, 8))):
+        spl_bytes = g.file(f"override/{spell.lower()}.spl")
+        ab_off = struct.unpack_from("<I", spl_bytes, 0x64)[0]
+        check((struct.unpack_from("<H", spl_bytes, ab_off + 0x12)[0],
+               struct.unpack_from("<H", spl_bytes, ab_off + 0x0E)[0]) == (ct, 30), f"{spell} delivery")
         guard, cast, block = effects_of(g, spell)[:3]
         check((guard["opcode"], cast["opcode"], block["opcode"]) == (318, 146, 324), f"{spell} undead split")
         heal = next(e for e in effects_of(g, cast["resource"]) if e["opcode"] == 17)
         check((heal["p1"], heal["dice"], heal["sides"]) == payload_roll, f"{spell} payload: {heal}")
+    for spell, ct in (("SPPR450", 4), ("SPPR550", 5)):
+        spl_bytes = g.file(f"override/{spell.lower()}.spl")
+        ab_off = struct.unpack_from("<I", spl_bytes, 0x64)[0]
+        check((struct.unpack_from("<H", spl_bytes, ab_off + 0x12)[0],
+               struct.unpack_from("<H", spl_bytes, ab_off + 0x0E)[0]) == (ct, 30), f"{spell} delivery")
     for item, payload_roll in (("IWDSER", (7, 3, 8)), ("IWDCRI", (12, 4, 8))):
         rows = ie.Game(g.root).get(item, "ITM")
         fx_off = struct.unpack_from("<I", rows, 0x6A)[0]

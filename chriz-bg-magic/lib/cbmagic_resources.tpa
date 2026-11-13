@@ -561,7 +561,6 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbhhumr.spl~ ~override/cbhhumr.spl~
   COPY ~chriz-bg-magic/res/cbhhumw.eff~ ~override/cbhhumw.eff~
   COPY ~chriz-bg-magic/res/cbhhumw.spl~ ~override/cbhhumw.spl~
-  COPY ~chriz-bg-magic/res/cbhi118a.spl~ ~override/cbhi118a.spl~
   COPY ~chriz-bg-magic/res/cbhi400.spl~ ~override/cbhi400.spl~
   COPY ~chriz-bg-magic/res/cbhi500.spl~ ~override/cbhi500.spl~
   COPY ~chriz-bg-magic/res/cbhi700.spl~ ~override/cbhi700.spl~
@@ -575,11 +574,6 @@ BEGIN
     WRITE_LONG 0xce cbm_state_DEATH_IMMUNITY
   COPY ~chriz-bg-magic/res/cbht40.itm~ ~override/cbht40.itm~
   COPY ~chriz-bg-magic/res/cbht70.itm~ ~override/cbht70.itm~
-  COPY ~chriz-bg-magic/res/cbhw118d.spl~ ~override/cbhw118d.spl~
-  COPY ~chriz-bg-magic/res/cbhw118e.spl~ ~override/cbhw118e.spl~
-    WRITE_LONG 0x9e cbm_state_STUN_IMMUNITY
-  COPY ~chriz-bg-magic/res/cbhw118g.spl~ ~override/cbhw118g.spl~
-    WRITE_LONG 0x9e cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/cbhwsty1.spl~ ~override/cbhwsty1.spl~
   COPY ~chriz-bg-magic/res/cbm412a.eff~ ~override/cbm412a.eff~
   COPY ~chriz-bg-magic/res/cbm412b.eff~ ~override/cbm412b.eff~
@@ -2652,8 +2646,10 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi118.spl~ ~override/spwi118.spl~
     WRITE_LONG 0x50 12174
     PATCH_IF cbm_english BEGIN SAY 0x50 @70071 END
-    WRITE_LONG 0x34a cbm_stat_212
-    WRITE_LONG 0x64a cbm_prot_131_1_4
+    WRITE_LONG 0x31a cbm_stat_212
+    WRITE_LONG 0x5ea cbm_prot_131_1_4
+    WRITE_LONG 0x646 cbm_state_STUN_IMMUNITY
+    WRITE_LONG 0x796 cbm_state_HOLD_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi120.spl~ ~override/spwi120.spl~
     WRITE_LONG 0x50 25867
     PATCH_IF cbm_english BEGIN SAY 0x50 @70172 END

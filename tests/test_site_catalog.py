@@ -175,6 +175,27 @@ def test_site_catalog(work, _weidu=None):
         match = jargon_re.search(text)
         check(not match, f"Engine jargon / leak {match.group(0)!r} in {label}: {text!r}" if match else "")
 
+    by_slug = {entry["slug"]: entry for entry in source["spells"]}
+    check("3 rounds + 1 round/level" in by_slug["wizard-improved-haste"]["summary"]
+          and "1 turn" not in by_slug["wizard-improved-haste"]["summary"],
+          "Improved Haste catalog summary")
+    for cure_slug in (
+        "divine-cure-light-wounds",
+        "divine-cure-moderate-wounds",
+        "divine-cure-medium-wounds",
+        "divine-cure-serious-wounds",
+        "divine-cure-critical-wounds",
+    ):
+        check("10 ft." in by_slug[cure_slug]["summary"], f"Cure range missing in {cure_slug}")
+    for touch_slug in (
+        "divine-cause-moderate-wounds",
+        "divine-cause-medium-wounds",
+        "divine-cause-serious-wounds",
+        "divine-cause-critical-wounds",
+        "divine-harm",
+    ):
+        check("Touch range" in by_slug[touch_slug]["summary"], f"Touch range missing in {touch_slug}")
+
     internal_set = {r.lower() for r in source["internalResrefs"]}
     check(not (covered_defs & internal_set), f"Overlap between spells and internalResrefs: {covered_defs & internal_set}")
 

@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Cure Serious Wounds\n(Necromancy)\n\nLevel: 4\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 6\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is a more potent version of the Cure Light Wounds spell. The priest lays <PRO_HISHER> hand upon a creature and heals 3d8 + 7 points of wound or other injury damage to the creature's body. This healing cannot affect noncorporeal, nonliving, or extraplanar creatures.",
+   "text": "Cure Serious Wounds\n(Necromancy)\n\nLevel: 4\nSphere: Healing\nRange: 10 ft.\nDuration: Permanent\nCasting Time: 4\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is a more potent version of the Cure Light Wounds spell. The priest targets a creature within range and heals 3d8 + 7 points of wound or other injury damage to the creature's body. This healing cannot affect noncorporeal, nonliving, or extraplanar creatures.",
    "old": 12325
   },
   "description_identified": 9999999,
@@ -37,9 +37,9 @@
    "icon": "SPPR401B",
    "target": 1,
    "target_count": 0,
-   "range": 0,
+   "range": 10,
    "min_level": 1,
-   "casting_time": 6,
+   "casting_time": 4,
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,

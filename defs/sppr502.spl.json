@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Cure Critical Wounds\n(Necromancy)\n\nLevel: 5\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 7\nArea of Effect: 1 creature\nSaving Throw: None\n\nThe Cure Critical Wounds spell is a very potent version of the Cure Light Wounds spell. The priest lays <PRO_HISHER> hands upon a creature and heals 4d8 + 12 points of damage from wounds or other injuries. The spell does not affect creatures without corporeal bodies, those of extraplanar origin, or those not living.",
+   "text": "Cure Critical Wounds\n(Necromancy)\n\nLevel: 5\nSphere: Healing\nRange: 10 ft.\nDuration: Permanent\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nThe Cure Critical Wounds spell is a very potent version of the Cure Light Wounds spell. The priest targets a creature within range and heals 4d8 + 12 points of damage from wounds or other injuries. The spell does not affect creatures without corporeal bodies, those of extraplanar origin, or those not living.",
    "old": 18729
   },
   "description_identified": 9999999,
@@ -37,9 +37,9 @@
    "icon": "SPPR502B",
    "target": 1,
    "target_count": 0,
-   "range": 0,
+   "range": 10,
    "min_level": 1,
-   "casting_time": 7,
+   "casting_time": 5,
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,

@@ -21,7 +21,7 @@
   "ground_icon": "",
   "weight": 0,
   "description": {
-   "text": "Cause Critical Wounds\n(Necromancy)\n\nLevel: 5\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 7\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is the reverse of Cure Critical Wounds. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell inflicts 4d8 + 12 points of damage upon the target. The next attack that the priest makes will cause this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.",
+   "text": "Cause Critical Wounds\n(Necromancy)\n\nLevel: 5\nSphere: Healing\nRange: Touch\nDuration: Permanent\nCasting Time: 5\nArea of Effect: 1 creature\nSaving Throw: None\n\nThis spell is the reverse of Cure Critical Wounds. Instead of healing the creature touched, it causes damage. On a successful touch from the priest, the spell inflicts 4d8 + 12 points of damage upon the target. The next attack that the priest makes will cause this effect; however, <PRO_HESHE> only has 2 rounds to make the attack before the spell fizzles. If the priest misses the target creature, the spell is wasted. There is no Saving Throw. Undead are healed for 4d8 + 12 Hit Points.",
    "old": 11194
   },
   "description_identified": 9999999,
@@ -39,7 +39,7 @@
    "target_count": 0,
    "range": 1,
    "min_level": 1,
-   "casting_time": 7,
+   "casting_time": 5,
    "unused_14": "00000600000000000100",
    "charges": 1,
    "charge_depletion": 1,

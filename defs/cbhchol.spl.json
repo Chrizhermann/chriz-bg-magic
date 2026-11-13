@@ -563,6 +563,24 @@
      "save": 0,
      "bonus": 0,
      "special": 0
+    },
+    {
+     "opcode": 321,
+     "target": 2,
+     "power": 0,
+     "p1": 0,
+     "p2": 2,
+     "timing": 1,
+     "dispel": 0,
+     "duration": 0,
+     "prob1": 100,
+     "prob2": 0,
+     "resource": "spwi118",
+     "dice": 0,
+     "sides": 0,
+     "save": 0,
+     "bonus": 0,
+     "special": 0
     }
    ]
   }

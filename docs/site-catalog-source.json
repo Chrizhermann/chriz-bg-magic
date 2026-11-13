@@ -137,7 +137,7 @@
       ],
       "summary": "Reworked from single-target double attacks (up to 10 APR) into a 15-ft. party combat buff granting +1 extra attack, +2 THAC0, +2 AC, and +2 Save vs. Breath.",
       "bullets": [
-        "Lasts 1 turn (casting time 6), grants +6 movement rate and Slow immunity, and caps extra attacks from Haste, Improved Haste, and Righteous Wrath at +1 total (with EEex).",
+        "Lasts 3 rounds + 1 round/level (casting time 6), grants +6 movement rate and Slow immunity, and caps extra attacks from Haste, Improved Haste, and Righteous Wrath at +1 total (with EEex).",
         "Haste and Slow cancel each other across both spells and items."
       ],
       "openQuestions": [
@@ -221,7 +221,7 @@
       ],
       "summary": "Faster divine casting times, stronger Cure and Cause Wounds scaling, enemy-only Silence, and six new Wizard and Divine spells.",
       "bullets": [
-        "Cure and Cause Wounds scale from 1d8+5 (casting time 4) up to 4d8+12 (casting time 7), with Cause Wounds and Harm healing undead instead of hurting them; Heal drops to casting time 6.",
+        "Single-target Cure spells extend to 10 ft. range with casting time equal to spell level (1–5), Cause Wounds keep Touch range at casting times 2–5, and Harm drops to casting time 6 while Cause Wounds and Harm heal undead instead of hurting them.",
         "Six new spells: Faerie Fire (L1), Icelance (L3 Druid), Protection from Cold (L3), Protection from Acid (L4), Mass Regenerate (L5), and Conjure Air Elemental (L6 Druid)."
       ],
       "openQuestions": []
@@ -1217,7 +1217,7 @@
       "tags": [
         "eeex"
       ],
-      "summary": "Reworked from single-target double attacks into a 15-ft. party buff (1 turn, casting time 6): +1 extra attack (doesn't stack with Haste or Righteous Wrath), +2 THAC0, +2 AC, +2 Save vs. Breath, +6 movement rate, and Slow immunity.",
+      "summary": "Reworked from single-target double attacks into a 15-ft. party buff (3 rounds + 1 round/level, casting time 6): +1 extra attack (doesn't stack with Haste or Righteous Wrath), +2 THAC0, +2 AC, +2 Save vs. Breath, +6 movement rate, and Slow immunity.",
       "typedNote": "Shares the +1 extra-attack cap with Haste and Righteous Wrath of the Faithful (with EEex).",
       "changeType": "rework"
     },
@@ -1770,7 +1770,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 4; heals 1d8 + 5 HP.",
+      "summary": "Range extended to 10 ft., casting time lowered to 1; heals 1d8 + 5 HP.",
       "changeType": "buff"
     },
     {
@@ -1989,7 +1989,7 @@
         "iwd-optional",
         "healing"
       ],
-      "summary": "When IWD spells are installed, casting time is lowered to 4 and it heals 2d8 + 4 HP.",
+      "summary": "When IWD spells are installed, range extends to 10 ft., casting time drops to 2, and it heals 2d8 + 4 HP.",
       "descriptionTra": "tra:60100",
       "changeType": "buff"
     },
@@ -2005,7 +2005,7 @@
         "iwd-optional",
         "healing"
       ],
-      "summary": "When IWD spells are installed, casting time is lowered to 4, dealing 2d8 + 4 magic damage (save for half) or healing undead for 2d8 + 4 HP.",
+      "summary": "When IWD spells are installed, casting time drops to 2 (Touch range), dealing 2d8 + 4 magic damage (save for half) or healing undead for 2d8 + 4 HP.",
       "access": "Cleric",
       "descriptionTra": "tra:60101",
       "changeType": "buff"
@@ -2147,7 +2147,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 4 and heals 2d8 + 7 HP.",
+      "summary": "Range extended to 10 ft., casting time lowered to 3; heals 2d8 + 7 HP.",
       "changeType": "buff"
     },
     {
@@ -2225,7 +2225,7 @@
         "iwd-optional",
         "healing"
       ],
-      "summary": "When IWD spells are installed, casting time is lowered to 4, dealing 2d8 + 7 magic damage (save for half) or healing undead for 2d8 + 7 HP.",
+      "summary": "When IWD spells are installed, casting time drops to 3 (Touch range), dealing 2d8 + 7 magic damage (save for half) or healing undead for 2d8 + 7 HP.",
       "access": "Cleric",
       "descriptionTra": "tra:60102",
       "changeType": "buff"
@@ -2242,7 +2242,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 6 and heals 3d8 + 7 HP.",
+      "summary": "Range extended to 10 ft., casting time lowered to 4; heals 3d8 + 7 HP.",
       "changeType": "buff"
     },
     {
@@ -2363,7 +2363,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 6; melee touch deals 3d8 + 7 magic damage (no save) or heals undead for 3d8 + 7 HP.",
+      "summary": "Casting time lowered to 4 (Touch range); melee touch deals 3d8 + 7 magic damage (no save) or heals undead for 3d8 + 7 HP.",
       "access": "Cleric",
       "changeType": "buff"
     },
@@ -2461,7 +2461,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 7 and heals 4d8 + 12 HP.",
+      "summary": "Range extended to 10 ft., casting time lowered to 5; heals 4d8 + 12 HP.",
       "changeType": "buff"
     },
     {
@@ -2555,7 +2555,7 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 7; melee touch deals 4d8 + 12 magic damage (no save) or heals undead for 4d8 + 12 HP.",
+      "summary": "Casting time lowered to 5 (Touch range); melee touch deals 4d8 + 12 magic damage (no save) or heals undead for 4d8 + 12 HP.",
       "access": "Cleric",
       "changeType": "buff"
     },
@@ -2804,7 +2804,7 @@
       "tags": [
         "healing"
       ],
-      "summary": "Casting time lowered from 9 to 7; a melee hit drops a living target to 1 HP (no save) or fully heals an undead creature.",
+      "summary": "Casting time lowered from 9 to 6 (Touch range); a melee hit drops a living target to 1 HP (no save) or fully heals an undead creature.",
       "changeType": "minor-buff"
     },
     {

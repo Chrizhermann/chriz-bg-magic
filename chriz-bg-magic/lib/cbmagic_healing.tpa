@@ -458,21 +458,74 @@ BEGIN
   BUT_ONLY
 END
 
-DEFINE_PATCH_FUNCTION cbmagic_healing_lower_casting_time
-  INT_VAR target_ct = 0
-  RET changed already
+// Overwrite casting time (when target_ct >= 0) and ability range (when target_range >= 0)
+// unconditionally across every ability header.
+DEFINE_PATCH_FUNCTION cbmagic_healing_set_delivery
+  INT_VAR target_ct = (0 - 1) target_range = (0 - 1)
+  RET ct_changed range_changed
 BEGIN
-  SET changed = 0
-  SET already = 0
+  SET ct_changed = 0
+  SET range_changed = 0
   READ_LONG 0x64 ab_off
   READ_SHORT 0x68 ab_cnt
   FOR (a = 0; a < ab_cnt; ++a) BEGIN
-    READ_SHORT (ab_off + a * 0x28 + 0x12) ct
-    PATCH_IF (ct > target_ct) BEGIN
-      WRITE_SHORT (ab_off + a * 0x28 + 0x12) target_ct
-      SET changed += 1
-    END ELSE BEGIN
-      SET already += 1
+    PATCH_IF (target_ct >= 0) BEGIN
+      READ_SHORT (ab_off + a * 0x28 + 0x12) ct
+      PATCH_IF (ct != target_ct) BEGIN
+        WRITE_SHORT (ab_off + a * 0x28 + 0x12) target_ct
+        SET ct_changed += 1
+      END
+    END
+    PATCH_IF (target_range >= 0) BEGIN
+      READ_SHORT (ab_off + a * 0x28 + 0x0e) rng
+      PATCH_IF (rng != target_range) BEGIN
+        WRITE_SHORT (ab_off + a * 0x28 + 0x0e) target_range
+        SET range_changed += 1
+      END
+    END
+  END
+END
+
+// Sync ability range (+0x0e) on all indexed scrolls casting %spell% (opcode 146 or 148).
+DEFINE_ACTION_FUNCTION cbmagic_healing_scroll_range
+  INT_VAR target_range = 10
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF !(~%spell%~ STRING_EQUAL ~~) AND (target_range >= 0) BEGIN
+    LAF cbmagic_scrolls_of STR_VAR spell = EVAL ~%spell%~ RET scrolls END
+    OUTER_PATCH_SAVE remaining ~%scrolls%~ BEGIN REPLACE_TEXTUALLY ~^ +~ ~~ END
+    OUTER_WHILE !(~%remaining%~ STRING_EQUAL ~~) BEGIN
+      OUTER_PATCH_SAVE scroll ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~ .*$~ ~~ END
+      OUTER_PATCH_SAVE remaining ~%remaining%~ BEGIN REPLACE_TEXTUALLY ~^[^ ]+ ?~ ~~ END
+      ACTION_IF FILE_EXISTS_IN_GAME ~%scroll%.itm~ BEGIN
+        COPY_EXISTING ~%scroll%.itm~ ~override~
+          LPF cbmagic_healing_itm_valid RET valid reason END
+          PATCH_IF valid BEGIN
+            READ_LONG 0x64 ab_off
+            READ_SHORT 0x68 ab_cnt
+            READ_LONG 0x6a fx_off
+            FOR (a = 0; a < ab_cnt; ++a) BEGIN
+              SET casts = 0
+              READ_SHORT (ab_off + a * 0x38 + 0x1e) n
+              READ_SHORT (ab_off + a * 0x38 + 0x20) first
+              FOR (i = 0; i < n; ++i) BEGIN
+                SET fx = fx_off + (first + i) * 0x30
+                READ_SHORT fx op
+                READ_ASCII (fx + 0x14) res (8) NULL
+                PATCH_IF ((op = 146) OR (op = 148)) AND (~%res%~ STRING_EQUAL_CASE ~%spell%~) BEGIN
+                  SET casts = 1
+                END
+              END
+              PATCH_IF casts BEGIN
+                READ_SHORT (ab_off + a * 0x38 + 0x0e) rng
+                PATCH_IF (rng != target_range) BEGIN
+                  WRITE_SHORT (ab_off + a * 0x38 + 0x0e) target_range
+                END
+              END
+            END
+          END
+        BUT_ONLY
+      END
     END
   END
 END
@@ -614,10 +667,9 @@ BEGIN
 END
 
 // One named Cure spell: all of its owned Current HP effects become the selected roll and
-// every ability is lowered only to the decided casting-time ceiling.  Faster variants from
-// another mod are preserved.
+// every ability is set to the decided casting time and range unconditionally.
 DEFINE_ACTION_FUNCTION cbmagic_healing_apply_cure
-  INT_VAR target_ct = 0 bonus = 0 dice = 0 sides = 0 text_tra = 0
+  INT_VAR target_ct = (0 - 1) target_range = 10 bonus = 0 dice = 0 sides = 0 text_tra = 0
   STR_VAR symbol = ~~ label = ~~
 BEGIN
   LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
@@ -631,8 +683,8 @@ BEGIN
       PATCH_IF valid BEGIN
         LPF cbmagic_healing_set_roll INT_VAR bonus dice sides RET matched_local = matched changed = changed END
         SET matched = matched_local
-        LPF cbmagic_healing_lower_casting_time INT_VAR target_ct RET ct_changed = changed ct_already = already END
-        PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): %matched% healing effects use %dice% dice of %sides% sides + %bonus%; casting time lowered in %ct_changed% abilities (%ct_already% already as fast).~
+        LPF cbmagic_healing_set_delivery INT_VAR target_ct target_range RET ct_changed range_changed END
+        PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): %matched% healing effects use %dice% dice of %sides% sides + %bonus%; casting time updated in %ct_changed% abilities, range in %range_changed%.~
       END ELSE BEGIN
         SET malformed = 1
         PATCH_PRINT ~chriz-bg-magic: %label% (%spell%) is not patched: %reason%.~
@@ -640,11 +692,12 @@ BEGIN
     BUT_ONLY
     ACTION_IF !malformed BEGIN
       ACTION_IF (matched = 0) BEGIN
-        PRINT ~chriz-bg-magic: %label% (%spell%) has no healing effect to roll; its casting time changes all the same.~
+        PRINT ~chriz-bg-magic: %label% (%spell%) has no healing effect to roll; its delivery stats still update.~
       END
       OUTER_SPRINT body (AT text_tra)
       OUTER_SET text = RESOLVE_STR_REF (~%body%~)
       LAF cbmagic_write_text INT_VAR text STR_VAR spell END
+      LAF cbmagic_healing_scroll_range INT_VAR target_range STR_VAR spell END
     END
   END
 END
@@ -725,9 +778,9 @@ BEGIN
       END
       OUTER_SET target_ct = (direct_matches > 0) ? direct_ct : touch_ct
       COPY_EXISTING ~%spell%.spl~ ~override~
-        PATCH_IF (target_ct > 0) BEGIN
-          LPF cbmagic_healing_lower_casting_time INT_VAR target_ct RET ct_changed = changed ct_already = already END
-          PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): casting time target %target_ct%, changed in %ct_changed% abilities; %ct_already% already as fast.~
+        PATCH_IF (target_ct >= 0) BEGIN
+          LPF cbmagic_healing_set_delivery INT_VAR target_ct RET ct_changed range_changed END
+          PATCH_PRINT ~chriz-bg-magic: %label% (%spell%): casting time set to %target_ct%, updated in %ct_changed% abilities.~
         END
       BUT_ONLY
       OUTER_SPRINT body (AT text_tra)
@@ -737,10 +790,19 @@ BEGIN
   END
 END
 
+// Sync range across any game or mod-added scrolls casting the base Cure spells.
+DEFINE_ACTION_FUNCTION cbmagic_healing_cure_scrolls
+BEGIN
+  ACTION_FOR_EACH spell IN ~sppr103~ ~sppr315~ ~sppr401~ ~sppr502~ BEGIN
+    LAF cbmagic_healing_scroll_range INT_VAR target_range = 10 STR_VAR spell END
+  END
+END
+
 // IWDification's symbols simply log and skip when they are absent from SPELL.IDS.
 DEFINE_ACTION_FUNCTION cbmagic_healing_cure_moderate
 BEGIN
-  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 4 bonus = 4 dice = 2 sides = 8 text_tra = 60100
+  LAF cbmagic_healing_cure_scrolls END
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 2 target_range = 10 bonus = 4 dice = 2 sides = 8 text_tra = 60100
     STR_VAR symbol = ~CLERIC_CURE_MODERATE_WOUNDS~ label = ~Cure Moderate Wounds~ END
 END
 
@@ -749,12 +811,12 @@ END
 // private files named after them (CBHT40, CBHI500, CBHI700, ...).
 DEFINE_ACTION_FUNCTION cbmagic_healing_cause_iwd
 BEGIN
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 bonus = 4 dice = 2 sides = 8 text_tra = 60101
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 2 touch_ct = 2 bonus = 4 dice = 2 sides = 8 text_tra = 60101
     STR_VAR symbol = ~CLERIC_CAUSE_MODERATE_WOUNDS~ label = ~Cause Moderate Wounds~ tag = ~2~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 bonus = 7 dice = 2 sides = 8 text_tra = 60102
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 3 touch_ct = 3 bonus = 7 dice = 2 sides = 8 text_tra = 60102
     STR_VAR symbol = ~CLERIC_CAUSE_MEDIUM_WOUNDS~ label = ~Cause Medium Wounds~ tag = ~3~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 6 bonus = 7 dice = 3 sides = 8 text_tra = 60103
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 bonus = 7 dice = 3 sides = 8 text_tra = 60103
     STR_VAR symbol = ~CLERIC_CAUSE_SERIOUS_WOUNDS_IWD~ label = ~Cause Serious Wounds~ tag = ~9~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 7 touch_ct = 7 bonus = 12 dice = 4 sides = 8 text_tra = 60104
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 5 touch_ct = 5 bonus = 12 dice = 4 sides = 8 text_tra = 60104
     STR_VAR symbol = ~CLERIC_CAUSE_CRITICAL_WOUNDS_IWD~ label = ~Cause Critical Wounds~ tag = ~8~ END
 END
