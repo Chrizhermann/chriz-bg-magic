@@ -459,7 +459,7 @@
         "dispel-protection"
       ],
       "summary": "Reflected Image and Mirror Image no longer combine simultaneously; live Character Record displays active state cleanly.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-find-familiar",
@@ -520,7 +520,7 @@
       ],
       "summary": "AC and saving-throw bonuses belong to the Dodge type (stacking cleanly without doubling Defensive Harmony); Character Record state added.",
       "typedNote": "Dodge AC and saving-throw bonus (does not stack with Defensive Harmony).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-horror",
@@ -548,7 +548,7 @@
         "dispel-protection"
       ],
       "summary": "Duration adjusted to 8 hours (instead of 24 hours) with Character Record tracking.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-luck",
@@ -608,7 +608,7 @@
         "eeex"
       ],
       "summary": "Casting time lowered from 9 to 5 and sets a minimum Strength floor rather than erasing higher Strength from items.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-web",
@@ -913,7 +913,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can memorize and cast it.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-teleport-field",
@@ -943,7 +943,7 @@
       ],
       "summary": "THAC0, damage, and save bonuses belong to the Morale type; temporary Hit Points stack normally.",
       "typedNote": "Morale bonus (THAC0, damage, saves; does not stack with Hope, Righteous Wrath, Blood Rage, or Animal Rage).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-emotion-hope",
@@ -959,7 +959,7 @@
       ],
       "summary": "THAC0, damage, and save bonuses belong to the Morale type and stack cleanly without doubling Courage or Righteous Wrath.",
       "typedNote": "Morale bonus (THAC0, damage, saves; stacks temporary HP cleanly with other sources).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-cloudkill",
@@ -1160,7 +1160,7 @@
         "summon"
       ],
       "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom) in addition to slaying low-HD creatures and summons (Devas/Planetars remain immune).",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-pierce-magic",
@@ -1190,7 +1190,7 @@
         "dispel-protection"
       ],
       "summary": "Casting time lowered from 8 to 6 and interacts cleanly with updated illusion rules (including Spook).",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-power-word-silence",
@@ -1204,7 +1204,7 @@
         "save-mechanics"
       ],
       "summary": "School changed from Conjuration to Enchantment on both spell and scroll.",
-      "changeType": "rework"
+      "changeType": "fix"
     },
     {
       "slug": "wizard-improved-haste",
@@ -1261,7 +1261,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school on spell and scroll so every specialist mage can learn and cast it.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-conjure-fire-elemental",
@@ -1275,7 +1275,7 @@
         "summon"
       ],
       "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-conjure-air-elemental",
@@ -1289,7 +1289,7 @@
         "summon"
       ],
       "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-conjure-earth-elemental",
@@ -1303,7 +1303,7 @@
         "summon"
       ],
       "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-conjure-water-elemental",
@@ -1320,7 +1320,7 @@
       "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD Water Elementals (64/35/1% at level 12 -> 56/35/9% at level 20), 3-round control contest, and standardized name.",
       "name": "Conjure Water Elemental",
       "vanillaSource": "iwd:SPWI533",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-trollish-fortitude",
@@ -1337,7 +1337,7 @@
       ],
       "summary": "Belongs to the Regeneration family so higher-level Regenerate or Mass Regenerate replaces it cleanly.",
       "typedNote": "Regeneration family.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-project-image",
@@ -1396,7 +1396,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school on both spell and scroll so specialists keep access.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-sphere-of-chaos",
@@ -1452,7 +1452,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to Enchantment school and creatures protected by Free Action are immune.",
-      "changeType": "rework"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "wizard-simulacrum",
@@ -1525,7 +1525,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school on spell and scroll so all specialist mages can memorize it.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-incendiary-cloud",
@@ -1665,7 +1665,7 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can cast it.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "wizard-power-word-kill",
@@ -1679,7 +1679,7 @@
         "save-mechanics"
       ],
       "summary": "School changed from Conjuration to Enchantment on both spell and scroll.",
-      "changeType": "rework"
+      "changeType": "fix"
     },
     {
       "slug": "wizard-shapechange",
@@ -1817,7 +1817,7 @@
       ],
       "summary": "Restricted to Druids, Shamans, and Rangers (Clerics/Paladins excluded); keeps vanilla weapon stats.",
       "access": "Druid / Shaman / Ranger",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-faerie-fire",
@@ -1850,7 +1850,7 @@
       "summary": "IWD Curse penalties (THAC0, damage, saves, Luck) are typed Curse so they do not double-stack with Doom or Unholy Blight.",
       "access": "Cleric",
       "typedNote": "Curse penalty (THAC0, damage, saves, Luck; strongest Curse penalty applies).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-doom",
@@ -1899,7 +1899,7 @@
       "summary": "Restricted to Druids and Rangers; its saving-throw bonus counts as Deflection while base AC keeps the engine's best-base-AC rule.",
       "access": "Druid / Ranger",
       "typedNote": "Saves count as Deflection; base AC still follows the engine's best-base-AC rule.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-chant",
@@ -1916,7 +1916,7 @@
       "summary": "Decomposed so its saving-throw modifiers count as Favor and its Luck modifiers count as Luck (both allies and enemies).",
       "access": "Cleric",
       "typedNote": "Favor saving-throw bonus/penalty + Luck modifier; decomposed into separate typed effects.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-flame-blade",
@@ -1932,7 +1932,7 @@
       ],
       "summary": "Restricted to Druids/Rangers and created blade strikes as a +1 magical weapon.",
       "access": "Druid / Ranger",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-silence-15-radius",
@@ -1975,7 +1975,7 @@
       ],
       "summary": "Paired with Champion's Strength (Champion's Strength removes and blocks Draw Upon Divine Might while active) while coexisting with other Transformation buffs.",
       "typedNote": "Exclusive pair with Champion's Strength (Champion's Strength replaces and blocks Draw Upon Holy Might while active).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-cure-moderate-wounds",
@@ -2116,7 +2116,7 @@
       ],
       "summary": "Sets a minimum 18/75 Strength floor on the party instead of overriding higher item Strength (under EEex).",
       "access": "Cleric",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-unholy-blight",
@@ -2133,7 +2133,7 @@
       "summary": "Area damage bypasses Mirror Image, and its evil-target penalty counts as Curse so it does not double-stack with Doom or Curse.",
       "access": "Cleric",
       "typedNote": "Curse penalty on evil-path/matching targets; does not stack with Doom or Curse penalties.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-cure-medium-wounds",
@@ -2179,7 +2179,7 @@
       "summary": "Allies' +1 and enemies' -1 THAC0, damage, and saving-throw modifiers count as Favor (shared with Bless, Recitation, and Chant saves).",
       "access": "Cleric",
       "typedNote": "Favor bonus/penalty (+1 allies / -1 enemies on THAC0, damage, saves).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-icelance",
@@ -2211,7 +2211,7 @@
       ],
       "summary": "Swarm dispersion interactions with Death Spell and normal-weapon/fire immunity effects cleaned up cleanly.",
       "access": "Druid / Shaman / Ranger",
-      "changeType": "rework"
+      "changeType": "nerf"
     },
     {
       "slug": "divine-cause-medium-wounds",
@@ -2259,7 +2259,7 @@
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
       "access": "Druid / Ranger",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-free-action",
@@ -2412,7 +2412,7 @@
       "access": "Cleric",
       "descriptionTra": "tra:50101",
       "typedNote": "Favor bonus/penalty (+2 allies / -2 enemies on THAC0 and saving throws).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-blood-rage",
@@ -2447,7 +2447,7 @@
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
       "access": "Druid / Ranger",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-cure-critical-wounds",
@@ -2478,7 +2478,7 @@
       ],
       "summary": "Casting time lowered from 8 to 5 and AoE fire damage bypasses Mirror Image cleanly.",
       "access": "Cleric",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-true-seeing",
@@ -2493,7 +2493,7 @@
         "dispel-protection"
       ],
       "summary": "Casting time lowered from 8 to 6 and dispels/counters illusions including Spook cleanly.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-stoneskin",
@@ -2590,7 +2590,7 @@
       "summary": "Casting time lowered 9 -> 5, sets an 18/00 Strength floor under its Strength bonus, and joins the Transformation family.",
       "access": "Cleric",
       "typedNote": "Transformation family (replaces/blocks lower-level Transformation buffs; Strength floor 19 +1/+2 size).",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-mass-cure",
@@ -2621,7 +2621,7 @@
       ],
       "summary": "Insect swarm dispersed by Death Spell and blocked cleanly by Fire Shield / Protection From Normal Weapons / Wraithform.",
       "access": "Druid / Shaman / Ranger",
-      "changeType": "rework"
+      "changeType": "nerf"
     },
     {
       "slug": "divine-mass-regenerate",
@@ -2695,7 +2695,7 @@
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
       "access": "Druid / Ranger",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-blade-barrier",
@@ -2727,7 +2727,7 @@
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
       "access": "Druid / Ranger",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-conjure-fire-elemental",
@@ -2743,7 +2743,7 @@
       ],
       "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20), standardized elemental naming, and Character Record tracking.",
       "access": "Druid / Ranger",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-conjure-air-elemental",
@@ -2776,7 +2776,7 @@
       ],
       "summary": "Casting time lowered 9 -> 6, AoE blast bypasses Mirror Image, and created Fire Seeds can be removed by Dispel/Remove Magic.",
       "access": "Druid / Ranger",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-heal",
@@ -2805,7 +2805,7 @@
         "healing"
       ],
       "summary": "Casting time 7 touch attack reduces target to 1 HP (or heals undead completely) with private touch-item cleanup.",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-false-dawn",
@@ -2852,7 +2852,7 @@
       ],
       "summary": "Casting time lowered from 9 to 6 with consistent radiant damage delivery.",
       "access": "Cleric",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-physical-mirror",
@@ -2883,7 +2883,7 @@
       "summary": "AC and saving-throw bonuses count as Deflection so they do not double-stack with Aura of Flaming Death or Spirit Armor/Barkskin saves.",
       "access": "Cleric",
       "typedNote": "Deflection AC and saving-throw bonus (does not stack with Aura of Flaming Death or Spirit Armor/Barkskin saves).",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     },
     {
       "slug": "divine-conjure-earth-elemental",
@@ -2899,7 +2899,7 @@
       ],
       "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20) and standardized elemental names.",
       "access": "Druid / Ranger",
-      "changeType": "buff"
+      "changeType": "minor-buff"
     },
     {
       "slug": "divine-gate",
@@ -3069,7 +3069,7 @@
       ],
       "summary": "Dispersion by Death Spell and protection interactions (Fire Shield, Normal Weapons, Wraithform) updated cleanly.",
       "access": "Druid / Shaman / Ranger",
-      "changeType": "rework"
+      "changeType": "nerf"
     },
     {
       "slug": "divine-symbol-stun",
@@ -3169,7 +3169,7 @@
       "summary": "AC and saving-throw bonuses belong to the Deflection type (does not double-stack with Entropy Shield) while fire shield protections stay clear.",
       "access": "Cleric HLA",
       "typedNote": "Deflection AC and saving-throw bonus.",
-      "changeType": "nerf"
+      "changeType": "minor-nerf"
     }
   ]
 }

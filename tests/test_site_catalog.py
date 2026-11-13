@@ -23,7 +23,7 @@ from harness import check, test  # noqa: E402
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ALLOWED_TRADITIONS = {"wizard", "divine"}
 ALLOWED_ORIGINS = {"modified", "new", "iwd-optional"}
-ALLOWED_CHANGE_TYPES = {"buff", "nerf", "rework", "new", "fix"}
+ALLOWED_CHANGE_TYPES = {"buff", "minor-buff", "nerf", "minor-nerf", "rework", "new", "fix"}
 ALLOWED_TAGS = {
     "typed-bonus",
     "family",

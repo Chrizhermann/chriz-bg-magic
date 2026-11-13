@@ -426,7 +426,9 @@ def export_catalog(
     wizard_count = sum(1 for s in exported_spells if s["tradition"] == "wizard")
     divine_count = sum(1 for s in exported_spells if s["tradition"] == "divine")
     buff_count = sum(1 for s in exported_spells if s["changeType"] == "buff")
+    minor_buff_count = sum(1 for s in exported_spells if s["changeType"] == "minor-buff")
     nerf_count = sum(1 for s in exported_spells if s["changeType"] == "nerf")
+    minor_nerf_count = sum(1 for s in exported_spells if s["changeType"] == "minor-nerf")
     rework_count = sum(1 for s in exported_spells if s["changeType"] == "rework")
     new_count = sum(1 for s in exported_spells if s["changeType"] == "new")
     fix_count = sum(1 for s in exported_spells if s["changeType"] == "fix")
@@ -438,7 +440,9 @@ def export_catalog(
             "totalSpells": len(exported_spells),
             "balanceChanges": len(exported_spells) - fix_count,
             "buffs": buff_count,
+            "minorBuffs": minor_buff_count,
             "nerfs": nerf_count,
+            "minorNerfs": minor_nerf_count,
             "reworks": rework_count,
             "newSpells": new_count,
             "fixes": fix_count,
