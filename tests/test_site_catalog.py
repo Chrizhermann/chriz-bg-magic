@@ -139,6 +139,42 @@ def test_site_catalog(work, _weidu=None):
         for hl_slug in slugs:
             check(hl_slug in seen_slugs, f"Unknown spellSlug {hl_slug!r} on highlight {hl.get('id')}")
 
+    jargon_re = re.compile(
+        r"BOTH gender|\bgender\b|\bopcode\b|\.(spl|itm|eff|cre|lua|tpa|tp2|ids|2da)\b"
+        r"|\bSPWI\d|\bSPPR\d|\bPROJIMAG\b|\bM_CBM|\bpayload|\bdecomposed\b"
+        r"|\breciprocity\b|\bretaliation procs?\b|\bsave branch|\bscroll deliver"
+        r"|\bprivate touch-item|\bschoolless\b|\b3e-grounded\b|\bDraw Upon Divine Might\b"
+        r"|floor\(|min\(L|max\(L|\bcleanly\b",
+        re.IGNORECASE,
+    )
+    prose_blobs = []
+    for hl in source.get("highlights", []):
+        prose_blobs.append((f"highlight:{hl.get('id')}.summary", hl.get("summary", "")))
+        for idx, bullet in enumerate(hl.get("bullets", [])):
+            prose_blobs.append((f"highlight:{hl.get('id')}.bullets[{idx}]", bullet))
+        for idx, q in enumerate(hl.get("openQuestions", [])):
+            prose_blobs.append((f"highlight:{hl.get('id')}.openQuestions[{idx}]", q))
+    for bt in source.get("bonusTypes", []):
+        prose_blobs.append((f"bonusTypes:{bt.get('type')}.affectedValues", bt.get("affectedValues", "")))
+        prose_blobs.append((f"bonusTypes:{bt.get('type')}.notes", bt.get("notes", "")))
+        for idx, sp in enumerate(bt.get("spells", [])):
+            prose_blobs.append((f"bonusTypes:{bt.get('type')}.spells[{idx}]", sp))
+    for fam in source.get("exclusiveFamilies", []):
+        prose_blobs.append((f"exclusiveFamilies:{fam.get('family')}.family", fam.get("family", "")))
+        prose_blobs.append((f"exclusiveFamilies:{fam.get('family')}.rule", fam.get("rule", "")))
+        for idx, mem in enumerate(fam.get("members", [])):
+            prose_blobs.append((f"exclusiveFamilies:{fam.get('family')}.members[{idx}]", mem))
+    for rule in source.get("systemRules", []):
+        prose_blobs.append((f"systemRules:{rule.get('title')}.title", rule.get("title", "")))
+        prose_blobs.append((f"systemRules:{rule.get('title')}.summary", rule.get("summary", "")))
+    for entry in source["spells"]:
+        prose_blobs.append((f"spell:{entry['slug']}.summary", entry.get("summary", "")))
+        if entry.get("typedNote"):
+            prose_blobs.append((f"spell:{entry['slug']}.typedNote", entry["typedNote"]))
+    for label, text in prose_blobs:
+        match = jargon_re.search(text)
+        check(not match, f"Engine jargon / leak {match.group(0)!r} in {label}: {text!r}" if match else "")
+
     internal_set = {r.lower() for r in source["internalResrefs"]}
     check(not (covered_defs & internal_set), f"Overlap between spells and internalResrefs: {covered_defs & internal_set}")
 
