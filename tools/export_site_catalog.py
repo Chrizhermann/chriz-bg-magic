@@ -375,6 +375,28 @@ def export_catalog(
         icon_file = out_icons_dir / f"{entry['slug']}.webp"
         icon_img.save(icon_file, format="WEBP", lossless=True, quality=100)
 
+        vanilla_desc = ""
+        vanilla_name = ""
+        vanilla_spec = entry.get("vanillaSource")
+        if entry["origin"] != "new" and vanilla_spec != "none":
+            if vanilla_spec:
+                v_kind, v_ref = vanilla_spec.split(":", 1)
+                v_archive = iwdee if v_kind == "iwd" else bg2ee
+                v_bytes = v_archive.get_resource(v_ref, 0x3EE, "spl")
+            elif src_kind == "iwd":
+                v_archive = iwdee
+                v_bytes = iwdee.get_resource(src_ref, 0x3EE, "spl")
+            else:
+                v_archive = bg2ee
+                v_bytes = bg2ee.get_resource(entry["resref"], 0x3EE, "spl")
+                if v_bytes is None:
+                    v_archive = iwdee
+                    v_bytes = iwdee.get_resource(entry["resref"], 0x3EE, "spl")
+            if v_bytes is not None:
+                v_parsed = parse_binary_spl(v_bytes, v_archive)
+                vanilla_desc = clean_ie_text(v_parsed["description"])
+                vanilla_name = clean_ie_text(v_parsed["name"]).strip()
+
         out_entry = {
             "slug": entry["slug"],
             "name": name,
@@ -384,11 +406,16 @@ def export_catalog(
             "levelLabel": entry["levelLabel"],
             "school": school,
             "origin": entry["origin"],
+            "changeType": entry["changeType"],
             "tags": entry["tags"],
             "summary": entry["summary"],
             "description": description,
             "icon": icon_rel,
         }
+        if vanilla_desc:
+            out_entry["vanillaDescription"] = vanilla_desc
+            if vanilla_name and vanilla_name.lower() != name.lower():
+                out_entry["vanillaName"] = vanilla_name
         for opt in ("access", "relatedResrefs", "typedNote"):
             if opt in entry and entry[opt]:
                 out_entry[opt] = entry[opt]
@@ -398,16 +425,25 @@ def export_catalog(
 
     wizard_count = sum(1 for s in exported_spells if s["tradition"] == "wizard")
     divine_count = sum(1 for s in exported_spells if s["tradition"] == "divine")
-    new_count = sum(1 for s in exported_spells if s["origin"] == "new")
+    buff_count = sum(1 for s in exported_spells if s["changeType"] == "buff")
+    nerf_count = sum(1 for s in exported_spells if s["changeType"] == "nerf")
+    rework_count = sum(1 for s in exported_spells if s["changeType"] == "rework")
+    new_count = sum(1 for s in exported_spells if s["changeType"] == "new")
+    fix_count = sum(1 for s in exported_spells if s["changeType"] == "fix")
     iwd_count = sum(1 for s in exported_spells if s["origin"] == "iwd-optional")
 
     catalog = {
         "mod": source["mod"],
         "stats": {
             "totalSpells": len(exported_spells),
+            "balanceChanges": len(exported_spells) - fix_count,
+            "buffs": buff_count,
+            "nerfs": nerf_count,
+            "reworks": rework_count,
+            "newSpells": new_count,
+            "fixes": fix_count,
             "wizardSpells": wizard_count,
             "divineSpells": divine_count,
-            "newSpells": new_count,
             "iwdOptionalSpells": iwd_count,
         },
         "bonusTypes": source["bonusTypes"],

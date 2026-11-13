@@ -104,77 +104,125 @@
   "highlights": [
     {
       "id": "celestials",
-      "title": "Celestial Summons (Devas & Planetars)",
-      "badge": "Open for Community Feedback",
-      "summary": "Rebalanced 3e-grounded Devas and Planetars without permanent Haste, clearer spellbooks, player spell selection, and a 1 Deva + 1 Planetar party cap.",
+      "direction": "rework",
+      "badge": "Discussion · Celestials",
+      "title": "Devas & Planetars",
+      "spellSlugs": [
+        "wizard-summon-planetar",
+        "wizard-summon-dark-planetar",
+        "divine-summon-deva",
+        "divine-summon-fallen-deva"
+      ],
+      "summary": "Rebalanced 3e-grounded Devas (3 turns) and Planetars (2 turns) without permanent Haste, plus a 1 Deva + 1 Planetar party cap.",
       "bullets": [
-        "Casting time is 1 round (9), range 30 ft., lasting 3 turns for Devas and 2 turns for Planetars.",
-        "Planetars have 18 HD and 171 HP (instead of permanent Haste); Devas have 14 HD and 136 HP; every listed weapon hit/status matches in-game numbers.",
-        "Both carry BOTH gender so Death Spell cannot kill a creature listed as death-magic immune, and you control which spells they cast.",
-        "Party cap allows up to one Deva (or Fallen Deva) and one Planetar (or Dark Planetar) simultaneously across Clerics, Paladins, and Wizards."
+        "Planetars have 18 HD / 152 HP (no permanent Haste); Devas have 14 HD / 136 HP; you control their spellbooks.",
+        "Casting time 9, range 30 ft., BOTH gender so Death Spell ignores death-magic-immune celestials.",
+        "Cap allows up to one Deva/Fallen Deva and one Planetar/Dark Planetar simultaneously."
       ],
       "openQuestions": [
-        "Are the new 3e-inspired stats, 2–3 turn durations, and removal of permanent Planetar Haste strong enough against high-level ToB encounters without trivializing fights?",
-        "Should any spells be swapped on the Deva or Planetar level-by-level spell lists, or should the 1 Deva + 1 Planetar limit work differently?"
+        "Are the 2–3 turn durations and Planetar stats without permanent Haste strong enough for ToB fights?",
+        "Should 1 Deva + 1 Planetar remain allowed together, or should the cap be 1 celestial total?"
       ]
     },
     {
-      "id": "typed-buffs",
-      "title": "Typed Buff Stacking & Exclusive Families",
-      "badge": "EEex Powered",
-      "summary": "Six clear buff types (Morale, Favor, Luck, Dodge, Deflection, Curse) plus exclusive Transformation and Regeneration families end bloated additive stacking while keeping recasts smooth.",
+      "id": "improved-haste",
+      "direction": "rework",
+      "badge": "Discussion · Haste & APR",
+      "title": "Improved Haste & Attack Cap",
+      "spellSlugs": [
+        "wizard-improved-haste",
+        "wizard-haste",
+        "divine-righteous-wrath-of-the-faithful",
+        "wizard-slow"
+      ],
+      "summary": "Reworked from free single-target 2x APR (10 APR) into a 15-ft. party combat buff (+1 non-stacking APR, +2 THAC0/AC/Breath).",
       "bullets": [
-        "For each stat and type, the strongest bonus and strongest penalty apply together; suppressed buffs stay on the target and resume if the stronger buff expires.",
-        "Haste, Improved Haste, and Righteous Wrath of the Faithful coexist peacefully: only one extra attack counts at a time (EEex).",
-        "Strength-setting spells (Strength, Strength of One, Divine Power, Righteous Magic, Champion's Strength, Blood/Animal Rage) set a minimum floor instead of erasing gear Strength."
+        "Lasts 1 turn (cast time 6), grants +6 movement and Slow immunity, and coexists with Haste / RWotF under the 1-extra-APR cap (EEex).",
+        "Haste and Slow cancel each other cleanly across spells and items."
+      ],
+      "openQuestions": [
+        "Keep tuning this party-buff version slightly upward, or let Improved Haste unlock a higher APR ceiling (e.g. 6–7 APR with EEex) instead of auto-doubling?"
+      ]
+    },
+    {
+      "id": "dispelling-screen",
+      "direction": "rework",
+      "badge": "Discussion · Protections",
+      "title": "Dispelling Screen & Pierce Magic",
+      "spellSlugs": [
+        "wizard-dispelling-screen",
+        "wizard-breach",
+        "wizard-pierce-magic",
+        "wizard-lower-resistance"
+      ],
+      "summary": "Dispelling Screen replaces Spell Immunity with a 15-ft. party shield blocking one Breach or Dispel/Remove Magic.",
+      "bullets": [
+        "Lasts 5 turns; Spell Immunity sub-spells (SPWI590–597) redirect here so existing AI scripts cast it automatically.",
+        "Pierce Magic halves target Magic Resistance (min 10%, max 40% for 5 rounds, EEex); Lower Resistance removes 30% + 1%/level."
+      ],
+      "openQuestions": [
+        "Does Dispelling Screen need a short ~1s grace window after popping to absorb double-dispel sequencers?",
+        "How should Breach and dispels interact with Entropy Shield once AI support lands?"
+      ]
+    },
+    {
+      "id": "typed-stacking",
+      "direction": "rework",
+      "badge": "Discussion · Buff Stacking",
+      "title": "Typed Bonuses & Transformations",
+      "spellSlugs": [
+        "divine-bless",
+        "divine-chant",
+        "divine-defensive-harmony",
+        "wizard-tensers-transformation",
+        "divine-divine-power"
+      ],
+      "summary": "Six bonus types (Morale, Favor, Luck, Dodge, Deflection, Curse) and exclusive Transformations replace blind buff stacking.",
+      "bullets": [
+        "Strongest bonus and penalty per stat and type apply; weaker buffs stay active underneath and resume if needed.",
+        "Strength-granting spells set a Strength floor (EEex) instead of overwriting higher gear Strength."
+      ],
+      "openQuestions": [
+        "Does typed non-stacking make pre-buffing cleaner, or is any specific combination missed?"
+      ]
+    },
+    {
+      "id": "cc-saves-illusions",
+      "direction": "nerf",
+      "badge": "Combat Rules",
+      "title": "Wake on Damage, Saves & Clones",
+      "spellSlugs": [
+        "wizard-sleep",
+        "wizard-skull-trap",
+        "wizard-mirror-image",
+        "wizard-polymorph-self",
+        "wizard-simulacrum"
+      ],
+      "summary": "Sleeping/unconscious foes wake on hit, major AoEs roll Save vs. Breath and bypass Mirror Image, and clones lose item exploits.",
+      "bullets": [
+        "Wake on damage applies across Sleep, Color Spray, Command, Greater Command, Stinking Cloud, and Hopelessness.",
+        "Skull Trap caps at 12d6; Simulacrum keeps class/kit innates & level-scaled HLAs (EEex) without quick-slot abuse.",
+        "Polymorph Self and Shapechange deliver 7 rebuilt forms each with honest stats."
       ],
       "openQuestions": []
     },
     {
-      "id": "healing-overhaul",
-      "title": "Healing & Cause Wounds Scaling",
-      "badge": "Core Balance",
-      "summary": "Cure and Cause Wounds scale with real die-plus-flat healing, streamlined casting times, and clean undead reciprocity.",
-      "bullets": [
-        "Cure Light (1d8+5, CT 4), Moderate (2d8+4, CT 4), Medium (2d8+7, CT 4), Serious (3d8+7, CT 6), Critical (4d8+12, CT 7), and Mass Cure (1d8+1/level, CT 4).",
-        "Heal drops to casting time 6 (full HP + disease/blindness/Feeblemind cure); Mass Regenerate adds 2 HP/round (1 HP/3s) party regeneration at level 5.",
-        "Cause Wounds mirror Cure Wounds numbers and heal undead instead of harming them; Slow Poison keeps instant poison removal like the base game."
+      "id": "divine-casting-cures",
+      "direction": "buff",
+      "badge": "Divine & New Spells",
+      "title": "Faster Divine Casting & 6 New Spells",
+      "spellSlugs": [
+        "divine-stoneskin",
+        "divine-silence-15-radius",
+        "divine-cure-critical-wounds",
+        "divine-heal",
+        "divine-faerie-fire",
+        "divine-mass-regenerate"
       ],
-      "openQuestions": []
-    },
-    {
-      "id": "magic-resistance",
-      "title": "Pierce Magic, Magic Resistance & Dispelling Screen",
-      "badge": "Caster Duels",
-      "summary": "Pierce Magic scales off half the target's current MR, Dispelling Screen absorbs one Breach or Dispel, and Protection vs. Breach follows clear rules.",
+      "summary": "Streamlined casting times and real die+flat Cure/Cause scaling, enemy-only Silence, plus six new Wizard & Divine spells.",
       "bullets": [
-        "Pierce Magic reduces target Magic Resistance by half its current value rounded down (min 10, max 40 points) for 5 rounds when EEex is active.",
-        "Dispelling Screen blocks one Dispel/Remove Magic or Breach (stripping the screen first) across arcane and divine dispel abilities.",
-        "Minor Spell Deflection caps cleanly at spell level 4; Dispel Magic & Remove Magic also destroy summoned Nishruu and Hakeashar and dispellable created weapons."
-      ],
-      "openQuestions": []
-    },
-    {
-      "id": "forms-and-controls",
-      "title": "Polymorph Self, Shapechange & Crowd Control Rules",
-      "badge": "Tactical Play",
-      "summary": "6 rebuilt Polymorph Self forms and 6 Shapechange forms with exact combat numbers, plus Wake on Damage on sleep/stun effects and Breath saves on big AoE blasts.",
-      "bullets": [
-        "Polymorph Self forms (Hill Giant, Ogre Mage, Giant Spider, Mustard Jelly, Hell Hound, Rat) & Shapechange forms (Greater Wolfwere, Iron Golem, Mind Flayer, Earth Elemental, Death Knight, Greater Basilisk) list exact AC, THAC0, APR, damage, resistances, and special abilities.",
-        "Sleep, Color Spray, Command, Greater Command, Power Word: Sleep, Stinking Cloud, Sphere of Chaos, and Emotion: Hopelessness wake victims when damaged.",
-        "Fireball, Delayed Blast Fireball, and Cone of Cold roll against Breath instead of Spell; Web, Grease, Entangle, and Stinking Cloud enforce logical creature immunities."
-      ],
-      "openQuestions": []
-    },
-    {
-      "id": "protagonist-survival",
-      "title": "Protagonist Petrification/Imprisonment, Simulacrum & Familiars",
-      "badge": "EEex & Quality of Life",
-      "summary": "Petrification or Imprisonment on the main character no longer triggers an instant game over while companions remain active, plus cleaner Simulacrum and EET Find Familiar.",
-      "bullets": [
-        "If companions remain able to act and carry or can reach a real cure (Stone to Flesh / Freedom), the party can carry on and rescue the protagonist; real dead ends still end cleanly.",
-        "Simulacrum clones keep their real class/kit innates and HLAs (under EEex) instead of empty or infinite-item exploits; Project Image disables quick-slot items and innates.",
-        "Find Familiar belongs to Universal so specialists can cast it, with campaign HP tiers clearly listed across BG1, SoD, SoA, and ToB."
+        "Cure/Cause Wounds scale from 1d8+5 (CT 4) up to 4d8+12 (CT 7) with undead reciprocity; Heal drops to CT 6.",
+        "New spells: Faerie Fire (L1), Mass Regenerate (L5), Icelance & Conjure Air Elemental (Druid), Protection from Cold (L3) & Acid (L4)."
       ],
       "openQuestions": []
     }
@@ -340,7 +388,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Lists creature immunities clearly and prevents catching flying, incorporeal, or inherently slippery/massive foes."
+      "summary": "Lasts 3 + 1 round/level (4–23 rounds), switches save to Save vs. Breath (+2), and makes flying, incorporeal, and dragon creatures immune.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-color-spray",
@@ -353,7 +402,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Creatures put unconscious by Color Spray now wake upon taking damage; description updated to match."
+      "summary": "Creatures put unconscious by Color Spray now wake upon taking damage; description updated to match.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-blindness",
@@ -366,7 +416,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Range 40 ft., casting time 2, duration 1 round/2 levels (2–5 rounds); applies -4 THAC0 and -4 AC on failed Save vs. Spell."
+      "summary": "Duration shortened from 2 hours to 1 round per 2 caster levels (2–5 rounds); applies -4 THAC0 and -4 AC on failed Save vs. Spell.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-sleep",
@@ -379,7 +430,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Targets put to sleep wake when damaged; description updated."
+      "summary": "Targets put to sleep wake when damaged; description updated.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-chromatic-orb",
@@ -392,7 +444,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Damage and effect scaling updated cleanly with consistent saving-throw and stun/petrification rules."
+      "summary": "Drops the +6 enemy save bonus, unlocks Conjurers, extends range to 50 ft., and scales up to 2d8 magic damage + 3-round stun (L5) or 13-round hold (L7+).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-reflected-image",
@@ -405,7 +458,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Reflected Image and Mirror Image no longer combine simultaneously; live Character Record displays active state cleanly."
+      "summary": "Reflected Image and Mirror Image no longer combine simultaneously; live Character Record displays active state cleanly.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-find-familiar",
@@ -420,7 +474,8 @@
         "save-mechanics"
       ],
       "summary": "Moved to the Universal school (castable by any specialist) with cleared scroll specialist locks and campaign-tiered familiar HP across BG1, SoD, SoA, and ToB.",
-      "descriptionTra": "tra:60105"
+      "descriptionTra": "tra:60105",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-nahals-reckless-dweomer",
@@ -433,8 +488,9 @@
       "tags": [
         "eeex"
       ],
-      "summary": "Wild surge handling and Character Record status tracking cleaned up; surge outcomes obey updated wake-on-damage/control rules.",
-      "access": "Wild Mage"
+      "summary": "Loses Aura Cleansing: casting Nahal's Reckless Dweomer now obeys the normal 1-spell-per-round aura timer.",
+      "access": "Wild Mage",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-spook",
@@ -447,7 +503,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Clearly states interaction with True Sight / True Seeing and illusion/mind protections; Character Record state cleaned up."
+      "summary": "Undead and creatures under True Seeing / True Sight are properly immune; description updated.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-blur",
@@ -462,7 +519,8 @@
         "eeex"
       ],
       "summary": "AC and saving-throw bonuses belong to the Dodge type (stacking cleanly without doubling Defensive Harmony); Character Record state added.",
-      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Defensive Harmony)."
+      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Defensive Harmony).",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-horror",
@@ -475,7 +533,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Fear effects and Character Record state cleanup updated consistently."
+      "summary": "Undead are properly immune across spell and scroll deliveries.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-invisibility",
@@ -488,7 +547,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Duration adjusted to 8 hours (instead of 24 hours) with Character Record tracking."
+      "summary": "Duration adjusted to 8 hours (instead of 24 hours) with Character Record tracking.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-luck",
@@ -503,7 +563,8 @@
         "eeex"
       ],
       "summary": "Duration extended to 15 rounds (from 3), refreshes cleanly on recast, and Luck modifiers are typed so Chant does not double-stack.",
-      "typedNote": "Luck bonus (does not stack with Chant's Luck bonus)."
+      "typedNote": "Luck bonus (does not stack with Chant's Luck bonus).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-mirror-image",
@@ -517,7 +578,8 @@
         "dispel-protection",
         "save-mechanics"
       ],
-      "summary": "Does not combine with Reflected Image, area-of-effect spell damage bypasses images cleanly, and Character Record shows active state."
+      "summary": "Does not combine with Reflected Image, area-of-effect spell damage bypasses images cleanly, and Character Record shows active state.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-stinking-cloud",
@@ -530,7 +592,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Conjuration/Summoning; unconscious targets wake on damage, and poison-immune/non-breathing/incorporeal foes are immune."
+      "summary": "Moved to Conjuration/Summoning; unconscious targets wake on damage, and poison-immune/non-breathing/incorporeal foes are immune.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-strength",
@@ -544,7 +607,8 @@
         "casting-time",
         "eeex"
       ],
-      "summary": "Casting time lowered from 9 to 5 and sets a minimum Strength floor rather than erasing higher Strength from items."
+      "summary": "Casting time lowered from 9 to 5 and sets a minimum Strength floor rather than erasing higher Strength from items.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-web",
@@ -557,7 +621,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Conjuration/Summoning; incorporeal monsters, dragons, true beholders, and mephits are properly immune while spiders stay immune."
+      "summary": "Switches save to Save vs. Breath (-2), moves to Conjuration, and makes spiders, slimes, dragons, flying, and incorporeal foes immune.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-power-word-sleep",
@@ -570,7 +635,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Enchantment/Charm and updated so taking damage wakes sleeping targets."
+      "summary": "Moved to Enchantment/Charm and updated so taking damage wakes sleeping targets.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-clairvoyance",
@@ -583,7 +649,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Works indoors and outdoors and grants dispellable backstab immunity for 3 rounds + 1 round per 2 levels (up to 10 rounds at level 19)."
+      "summary": "Works indoors and outdoors and grants dispellable backstab immunity for 3 rounds + 1 round per 2 levels (up to 10 rounds at level 19).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-remove-magic",
@@ -596,7 +663,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Strips Dispelling Screen first, removes dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+      "summary": "Strips Dispelling Screen first, removes dispellable created weapons, and destroys summoned Nishruu and Hakeashar.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-fireball",
@@ -609,7 +677,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image as an area-of-effect spell."
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image as an area-of-effect spell.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-haste",
@@ -623,7 +692,8 @@
         "save-mechanics",
         "eeex"
       ],
-      "summary": "Cancels and opposes Slow cleanly and no longer terminates Improved Haste or Righteous Wrath; extra attacks follow the single-bonus-attack cap (EEex)."
+      "summary": "Cancels and opposes Slow cleanly and no longer terminates Improved Haste or Righteous Wrath; extra attacks follow the single-bonus-attack cap (EEex).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-invisibility-sphere",
@@ -637,7 +707,8 @@
         "casting-time",
         "dispel-protection"
       ],
-      "summary": "Renamed to Invisibility Sphere, casting time reduced from 9 to 1, duration set to 1 turn, using an ally-only radius."
+      "summary": "Renamed to Invisibility Sphere, casting time reduced from 9 to 1, duration set to 1 turn, using an ally-only radius.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-lightning-bolt",
@@ -650,7 +721,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Area damage and bouncing bolt rules updated cleanly (bypasses Mirror Image)."
+      "summary": "Keeps classic bouncing bolt behavior and switches to Save vs. Breath for half damage (bypassing Mirror Image).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-slow",
@@ -663,7 +735,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Cancels and is cancelled by Haste/Improved Haste cleanly with consistent EEex tracking."
+      "summary": "Cancels and is cancelled by Haste/Improved Haste cleanly with consistent EEex tracking.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-skull-trap",
@@ -676,7 +749,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "AoE detonation damage properly bypasses Mirror Image."
+      "summary": "Damage capped at 12d6 (was uncapped 20d6), switches to Save vs. Breath for half damage, and bypasses Mirror Image.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-wraithform",
@@ -689,7 +763,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Clearly protects against normal weapons and insect swarms while active."
+      "summary": "Clearly protects against normal weapons and insect swarms while active.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-minor-spell-deflection",
@@ -702,7 +777,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Fixed to absorb spells only up to 4th level (was 7th) with live Character Record tracking."
+      "summary": "Fixed to absorb spells only up to 4th level (was 7th) with live Character Record tracking.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-dispel-magic",
@@ -715,7 +791,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-icelance",
@@ -729,7 +806,8 @@
         "iwd-optional",
         "save-mechanics"
       ],
-      "summary": "Deals 5d6 guaranteed cold damage within 100 ft.; Save vs. Spell negates only the 3-round stun, never the cold damage."
+      "summary": "Deals 5d6 guaranteed cold damage within 100 ft.; Save vs. Spell negates only the 3-round stun, never the cold damage.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-confusion",
@@ -742,7 +820,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Duration scales evenly from 4 rounds (levels 1–14) to 5 rounds (15–19) and 6 rounds (level 20+), keeping the -2 Save vs. Spell."
+      "summary": "Duration scales evenly from 4 rounds (levels 1–14) to 5 rounds (15–19) and 6 rounds (level 20+), keeping the -2 Save vs. Spell.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-fireshield-blue",
@@ -755,7 +834,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Updated description and protection interactions against insect swarms and retaliation procs."
+      "summary": "Updated description and protection interactions against insect swarms and retaliation procs.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-emotion-hopelessness",
@@ -770,7 +850,8 @@
         "save-mechanics"
       ],
       "summary": "IWD Emotion: Hopelessness stuns failed targets for 60 seconds and breaks immediately when the target takes damage.",
-      "descriptionTra": "tra:60106"
+      "descriptionTra": "tra:60106",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-spirit-armor",
@@ -785,7 +866,8 @@
         "save-mechanics"
       ],
       "summary": "Grants base AC 1 and +3 saves vs. Spell; saving-throw bonus is typed Deflection, and the self-damage on cast/expiry does not interrupt or hurt allies.",
-      "typedNote": "Saves count as Deflection; base AC 1 follows the engine's best-base-AC rule."
+      "typedNote": "Saves count as Deflection; base AC 1 follows the engine's best-base-AC rule.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-polymorph-self",
@@ -798,11 +880,12 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Rebuilt into 6 balanced combat forms (Hill Giant, Ogre Mage, Giant Spider, Mustard Jelly, Hell Hound, Rat) with exact stats; Spider and Mustard Jelly forms have private innate abilities (`spwi495`, `spwi496`).",
+      "summary": "Lasts 1 turn + 3 rounds/level and shifts freely between 7 forms (gnoll leader, mustard jelly, ogre, spider, brown bear, black bear, wolf) with clean EEex weapon/bar handling.",
       "relatedResrefs": [
         "SPWI495",
         "SPWI496"
-      ]
+      ],
+      "changeType": "rework"
     },
     {
       "slug": "wizard-fireshield-red",
@@ -815,7 +898,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Updated description and protection interactions against insect swarms and retaliation procs."
+      "summary": "Updated description and protection interactions against insect swarms and retaliation procs.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-minor-sequencer",
@@ -828,7 +912,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can memorize and cast it."
+      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can memorize and cast it.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-teleport-field",
@@ -841,7 +926,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Range set to 30 ft. (from 40 ft.) and enemies inside now receive a Save vs. Spell at -4 each round to resist teleportation."
+      "summary": "Range set to 30 ft. (from 40 ft.) and enemies inside now receive a Save vs. Spell at -4 each round to resist teleportation.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-emotion-courage",
@@ -856,7 +942,8 @@
         "typed-bonus"
       ],
       "summary": "THAC0, damage, and save bonuses belong to the Morale type; temporary Hit Points stack normally.",
-      "typedNote": "Morale bonus (THAC0, damage, saves; does not stack with Hope, Righteous Wrath, Blood Rage, or Animal Rage)."
+      "typedNote": "Morale bonus (THAC0, damage, saves; does not stack with Hope, Righteous Wrath, Blood Rage, or Animal Rage).",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-emotion-hope",
@@ -871,7 +958,8 @@
         "typed-bonus"
       ],
       "summary": "THAC0, damage, and save bonuses belong to the Morale type and stack cleanly without doubling Courage or Righteous Wrath.",
-      "typedNote": "Morale bonus (THAC0, damage, saves; stacks temporary HP cleanly with other sources)."
+      "typedNote": "Morale bonus (THAC0, damage, saves; stacks temporary HP cleanly with other sources).",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-cloudkill",
@@ -884,7 +972,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and skips Mirror Image as an area cloud."
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and skips Mirror Image as an area cloud.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-cone-of-cold",
@@ -897,7 +986,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image."
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-chaos",
@@ -910,7 +1000,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Duration scales 4 / 5 / 6 rounds (levels 1 / 15 / 20+) while preserving its automatic low-HD and -4 save branches."
+      "summary": "Duration scales 4 / 5 / 6 rounds (levels 1 / 15 / 20+) while preserving its automatic low-HD and -4 save branches.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-dispelling-screen",
@@ -923,7 +1014,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Reworked Protection From Magic Energy slot into Dispelling Screen: party-wide single-use shield that absorbs one Breach or Dispel/Remove Magic before collapsing."
+      "summary": "Replaces Spell Immunity (SPWI510): 15-ft. party shield (5 turns) that absorbs one Breach or Dispel/Remove Magic before collapsing; AI Spell Immunity sub-spells redirect here.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-protection-from-normal-weapons",
@@ -936,7 +1028,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Also protects reliably against insect swarm damage while active; description updated."
+      "summary": "Also protects reliably against insect swarm damage while active; description updated.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-breach",
@@ -949,7 +1042,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Absorbed once by Dispelling Screen (stripping the screen cleanly via split payloads) before stripping combat protections."
+      "summary": "Absorbed once by Dispelling Screen (stripping the screen cleanly via split payloads) before stripping combat protections.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-lower-resistance",
@@ -962,7 +1056,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Magic resistance reduction stacks reliably without wiping unrelated protections."
+      "summary": "Lowers target Magic Resistance by 30% + 1%/level (up from 10% + 1%/level), while respecting active spell protections.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-oracle",
@@ -975,7 +1070,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Dispels illusion spells up to 9th level (from 5th) across a 30-ft. enemy-only radius around the caster."
+      "summary": "Dispels illusion spells up to 9th level (from 5th) across a 30-ft. enemy-only radius around the caster.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-conjure-lesser-fire-elemental",
@@ -988,7 +1084,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Standardized 8 HD Lesser Fire Elemental naming and clean summoning rules."
+      "summary": "Standardized 8 HD Lesser Fire Elemental naming and clean summoning rules.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-conjure-lesser-air-elemental",
@@ -1001,7 +1098,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Standardized 8 HD Lesser Air Elemental naming and clean summoning rules."
+      "summary": "Standardized 8 HD Lesser Air Elemental naming and clean summoning rules.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-conjure-lesser-earth-elemental",
@@ -1014,7 +1112,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Standardized 8 HD Lesser Earth Elemental naming and clean summoning rules."
+      "summary": "Standardized 8 HD Lesser Earth Elemental naming and clean summoning rules.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-conjure-lesser-water-elemental",
@@ -1029,7 +1128,9 @@
         "summon"
       ],
       "summary": "Summons an 8 HD Lesser Water Elemental with the 3-round control contest (15% hostile chance on contest failure) and standardized elemental name.",
-      "name": "Conjure Lesser Water Elemental"
+      "name": "Conjure Lesser Water Elemental",
+      "vanillaSource": "none",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-tensers-transformation",
@@ -1043,7 +1144,8 @@
         "family"
       ],
       "summary": "Top-tier member of the Transformation family (replaces/blocks lower divine combat buffs); description lists family interactions.",
-      "typedNote": "Transformation family (highest arcane/divine combat transformation)."
+      "typedNote": "Transformation family (highest arcane/divine combat transformation).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-death-spell",
@@ -1057,7 +1159,8 @@
         "save-mechanics",
         "summon"
       ],
-      "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom) in addition to slaying low-HD creatures and summons (Devas/Planetars remain immune)."
+      "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom) in addition to slaying low-HD creatures and summons (Devas/Planetars remain immune).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-pierce-magic",
@@ -1071,7 +1174,8 @@
         "dispel-protection",
         "eeex"
       ],
-      "summary": "Under EEex, reduces target Magic Resistance by floor(current MR / 2), min 10 and max 40 percentage points for 5 rounds, after stripping one spell protection."
+      "summary": "Under EEex, reduces target Magic Resistance by floor(current MR / 2), min 10 and max 40 percentage points for 5 rounds, after stripping one spell protection.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-true-sight",
@@ -1085,7 +1189,8 @@
         "casting-time",
         "dispel-protection"
       ],
-      "summary": "Casting time lowered from 8 to 6 and interacts cleanly with updated illusion rules (including Spook)."
+      "summary": "Casting time lowered from 8 to 6 and interacts cleanly with updated illusion rules (including Spook).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-power-word-silence",
@@ -1098,7 +1203,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated Power Word: Silence mechanics and description consistency."
+      "summary": "School changed from Conjuration to Enchantment on both spell and scroll.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-improved-haste",
@@ -1111,8 +1217,9 @@
       "tags": [
         "eeex"
       ],
-      "summary": "Coexists peacefully with Haste and Righteous Wrath of the Faithful while capping bonus attacks to one active source (EEex).",
-      "typedNote": "Attack-per-round cap shared with Haste and Righteous Wrath of the Faithful (EEex)."
+      "summary": "Reworked from single-target 2x APR into a 15-ft. party buff (1 turn, cast time 6): +1 APR (non-stacking), +2 THAC0, +2 AC, +2 Save vs. Breath, +6 movement, and Slow immunity.",
+      "typedNote": "Attack-per-round cap shared with Haste and Righteous Wrath of the Faithful (EEex).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-death-fog",
@@ -1125,7 +1232,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and area damage bypasses Mirror Image."
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded on spell and scroll) and area damage bypasses Mirror Image.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-disintegrate",
@@ -1138,7 +1246,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Destroys summoned Mordenkainen's Swords cleanly (without item/save exploits) alongside standard disintegration rules."
+      "summary": "Destroys summoned Mordenkainen's Swords cleanly (without item/save exploits) alongside standard disintegration rules.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-contingency",
@@ -1151,7 +1260,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on spell and scroll so every specialist mage can learn and cast it."
+      "summary": "Moved to the Universal school on spell and scroll so every specialist mage can learn and cast it.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-conjure-fire-elemental",
@@ -1164,7 +1274,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-conjure-air-elemental",
@@ -1177,7 +1288,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-conjure-earth-elemental",
@@ -1190,7 +1302,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names."
+      "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD elementals from level 12 to 20 (64/35/1% -> 56/35/9%) and standardized elemental names.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-conjure-water-elemental",
@@ -1205,7 +1318,9 @@
         "summon"
       ],
       "summary": "Linear Hit-Dice scaling for 12 / 16 / 24 HD Water Elementals (64/35/1% at level 12 -> 56/35/9% at level 20), 3-round control contest, and standardized name.",
-      "name": "Conjure Water Elemental"
+      "name": "Conjure Water Elemental",
+      "vanillaSource": "iwd:SPWI533",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-trollish-fortitude",
@@ -1221,7 +1336,8 @@
         "healing"
       ],
       "summary": "Belongs to the Regeneration family so higher-level Regenerate or Mass Regenerate replaces it cleanly.",
-      "typedNote": "Regeneration family."
+      "typedNote": "Regeneration family.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-project-image",
@@ -1237,7 +1353,8 @@
       "summary": "Projected images cannot use quick-slot items or innate special abilities while active (`PROJIMAG.SPL`).",
       "relatedResrefs": [
         "PROJIMAG"
-      ]
+      ],
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-cacofiend",
@@ -1250,7 +1367,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Demon summoning interactions and descriptions standardized cleanly."
+      "summary": "Summoned fiend matches caster alignment: Bone Fiend (baatezu) for lawful casters, Nabassu (tanar'ri) for neutral and chaotic casters.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-mantle",
@@ -1263,7 +1381,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Mantle weapon protection effects and description aligned with weapon-enchantment tiers."
+      "summary": "Blocks weapons up to +3 enchantment (up from +2 in Vanilla).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-spell-sequencer",
@@ -1276,7 +1395,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on both spell and scroll so specialists keep access."
+      "summary": "Moved to the Universal school on both spell and scroll so specialists keep access.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-sphere-of-chaos",
@@ -1289,7 +1409,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Enemy-only 10-round field at 40 ft. range; enemies save vs. Spell at -4 each round or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold for 1 round."
+      "summary": "Enemy-only 10-round field at 40 ft. range; enemies save vs. Spell at -4 each round or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold for 1 round.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-delayed-blast-fireball",
@@ -1302,7 +1423,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image."
+      "summary": "Uses Save vs. Breath for half damage and bypasses Mirror Image.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-finger-of-death",
@@ -1315,7 +1437,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated death-magic protection checks and saving throw behavior consistently."
+      "summary": "Slay effect uses Save vs. Death at 0 instead of Save vs. Spell at -2.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-power-word-stun",
@@ -1328,7 +1451,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated HP-threshold stun behavior and Character Record feedback."
+      "summary": "Moved to Enchantment school and creatures protected by Free Action are immune.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-simulacrum",
@@ -1344,7 +1468,8 @@
       "summary": "Clones cannot abuse quick-slot items; under EEex (`M_CBMSIM.lua`), Simulacra keep accurate class/kit innates and HLAs matching their actual clone level (`simulacr`).",
       "relatedResrefs": [
         "SIMULACR"
-      ]
+      ],
+      "changeType": "rework"
     },
     {
       "slug": "wizard-pierce-shield",
@@ -1357,7 +1482,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Protection removal and MR reduction behavior cleaned up cleanly."
+      "summary": "Removes Dispelling Screen cleanly without being absorbed alongside standard spell-protection stripping.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-summon-fiend",
@@ -1370,7 +1496,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Fiend summoning rules and descriptions updated consistently."
+      "summary": "Summoned fiend matches caster alignment: Cornugon (baatezu) for lawful casters, Glabrezu (tanar'ri) for neutral and chaotic casters.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-improved-mantle",
@@ -1383,7 +1510,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Improved Mantle weapon enchantment immunity and Character Record indicators updated."
+      "summary": "Blocks weapons up to +4 enchantment (up from +3 in Vanilla).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-spell-trigger",
@@ -1396,7 +1524,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on spell and scroll so all specialist mages can memorize it."
+      "summary": "Moved to the Universal school on spell and scroll so all specialist mages can memorize it.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-incendiary-cloud",
@@ -1409,7 +1538,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to Conjuration/Summoning (Diviner excluded) and cloud fire damage bypasses Mirror Image."
+      "summary": "Moved to Conjuration/Summoning (Diviner excluded) and cloud fire damage bypasses Mirror Image.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-symbol-fear",
@@ -1422,7 +1552,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated Symbol fear effects and Character Record state consistency."
+      "summary": "Explosion affects enemies only (never allies) and school moves from Conjuration to Enchantment.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-abi-dalzims-horrid-wilting",
@@ -1435,7 +1566,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Explicitly lists all immune creature types (undead, constructs, water/non-living creatures) and bypasses Mirror Image."
+      "summary": "Undead, golems, animated swords, and air/earth/fire elementals are properly immune; AoE damage bypasses Mirror Image.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-power-word-blind",
@@ -1448,7 +1580,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Applies unified -4 THAC0 / -4 AC Blindness penalties matching Blindness."
+      "summary": "Affects a single target instead of an area of effect, and moves from Conjuration to Enchantment.",
+      "changeType": "nerf"
     },
     {
       "slug": "wizard-symbol-stun",
@@ -1461,7 +1594,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated Symbol stun effects and duration consistency."
+      "summary": "Explosion affects enemies only, moves to Enchantment, and respects Free Action immunity.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-symbol-death",
@@ -1474,7 +1608,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated death-threshold handling and protections cleanly."
+      "summary": "Explosion affects enemies only and school moves from Conjuration to Enchantment.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-spellstrike",
@@ -1487,7 +1622,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Spell protection stripping order and description cleaned up."
+      "summary": "Removes Dispelling Screen cleanly without being absorbed while stripping all spell protections.",
+      "changeType": "fix"
     },
     {
       "slug": "wizard-gate",
@@ -1500,7 +1636,8 @@
       "tags": [
         "summon"
       ],
-      "summary": "Pit Fiend summoning rules and description updated consistently."
+      "summary": "Gated fiend matches caster alignment: Pit Fiend for lawful casters, scripted Balor (fear aura, Stoneskin, Domination) for neutral/chaotic casters.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-absolute-immunity",
@@ -1513,7 +1650,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Protection vs. enchanted weapons and non-weapon protections verified cleanly."
+      "summary": "Blocks weapons up to +6 enchantment (up from +5 in Vanilla).",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-chain-contingency",
@@ -1526,7 +1664,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can cast it."
+      "summary": "Moved to the Universal school on both spell and scroll so every specialist mage can cast it.",
+      "changeType": "buff"
     },
     {
       "slug": "wizard-power-word-kill",
@@ -1539,7 +1678,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated death-magic immunity checks cleanly."
+      "summary": "School changed from Conjuration to Enchantment on both spell and scroll.",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-shapechange",
@@ -1552,7 +1692,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Rebuilt into 6 balanced forms (Greater Wolfwere, Iron Golem, Mind Flayer, Earth Elemental, Death Knight, Greater Basilisk) with exact weapon enchants, APR, resistances, and special powers."
+      "summary": "Lasts 1 turn + 2 rounds/level and shifts between 7 forms (Mind Flayer, Iron Golem, Giant Troll, Greater Wolfwere, Fire Elemental, Greater Basilisk, Marilith).",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-summon-planetar",
@@ -1566,8 +1707,9 @@
         "celestial",
         "summon"
       ],
-      "summary": "No permanent Haste; 18 HD / 171 HP elf mage Planetar with updated 3e-grounded stats, controlled spellcasting, BOTH gender, and shared 1-Planetar party cap.",
-      "access": "Wizard HLA"
+      "summary": "No permanent Haste; 18 HD / 152 HP Planetar for 2 turns with dispelling vorpal sword, controllable spellbook, and 1-Planetar party cap.",
+      "access": "Wizard HLA",
+      "changeType": "rework"
     },
     {
       "slug": "wizard-summon-dark-planetar",
@@ -1581,8 +1723,9 @@
         "celestial",
         "summon"
       ],
-      "summary": "No permanent Haste; 18 HD / 171 HP Dark Planetar with Fire/Unholy loadout, controlled spellcasting, BOTH gender, and shared 1-Planetar party cap.",
-      "access": "Wizard HLA"
+      "summary": "No permanent Haste; 18 HD / 152 HP Dark Planetar for 2 turns with dispelling vorpal sword, controllable spellbook, and 1-Planetar party cap.",
+      "access": "Wizard HLA",
+      "changeType": "rework"
     },
     {
       "slug": "divine-bless",
@@ -1598,7 +1741,8 @@
         "eeex"
       ],
       "summary": "Casting time lowered 9 -> 5, duration scales 30s + 1 round/level across levels 1–20, and THAC0/damage bonuses count as Favor (keeps separate +5 morale modifier).",
-      "typedNote": "Favor bonus (THAC0, damage, saves; does not stack with Prayer, Recitation, or Chant saves). Keeps its separate +5 morale modifier."
+      "typedNote": "Favor bonus (THAC0, damage, saves; does not stack with Prayer, Recitation, or Chant saves). Keeps its separate +5 morale modifier.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-command",
@@ -1611,7 +1755,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Applies 1-round sleep within 30 ft., wakes on damage, and imposes a scaling save penalty (-1 per 2 levels after 1st, max -4 at 9th)."
+      "summary": "Applies 1-round sleep within 30 ft., wakes on damage, and imposes a scaling save penalty (-1 per 2 levels after 1st, max -4 at 9th).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-cure-light-wounds",
@@ -1625,7 +1770,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 4; heals 1d8 + 5 HP cleanly with updated description."
+      "summary": "Casting time lowered to 4; heals 1d8 + 5 HP cleanly with updated description.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-entangle",
@@ -1639,8 +1785,9 @@
         "druid",
         "save-mechanics"
       ],
-      "summary": "Explicitly lists immune creature types (giant, flying, incorporeal, elemental, etc.) matching tactical terrain rules.",
-      "access": "Druid / Shaman / Ranger"
+      "summary": "Switches save to Save vs. Breath (+3) and makes flying, incorporeal, elemental, giant, and dragon creatures immune.",
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "rework"
     },
     {
       "slug": "divine-magical-stone",
@@ -1653,7 +1800,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Created magical stones can now be removed by Dispel/Remove Magic like other created spell weapons."
+      "summary": "Buffed from 1d4 to 3d4 crushing damage (6d4 against undead).",
+      "changeType": "buff"
     },
     {
       "slug": "divine-shillelagh",
@@ -1667,8 +1815,9 @@
         "druid",
         "dispel-protection"
       ],
-      "summary": "Restricted to Druids/Shamans/Rangers and its created club can be removed by Dispel/Remove Magic.",
-      "access": "Druid / Shaman / Ranger"
+      "summary": "Restricted to Druids, Shamans, and Rangers (Clerics/Paladins excluded); keeps vanilla weapon stats.",
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-faerie-fire",
@@ -1683,7 +1832,8 @@
         "dispel-protection"
       ],
       "summary": "New level-1 druid spell (casting time 1, 5-ft. enemy radius): targets that fail Save vs. Spell take -2 AC, lose invisibility, cannot turn invisible, and glow violet for 4 rounds.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "new"
     },
     {
       "slug": "divine-curse",
@@ -1699,7 +1849,8 @@
       ],
       "summary": "IWD Curse penalties (THAC0, damage, saves, Luck) are typed Curse so they do not double-stack with Doom or Unholy Blight.",
       "access": "Cleric",
-      "typedNote": "Curse penalty (THAC0, damage, saves, Luck; strongest Curse penalty applies)."
+      "typedNote": "Curse penalty (THAC0, damage, saves, Luck; strongest Curse penalty applies).",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-doom",
@@ -1715,7 +1866,8 @@
         "save-mechanics"
       ],
       "summary": "Casting time lowered 9 -> 1, applies -2 THAC0, damage, and saves (no AC penalty) with Save vs. Spell negating (scaling 0 to -4 at level 9); counts as Curse.",
-      "typedNote": "Curse penalty (-2 THAC0, -2 damage, -2 saves; does not stack with Curse or Unholy Blight penalties)."
+      "typedNote": "Curse penalty (-2 THAC0, -2 damage, -2 saves; does not stack with Curse or Unholy Blight penalties).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-aid",
@@ -1729,7 +1881,8 @@
         "healing",
         "typed-bonus"
       ],
-      "summary": "Replaced combined Bless effect with pure HP boost (1d8 + min(L, 10) for max(L, 3), 1 turn/level), refreshes on recast, and shows its own portrait icon."
+      "summary": "Replaced combined Bless effect with pure HP boost (1d8 + min(L, 10) for max(L, 3), 1 turn/level), refreshes on recast, and shows its own portrait icon.",
+      "changeType": "rework"
     },
     {
       "slug": "divine-barkskin",
@@ -1745,7 +1898,8 @@
       ],
       "summary": "Restricted to Druids and Rangers; its saving-throw bonus counts as Deflection while base AC keeps the engine's best-base-AC rule.",
       "access": "Druid / Ranger",
-      "typedNote": "Saves count as Deflection; base AC still follows the engine's best-base-AC rule."
+      "typedNote": "Saves count as Deflection; base AC still follows the engine's best-base-AC rule.",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-chant",
@@ -1761,7 +1915,8 @@
       ],
       "summary": "Decomposed so its saving-throw modifiers count as Favor and its Luck modifiers count as Luck (both allies and enemies).",
       "access": "Cleric",
-      "typedNote": "Favor saving-throw bonus/penalty + Luck modifier; decomposed into separate typed effects."
+      "typedNote": "Favor saving-throw bonus/penalty + Luck modifier; decomposed into separate typed effects.",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-flame-blade",
@@ -1775,8 +1930,9 @@
         "druid",
         "dispel-protection"
       ],
-      "summary": "Restricted to Druids/Rangers, lasts cleanly, and the created Flame Blade can be dispelled by Dispel/Remove Magic.",
-      "access": "Druid / Ranger"
+      "summary": "Restricted to Druids/Rangers and created blade strikes as a +1 magical weapon.",
+      "access": "Druid / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-silence-15-radius",
@@ -1789,7 +1945,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated casting/save timing and Character Record state clarity."
+      "summary": "Area now affects enemies only instead of silencing your own party.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-slow-poison",
@@ -1802,7 +1959,8 @@
       "tags": [
         "healing"
       ],
-      "summary": "Keeps the base game's immediate poison cure + poison icon/resource cleanup (not delayed slow-poison opcode 329)."
+      "summary": "Keeps the base game's immediate poison cure + poison icon/resource cleanup (not delayed slow-poison opcode 329).",
+      "changeType": "fix"
     },
     {
       "slug": "divine-draw-upon-holy-might",
@@ -1816,7 +1974,8 @@
         "family"
       ],
       "summary": "Paired with Champion's Strength (Champion's Strength removes and blocks Draw Upon Divine Might while active) while coexisting with other Transformation buffs.",
-      "typedNote": "Exclusive pair with Champion's Strength (Champion's Strength replaces and blocks Draw Upon Holy Might while active)."
+      "typedNote": "Exclusive pair with Champion's Strength (Champion's Strength replaces and blocks Draw Upon Holy Might while active).",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-cure-moderate-wounds",
@@ -1831,7 +1990,8 @@
         "healing"
       ],
       "summary": "IWD Cure Moderate Wounds lowered to casting time 4 and heals 2d8 + 4 HP (text updated).",
-      "descriptionTra": "tra:60100"
+      "descriptionTra": "tra:60100",
+      "changeType": "buff"
     },
     {
       "slug": "divine-cause-moderate-wounds",
@@ -1847,7 +2007,8 @@
       ],
       "summary": "IWD Cause Moderate Wounds lowered to casting time 4, dealing 2d8 + 4 magic damage (save half) or healing undead for 2d8 + 4.",
       "access": "Cleric",
-      "descriptionTra": "tra:60101"
+      "descriptionTra": "tra:60101",
+      "changeType": "buff"
     },
     {
       "slug": "divine-writhing-fog",
@@ -1862,7 +2023,8 @@
         "save-mechanics"
       ],
       "summary": "Area-of-effect cold damage bypasses Mirror Image cleanly.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "fix"
     },
     {
       "slug": "divine-call-lightning",
@@ -1876,8 +2038,9 @@
         "druid",
         "save-mechanics"
       ],
-      "summary": "Bolt damage updated for consistent Mirror Image / save behavior.",
-      "access": "Druid / Shaman / Ranger"
+      "summary": "Duration extended to 1 round per caster level (up to 11 bolts outdoors).",
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-dispel-magic",
@@ -1890,7 +2053,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar."
+      "summary": "Absorbed once by Dispelling Screen, destroys dispellable created weapons, and destroys summoned Nishruu and Hakeashar.",
+      "changeType": "fix"
     },
     {
       "slug": "divine-glyph-of-warding",
@@ -1904,8 +2068,9 @@
         "casting-time",
         "save-mechanics"
       ],
-      "summary": "Casting time lowered 9 -> 5 and AoE trap damage bypasses Mirror Image.",
-      "access": "Cleric"
+      "summary": "Casting time lowered 9 -> 5, uses Save vs. Breath, and a successful save halves damage instead of negating it.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-remove-paralysis",
@@ -1918,8 +2083,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Also clears the 'Webbed' Character Record state properly in EET alongside paralysis removal.",
-      "access": "Cleric"
+      "summary": "Keeps vanilla AoE paralysis removal and clears lingering Webbed status cleanly.",
+      "access": "Cleric",
+      "changeType": "fix"
     },
     {
       "slug": "divine-invisibility-purge",
@@ -1934,7 +2100,8 @@
         "dispel-protection"
       ],
       "summary": "Casting time lowered from 8 to 3 and clears invisibility reliably across illusion protections.",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-strength-of-one",
@@ -1948,7 +2115,8 @@
         "eeex"
       ],
       "summary": "Sets a minimum 18/75 Strength floor on the party instead of overriding higher item Strength (under EEex).",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-unholy-blight",
@@ -1964,7 +2132,8 @@
       ],
       "summary": "Area damage bypasses Mirror Image, and its evil-target penalty counts as Curse so it does not double-stack with Doom or Curse.",
       "access": "Cleric",
-      "typedNote": "Curse penalty on evil-path/matching targets; does not stack with Doom or Curse penalties."
+      "typedNote": "Curse penalty on evil-path/matching targets; does not stack with Doom or Curse penalties.",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-cure-medium-wounds",
@@ -1978,7 +2147,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 4 and heals 2d8 + 7 HP cleanly."
+      "summary": "Casting time lowered to 4 and heals 2d8 + 7 HP cleanly.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-protection-from-cold",
@@ -1991,7 +2161,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "New level-3 priest spell (matching Wizard 3): grants 100% cold resistance to one creature for 1 turn per caster level."
+      "summary": "New level-3 priest spell (matching Wizard 3): grants 100% cold resistance to one creature for 1 turn per caster level.",
+      "changeType": "new"
     },
     {
       "slug": "divine-prayer",
@@ -2007,7 +2178,8 @@
       ],
       "summary": "Allies' +1 and enemies' -1 THAC0, damage, and saving-throw modifiers count as Favor (shared with Bless, Recitation, and Chant saves).",
       "access": "Cleric",
-      "typedNote": "Favor bonus/penalty (+1 allies / -1 enemies on THAC0, damage, saves)."
+      "typedNote": "Favor bonus/penalty (+1 allies / -1 enemies on THAC0, damage, saves).",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-icelance",
@@ -2022,7 +2194,8 @@
         "save-mechanics"
       ],
       "summary": "New level-3 druid spell: deals 5d6 cold damage automatically within 100 ft.; Save vs. Spell negates only the 3-round stun.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "new"
     },
     {
       "slug": "divine-summon-insects",
@@ -2037,7 +2210,8 @@
         "summon"
       ],
       "summary": "Swarm dispersion interactions with Death Spell and normal-weapon/fire immunity effects cleaned up cleanly.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "rework"
     },
     {
       "slug": "divine-cause-medium-wounds",
@@ -2053,7 +2227,8 @@
       ],
       "summary": "IWD Cause Medium Wounds lowered to casting time 4, dealing 2d8 + 7 magic damage (save half) or healing undead for 2d8 + 7.",
       "access": "Cleric",
-      "descriptionTra": "tra:60102"
+      "descriptionTra": "tra:60102",
+      "changeType": "buff"
     },
     {
       "slug": "divine-cure-serious-wounds",
@@ -2067,7 +2242,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 6 and heals 3d8 + 7 HP cleanly."
+      "summary": "Casting time lowered to 6 and heals 3d8 + 7 HP cleanly.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-animal-summoning-i",
@@ -2082,7 +2258,8 @@
         "summon"
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-free-action",
@@ -2095,7 +2272,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Blocks movement/action hampers reliably and handles upgraded Web/Hold/Slow rules cleanly."
+      "summary": "Lasts 1 turn/level, adds Druid/Ranger access and Stun immunity, and no longer blocks Haste or movement bonuses.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-neutralize-poison",
@@ -2108,7 +2286,8 @@
       "tags": [
         "healing"
       ],
-      "summary": "Cleanses poison, disease, blindness/deafness where applicable, and restores clean Character Record state."
+      "summary": "Cures poison and grants poison immunity for 1 turn/level, but no longer heals 10 HP or cures blindness, deafness, or disease.",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-defensive-harmony",
@@ -2121,9 +2300,10 @@
       "tags": [
         "typed-bonus"
       ],
-      "summary": "AC bonus belongs to the Dodge type (does not double-stack with Blur; stacks cleanly with Deflection spells).",
+      "summary": "AC bonus doubled from +2 to +4 (Dodge bonus type); restricted to Clerics and Paladins.",
       "access": "Cleric",
-      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Blur's Dodge bonus)."
+      "typedNote": "Dodge AC and saving-throw bonus (does not stack with Blur's Dodge bonus).",
+      "changeType": "buff"
     },
     {
       "slug": "divine-death-ward",
@@ -2137,7 +2317,8 @@
         "casting-time",
         "dispel-protection"
       ],
-      "summary": "Casting time set cleanly to 1 and protects reliably against death-magic effects with unified Character Record icon."
+      "summary": "Keeps vanilla death-magic immunity and also protects against Nature's Beauty's humanoid slay.",
+      "changeType": "fix"
     },
     {
       "slug": "divine-divine-power",
@@ -2151,9 +2332,10 @@
         "family",
         "eeex"
       ],
-      "summary": "Member of the Transformation family and uses a Strength 19 floor instead of erasing gear Strength (EEex).",
+      "summary": "Renamed from Holy Power; cast time 6 -> 4, grants non-fighter clerics fighter bonus APR (+1/2 at L7, +1 at L13), 18/00 STR floor, Transformation family.",
       "access": "Cleric",
-      "typedNote": "Transformation family (replaced/blocked by higher-level Transformation buffs; keeps floor Strength 19)."
+      "typedNote": "Transformation family (replaced/blocked by higher-level Transformation buffs; keeps floor Strength 19).",
+      "changeType": "buff"
     },
     {
       "slug": "divine-negative-plane-protection",
@@ -2166,7 +2348,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Level-drain protection updated cleanly with clear duration and Character Record state."
+      "summary": "Duration increased from 5 rounds to 1 turn per caster level (7–20 turns) for Clerics and Druids.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-cause-serious-wounds",
@@ -2181,7 +2364,8 @@
         "casting-time"
       ],
       "summary": "Casting time lowered to 6; touch attack deals 3d8 + 7 damage (no save; heals undead for 3d8 + 7 HP).",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-lesser-restoration",
@@ -2194,8 +2378,9 @@
       "tags": [
         "healing"
       ],
-      "summary": "Restores drained levels cleanly without lingering penalty icons.",
-      "access": "Cleric"
+      "summary": "Removes caster fatigue drawback and cures level drain, feeblemind, Blood Rage fatigue, and ability-score drain (EEex).",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-protection-from-acid",
@@ -2208,7 +2393,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "New level-4 priest spell: grants 100% acid resistance to one creature for 1 turn per caster level."
+      "summary": "New level-4 priest spell: grants 100% acid resistance to one creature for 1 turn per caster level.",
+      "changeType": "new"
     },
     {
       "slug": "divine-recitation",
@@ -2225,7 +2411,8 @@
       "summary": "Applies +2 ally / -2 enemy THAC0 & saves in a 25-ft. radius around the caster, explicitly typed as Favor.",
       "access": "Cleric",
       "descriptionTra": "tra:50101",
-      "typedNote": "Favor bonus/penalty (+2 allies / -2 enemies on THAC0 and saving throws)."
+      "typedNote": "Favor bonus/penalty (+2 allies / -2 enemies on THAC0 and saving throws).",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-blood-rage",
@@ -2243,7 +2430,8 @@
       ],
       "summary": "THAC0 and damage bonuses count as Morale; belongs to the Transformation family and sets Strength floor 19 (replaces base-strength overwrite).",
       "access": "Cleric",
-      "typedNote": "Morale bonus (THAC0/damage) + Transformation family (Strength floor 19)."
+      "typedNote": "Morale bonus (THAC0/damage) + Transformation family (Strength floor 19).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-animal-summoning-ii",
@@ -2258,7 +2446,8 @@
         "summon"
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-cure-critical-wounds",
@@ -2272,7 +2461,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 7 and heals 4d8 + 12 HP cleanly."
+      "summary": "Casting time lowered to 7 and heals 4d8 + 12 HP cleanly.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-flame-strike",
@@ -2287,7 +2477,8 @@
         "save-mechanics"
       ],
       "summary": "Casting time lowered from 8 to 5 and AoE fire damage bypasses Mirror Image cleanly.",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-true-seeing",
@@ -2301,7 +2492,8 @@
         "casting-time",
         "dispel-protection"
       ],
-      "summary": "Casting time lowered from 8 to 6 and dispels/counters illusions including Spook cleanly."
+      "summary": "Casting time lowered from 8 to 6 and dispels/counters illusions including Spook cleanly.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-stoneskin",
@@ -2315,8 +2507,9 @@
         "druid",
         "dispel-protection"
       ],
-      "summary": "Updated skin absorption/visuals and Character Record indicator cleanly.",
-      "access": "Druid / Shaman / Ranger"
+      "summary": "Iron Skins renamed to Stoneskin with casting time reduced from 9 to 1.",
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-champions-strength",
@@ -2330,9 +2523,10 @@
         "family",
         "eeex"
       ],
-      "summary": "Member of Transformation family, replaces/blocks Draw Upon Holy Might while active, and sets a minimum Strength 19 floor instead of lowering gear Strength.",
+      "summary": "Sets an 18/00 Strength floor (never lowering 19+ gear STR), removes/blocks Draw Upon Holy Might, and joins the Transformation family.",
       "access": "Cleric",
-      "typedNote": "Transformation family + excludes/replaces Draw Upon Holy Might while active (Strength floor 19)."
+      "typedNote": "Transformation family + excludes/replaces Draw Upon Holy Might while active (Strength floor 19).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-magic-resistance",
@@ -2346,7 +2540,8 @@
         "casting-time",
         "dispel-protection"
       ],
-      "summary": "Casting time lowered from 9 to 5."
+      "summary": "Casting time lowered 9 -> 5 and adds to Magic Resistance instead of overwriting higher existing MR.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-cause-critical-wounds",
@@ -2361,7 +2556,8 @@
         "casting-time"
       ],
       "summary": "Casting time lowered to 7; touch attack deals 4d8 + 12 damage (no save; heals undead for 4d8 + 12 HP).",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-greater-command",
@@ -2375,7 +2571,8 @@
         "save-mechanics"
       ],
       "summary": "Targets put to sleep now wake upon taking damage; description updated.",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-righteous-magic",
@@ -2390,9 +2587,10 @@
         "family",
         "eeex"
       ],
-      "summary": "Casting time lowered 9 -> 5; belongs to Transformation family and uses Strength floor 19 + caster bonus instead of erasing gear Strength.",
+      "summary": "Casting time lowered 9 -> 5, sets an 18/00 Strength floor under its Strength bonus, and joins the Transformation family.",
       "access": "Cleric",
-      "typedNote": "Transformation family (replaces/blocks lower-level Transformation buffs; Strength floor 19 +1/+2 size)."
+      "typedNote": "Transformation family (replaces/blocks lower-level Transformation buffs; Strength floor 19 +1/+2 size).",
+      "changeType": "buff"
     },
     {
       "slug": "divine-mass-cure",
@@ -2406,7 +2604,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered to 4 and heals party allies within 15 ft. for 1d8 + 1 HP/caster level."
+      "summary": "Casting time lowered to 4 and heals party allies within 15 ft. for 1d8 + 1 HP/caster level.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-insect-plague",
@@ -2421,7 +2620,8 @@
         "summon"
       ],
       "summary": "Insect swarm dispersed by Death Spell and blocked cleanly by Fire Shield / Protection From Normal Weapons / Wraithform.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "rework"
     },
     {
       "slug": "divine-mass-regenerate",
@@ -2438,7 +2638,8 @@
       ],
       "summary": "New level-5 priest spell (Regeneration family): grants party allies within sight 2 HP/round (1 HP every 3s) for 1 turn + 2 rounds/level (max 30 rounds).",
       "access": "Druid / Shaman / Ranger",
-      "typedNote": "Regeneration family (replaces lower-level Regeneration buffs)."
+      "typedNote": "Regeneration family (replaces lower-level Regeneration buffs).",
+      "changeType": "new"
     },
     {
       "slug": "divine-righteous-wrath-of-the-faithful",
@@ -2456,7 +2657,8 @@
       "summary": "THAC0, damage, and saves count as Morale; temporary HP still stack; extra attack coexists with Haste/Improved Haste under the single-extra-attack cap (EEex).",
       "access": "Cleric",
       "descriptionTra": "tra:50100",
-      "typedNote": "Morale bonus (THAC0, damage, saves) + single-extra-attack cap with Haste and Improved Haste (EEex)."
+      "typedNote": "Morale bonus (THAC0, damage, saves) + single-extra-attack cap with Haste and Improved Haste (EEex).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-animal-rage",
@@ -2476,7 +2678,8 @@
       "summary": "Save bonus counts as Morale; belongs to the Transformation family and sets a minimum Strength 19 floor cleanly.",
       "access": "Druid / Shaman / Ranger",
       "descriptionTra": "tra:60108",
-      "typedNote": "Morale bonus (saving throws) + Transformation family (Strength floor 19)."
+      "typedNote": "Morale bonus (saving throws) + Transformation family (Strength floor 19).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-animal-summoning-iii",
@@ -2491,7 +2694,8 @@
         "summon"
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-blade-barrier",
@@ -2505,8 +2709,9 @@
         "casting-time",
         "save-mechanics"
       ],
-      "summary": "Casting time lowered from 9 to 6 and blade barrier damage bypasses Mirror Image cleanly.",
-      "access": "Cleric"
+      "summary": "Casting time lowered 9 -> 6, aura damages enemies only, and Save vs. Spell halves damage instead of negating it.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-conjure-animals",
@@ -2521,7 +2726,8 @@
         "summon"
       ],
       "summary": "Restricted to Druids and Rangers (Cleric/Paladin excluded).",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-conjure-fire-elemental",
@@ -2536,7 +2742,8 @@
         "summon"
       ],
       "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20), standardized elemental naming, and Character Record tracking.",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-conjure-air-elemental",
@@ -2551,7 +2758,8 @@
         "summon"
       ],
       "summary": "New level-6 druid spell: summons a 12 / 16 / 24 HD Air Elemental (64/35/1% at 11 -> 37/51/12% at 20) for 1 turn/level (max 20) with no control contest.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "new"
     },
     {
       "slug": "divine-fire-seeds",
@@ -2567,7 +2775,8 @@
         "dispel-protection"
       ],
       "summary": "Casting time lowered 9 -> 6, AoE blast bypasses Mirror Image, and created Fire Seeds can be removed by Dispel/Remove Magic.",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-heal",
@@ -2581,7 +2790,8 @@
         "healing",
         "casting-time"
       ],
-      "summary": "Casting time lowered from 9 to 6; restores full HP and cures disease, blindness, and Feeblemind cleanly."
+      "summary": "Casting time lowered from 9 to 6; restores full HP and cures disease, blindness, and Feeblemind cleanly.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-harm",
@@ -2594,7 +2804,8 @@
       "tags": [
         "healing"
       ],
-      "summary": "Casting time 7 touch attack reduces target to 1 HP (or heals undead completely) with private touch-item cleanup."
+      "summary": "Casting time 7 touch attack reduces target to 1 HP (or heals undead completely) with private touch-item cleanup.",
+      "changeType": "buff"
     },
     {
       "slug": "divine-false-dawn",
@@ -2608,7 +2819,8 @@
         "save-mechanics"
       ],
       "summary": "AoE sun damage bypasses Mirror Image and enemy confusion state reports cleanly in Character Record.",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "fix"
     },
     {
       "slug": "divine-dolorous-decay",
@@ -2622,8 +2834,9 @@
         "druid",
         "save-mechanics"
       ],
-      "summary": "Updated Slow/decay interaction and Character Record indicator cleanly.",
-      "access": "Druid / Shaman / Ranger"
+      "summary": "Keeps vanilla decay/slow mechanics and participates cleanly in Haste/Slow mutual cancellation.",
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "fix"
     },
     {
       "slug": "divine-bolt-of-glory",
@@ -2638,7 +2851,8 @@
         "save-mechanics"
       ],
       "summary": "Casting time lowered from 9 to 6 with consistent radiant damage delivery.",
-      "access": "Cleric"
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-physical-mirror",
@@ -2651,7 +2865,8 @@
       "tags": [
         "dispel-protection"
       ],
-      "summary": "Adds Character Record live state tracking alongside missile reflection."
+      "summary": "Keeps vanilla missile reflection with live Character Record status tracking.",
+      "changeType": "fix"
     },
     {
       "slug": "divine-entropy-shield",
@@ -2667,7 +2882,8 @@
       ],
       "summary": "AC and saving-throw bonuses count as Deflection so they do not double-stack with Aura of Flaming Death or Spirit Armor/Barkskin saves.",
       "access": "Cleric",
-      "typedNote": "Deflection AC and saving-throw bonus (does not stack with Aura of Flaming Death or Spirit Armor/Barkskin saves)."
+      "typedNote": "Deflection AC and saving-throw bonus (does not stack with Aura of Flaming Death or Spirit Armor/Barkskin saves).",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-conjure-earth-elemental",
@@ -2682,7 +2898,8 @@
         "summon"
       ],
       "summary": "Linear HD scaling (64/35/1% at level 11 -> 37/51/12% at level 20) and standardized elemental names.",
-      "access": "Druid / Ranger"
+      "access": "Druid / Ranger",
+      "changeType": "buff"
     },
     {
       "slug": "divine-gate",
@@ -2695,8 +2912,9 @@
       "tags": [
         "summon"
       ],
-      "summary": "Pit Fiend summoning rules and descriptions standardized cleanly.",
-      "access": "Cleric"
+      "summary": "Gated fiend matches caster alignment: Pit Fiend for lawful casters, scripted Balor for neutral and chaotic casters.",
+      "access": "Cleric",
+      "changeType": "rework"
     },
     {
       "slug": "divine-natures-beauty",
@@ -2710,8 +2928,9 @@
         "druid",
         "save-mechanics"
       ],
-      "summary": "Updated Blindness (-4 THAC0 / -4 AC) and death/save interactions cleanly.",
-      "access": "Druid / Ranger"
+      "summary": "Enemy-only schoolless blast (not dispelled by True Sight): failed Save vs. Spell (+3) slays humanoids and permanently blinds; saved foes are blinded 3 rounds.",
+      "access": "Druid / Ranger",
+      "changeType": "rework"
     },
     {
       "slug": "divine-symbol-fear",
@@ -2724,8 +2943,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated fear effects and Character Record state consistency.",
-      "access": "Cleric"
+      "summary": "Explosion affects enemies only and school moves from Conjuration to Enchantment.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-finger-of-death",
@@ -2738,8 +2958,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated death-magic immunity checks cleanly.",
-      "access": "Cleric"
+      "summary": "Slay effect uses Save vs. Death at 0 instead of Save vs. Spell at -2.",
+      "access": "Cleric",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-sphere-of-chaos",
@@ -2752,7 +2973,8 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Replaced Priest Confusion with Sphere of Chaos: 10-round enemy-only field where foes save vs. Spell at -4 or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold."
+      "summary": "Replaced Priest Confusion with Sphere of Chaos: 10-round enemy-only field where foes save vs. Spell at -4 or suffer feeblemind, confusion, panic, wake-on-damage sleep, or hold.",
+      "changeType": "rework"
     },
     {
       "slug": "divine-holy-word",
@@ -2765,8 +2987,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated deafness/slow/dispel/spell-failure interactions and Character Record consistency.",
-      "access": "Cleric"
+      "summary": "Keeps vanilla mechanics with clean status/description consistency.",
+      "access": "Cleric",
+      "changeType": "fix"
     },
     {
       "slug": "divine-regeneration",
@@ -2780,9 +3003,10 @@
         "healing",
         "family"
       ],
-      "summary": "Highest-tier member of the Regeneration family (replaces/blocks Mass Regenerate and Trollish Fortitude while active).",
+      "summary": "Restricted to Druids; heals 2 HP/sec for 1 round/level (longer duration, lower burst than vanilla 3 HP/sec for 1 round/2 levels) and leads Regeneration family.",
       "access": "Druid / Shaman / Ranger",
-      "typedNote": "Regeneration family (highest-level priest Regeneration wins)."
+      "typedNote": "Regeneration family (highest-level priest Regeneration wins).",
+      "changeType": "rework"
     },
     {
       "slug": "divine-greater-restoration",
@@ -2795,8 +3019,9 @@
       "tags": [
         "healing"
       ],
-      "summary": "Restores drained levels, heals cleanly, and clears lingering status/web/record flags reliably.",
-      "access": "Cleric"
+      "summary": "Additionally cures Hold, Stun, Sleep, Petrification, Polymorph, curses, Blindness, Deafness, and ability-score drain.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-unholy-word",
@@ -2809,8 +3034,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated deafness/slow/dispel/spell-failure interactions and Character Record consistency.",
-      "access": "Cleric"
+      "summary": "Keeps vanilla mechanics with clean status/description consistency.",
+      "access": "Cleric",
+      "changeType": "fix"
     },
     {
       "slug": "divine-symbol-hopelessness",
@@ -2826,7 +3052,8 @@
       ],
       "summary": "Applies 120-second hopeless stun on failed -2 saves; taking damage immediately frees affected enemies.",
       "access": "Cleric",
-      "descriptionTra": "tra:60107"
+      "descriptionTra": "tra:60107",
+      "changeType": "nerf"
     },
     {
       "slug": "divine-creeping-doom",
@@ -2841,7 +3068,8 @@
         "summon"
       ],
       "summary": "Dispersion by Death Spell and protection interactions (Fire Shield, Normal Weapons, Wraithform) updated cleanly.",
-      "access": "Druid / Shaman / Ranger"
+      "access": "Druid / Shaman / Ranger",
+      "changeType": "rework"
     },
     {
       "slug": "divine-symbol-stun",
@@ -2854,8 +3082,9 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated Symbol stun effects and duration consistency.",
-      "access": "Cleric"
+      "summary": "Explosion affects enemies only, moves to Enchantment, and respects Free Action immunity.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-symbol-death",
@@ -2868,65 +3097,69 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Updated death-threshold handling and protections cleanly.",
-      "access": "Cleric"
+      "summary": "Explosion affects enemies only and school moves from Conjuration to Enchantment.",
+      "access": "Cleric",
+      "changeType": "buff"
     },
     {
       "slug": "divine-globe-of-blades",
       "resref": "SPPR725",
       "tradition": "divine",
       "level": 10,
-      "levelLabel": "Quest / HLA",
+      "levelLabel": "HLA",
       "source": "defs:sppr725",
       "origin": "modified",
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Area blade damage bypasses Mirror Image cleanly.",
-      "access": "Cleric Quest"
+      "summary": "Blade aura damages enemies only and Save vs. Spell halves damage instead of negating it.",
+      "access": "Cleric HLA",
+      "changeType": "buff"
     },
     {
       "slug": "divine-summon-deva",
       "resref": "SPPR726",
       "tradition": "divine",
       "level": 10,
-      "levelLabel": "Quest / HLA",
+      "levelLabel": "HLA",
       "source": "defs:sppr726",
       "origin": "modified",
       "tags": [
         "celestial",
         "summon"
       ],
-      "summary": "Rebuilt 14 HD / 136 HP Deva (`SPPR726` / Paladin HLA `SPCL923`) with full controllable spellbook (levels 1–7), 2 APR Heavy Mace +3 (undead slay / 50% stun), BOTH gender, and shared 1-Deva party cap.",
-      "access": "Cleric Quest & Paladin HLA",
+      "summary": "14 HD / 136 HP Deva for 3 turns with controllable priest spellbook, Heavy Mace +3, and shared 1-Deva party cap.",
+      "access": "Cleric & Paladin HLA",
       "relatedResrefs": [
         "SPCL923"
-      ]
+      ],
+      "changeType": "rework"
     },
     {
       "slug": "divine-summon-fallen-deva",
       "resref": "SPPR727",
       "tradition": "divine",
       "level": 10,
-      "levelLabel": "Quest / HLA",
+      "levelLabel": "HLA",
       "source": "defs:sppr727",
       "origin": "modified",
       "tags": [
         "celestial",
         "summon"
       ],
-      "summary": "Rebuilt 14 HD / 136 HP Fallen Deva (`SPPR727` / Paladin HLA `SPCL935`) with Long Sword +3 (1d8+10 + 1d8 fire + bleed), full dark spellbook, BOTH gender, and shared 1-Deva party cap.",
-      "access": "Cleric Quest & Paladin HLA",
+      "summary": "14 HD / 136 HP Fallen Deva for 3 turns with controllable dark spellbook, Long Sword +3 (+1d8 fire + bleed), and shared 1-Deva party cap.",
+      "access": "Cleric & Paladin HLA",
       "relatedResrefs": [
         "SPCL935"
-      ]
+      ],
+      "changeType": "rework"
     },
     {
       "slug": "divine-aura-of-flaming-death",
       "resref": "SPPR730",
       "tradition": "divine",
       "level": 10,
-      "levelLabel": "Quest / HLA",
+      "levelLabel": "HLA",
       "source": "defs:sppr730",
       "origin": "modified",
       "tags": [
@@ -2934,8 +3167,9 @@
         "dispel-protection"
       ],
       "summary": "AC and saving-throw bonuses belong to the Deflection type (does not double-stack with Entropy Shield) while fire shield protections stay clear.",
-      "access": "Cleric Quest",
-      "typedNote": "Deflection AC and saving-throw bonus."
+      "access": "Cleric HLA",
+      "typedNote": "Deflection AC and saving-throw bonus.",
+      "changeType": "nerf"
     }
   ]
 }

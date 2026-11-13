@@ -23,6 +23,7 @@ from harness import check, test  # noqa: E402
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ALLOWED_TRADITIONS = {"wizard", "divine"}
 ALLOWED_ORIGINS = {"modified", "new", "iwd-optional"}
+ALLOWED_CHANGE_TYPES = {"buff", "nerf", "rework", "new", "fix"}
 ALLOWED_TAGS = {
     "typed-bonus",
     "family",
@@ -115,6 +116,10 @@ def test_site_catalog(work, _weidu=None):
         check(entry["tradition"] in ALLOWED_TRADITIONS, f"Bad tradition on {slug}")
         check(entry["level"] in (*range(1, 10), 10), f"Bad level on {slug}")
         check(entry["origin"] in ALLOWED_ORIGINS, f"Bad origin on {slug}")
+        check(entry.get("changeType") in ALLOWED_CHANGE_TYPES, f"Bad changeType on {slug}")
+        check((entry["origin"] == "new") == (entry["changeType"] == "new"), f"Mismatched new changeType/origin on {slug}")
+        check("Quest" not in entry["levelLabel"], f"Forbidden 'Quest' in levelLabel on {slug}")
+        check("Quest" not in entry.get("access", ""), f"Forbidden 'Quest' in access on {slug}")
         check(bool(entry["summary"].strip()), f"Empty summary on {slug}")
         check(set(entry["tags"]).issubset(ALLOWED_TAGS) and entry["tags"], f"Bad tags on {slug}")
 
@@ -126,6 +131,13 @@ def test_site_catalog(work, _weidu=None):
         for rel in entry.get("relatedResrefs", []):
             if (REPO_ROOT / "defs" / f"{rel.lower()}.spl.json").is_file():
                 covered_defs.add(rel.lower())
+
+    for hl in source.get("highlights", []):
+        check(hl.get("direction") in ALLOWED_CHANGE_TYPES, f"Bad direction on highlight {hl.get('id')}")
+        slugs = hl.get("spellSlugs")
+        check(isinstance(slugs, list) and len(slugs) > 0, f"Missing spellSlugs on highlight {hl.get('id')}")
+        for hl_slug in slugs:
+            check(hl_slug in seen_slugs, f"Unknown spellSlug {hl_slug!r} on highlight {hl.get('id')}")
 
     internal_set = {r.lower() for r in source["internalResrefs"]}
     check(not (covered_defs & internal_set), f"Overlap between spells and internalResrefs: {covered_defs & internal_set}")
