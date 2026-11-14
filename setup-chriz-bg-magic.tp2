@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-bg-magic~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-bg-magic)~
-VERSION ~v0.1.0~
+VERSION ~v0.1.1~
 
 ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_shared.tpa~

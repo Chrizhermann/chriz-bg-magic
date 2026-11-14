@@ -5,7 +5,7 @@ Christopher Hermann's own spell mod for **Baldur's Gate II: Enhanced Edition** a
 are made, everything else stays as in the base game, and real bugs and logic errors get
 fixed.
 
-**Status:** `v0.1.0` — first public test release for BG2:EE and EET (`2.7.3.0`, EEex `v1.3.1` recommended). Interactive spell catalog and overhaul overview: <https://bg.chrizfader.org/magic>.
+**Status:** `v0.1.1` — public test release for BG2:EE and EET (`2.7.3.0`, EEex `v1.3.1` recommended). Interactive spell catalog and overhaul overview: <https://bg.chrizfader.org/magic>.
 
 - Target: BG2:EE and EET 2.7.3.0. Where a change needs EEex, it asks for EEex v1.3.1.
 - What each change does, in plain terms: [docs/components.md](docs/components.md).
@@ -13,7 +13,7 @@ fixed.
 
 ## Install
 
-Download `chriz-bg-magic-v0.1.0.zip` from [GitHub Releases](https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.0), extract it into your game folder, and run `setup-chriz-bg-magic.exe` (or `weidu setup-chriz-bg-magic.tp2`).
+Download `chriz-bg-magic-v0.1.1.zip` from [GitHub Releases](https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.1), extract it into your game folder, and run `setup-chriz-bg-magic.exe` (or `weidu setup-chriz-bg-magic.tp2`).
 
 **Do not install Chriz BG Magic together with Spell Revisions.** It replaces Spell
 Revisions, the two are not compatible, and the installer warns if it finds Spell

@@ -1,10 +1,10 @@
 {
   "mod": {
     "name": "Chriz BG Magic",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "targetGames": "BG2:EE & EET 2.7.3.0 (EEex v1.3.1 recommended)",
     "repoUrl": "https://github.com/Chrizhermann/chriz-bg-magic",
-    "releaseUrl": "https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.0"
+    "releaseUrl": "https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.1"
   },
   "bonusTypes": [
     {
@@ -117,7 +117,7 @@
       "bullets": [
         "Planetars have 18 HD and 152 HP (without permanent Haste); Devas have 14 HD and 136 HP, and you control their full spellbooks.",
         "Takes 1 round to cast (casting time 9, 30-ft. range), and Death Spell no longer instakills summoned Devas or Planetars.",
-        "Party cap allows up to one Deva (or Fallen Deva) and one Planetar (or Dark Planetar) on the field at the same time."
+        "Party cap allows up to one (Fallen) Deva and one (Dark) Planetar on the field at the same time."
       ],
       "openQuestions": [
         "Are the 2–3 turn durations and Planetar stats without permanent Haste strong enough for ToB fights?",
@@ -135,9 +135,9 @@
         "divine-righteous-wrath-of-the-faithful",
         "wizard-slow"
       ],
-      "summary": "Reworked from single-target double attacks (up to 10 APR) into a 15-ft. party combat buff granting +1 extra attack, +2 THAC0, +2 AC, and +2 Save vs. Breath.",
+      "summary": "Improved Haste is reworked from single-target double attacks (up to 10 APR) into a 15-ft. party combat buff granting +1 extra attack, +2 THAC0, +2 AC, and +2 Save vs. Breath.",
       "bullets": [
-        "Lasts 3 rounds + 1 round/level (casting time 6), grants +6 movement rate and Slow immunity, and caps extra attacks from Haste, Improved Haste, and Righteous Wrath at +1 total (with EEex).",
+        "Improved Haste lasts 3 rounds + 1 round/level (casting time 6), grants +6 movement rate and Slow immunity, and caps extra attacks from Haste, Improved Haste, and Righteous Wrath at +1 total (with EEex).",
         "Haste and Slow cancel each other across both spells and items."
       ],
       "openQuestions": [
@@ -157,7 +157,7 @@
       ],
       "summary": "Dispelling Screen replaces Spell Immunity with a 15-ft. party ward that absorbs one Breach or Dispel/Remove Magic.",
       "bullets": [
-        "Lasts 5 turns; enemy mages whose scripts cast Spell Immunity automatically cast Dispelling Screen instead.",
+        "Dispelling Screen lasts 5 turns; enemy mages whose scripts cast Spell Immunity automatically cast Dispelling Screen instead.",
         "Pierce Magic strips one spell protection up to 8th level and halves the target's current Magic Resistance (10%–40% for 5 rounds, with EEex); Lower Resistance removes 30% + 1% per level."
       ],
       "openQuestions": [
@@ -179,7 +179,8 @@
       ],
       "summary": "Six bonus types (Morale, Favor, Luck, Dodge, Deflection, Curse) and exclusive Transformation spells prevent endless pre-buff stacking.",
       "bullets": [
-        "Only the highest bonus (or penalty) of each type counts per stat; weaker buffs stay running underneath if a stronger short buff expires.",
+        "Different types stack (for example Bless's +1 Favor with Righteous Wrath's Morale bonus or Defensive Harmony's +4 Dodge AC), while same-type bonuses on the same stat only apply the strongest one — so Bless and Prayer don't stack THAC0, and weaker buffs resume if a stronger short buff expires.",
+        "Multi-type spells check each stat separately (Chant's Luck bonus uses Luck while its save bonus uses Favor — see the Typed Bonus Stacking table below for every spell's type).",
         "Strength buffs raise low Strength up to their target value without overwriting higher Strength from belts, gauntlets, or potions (with EEex)."
       ],
       "openQuestions": [
@@ -188,21 +189,24 @@
     },
     {
       "id": "cc-saves-illusions",
-      "direction": "nerf",
+      "direction": "rework",
       "badge": "Combat Rules",
-      "title": "Wake on Damage, Saves & Clones",
+      "title": "Sleep, AoE Saves, Clones & Shapeshifting",
       "spellSlugs": [
         "wizard-sleep",
+        "wizard-color-spray",
+        "wizard-power-word-sleep",
         "wizard-skull-trap",
         "wizard-mirror-image",
+        "wizard-simulacrum",
         "wizard-polymorph-self",
-        "wizard-simulacrum"
+        "wizard-shapechange"
       ],
-      "summary": "Sleeping and unconscious foes wake when hit, area blasts use Save vs. Breath and ignore Mirror Image, and clones can't abuse quick-slot items.",
+      "summary": "Sleeping and unconscious foes wake when hit, area blasts use Save vs. Breath and bypass Mirror Image, clones lose quick-slot abuse, and shapeshifting forms match their real stats.",
       "bullets": [
-        "Taking damage wakes sleeping or unconscious targets hit by Sleep, Color Spray, Command, Greater Command, Stinking Cloud, or Emotion: Hopelessness.",
-        "Skull Trap caps at 12d6; Project Image and Simulacrum can no longer use quick-slot items, while Simulacrum keeps its level-appropriate class abilities and HLAs (with EEex).",
-        "Polymorph Self and Shapechange each offer 6 reworked forms with accurate combat stats and clear spellcasting rules."
+        "Taking damage wakes sleeping or unconscious targets hit by Sleep, Color Spray, Power Word: Sleep, Command, Greater Command, Stinking Cloud, or Emotion/Symbol: Hopelessness.",
+        "Fireball, Cone of Cold, Sunfire, and Skull Trap (capped at 12d6) roll Save vs. Breath and hit through Mirror Image; Project Image and Simulacrum cannot use quick-slot items, while Simulacrum keeps level-appropriate class abilities and HLAs (with EEex).",
+        "Polymorph Self (Hill Giant, Ogre Mage, Spider, Mustard Jelly, Hell Hound, Rat) and Shapechange (Mind Flayer, Iron Golem, Giant Troll, Marilith, Greater Basilisk, Invisible Stalker) replace buggy vanilla stats with each creature's full combat attacks, resistances, and clear spellcasting rules."
       ],
       "openQuestions": []
     },
@@ -219,7 +223,7 @@
         "divine-faerie-fire",
         "divine-mass-regenerate"
       ],
-      "summary": "Faster divine casting times, stronger Cure and Cause Wounds scaling, enemy-only Silence, and six new Wizard and Divine spells.",
+      "summary": "Faster divine casting times, 10-ft. single-target Cure spells, stronger Cure and Cause Wounds scaling, enemy-only Silence, and six new Divine spells.",
       "bullets": [
         "Single-target Cure spells extend to 10 ft. range with casting time equal to spell level (1–5), Cause Wounds keep Touch range at casting times 2–5, and Harm drops to casting time 6 while Cause Wounds and Harm heal undead instead of hurting them.",
         "Six new spells: Faerie Fire (L1), Icelance (L3 Druid), Protection from Cold (L3), Protection from Acid (L4), Mass Regenerate (L5), and Conjure Air Elemental (L6 Druid)."
@@ -444,7 +448,7 @@
       "tags": [
         "save-mechanics"
       ],
-      "summary": "Drops the +6 enemy save bonus, unlocks Conjurers, extends range to 50 ft., and scales up to 2d8 magic damage plus a 3-round stun (level 5) or 13-round hold (level 7+).",
+      "summary": "Drops the +6 enemy save bonus, lets Conjurers learn and cast it (vanilla mistakenly barred them), extends range to 50 ft., and scales up to 2d8 magic damage plus a 3-round stun (level 5) or 13-round hold (level 7+).",
       "changeType": "buff"
     },
     {
@@ -473,7 +477,7 @@
         "summon",
         "save-mechanics"
       ],
-      "summary": "Moved to the Universal school on both spell and scroll so any specialist mage can cast it, with familiar HP scaled to the campaign (BG1, SoD, SoA, and ToB).",
+      "summary": "Moved to the Universal school on both spell and scroll so any specialist mage can cast it, and fixes inconsistent vanilla familiar HP with steady campaign scaling: 12 HP in BG1 and SoD (Imp 9), 24 HP in SoA (Imp 18), and 48 HP in ToB.",
       "descriptionTra": "tra:60105",
       "changeType": "buff"
     },
@@ -1159,7 +1163,7 @@
         "save-mechanics",
         "summon"
       ],
-      "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom) in addition to slaying low-HD creatures and most summons (Devas and Planetars are immune).",
+      "summary": "Disperses summoned insect swarms (Summon Insects, Insect Plague, Creeping Doom — including Vampire Cloud of Bats) in addition to slaying low-HD creatures and most summons (Devas and Planetars are immune).",
       "changeType": "minor-buff"
     },
     {
@@ -1636,7 +1640,7 @@
       "tags": [
         "summon"
       ],
-      "summary": "Gated fiend matches your alignment: Pit Fiend for lawful casters, or a deadly Balor (fear aura, Stoneskin, Domination) for neutral and chaotic casters.",
+      "summary": "Summons an alignment-matched fiend with full combat AI and a fear aura: a Pit Fiend for lawful casters, or a Balor (with Stoneskin renewal and Domination) for neutral and chaotic casters.",
       "changeType": "rework"
     },
     {
@@ -1973,7 +1977,7 @@
       "tags": [
         "family"
       ],
-      "summary": "Paired with Champion's Strength (Champion's Strength removes and blocks Draw Upon Holy Might while active), while coexisting with all other Transformation spells.",
+      "summary": "Cannot stack with Champion's Strength (casting Champion's Strength removes and blocks Draw Upon Holy Might while active), while still working alongside other Transformation spells like Righteous Magic.",
       "typedNote": "Blocked by Champion's Strength while active; works alongside other Transformation spells.",
       "changeType": "minor-nerf"
     },
@@ -2912,7 +2916,7 @@
       "tags": [
         "summon"
       ],
-      "summary": "Gated fiend matches your alignment: Pit Fiend for lawful casters, or a deadly Balor for neutral and chaotic casters.",
+      "summary": "Summons an alignment-matched fiend with full combat AI and a fear aura: a Pit Fiend for lawful casters, or a Balor (with Stoneskin renewal and Domination) for neutral and chaotic casters.",
       "access": "Cleric",
       "changeType": "rework"
     },
@@ -2928,7 +2932,7 @@
         "druid",
         "save-mechanics"
       ],
-      "summary": "Enemy-only burst (cannot be dispelled by True Sight): targets that fail Save vs. Spell (+3) are permanently blinded (and humanoid enemies are slain instantly); those that save are blinded for 3 rounds.",
+      "summary": "Enemy-only burst (cannot be dispelled by True Sight): on a failed Save vs. Spell (+3), humanoid enemies are slain instantly and non-humanoids are permanently blinded; targets that save are blinded for 3 rounds.",
       "access": "Druid / Ranger",
       "changeType": "rework"
     },

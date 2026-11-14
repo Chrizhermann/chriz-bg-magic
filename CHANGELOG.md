@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 - 2026-11-14
+
+- Improved Haste (`SPWI613`, `SCRL7Q`): duration changed from fixed 1 turn to `3 rounds + 1 round/level` (`90s` up to `138s` at level 20).
+- Healing & Cause Wounds: single-target Cure spells (`Cure Light`, IWD `Cure Moderate`, `Cure Medium`, `Cure Serious`, `Cure Critical Wounds`) set to `10-ft.` range and casting time equal to spell level (`1`–`5`), with matching scroll cast range; `Cause Wounds` casting times lowered to `2`–`5` (`Touch` range kept); `Harm` casting time lowered to `6` (`Touch` range kept).
+- Chromatic Orb (`SPWI118`, `SCRL83`): removed duplicate vanilla progression block and stale range/save lines, replaced leftover external Fixpack subspell calls with direct `STUN_IMMUNITY` and `HOLD_IMMUNITY` checks, and pointed cure helpers (`CBHCBLD`, `CBHCSTN`, `CBHCHOL`) directly at `SPWI118`.
+- `/magic` catalog source (`docs/site-catalog-source.json`): refined spotlight cards and spell summaries from playtest feedback.
+
 ## 0.1.0 - 2026-11-13
 
 - Dispel Magic and Remove Magic destroy a summoned Nishruu or Hakeashar on every install. Until
