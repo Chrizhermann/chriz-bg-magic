@@ -17,7 +17,7 @@ if str(TESTS_DIR) not in sys.path:
 if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
-from export_site_catalog import clean_ie_text, decode_bam_frame_to_image, load_tra  # noqa: E402
+from export_site_catalog import clean_ie_text, decode_bam_frame_to_image, export_ini_schema, load_tra  # noqa: E402
 from harness import check, test  # noqa: E402
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -222,13 +222,8 @@ def test_site_catalog(work, _weidu=None):
     cleaned = clean_ie_text("Gives <PRO_HISHER> ally ^0xFF00FF00bonus^-.\r\n\r\n\r\nDone")
     check("<PRO_" not in cleaned and "^0x" not in cleaned and "^-" not in cleaned, f"Token not cleaned: {cleaned!r}")
 
-    import json as _json
-    import subprocess as _subprocess
-    import sys as _sys
-    import tempfile as _tempfile
-
-    ini_schema = _json.loads((REPO_ROOT / "docs" / "ini-schema.json").read_text(encoding="utf-8"))
-    tables = _json.loads((REPO_ROOT / "defs" / "tables.json").read_text(encoding="utf-8"))
+    ini_schema = json.loads((REPO_ROOT / "docs" / "ini-schema.json").read_text(encoding="utf-8"))
+    tables = json.loads((REPO_ROOT / "defs" / "tables.json").read_text(encoding="utf-8"))
     check(ini_schema.get("schemaVersion") == 1, "Bad ini-schema schemaVersion")
     check(ini_schema.get("fileName") == "chriz-bg-magic.ini", "Bad ini-schema fileName")
     check(bool(str(ini_schema.get("tier1Note", "")).strip()), "Missing ini-schema tier1Note")
@@ -274,27 +269,31 @@ def test_site_catalog(work, _weidu=None):
         "pierce_magic_mr_min default exceeds pierce_magic_mr_max default",
     )
 
-    with _tempfile.TemporaryDirectory() as tmp:
-        out_json = Path(tmp) / "magic-catalog.json"
-        out_icons = Path(tmp) / "icons"
-        proc = _subprocess.run(
-            [_sys.executable, str(TOOLS_DIR / "export_site_catalog.py"),
-             "--out-json", str(out_json), "--out-icons-dir", str(out_icons)],
-            cwd=str(REPO_ROOT),
-            capture_output=True,
-            text=True,
-        )
-        check(proc.returncode == 0, f"export_site_catalog failed: {proc.stderr or proc.stdout}")
-        exported = _json.loads(out_json.read_text(encoding="utf-8"))
-        exp_schema = exported.get("iniSchema")
-        check(isinstance(exp_schema, dict) and exp_schema.get("schemaVersion") == 1, "Missing exported iniSchema")
-        exp_keys = []
-        for sec in exp_schema.get("sections", []):
-            for st in sec.get("settings", []):
-                exp_keys.append(st["key"])
-                check("ownedFiles" not in st and "addSpellSymbol" not in st,
-                      f"Installer-only field leaked in exported iniSchema for {st['key']}")
-        check(len(exp_keys) == len(seen_keys), f"Exported iniSchema key count mismatch: {len(exp_keys)} vs {len(seen_keys)}")
+    exp_schema = export_ini_schema(ini_schema, seen_slugs)
+    check(isinstance(exp_schema, dict) and exp_schema.get("schemaVersion") == 1, "Missing exported iniSchema")
+    exp_keys = []
+    for sec in exp_schema.get("sections", []):
+        for st in sec.get("settings", []):
+            exp_keys.append(st["key"])
+            check("ownedFiles" not in st and "addSpellSymbol" not in st,
+                  f"Installer-only field leaked in exported iniSchema for {st['key']}")
+    check(len(exp_keys) == len(seen_keys), f"Exported iniSchema key count mismatch: {len(exp_keys)} vs {len(seen_keys)}")
+
+    bad_slug_schema = json.loads(json.dumps(ini_schema))
+    bad_slug_schema["sections"][0]["settings"][0]["spellSlugs"] = ["nonexistent-spell-slug"]
+    try:
+        export_ini_schema(bad_slug_schema, seen_slugs)
+        check(False, "Expected ValueError for unknown spellSlug")
+    except ValueError:
+        pass
+
+    bad_dep_schema = json.loads(json.dumps(ini_schema))
+    bad_dep_schema["sections"][0]["settings"][0]["dependsOn"] = "missing_toggle"
+    try:
+        export_ini_schema(bad_dep_schema, seen_slugs)
+        check(False, "Expected ValueError for invalid dependsOn")
+    except ValueError:
+        pass
 
 
 if __name__ == "__main__":

@@ -309,6 +309,47 @@ def resolve_icon_bam(
     raise FileNotFoundError(f"Could not find icon BAM among {candidates!r}")
 
 
+def export_ini_schema(ini_schema_raw: dict, known_slugs: set[str]) -> dict:
+    """Validate INI schema references and strip installer-only fields for website export."""
+    toggle_keys = set()
+    all_keys = set()
+    exported_sections = []
+    for sec in ini_schema_raw["sections"]:
+        sec_settings = []
+        for entry in sec["settings"]:
+            key = entry["key"]
+            if key in all_keys:
+                raise ValueError(f"Duplicate INI key {key!r}")
+            all_keys.add(key)
+            if entry["type"] == "bool":
+                toggle_keys.add(key)
+            for slug in entry.get("spellSlugs", []):
+                if slug not in known_slugs:
+                    raise ValueError(f"INI setting {key!r} references unknown spellSlug {slug!r}")
+            public_entry = {
+                k: v for k, v in entry.items()
+                if k not in ("ownedFiles", "addSpellSymbol")
+            }
+            sec_settings.append(public_entry)
+        exported_sections.append({
+            "id": sec["id"],
+            "title": sec["title"],
+            "description": sec["description"],
+            "settings": sec_settings,
+        })
+    for sec in exported_sections:
+        for entry in sec["settings"]:
+            dep = entry.get("dependsOn")
+            if dep and dep not in toggle_keys:
+                raise ValueError(f"INI setting {entry['key']!r} dependsOn unknown toggle {dep!r}")
+    return {
+        "schemaVersion": ini_schema_raw["schemaVersion"],
+        "fileName": ini_schema_raw["fileName"],
+        "tier1Note": ini_schema_raw["tier1Note"],
+        "sections": exported_sections,
+    }
+
+
 def export_catalog(
     source_path: Path,
     out_json: Path,
@@ -436,43 +477,7 @@ def export_catalog(
 
     known_slugs = {s["slug"] for s in exported_spells}
     ini_schema_raw = json.loads((Path(__file__).resolve().parent.parent / "docs" / "ini-schema.json").read_text(encoding="utf-8"))
-    toggle_keys = set()
-    all_keys = set()
-    exported_sections = []
-    for sec in ini_schema_raw["sections"]:
-        sec_settings = []
-        for entry in sec["settings"]:
-            key = entry["key"]
-            if key in all_keys:
-                raise ValueError(f"Duplicate INI key {key!r}")
-            all_keys.add(key)
-            if entry["type"] == "bool":
-                toggle_keys.add(key)
-            for slug in entry.get("spellSlugs", []):
-                if slug not in known_slugs:
-                    raise ValueError(f"INI setting {key!r} references unknown spellSlug {slug!r}")
-            public_entry = {
-                k: v for k, v in entry.items()
-                if k not in ("ownedFiles", "addSpellSymbol")
-            }
-            sec_settings.append(public_entry)
-        exported_sections.append({
-            "id": sec["id"],
-            "title": sec["title"],
-            "description": sec["description"],
-            "settings": sec_settings,
-        })
-    for sec in exported_sections:
-        for entry in sec["settings"]:
-            dep = entry.get("dependsOn")
-            if dep and dep not in toggle_keys:
-                raise ValueError(f"INI setting {entry['key']!r} dependsOn unknown toggle {dep!r}")
-    ini_schema = {
-        "schemaVersion": ini_schema_raw["schemaVersion"],
-        "fileName": ini_schema_raw["fileName"],
-        "tier1Note": ini_schema_raw["tier1Note"],
-        "sections": exported_sections,
-    }
+    ini_schema = export_ini_schema(ini_schema_raw, known_slugs)
 
     catalog = {
         "mod": source["mod"],
