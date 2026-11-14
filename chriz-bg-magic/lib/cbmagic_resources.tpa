@@ -8,8 +8,15 @@ BEGIN
   ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN OUTER_SET cbm_english = 1 END ELSE BEGIN
     PRINT ~chriz-bg-magic: descriptions exist only in English so far; this game (%lang%) keeps its own.~
   END
-  // Files without anything to fill in.
-  COPY ~chriz-bg-magic/files~ ~override~
+  // Files without anything to fill in (spwi510.2da follows rework_dispelling_screen).
+  ACTION_BASH_FOR ~chriz-bg-magic/files~ ~^.+$~ BEGIN
+    ACTION_IF !(~%BASH_FOR_FILE%~ STRING_EQUAL_CASE ~spwi510.2da~) BEGIN
+      COPY ~%BASH_FOR_FILESPEC%~ ~override/%BASH_FOR_FILE%~
+    END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/files/spwi510.2da~ ~override/spwi510.2da~
+  END
   // Rows and numbers of this install.
   LAF cbmagic_splprot_row INT_VAR stat = 0x104 value = 37 relation = 1 RET cbm_prot_0x104_37_1 = row END
   LAF cbmagic_splprot_row INT_VAR stat = 118 value = 0 relation = 3 RET cbm_prot_118_0_3 = row END
@@ -173,125 +180,163 @@ BEGIN
   LAF cbmagic_statdesc_text INT_VAR row = 55 text = ref END
   OUTER_SET ref = RESOLVE_STR_REF (@70243)
   LAF cbmagic_statdesc_text INT_VAR row = 112 text = ref END
-  APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    APPEND ~spell.ids~ ~2510 WIZARD_DISPELLING_SCREEN~ UNLESS ~WIZARD_DISPELLING_SCREEN~
+  END
   // Spells of our own, in the slot this install has free.
-  ADD_SPELL ~chriz-bg-magic/res/cbmair.spl~ 1 6 ~CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL~ RET cbm_res_CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL = resref END
-  ADD_SPELL ~chriz-bg-magic/res/sppr112.spl~ 1 1 ~CLERIC_CBMAGIC_FAERIE_FIRE~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_FAERIE_FIRE~ RET cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE = resref END
-  ADD_SPELL ~chriz-bg-magic/res/cbmlance.spl~ 1 3 ~CLERIC_CBMAGIC_ICELANCE~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_ICELANCE~ RET cbm_res_CLERIC_CBMAGIC_ICELANCE = resref END
-  ADD_SPELL ~chriz-bg-magic/res/sppr518.spl~ 1 5 ~CLERIC_CBMAGIC_MASS_REGENERATE~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_MASS_REGENERATE~ RET cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE = resref END
-  ADD_SPELL ~chriz-bg-magic/res/sppr418.spl~ 1 4 ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~ RET cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID = resref END
-  ADD_SPELL ~chriz-bg-magic/res/sppr316.spl~ 1 3 ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~ RET cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD = resref END
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL%.spl~ ~override~
-    SAY 0x8 @70002
-    SAY 0x50 @70003
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_ICELANCE%.spl~ ~override~
-    SAY 0x8 @70005
-    SAY 0x50 @70006
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%.spl~ ~override~
-    SAY 0x8 @70113
-    SAY 0x50 @70114
-    WRITE_SHORT 0x98 cbm_proj_cbmffir
-    WRITE_ASCIIE 0xde ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%~ #8
-    WRITE_LONG 0x312 cbm_stat_209
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%.spl~ ~override~
-    SAY 0x8 @70127
-    SAY 0x50 @70128
-    WRITE_ASCIIE 0x3a6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x45a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x556 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x60a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x706 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x7ba cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x8b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x96a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xa66 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0xb1a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xc16 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0xcca cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xdc6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0xe7a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xf76 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x102a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1126 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x11da cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x12d6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x138a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1486 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x153a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1636 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x16ea cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x17e6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x189a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1996 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x1a4a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1b46 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x1bfa cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1cf6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x1daa cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x1ea6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x1f5a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x2056 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x210a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x2206 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x22ba cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x23b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
-    WRITE_LONG 0x246a cbm_state_BUFF_PRO_DAMAGE
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%.spl~ ~override~
-    SAY 0x8 @70136
-    SAY 0x50 @70137
-    WRITE_ASCIIE 0x266 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x2ea cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x3b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x43a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x506 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x58a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x656 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x6da cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x7a6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x82a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x8f6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x97a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xa46 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0xaca cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xb96 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0xc1a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xce6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0xd6a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xe36 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0xeba cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0xf86 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x100a cbm_state_BUFF_PRO_DAMAGE
-    WRITE_ASCIIE 0x10d6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
-    WRITE_LONG 0x115a cbm_state_BUFF_PRO_DAMAGE
-  COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%.spl~ ~override~
-    SAY 0x8 @70148
-    SAY 0x50 @70149
-    WRITE_SHORT 0x98 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x216 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0xc0 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x336 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0xe8 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x456 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x110 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x576 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x138 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x696 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x160 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x7b6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x188 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x8d6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x1b0 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0x9f6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x1d8 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0xb16 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
-    WRITE_SHORT 0x200 cbm_proj_cbmmreg
-    WRITE_ASCIIE 0xc36 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+  ACTION_IF (cbm_ini_new_conjure_air_elemental != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/cbmair.spl~ 1 6 ~CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL~ RET cbm_res_CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_faerie_fire != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/sppr112.spl~ 1 1 ~CLERIC_CBMAGIC_FAERIE_FIRE~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_FAERIE_FIRE~ RET cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_icelance != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/cbmlance.spl~ 1 3 ~CLERIC_CBMAGIC_ICELANCE~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_ICELANCE~ RET cbm_res_CLERIC_CBMAGIC_ICELANCE = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_ICELANCE ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_mass_regenerate != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/sppr518.spl~ 1 5 ~CLERIC_CBMAGIC_MASS_REGENERATE~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_MASS_REGENERATE~ RET cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_protection_from_acid != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/sppr418.spl~ 1 4 ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_ACID~ RET cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_protection_from_cold != 0) BEGIN
+    ADD_SPELL ~chriz-bg-magic/res/sppr316.spl~ 1 3 ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_CBMAGIC_PROTECTION_FROM_COLD~ RET cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD = resref END
+  END ELSE BEGIN
+    OUTER_SPRINT cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD ~CBMNONE~
+  END
+  ACTION_IF (cbm_ini_new_conjure_air_elemental != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL%.spl~ ~override~
+      SAY 0x8 @70002
+      SAY 0x50 @70003
+  END
+  ACTION_IF (cbm_ini_new_icelance != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_ICELANCE%.spl~ ~override~
+      SAY 0x8 @70005
+      SAY 0x50 @70006
+  END
+  ACTION_IF (cbm_ini_new_faerie_fire != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%.spl~ ~override~
+      SAY 0x8 @70113
+      SAY 0x50 @70114
+      WRITE_SHORT 0x98 cbm_proj_cbmffir
+      WRITE_ASCIIE 0xde ~%cbm_res_CLERIC_CBMAGIC_FAERIE_FIRE%~ #8
+      WRITE_LONG 0x312 cbm_stat_209
+  END
+  ACTION_IF (cbm_ini_new_protection_from_cold != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%.spl~ ~override~
+      SAY 0x8 @70127
+      SAY 0x50 @70128
+      WRITE_ASCIIE 0x3a6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x45a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x556 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x60a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x706 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x7ba cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x8b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x96a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xa66 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0xb1a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xc16 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0xcca cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xdc6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0xe7a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xf76 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x102a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1126 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x11da cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x12d6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x138a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1486 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x153a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1636 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x16ea cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x17e6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x189a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1996 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x1a4a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1b46 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x1bfa cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1cf6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x1daa cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x1ea6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x1f5a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x2056 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x210a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x2206 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x22ba cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x23b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_COLD%~ #8
+      WRITE_LONG 0x246a cbm_state_BUFF_PRO_DAMAGE
+  END
+  ACTION_IF (cbm_ini_new_protection_from_acid != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%.spl~ ~override~
+      SAY 0x8 @70136
+      SAY 0x50 @70137
+      WRITE_ASCIIE 0x266 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x2ea cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x3b6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x43a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x506 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x58a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x656 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x6da cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x7a6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x82a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x8f6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x97a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xa46 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0xaca cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xb96 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0xc1a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xce6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0xd6a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xe36 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0xeba cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0xf86 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x100a cbm_state_BUFF_PRO_DAMAGE
+      WRITE_ASCIIE 0x10d6 ~%cbm_res_CLERIC_CBMAGIC_PROTECTION_FROM_ACID%~ #8
+      WRITE_LONG 0x115a cbm_state_BUFF_PRO_DAMAGE
+  END
+  ACTION_IF (cbm_ini_new_mass_regenerate != 0) BEGIN
+    COPY_EXISTING ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%.spl~ ~override~
+      SAY 0x8 @70148
+      SAY 0x50 @70149
+      WRITE_SHORT 0x98 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x216 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0xc0 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x336 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0xe8 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x456 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x110 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x576 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x138 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x696 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x160 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x7b6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x188 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x8d6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x1b0 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0x9f6 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x1d8 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0xb16 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+      WRITE_SHORT 0x200 cbm_proj_cbmmreg
+      WRITE_ASCIIE 0xc36 ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ #8
+  END
   // Spells and items, overwritten.
   COPY ~chriz-bg-magic/res/acidooz3.itm~ ~override/acidooz3.itm~
     WRITE_LONG 0xe2 cbm_Haste
@@ -581,8 +626,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmair2.eff~ ~override/cbmair2.eff~
   COPY ~chriz-bg-magic/res/cbmair3.eff~ ~override/cbmair3.eff~
   COPY ~chriz-bg-magic/res/cbmcelwg.itm~ ~override/cbmcelwg.itm~
-  COPY ~chriz-bg-magic/res/cbmdevae.cre~ ~override/cbmdevae.cre~
-  COPY ~chriz-bg-magic/res/cbmdevag.cre~ ~override/cbmdevag.cre~
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmdevae.cre~ ~override/cbmdevae.cre~
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmdevag.cre~ ~override/cbmdevag.cre~
+  END
   COPY ~chriz-bg-magic/res/cbmdevea.itm~ ~override/cbmdevea.itm~
   COPY ~chriz-bg-magic/res/cbmdever.itm~ ~override/cbmdever.itm~
   COPY ~chriz-bg-magic/res/cbmdevew.itm~ ~override/cbmdevew.itm~
@@ -591,15 +640,25 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmdevgw.itm~ ~override/cbmdevgw.itm~
   COPY ~chriz-bg-magic/res/cbmfnul.itm~ ~override/cbmfnul.itm~
   COPY ~chriz-bg-magic/res/cbmfrem.spl~ ~override/cbmfrem.spl~
-  COPY ~chriz-bg-magic/res/cbmg605a.spl~ ~override/cbmg605a.spl~
-  COPY ~chriz-bg-magic/res/cbmg605b.spl~ ~override/cbmg605b.spl~
-    WRITE_LONG 0xa2 cbm_prot_120_0_1
-    SAY 0x27e @70004
+  ACTION_IF (cbm_ini_rework_death_spell != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmg605a.spl~ ~override/cbmg605a.spl~
+  END
+  ACTION_IF (cbm_ini_rework_death_spell != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmg605b.spl~ ~override/cbmg605b.spl~
+      WRITE_LONG 0xa2 cbm_prot_120_0_1
+      SAY 0x27e @70004
+  END
   COPY ~chriz-bg-magic/res/cbmgbdom.spl~ ~override/cbmgbdom.spl~
     WRITE_LONG 0x9e cbm_state_CHARM_IMMUNITY
-  COPY ~chriz-bg-magic/res/cbmgcaco.eff~ ~override/cbmgcaco.eff~
-  COPY ~chriz-bg-magic/res/cbmgfien.eff~ ~override/cbmgfien.eff~
-  COPY ~chriz-bg-magic/res/cbmggate.eff~ ~override/cbmggate.eff~
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmgcaco.eff~ ~override/cbmgcaco.eff~
+  END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmgfien.eff~ ~override/cbmgfien.eff~
+  END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmggate.eff~ ~override/cbmggate.eff~
+  END
   COPY ~chriz-bg-magic/res/cbmgmst1.eff~ ~override/cbmgmst1.eff~
   COPY ~chriz-bg-magic/res/cbmgmst2.eff~ ~override/cbmgmst2.eff~
   COPY ~chriz-bg-magic/res/cbmgnb1.spl~ ~override/cbmgnb1.spl~
@@ -638,8 +697,12 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmphhc.cre~ ~override/cbmphhc.cre~
   COPY ~chriz-bg-magic/res/cbmphhg.spl~ ~override/cbmphhg.spl~
   COPY ~chriz-bg-magic/res/cbmphhw.itm~ ~override/cbmphhw.itm~
-  COPY ~chriz-bg-magic/res/cbmplane.cre~ ~override/cbmplane.cre~
-  COPY ~chriz-bg-magic/res/cbmplang.cre~ ~override/cbmplang.cre~
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmplane.cre~ ~override/cbmplane.cre~
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cbmplang.cre~ ~override/cbmplang.cre~
+  END
   COPY ~chriz-bg-magic/res/cbmplnea.itm~ ~override/cbmplnea.itm~
   COPY ~chriz-bg-magic/res/cbmplner.itm~ ~override/cbmplner.itm~
   COPY ~chriz-bg-magic/res/cbmplnew.itm~ ~override/cbmplnew.itm~
@@ -717,11 +780,15 @@ BEGIN
   COPY ~chriz-bg-magic/res/cbmww1.eff~ ~override/cbmww1.eff~
   COPY ~chriz-bg-magic/res/cbmww2.eff~ ~override/cbmww2.eff~
   COPY ~chriz-bg-magic/res/cbmww3.eff~ ~override/cbmww3.eff~
-  COPY ~chriz-bg-magic/res/cdgoliro.itm~ ~override/cdgoliro.itm~
-    SAY 0x5ee @70035
-    SAY 0x61e @70035
-    SAY 0x64e @70035
-  COPY ~chriz-bg-magic/res/cdmindfl.itm~ ~override/cdmindfl.itm~
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cdgoliro.itm~ ~override/cdgoliro.itm~
+      SAY 0x5ee @70035
+      SAY 0x61e @70035
+      SAY 0x64e @70035
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/cdmindfl.itm~ ~override/cdmindfl.itm~
+  END
   COPY ~chriz-bg-magic/res/cdmiscba.spl~ ~override/cdmiscba.spl~
     WRITE_BYTE 0x27 cbm_Haste
     WRITE_LONG 0x9e cbm_state_HASTE_IMMUNITY
@@ -752,7 +819,9 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/chan19.itm~ ~override/chan19.itm~
-  COPY ~chriz-bg-magic/res/critical.itm~ ~override/critical.itm~
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/critical.itm~ ~override/critical.itm~
+  END
   COPY ~chriz-bg-magic/res/csiren.itm~ ~override/csiren.itm~
   COPY ~chriz-bg-magic/res/cuthide.spl~ ~override/cuthide.spl~
     WRITE_LONG 0xfe cbm_state_HASTE_IMMUNITY
@@ -769,7 +838,9 @@ BEGIN
     WRITE_LONG 0x532 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/devaevil.itm~ ~override/devaevil.itm~
     WRITE_LONG 0x382 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/devaheal.spl~ ~override/devaheal.spl~
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/devaheal.spl~ ~override/devaheal.spl~
+  END
   COPY ~chriz-bg-magic/res/dogwawp.itm~ ~override/dogwawp.itm~
     WRITE_LONG 0x16e cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x1d2 cbm_Haste
@@ -1009,7 +1080,9 @@ BEGIN
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
-  COPY ~chriz-bg-magic/res/projimag.spl~ ~override/projimag.spl~
+  ACTION_IF (cbm_ini_simulacrum_clone_rules != 0) BEGIN
+    COPY ~chriz-bg-magic/res/projimag.spl~ ~override/projimag.spl~
+  END
   COPY ~chriz-bg-magic/res/ravag01.itm~ ~override/ravag01.itm~
     WRITE_LONG 0x2f2 cbm_DispelScreen
   COPY ~chriz-bg-magic/res/reaver.itm~ ~override/reaver.itm~
@@ -1048,18 +1121,22 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl1k.itm~ ~override/scrl1k.itm~
     WRITE_LONG 0x54 12179
     PATCH_IF cbm_english BEGIN SAY 0x54 @70039 END
-  COPY ~chriz-bg-magic/res/scrl1p.itm~ ~override/scrl1p.itm~
-    WRITE_LONG 0x54 17647
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70040 END
+  ACTION_IF (cbm_ini_rework_skull_trap != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl1p.itm~ ~override/scrl1p.itm~
+      WRITE_LONG 0x54 17647
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70040 END
+  END
   COPY ~chriz-bg-magic/res/scrl1u.itm~ ~override/scrl1u.itm~
     WRITE_LONG 0x54 12166
     PATCH_IF cbm_english BEGIN SAY 0x54 @70041 END
   COPY ~chriz-bg-magic/res/scrl2e.itm~ ~override/scrl2e.itm~
     WRITE_LONG 0x54 12175
     PATCH_IF cbm_english BEGIN SAY 0x54 @70042 END
-  COPY ~chriz-bg-magic/res/scrl56.itm~ ~override/scrl56.itm~
-    WRITE_LONG 0x54 12325
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70043 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl56.itm~ ~override/scrl56.itm~
+      WRITE_LONG 0x54 12325
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70043 END
+  END
   COPY ~chriz-bg-magic/res/scrl58.itm~ ~override/scrl58.itm~
     WRITE_LONG 0x54 17645
     PATCH_IF cbm_english BEGIN SAY 0x54 @70044 END
@@ -1072,21 +1149,27 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl5k.itm~ ~override/scrl5k.itm~
     WRITE_LONG 0x54 22609
     PATCH_IF cbm_english BEGIN SAY 0x54 @70047 END
-  COPY ~chriz-bg-magic/res/scrl61.itm~ ~override/scrl61.itm~
-    WRITE_LONG 0x54 18729
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70048 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl61.itm~ ~override/scrl61.itm~
+      WRITE_LONG 0x54 18729
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70048 END
+  END
   COPY ~chriz-bg-magic/res/scrl62.itm~ ~override/scrl62.itm~
     WRITE_LONG 0x54 12319
     PATCH_IF cbm_english BEGIN SAY 0x54 @70049 END
   COPY ~chriz-bg-magic/res/scrl66.itm~ ~override/scrl66.itm~
     WRITE_LONG 0x54 12154
     PATCH_IF cbm_english BEGIN SAY 0x54 @70050 END
-  COPY ~chriz-bg-magic/res/scrl6d.itm~ ~override/scrl6d.itm~
-    WRITE_LONG 0x54 45889
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70051 END
-  COPY ~chriz-bg-magic/res/scrl6e.itm~ ~override/scrl6e.itm~
-    WRITE_LONG 0x54 7481
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70052 END
+  ACTION_IF (cbm_ini_rework_find_familiar != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl6d.itm~ ~override/scrl6d.itm~
+      WRITE_LONG 0x54 45889
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70051 END
+  END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl6e.itm~ ~override/scrl6e.itm~
+      WRITE_LONG 0x54 7481
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70052 END
+  END
   COPY ~chriz-bg-magic/res/scrl6g.itm~ ~override/scrl6g.itm~
     WRITE_LONG 0x54 10862
     PATCH_IF cbm_english BEGIN SAY 0x54 @70053 END
@@ -1096,11 +1179,13 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl6q.itm~ ~override/scrl6q.itm~
     WRITE_LONG 0x54 25894
     PATCH_IF cbm_english BEGIN SAY 0x54 @70055 END
-  COPY ~chriz-bg-magic/res/scrl6s.itm~ ~override/scrl6s.itm~
-    WRITE_LONG 0xc 5019
-    PATCH_IF cbm_english BEGIN SAY 0xc @70056 END
-    WRITE_LONG 0x54 25913
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70057 END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl6s.itm~ ~override/scrl6s.itm~
+      WRITE_LONG 0xc 5019
+      PATCH_IF cbm_english BEGIN SAY 0xc @70056 END
+      WRITE_LONG 0x54 25913
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70057 END
+  END
   COPY ~chriz-bg-magic/res/scrl6v.itm~ ~override/scrl6v.itm~
     WRITE_LONG 0x54 29221
     PATCH_IF cbm_english BEGIN SAY 0x54 @70058 END
@@ -1110,12 +1195,14 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl71.itm~ ~override/scrl71.itm~
     WRITE_LONG 0x54 6622
     PATCH_IF cbm_english BEGIN SAY 0x54 @70060 END
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/scrl7l.itm~ ~override/scrl7l.itm~
-    WRITE_LONG 0x54 25935
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70061 END
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: scrl7l.itm stays as it is: its new rule needs EEex.~
+  ACTION_IF (cbm_ini_rework_pierce_magic != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/scrl7l.itm~ ~override/scrl7l.itm~
+      WRITE_LONG 0x54 25935
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70061 END
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: scrl7l.itm stays as it is: its new rule needs EEex.~
+    END
   END
   COPY ~chriz-bg-magic/res/scrl7m.itm~ ~override/scrl7m.itm~
     WRITE_LONG 0x54 25936
@@ -1123,11 +1210,13 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl7p.itm~ ~override/scrl7p.itm~
     WRITE_LONG 0x54 7779
     PATCH_IF cbm_english BEGIN SAY 0x54 @70063 END
-  COPY ~chriz-bg-magic/res/scrl7q.itm~ ~override/scrl7q.itm~
-    WRITE_LONG 0xc 34583
-    PATCH_IF cbm_english BEGIN SAY 0xc @70064 END
-    WRITE_LONG 0x54 25938
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70065 END
+  ACTION_IF (cbm_ini_rework_improved_haste != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl7q.itm~ ~override/scrl7q.itm~
+      WRITE_LONG 0xc 34583
+      PATCH_IF cbm_english BEGIN SAY 0xc @70064 END
+      WRITE_LONG 0x54 25938
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70065 END
+  END
   COPY ~chriz-bg-magic/res/scrl7r.itm~ ~override/scrl7r.itm~
     WRITE_LONG 0x54 7622
     PATCH_IF cbm_english BEGIN SAY 0x54 @70066 END
@@ -1143,15 +1232,19 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl7z.itm~ ~override/scrl7z.itm~
     WRITE_LONG 0x54 24842
     PATCH_IF cbm_english BEGIN SAY 0x54 @70070 END
-  COPY ~chriz-bg-magic/res/scrl83.itm~ ~override/scrl83.itm~
-    WRITE_LONG 0x54 12174
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70071 END
+  ACTION_IF (cbm_ini_rework_chromatic_orb != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl83.itm~ ~override/scrl83.itm~
+      WRITE_LONG 0x54 12174
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70071 END
+  END
   COPY ~chriz-bg-magic/res/scrl85.itm~ ~override/scrl85.itm~
     WRITE_LONG 0x54 6619
     PATCH_IF cbm_english BEGIN SAY 0x54 @70072 END
-  COPY ~chriz-bg-magic/res/scrl8i.itm~ ~override/scrl8i.itm~
-    WRITE_LONG 0x54 17348
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70073 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl8i.itm~ ~override/scrl8i.itm~
+      WRITE_LONG 0x54 17348
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70073 END
+  END
   COPY ~chriz-bg-magic/res/scrl8j.itm~ ~override/scrl8j.itm~
     WRITE_LONG 0x54 7613
     PATCH_IF cbm_english BEGIN SAY 0x54 @70074 END
@@ -1179,15 +1272,17 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl97.itm~ ~override/scrl97.itm~
     WRITE_LONG 0x54 12181
     PATCH_IF cbm_english BEGIN SAY 0x54 @70082 END
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/scrl98.itm~ ~override/scrl98.itm~
-    WRITE_LONG 0x54 12197
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70083 END
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: scrl98.itm is written without its new rule, which needs EEex.~
-  COPY ~chriz-bg-magic/res/without-eeex/scrl98.itm~ ~override/scrl98.itm~
-    WRITE_LONG 0x54 12197
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70215 END
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/scrl98.itm~ ~override/scrl98.itm~
+      WRITE_LONG 0x54 12197
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70083 END
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: scrl98.itm is written without its new rule, which needs EEex.~
+    COPY ~chriz-bg-magic/res/without-eeex/scrl98.itm~ ~override/scrl98.itm~
+      WRITE_LONG 0x54 12197
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70215 END
+    END
   END
   COPY ~chriz-bg-magic/res/scrl99.itm~ ~override/scrl99.itm~
     WRITE_LONG 0x54 12184
@@ -1195,9 +1290,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl9a.itm~ ~override/scrl9a.itm~
     WRITE_LONG 0x54 26242
     PATCH_IF cbm_english BEGIN SAY 0x54 @70085 END
-  COPY ~chriz-bg-magic/res/scrl9b.itm~ ~override/scrl9b.itm~
-    WRITE_LONG 0x54 17361
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70086 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl9b.itm~ ~override/scrl9b.itm~
+      WRITE_LONG 0x54 17361
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70086 END
+  END
   COPY ~chriz-bg-magic/res/scrl9c.itm~ ~override/scrl9c.itm~
     WRITE_LONG 0x54 7618
     PATCH_IF cbm_english BEGIN SAY 0x54 @70087 END
@@ -1216,9 +1313,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/scrl9m.itm~ ~override/scrl9m.itm~
     WRITE_LONG 0x54 26315
     PATCH_IF cbm_english BEGIN SAY 0x54 @70092 END
-  COPY ~chriz-bg-magic/res/scrl9n.itm~ ~override/scrl9n.itm~
-    WRITE_LONG 0x54 17352
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70093 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/scrl9n.itm~ ~override/scrl9n.itm~
+      WRITE_LONG 0x54 17352
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70093 END
+  END
   COPY ~chriz-bg-magic/res/scrl9p.itm~ ~override/scrl9p.itm~
     WRITE_LONG 0x54 7620
     PATCH_IF cbm_english BEGIN SAY 0x54 @70094 END
@@ -1253,7 +1352,9 @@ BEGIN
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
-  COPY ~chriz-bg-magic/res/simulacr.spl~ ~override/simulacr.spl~
+  ACTION_IF (cbm_ini_simulacrum_clone_rules != 0) BEGIN
+    COPY ~chriz-bg-magic/res/simulacr.spl~ ~override/simulacr.spl~
+  END
   COPY ~chriz-bg-magic/res/spcl123.spl~ ~override/spcl123.spl~
     WRITE_LONG 0x206 cbm_state_SLOW_IMMUNITY
     WRITE_LONG 0x26a cbm_Haste
@@ -1320,20 +1421,28 @@ BEGIN
     WRITE_LONG 0x132 cbm_state_PANIC_IMMUNITY
     WRITE_LONG 0x162 cbm_state_STUN_IMMUNITY
     WRITE_LONG 0x7f2 cbm_state_ENHANCED_BARD_SONG
-  COPY ~chriz-bg-magic/res/spcl923.spl~ ~override/spcl923.spl~
-    WRITE_LONG 0x50 63829
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
-    WRITE_LONG 0x54 63829
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70100 END
-  COPY ~chriz-bg-magic/res/spcl935.spl~ ~override/spcl935.spl~
-    WRITE_LONG 0x50 63831
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70101 END
-    WRITE_LONG 0x54 63831
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70101 END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spcl923.spl~ ~override/spcl923.spl~
+      WRITE_LONG 0x50 63829
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
+      WRITE_LONG 0x54 63829
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70100 END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spcl935.spl~ ~override/spcl935.spl~
+      WRITE_LONG 0x50 63831
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70101 END
+      WRITE_LONG 0x54 63831
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70101 END
+  END
   COPY ~chriz-bg-magic/res/spcl938.spl~ ~override/spcl938.spl~
     WRITE_LONG 0x2b2 cbm_stat_225
-  COPY ~chriz-bg-magic/res/spdeva.eff~ ~override/spdeva.eff~
-  COPY ~chriz-bg-magic/res/spdeva2.eff~ ~override/spdeva2.eff~
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spdeva.eff~ ~override/spdeva.eff~
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spdeva2.eff~ ~override/spdeva2.eff~
+  END
   COPY ~chriz-bg-magic/res/spdm102.spl~ ~override/spdm102.spl~
     WRITE_LONG 0x37a cbm_stat_227
     WRITE_LONG 0x5ba cbm_stat_227
@@ -1363,18 +1472,24 @@ BEGIN
   COPY ~chriz-bg-magic/res/spin102.spl~ ~override/spin102.spl~
   COPY ~chriz-bg-magic/res/spin112.spl~ ~override/spin112.spl~
     WRITE_LONG 0x2b2 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/spin152.spl~ ~override/spin152.spl~
-    WRITE_LONG 0x8 18626
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70102 END
-    SAY 0x50 @70103
-  COPY ~chriz-bg-magic/res/spin153.spl~ ~override/spin153.spl~
-    WRITE_LONG 0x8 18628
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70104 END
-    SAY 0x50 @70105
-  COPY ~chriz-bg-magic/res/spin154.spl~ ~override/spin154.spl~
-    WRITE_LONG 0x8 18630
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70106 END
-    SAY 0x50 @70107
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spin152.spl~ ~override/spin152.spl~
+      WRITE_LONG 0x8 18626
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70102 END
+      SAY 0x50 @70103
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spin153.spl~ ~override/spin153.spl~
+      WRITE_LONG 0x8 18628
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70104 END
+      SAY 0x50 @70105
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spin154.spl~ ~override/spin154.spl~
+      WRITE_LONG 0x8 18630
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70106 END
+      SAY 0x50 @70107
+  END
   COPY ~chriz-bg-magic/res/spin201.spl~ ~override/spin201.spl~
   COPY ~chriz-bg-magic/res/spin532.spl~ ~override/spin532.spl~
     WRITE_LONG 0xd2 cbm_stat_230
@@ -1544,8 +1659,12 @@ BEGIN
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/spin992.spl~ ~override/spin992.spl~
     WRITE_LONG 0x612 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/spplan.eff~ ~override/spplan.eff~
-  COPY ~chriz-bg-magic/res/spplan2.eff~ ~override/spplan2.eff~
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spplan.eff~ ~override/spplan.eff~
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spplan2.eff~ ~override/spplan2.eff~
+  END
   COPY ~chriz-bg-magic/res/sppr101.spl~ ~override/sppr101.spl~
     WRITE_LONG 0x50 12216
     PATCH_IF cbm_english BEGIN SAY 0x50 @70108 END
@@ -1592,9 +1711,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr102.spl~ ~override/sppr102.spl~
     WRITE_LONG 0x50 12224
     PATCH_IF cbm_english BEGIN SAY 0x50 @70109 END
-  COPY ~chriz-bg-magic/res/sppr103.spl~ ~override/sppr103.spl~
-    WRITE_LONG 0x50 12323
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70110 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr103.spl~ ~override/sppr103.spl~
+      WRITE_LONG 0x50 12323
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70110 END
+  END
   COPY ~chriz-bg-magic/res/sppr105.spl~ ~override/sppr105.spl~
     WRITE_LONG 0x50 12208
     PATCH_IF cbm_english BEGIN SAY 0x50 @70111 END
@@ -1624,49 +1745,51 @@ BEGIN
     WRITE_LONG 0xd2a cbm_prot_59_1_1
     WRITE_LONG 0xdba cbm_prot_59_1_1
     WRITE_LONG 0xe4a cbm_prot_59_1_1
-  COPY ~chriz-bg-magic/res/sppr113.spl~ ~override/sppr113.spl~
-    WRITE_LONG 0x50 3352
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70115 END
-    WRITE_LONG 0x232 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x292 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x2f2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x352 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x3b2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x412 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x472 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x562 cbm_state_DOOM
-    WRITE_LONG 0x682 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x6e2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x742 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x7a2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x802 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x862 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x8c2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x9b2 cbm_state_DOOM
-    WRITE_LONG 0xad2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xb32 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xb92 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xbf2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xc52 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xcb2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xd12 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xe02 cbm_state_DOOM
-    WRITE_LONG 0xf22 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xf82 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xfe2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1042 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x10a2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1102 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1162 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1252 cbm_state_DOOM
-    WRITE_LONG 0x1372 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x13d2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1432 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1492 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x14f2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1552 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x15b2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x16a2 cbm_state_DOOM
+  ACTION_IF (cbm_ini_rework_doom != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr113.spl~ ~override/sppr113.spl~
+      WRITE_LONG 0x50 3352
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70115 END
+      WRITE_LONG 0x232 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x292 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x2f2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x352 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x3b2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x412 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x472 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x562 cbm_state_DOOM
+      WRITE_LONG 0x682 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x6e2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x742 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x7a2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x802 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x862 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x8c2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x9b2 cbm_state_DOOM
+      WRITE_LONG 0xad2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xb32 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xb92 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xbf2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xc52 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xcb2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xd12 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xe02 cbm_state_DOOM
+      WRITE_LONG 0xf22 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xf82 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xfe2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1042 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x10a2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1102 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1162 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1252 cbm_state_DOOM
+      WRITE_LONG 0x1372 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x13d2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1432 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1492 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x14f2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1552 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x15b2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x16a2 cbm_state_DOOM
+  END
   COPY ~chriz-bg-magic/res/sppr201.spl~ ~override/sppr201.spl~
     WRITE_LONG 0x50 12322
     PATCH_IF cbm_english BEGIN SAY 0x50 @70116 END
@@ -1894,19 +2017,21 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr309.spl~ ~override/sppr309.spl~
     WRITE_LONG 0x50 12221
     PATCH_IF cbm_english BEGIN SAY 0x50 @70123 END
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/sppr312.spl~ ~override/sppr312.spl~
-    WRITE_LONG 0x50 12213
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70124 END
-    WRITE_LONG 0x162 cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1f2 cbm_state_BUFF_ENHANCEMENT
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: sppr312.spl is written without its new rule, which needs EEex.~
-  COPY ~chriz-bg-magic/res/without-eeex/sppr312.spl~ ~override/sppr312.spl~
-    WRITE_LONG 0x50 12213
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70216 END
-    WRITE_LONG 0x132 cbm_prot_36_18_3
-    WRITE_LONG 0x162 cbm_prot_37_75_4
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/sppr312.spl~ ~override/sppr312.spl~
+      WRITE_LONG 0x50 12213
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70124 END
+      WRITE_LONG 0x162 cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1f2 cbm_state_BUFF_ENHANCEMENT
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: sppr312.spl is written without its new rule, which needs EEex.~
+    COPY ~chriz-bg-magic/res/without-eeex/sppr312.spl~ ~override/sppr312.spl~
+      WRITE_LONG 0x50 12213
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70216 END
+      WRITE_LONG 0x132 cbm_prot_36_18_3
+      WRITE_LONG 0x162 cbm_prot_37_75_4
+    END
   END
   COPY ~chriz-bg-magic/res/sppr314.spl~ ~override/sppr314.spl~
     WRITE_LONG 0x50 4350
@@ -1956,9 +2081,11 @@ BEGIN
     WRITE_LONG 0x227e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x23a2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x2402 cbm_state_CBM_BONUS_TYPED
-  COPY ~chriz-bg-magic/res/sppr315.spl~ ~override/sppr315.spl~
-    WRITE_LONG 0x50 3807
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70126 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr315.spl~ ~override/sppr315.spl~
+      WRITE_LONG 0x50 3807
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70126 END
+  END
   COPY ~chriz-bg-magic/res/sppr319.spl~ ~override/sppr319.spl~
     WRITE_LONG 0x50 45047
     PATCH_IF cbm_english BEGIN SAY 0x50 @70129 END
@@ -1971,9 +2098,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr319c.eff~ ~override/sppr319c.eff~
   COPY ~chriz-bg-magic/res/sppr319c.spl~ ~override/sppr319c.spl~
     WRITE_LONG 0x102 cbm_stat_213
-  COPY ~chriz-bg-magic/res/sppr401.spl~ ~override/sppr401.spl~
-    WRITE_LONG 0x50 12325
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70043 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr401.spl~ ~override/sppr401.spl~
+      WRITE_LONG 0x50 12325
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70043 END
+  END
   COPY ~chriz-bg-magic/res/sppr402.spl~ ~override/sppr402.spl~
   COPY ~chriz-bg-magic/res/sppr403.spl~ ~override/sppr403.spl~
     WRITE_LONG 0x50 17645
@@ -2128,136 +2257,144 @@ BEGIN
     WRITE_LONG 0x24fa cbm_state_DISINTEGRATE_IMMUNITY
     WRITE_LONG 0x25ea cbm_state_BUFF_PRO_EFFECTS
     WRITE_LONG 0x261a cbm_state_DEATH_WARD
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/sppr412.spl~ ~override/sppr412.spl~
-    WRITE_LONG 0x8 6087
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70131 END
-    WRITE_LONG 0x50 6088
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70132 END
-    WRITE_LONG 0x39a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x42a cbm_stat_211
-    WRITE_LONG 0x45a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x48a cbm_state_HOLY_POWER
-    WRITE_LONG 0x69a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x72a cbm_stat_211
-    WRITE_LONG 0x75a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x78a cbm_state_HOLY_POWER
-    WRITE_LONG 0x99a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xa2a cbm_stat_211
-    WRITE_LONG 0xa5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xa8a cbm_state_HOLY_POWER
-    WRITE_LONG 0xc9a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xd2a cbm_stat_211
-    WRITE_LONG 0xd5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xd8a cbm_state_HOLY_POWER
-    WRITE_LONG 0xf9a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x102a cbm_stat_211
-    WRITE_LONG 0x105a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x108a cbm_state_HOLY_POWER
-    WRITE_LONG 0x129a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x132a cbm_stat_211
-    WRITE_LONG 0x135a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x138a cbm_state_HOLY_POWER
-    WRITE_LONG 0x159a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x162a cbm_stat_211
-    WRITE_LONG 0x165a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x168a cbm_state_HOLY_POWER
-    WRITE_LONG 0x189a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x192a cbm_stat_211
-    WRITE_LONG 0x195a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x198a cbm_state_HOLY_POWER
-    WRITE_LONG 0x1b9a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1c2a cbm_stat_211
-    WRITE_LONG 0x1c5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1c8a cbm_state_HOLY_POWER
-    WRITE_LONG 0x1e9a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1f2a cbm_stat_211
-    WRITE_LONG 0x1f5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1f8a cbm_state_HOLY_POWER
-    WRITE_LONG 0x219a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x222a cbm_stat_211
-    WRITE_LONG 0x225a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x228a cbm_state_HOLY_POWER
-    WRITE_LONG 0x249a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x252a cbm_stat_211
-    WRITE_LONG 0x255a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x258a cbm_state_HOLY_POWER
-    WRITE_LONG 0x279a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x282a cbm_stat_211
-    WRITE_LONG 0x285a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x288a cbm_state_HOLY_POWER
-    WRITE_LONG 0x2a9a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x2b2a cbm_stat_211
-    WRITE_LONG 0x2b5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x2b8a cbm_state_HOLY_POWER
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: sppr412.spl is written without its new rule, which needs EEex.~
-  COPY ~chriz-bg-magic/res/without-eeex/sppr412.spl~ ~override/sppr412.spl~
-    WRITE_LONG 0x8 6087
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70131 END
-    WRITE_LONG 0x50 6088
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70217 END
-    WRITE_LONG 0x42a cbm_stat_211
-    WRITE_LONG 0x45a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x48a cbm_state_HOLY_POWER
-    WRITE_LONG 0x72a cbm_stat_211
-    WRITE_LONG 0x75a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x78a cbm_state_HOLY_POWER
-    WRITE_LONG 0xa2a cbm_stat_211
-    WRITE_LONG 0xa5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xa8a cbm_state_HOLY_POWER
-    WRITE_LONG 0xd2a cbm_stat_211
-    WRITE_LONG 0xd5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xd8a cbm_state_HOLY_POWER
-    WRITE_LONG 0x102a cbm_stat_211
-    WRITE_LONG 0x105a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x108a cbm_state_HOLY_POWER
-    WRITE_LONG 0x132a cbm_stat_211
-    WRITE_LONG 0x135a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x138a cbm_state_HOLY_POWER
-    WRITE_LONG 0x162a cbm_stat_211
-    WRITE_LONG 0x165a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x168a cbm_state_HOLY_POWER
-    WRITE_LONG 0x192a cbm_stat_211
-    WRITE_LONG 0x195a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x198a cbm_state_HOLY_POWER
-    WRITE_LONG 0x1c2a cbm_stat_211
-    WRITE_LONG 0x1c5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1c8a cbm_state_HOLY_POWER
-    WRITE_LONG 0x1f2a cbm_stat_211
-    WRITE_LONG 0x1f5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1f8a cbm_state_HOLY_POWER
-    WRITE_LONG 0x222a cbm_stat_211
-    WRITE_LONG 0x225a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x228a cbm_state_HOLY_POWER
-    WRITE_LONG 0x252a cbm_stat_211
-    WRITE_LONG 0x255a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x258a cbm_state_HOLY_POWER
-    WRITE_LONG 0x282a cbm_stat_211
-    WRITE_LONG 0x285a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x288a cbm_state_HOLY_POWER
-    WRITE_LONG 0x2b2a cbm_stat_211
-    WRITE_LONG 0x2b5a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x2b8a cbm_state_HOLY_POWER
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/sppr412.spl~ ~override/sppr412.spl~
+      WRITE_LONG 0x8 6087
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70131 END
+      WRITE_LONG 0x50 6088
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70132 END
+      WRITE_LONG 0x39a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x42a cbm_stat_211
+      WRITE_LONG 0x45a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x48a cbm_state_HOLY_POWER
+      WRITE_LONG 0x69a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x72a cbm_stat_211
+      WRITE_LONG 0x75a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x78a cbm_state_HOLY_POWER
+      WRITE_LONG 0x99a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xa2a cbm_stat_211
+      WRITE_LONG 0xa5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xa8a cbm_state_HOLY_POWER
+      WRITE_LONG 0xc9a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xd2a cbm_stat_211
+      WRITE_LONG 0xd5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xd8a cbm_state_HOLY_POWER
+      WRITE_LONG 0xf9a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x102a cbm_stat_211
+      WRITE_LONG 0x105a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x108a cbm_state_HOLY_POWER
+      WRITE_LONG 0x129a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x132a cbm_stat_211
+      WRITE_LONG 0x135a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x138a cbm_state_HOLY_POWER
+      WRITE_LONG 0x159a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x162a cbm_stat_211
+      WRITE_LONG 0x165a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x168a cbm_state_HOLY_POWER
+      WRITE_LONG 0x189a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x192a cbm_stat_211
+      WRITE_LONG 0x195a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x198a cbm_state_HOLY_POWER
+      WRITE_LONG 0x1b9a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1c2a cbm_stat_211
+      WRITE_LONG 0x1c5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1c8a cbm_state_HOLY_POWER
+      WRITE_LONG 0x1e9a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1f2a cbm_stat_211
+      WRITE_LONG 0x1f5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1f8a cbm_state_HOLY_POWER
+      WRITE_LONG 0x219a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x222a cbm_stat_211
+      WRITE_LONG 0x225a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x228a cbm_state_HOLY_POWER
+      WRITE_LONG 0x249a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x252a cbm_stat_211
+      WRITE_LONG 0x255a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x258a cbm_state_HOLY_POWER
+      WRITE_LONG 0x279a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x282a cbm_stat_211
+      WRITE_LONG 0x285a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x288a cbm_state_HOLY_POWER
+      WRITE_LONG 0x2a9a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x2b2a cbm_stat_211
+      WRITE_LONG 0x2b5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x2b8a cbm_state_HOLY_POWER
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: sppr412.spl is written without its new rule, which needs EEex.~
+    COPY ~chriz-bg-magic/res/without-eeex/sppr412.spl~ ~override/sppr412.spl~
+      WRITE_LONG 0x8 6087
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70131 END
+      WRITE_LONG 0x50 6088
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70217 END
+      WRITE_LONG 0x42a cbm_stat_211
+      WRITE_LONG 0x45a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x48a cbm_state_HOLY_POWER
+      WRITE_LONG 0x72a cbm_stat_211
+      WRITE_LONG 0x75a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x78a cbm_state_HOLY_POWER
+      WRITE_LONG 0xa2a cbm_stat_211
+      WRITE_LONG 0xa5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xa8a cbm_state_HOLY_POWER
+      WRITE_LONG 0xd2a cbm_stat_211
+      WRITE_LONG 0xd5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xd8a cbm_state_HOLY_POWER
+      WRITE_LONG 0x102a cbm_stat_211
+      WRITE_LONG 0x105a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x108a cbm_state_HOLY_POWER
+      WRITE_LONG 0x132a cbm_stat_211
+      WRITE_LONG 0x135a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x138a cbm_state_HOLY_POWER
+      WRITE_LONG 0x162a cbm_stat_211
+      WRITE_LONG 0x165a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x168a cbm_state_HOLY_POWER
+      WRITE_LONG 0x192a cbm_stat_211
+      WRITE_LONG 0x195a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x198a cbm_state_HOLY_POWER
+      WRITE_LONG 0x1c2a cbm_stat_211
+      WRITE_LONG 0x1c5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1c8a cbm_state_HOLY_POWER
+      WRITE_LONG 0x1f2a cbm_stat_211
+      WRITE_LONG 0x1f5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1f8a cbm_state_HOLY_POWER
+      WRITE_LONG 0x222a cbm_stat_211
+      WRITE_LONG 0x225a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x228a cbm_state_HOLY_POWER
+      WRITE_LONG 0x252a cbm_stat_211
+      WRITE_LONG 0x255a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x258a cbm_state_HOLY_POWER
+      WRITE_LONG 0x282a cbm_stat_211
+      WRITE_LONG 0x285a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x288a cbm_state_HOLY_POWER
+      WRITE_LONG 0x2b2a cbm_stat_211
+      WRITE_LONG 0x2b5a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x2b8a cbm_state_HOLY_POWER
+    END
   END
   COPY ~chriz-bg-magic/res/sppr413.spl~ ~override/sppr413.spl~
     WRITE_LONG 0x50 55843
     PATCH_IF cbm_english BEGIN SAY 0x50 @70133 END
-  COPY ~chriz-bg-magic/res/sppr414.spl~ ~override/sppr414.spl~
-    WRITE_LONG 0x50 11185
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70134 END
-    WRITE_LONG 0xa2 cbm_prot_59_1_1
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/sppr417.spl~ ~override/sppr417.spl~
-    WRITE_LONG 0x50 55845
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70135 END
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: sppr417.spl stays as it is: its new rule needs EEex.~
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr414.spl~ ~override/sppr414.spl~
+      WRITE_LONG 0x50 11185
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70134 END
+      WRITE_LONG 0xa2 cbm_prot_59_1_1
+  END
+  ACTION_IF (cbm_ini_lesser_restoration_no_fatigue != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/sppr417.spl~ ~override/sppr417.spl~
+      WRITE_LONG 0x50 55845
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70135 END
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: sppr417.spl stays as it is: its new rule needs EEex.~
+    END
   END
   COPY ~chriz-bg-magic/res/sppr501.spl~ ~override/sppr501.spl~
-  COPY ~chriz-bg-magic/res/sppr502.spl~ ~override/sppr502.spl~
-    WRITE_LONG 0x50 18729
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70048 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr502.spl~ ~override/sppr502.spl~
+      WRITE_LONG 0x50 18729
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70048 END
+  END
   COPY ~chriz-bg-magic/res/sppr503.spl~ ~override/sppr503.spl~
     WRITE_LONG 0x50 12319
     PATCH_IF cbm_english BEGIN SAY 0x50 @70049 END
@@ -2270,57 +2407,61 @@ BEGIN
     PATCH_IF cbm_english BEGIN SAY 0x8 @70139 END
     WRITE_LONG 0x50 44943
     PATCH_IF cbm_english BEGIN SAY 0x50 @70140 END
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/sppr507.spl~ ~override/sppr507.spl~
-    WRITE_LONG 0x50 22834
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70141 END
-    WRITE_LONG 0x34a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x3aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x64a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x6aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x94a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x9aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xc4a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xf4a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xfaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x124a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x12aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x154a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x15aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x184a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x18aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1b4a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1baa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1e4a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1eaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x214a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x21aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x244a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x24aa cbm_state_BUFF_ENHANCEMENT
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: sppr507.spl is written without its new rule, which needs EEex.~
-  COPY ~chriz-bg-magic/res/without-eeex/sppr507.spl~ ~override/sppr507.spl~
-    WRITE_LONG 0x3aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x6aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x9aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xfaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x12aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x15aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x18aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1baa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1eaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x21aa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x24aa cbm_state_BUFF_ENHANCEMENT
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/sppr507.spl~ ~override/sppr507.spl~
+      WRITE_LONG 0x50 22834
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70141 END
+      WRITE_LONG 0x34a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x3aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x64a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x6aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x94a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x9aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xc4a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xf4a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xfaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x124a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x12aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x154a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x15aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x184a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x18aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1b4a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1baa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1e4a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1eaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x214a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x21aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x244a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x24aa cbm_state_BUFF_ENHANCEMENT
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: sppr507.spl is written without its new rule, which needs EEex.~
+    COPY ~chriz-bg-magic/res/without-eeex/sppr507.spl~ ~override/sppr507.spl~
+      WRITE_LONG 0x3aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x6aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x9aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xfaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x12aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x15aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x18aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1baa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1eaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x21aa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x24aa cbm_state_BUFF_ENHANCEMENT
+    END
   END
   COPY ~chriz-bg-magic/res/sppr509.spl~ ~override/sppr509.spl~
     WRITE_LONG 0x50 26784
     PATCH_IF cbm_english BEGIN SAY 0x50 @70142 END
-  COPY ~chriz-bg-magic/res/sppr510.spl~ ~override/sppr510.spl~
-    WRITE_LONG 0x50 11194
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70143 END
-    WRITE_LONG 0xa2 cbm_prot_59_1_1
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr510.spl~ ~override/sppr510.spl~
+      WRITE_LONG 0x50 11194
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70143 END
+      WRITE_LONG 0xa2 cbm_prot_59_1_1
+  END
   COPY ~chriz-bg-magic/res/sppr512.spl~ ~override/sppr512.spl~
     WRITE_LONG 0x50 6939
     PATCH_IF cbm_english BEGIN SAY 0x50 @70144 END
@@ -2351,9 +2492,11 @@ BEGIN
     WRITE_LONG 0x1c0a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x1eaa cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x214a cbm_state_BUFF_ENHANCEMENT
-  COPY ~chriz-bg-magic/res/sppr514.spl~ ~override/sppr514.spl~
-    WRITE_LONG 0x50 7469
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70146 END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr514.spl~ ~override/sppr514.spl~
+      WRITE_LONG 0x50 7469
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70146 END
+  END
   COPY ~chriz-bg-magic/res/sppr517.spl~ ~override/sppr517.spl~
     WRITE_LONG 0x50 45051
     PATCH_IF cbm_english BEGIN SAY 0x50 @70147 END
@@ -2380,13 +2523,17 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr606.spl~ ~override/sppr606.spl~
     WRITE_LONG 0x50 14254
     PATCH_IF cbm_english BEGIN SAY 0x50 @70152 END
-  COPY ~chriz-bg-magic/res/sppr607.spl~ ~override/sppr607.spl~
-    WRITE_LONG 0x50 8788
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70153 END
-  COPY ~chriz-bg-magic/res/sppr608.spl~ ~override/sppr608.spl~
-    WRITE_LONG 0x50 11202
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70154 END
-    WRITE_LONG 0xa2 cbm_prot_59_1_1
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr607.spl~ ~override/sppr607.spl~
+      WRITE_LONG 0x50 8788
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70153 END
+  END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr608.spl~ ~override/sppr608.spl~
+      WRITE_LONG 0x50 11202
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70154 END
+      WRITE_LONG 0xa2 cbm_prot_59_1_1
+  END
   COPY ~chriz-bg-magic/res/sppr609.spl~ ~override/sppr609.spl~
     WRITE_LONG 0x15e cbm_state_CONFUSION_IMMUNITY
   COPY ~chriz-bg-magic/res/sppr610.spl~ ~override/sppr610.spl~
@@ -2404,9 +2551,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/sppr702.spl~ ~override/sppr702.spl~
     WRITE_LONG 0x50 15181
     PATCH_IF cbm_english BEGIN SAY 0x50 @70156 END
-  COPY ~chriz-bg-magic/res/sppr703.spl~ ~override/sppr703.spl~
-    WRITE_LONG 0x50 14315
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70157 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr703.spl~ ~override/sppr703.spl~
+      WRITE_LONG 0x50 14315
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70157 END
+  END
   COPY ~chriz-bg-magic/res/sppr704.spl~ ~override/sppr704.spl~
     WRITE_LONG 0x50 44946
     PATCH_IF cbm_english BEGIN SAY 0x50 @70158 END
@@ -2494,16 +2643,20 @@ BEGIN
     WRITE_LONG 0x50 63802
     PATCH_IF cbm_english BEGIN SAY 0x50 @70168 END
   COPY ~chriz-bg-magic/res/sppr725d.spl~ ~override/sppr725d.spl~
-  COPY ~chriz-bg-magic/res/sppr726.spl~ ~override/sppr726.spl~
-    WRITE_LONG 0x50 63829
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
-    WRITE_LONG 0x54 63829
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70100 END
-  COPY ~chriz-bg-magic/res/sppr727.spl~ ~override/sppr727.spl~
-    WRITE_LONG 0x50 63831
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70101 END
-    WRITE_LONG 0x54 63831
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70101 END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr726.spl~ ~override/sppr726.spl~
+      WRITE_LONG 0x50 63829
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70100 END
+      WRITE_LONG 0x54 63829
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70100 END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/sppr727.spl~ ~override/sppr727.spl~
+      WRITE_LONG 0x50 63831
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70101 END
+      WRITE_LONG 0x54 63831
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70101 END
+  END
   COPY ~chriz-bg-magic/res/sppr730.spl~ ~override/sppr730.spl~
     WRITE_LONG 0x50 63843
     PATCH_IF cbm_english BEGIN SAY 0x50 @70169 END
@@ -2614,45 +2767,53 @@ BEGIN
     WRITE_SHORT 0x340 cbm_proj_cbmgr18
     WRITE_SHORT 0x368 cbm_proj_cbmgr19
     WRITE_SHORT 0x390 cbm_proj_cbmgr20
-  COPY ~chriz-bg-magic/res/spwi105.spl~ ~override/spwi105.spl~
-    WRITE_LONG 0x50 12191
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70170 END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi105.spl~ ~override/spwi105.spl~
+      WRITE_LONG 0x50 12191
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70170 END
+  END
   COPY ~chriz-bg-magic/res/spwi106.spl~ ~override/spwi106.spl~
     WRITE_LONG 0x50 6622
     PATCH_IF cbm_english BEGIN SAY 0x50 @70060 END
-  COPY ~chriz-bg-magic/res/spwi116.spl~ ~override/spwi116.spl~
-    WRITE_LONG 0x50 12172
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70171 END
-    WRITE_LONG 0x396 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x516 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x696 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x816 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x996 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xb16 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xc96 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xe16 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xf96 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1116 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1296 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1416 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1596 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1716 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1896 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1a16 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1b96 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1d16 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x1e96 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x2016 cbm_state_SLEEP_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi118.spl~ ~override/spwi118.spl~
-    WRITE_LONG 0x50 12174
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70071 END
-    WRITE_LONG 0x31a cbm_stat_212
-    WRITE_LONG 0x5ea cbm_prot_131_1_4
-    WRITE_LONG 0x646 cbm_state_STUN_IMMUNITY
-    WRITE_LONG 0x796 cbm_state_HOLD_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi120.spl~ ~override/spwi120.spl~
-    WRITE_LONG 0x50 25867
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70172 END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi116.spl~ ~override/spwi116.spl~
+      WRITE_LONG 0x50 12172
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70171 END
+      WRITE_LONG 0x396 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x516 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x696 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x816 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x996 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xb16 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xc96 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xe16 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xf96 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1116 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1296 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1416 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1596 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1716 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1896 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1a16 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1b96 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1d16 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x1e96 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x2016 cbm_state_SLEEP_IMMUNITY
+  END
+  ACTION_IF (cbm_ini_rework_chromatic_orb != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi118.spl~ ~override/spwi118.spl~
+      WRITE_LONG 0x50 12174
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70071 END
+      WRITE_LONG 0x31a cbm_stat_212
+      WRITE_LONG 0x5ea cbm_prot_131_1_4
+      WRITE_LONG 0x646 cbm_state_STUN_IMMUNITY
+      WRITE_LONG 0x796 cbm_state_HOLD_IMMUNITY
+  END
+  ACTION_IF (cbm_ini_rework_mirror_image != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi120.spl~ ~override/spwi120.spl~
+      WRITE_LONG 0x50 25867
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70172 END
+  END
   COPY ~chriz-bg-magic/res/spwi124.spl~ ~override/spwi124.spl~
   COPY ~chriz-bg-magic/res/spwi125.spl~ ~override/spwi125.spl~
     WRITE_LONG 0x50 38587
@@ -2814,87 +2975,95 @@ BEGIN
     WRITE_LONG 0x372 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x3d2 cbm_state_CBM_BONUS_TYPED
     WRITE_LONG 0x432 cbm_state_CBM_BONUS_TYPED
-  COPY ~chriz-bg-magic/res/spwi212.spl~ ~override/spwi212.spl~
-    WRITE_LONG 0x50 12142
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70174 END
+  ACTION_IF (cbm_ini_rework_mirror_image != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi212.spl~ ~override/spwi212.spl~
+      WRITE_LONG 0x50 12142
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70174 END
+  END
   COPY ~chriz-bg-magic/res/spwi213.spl~ ~override/spwi213.spl~
     WRITE_LONG 0x50 12181
     PATCH_IF cbm_english BEGIN SAY 0x50 @70082 END
     WRITE_LONG 0x15e cbm_state_MINOR_GLOBE
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/spwi214.spl~ ~override/spwi214.spl~
-    WRITE_LONG 0x50 12197
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70083 END
-    WRITE_LONG 0x3aa cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x46a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x5ba cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x67a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x7ca cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x88a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x9da cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xa9a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xbea cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xdfa cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0xeba cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x100a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x10ca cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x121a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x12da cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x142a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x14ea cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x163a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x16fa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x184a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x190a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1a5a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1b1a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1c6a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1d2a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1e7a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x1f3a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x208a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x214a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x229a cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x235a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x24aa cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x256a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x26ba cbm_state_CBM_STR_FLOOR
-    WRITE_LONG 0x277a cbm_state_BUFF_ENHANCEMENT
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: spwi214.spl is written without its new rule, which needs EEex.~
-  COPY ~chriz-bg-magic/res/without-eeex/spwi214.spl~ ~override/spwi214.spl~
-    WRITE_LONG 0x50 12197
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70215 END
-    WRITE_LONG 0x43a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x61a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x7fa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x9da cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xbba cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xd9a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0xf7a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x115a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x133a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x151a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x16fa cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x18da cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1aba cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1c9a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x1e7a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x205a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x223a cbm_state_BUFF_ENHANCEMENT
-    WRITE_LONG 0x241a cbm_state_BUFF_ENHANCEMENT
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/spwi214.spl~ ~override/spwi214.spl~
+      WRITE_LONG 0x50 12197
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70083 END
+      WRITE_LONG 0x3aa cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x46a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x5ba cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x67a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x7ca cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x88a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x9da cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xa9a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xbea cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xcaa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xdfa cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0xeba cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x100a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x10ca cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x121a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x12da cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x142a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x14ea cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x163a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x16fa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x184a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x190a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1a5a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1b1a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1c6a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1d2a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1e7a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x1f3a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x208a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x214a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x229a cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x235a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x24aa cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x256a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x26ba cbm_state_CBM_STR_FLOOR
+      WRITE_LONG 0x277a cbm_state_BUFF_ENHANCEMENT
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: spwi214.spl is written without its new rule, which needs EEex.~
+    COPY ~chriz-bg-magic/res/without-eeex/spwi214.spl~ ~override/spwi214.spl~
+      WRITE_LONG 0x50 12197
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70215 END
+      WRITE_LONG 0x43a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x61a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x7fa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x9da cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xbba cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xd9a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0xf7a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x115a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x133a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x151a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x16fa cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x18da cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1aba cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1c9a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x1e7a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x205a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x223a cbm_state_BUFF_ENHANCEMENT
+      WRITE_LONG 0x241a cbm_state_BUFF_ENHANCEMENT
+    END
   END
   COPY ~chriz-bg-magic/res/spwi215.spl~ ~override/spwi215.spl~
     WRITE_LONG 0x50 12184
     PATCH_IF cbm_english BEGIN SAY 0x50 @70084 END
     WRITE_LONG 0x27e cbm_state_MINOR_GLOBE
     WRITE_LONG 0x2ae cbm_state_WEB_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi220.spl~ ~override/spwi220.spl~
-    WRITE_LONG 0x50 7481
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70052 END
-    WRITE_LONG 0x18e cbm_state_SLEEP_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi298.spl~ ~override/spwi298.spl~
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi220.spl~ ~override/spwi220.spl~
+      WRITE_LONG 0x50 7481
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70052 END
+      WRITE_LONG 0x18e cbm_state_SLEEP_IMMUNITY
+  END
+  ACTION_IF (cbm_ini_rework_mirror_image != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi298.spl~ ~override/spwi298.spl~
+  END
   COPY ~chriz-bg-magic/res/spwi301.spl~ ~override/spwi301.spl~
     WRITE_LONG 0x50 12159
     PATCH_IF cbm_english BEGIN SAY 0x50 @70036 END
@@ -2992,25 +3161,27 @@ BEGIN
     WRITE_BYTE 0x27 cbm_Slow
     WRITE_LONG 0xa2 cbm_Slow
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi313.spl~ ~override/spwi313.spl~
-    WRITE_LONG 0x50 17647
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70040 END
-    WRITE_LONG 0x2f6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x3b6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x476 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x536 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x5f6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x6b6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x776 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x836 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x8f6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0x9b6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xa76 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xb36 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xbf6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xcb6 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xd76 cbm_state_MINOR_GLOBE
-    WRITE_LONG 0xe36 cbm_state_MINOR_GLOBE
+  ACTION_IF (cbm_ini_rework_skull_trap != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi313.spl~ ~override/spwi313.spl~
+      WRITE_LONG 0x50 17647
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70040 END
+      WRITE_LONG 0x2f6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x3b6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x476 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x536 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x5f6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x6b6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x776 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x836 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x8f6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0x9b6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xa76 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xb36 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xbf6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xcb6 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xd76 cbm_state_MINOR_GLOBE
+      WRITE_LONG 0xe36 cbm_state_MINOR_GLOBE
+  END
   COPY ~chriz-bg-magic/res/spwi315.spl~ ~override/spwi315.spl~
     WRITE_LONG 0x50 12144
     PATCH_IF cbm_english BEGIN SAY 0x50 @70179 END
@@ -3111,44 +3282,48 @@ BEGIN
     WRITE_LONG 0x3f9a cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x3fca cbm_state_BUFF_PRO_DAMAGE
     WRITE_LONG 0x3ffa cbm_state_BLUE_FIRESHIELD
-  COPY ~chriz-bg-magic/res/spwi411b.spl~ ~override/spwi411b.spl~
-    WRITE_LONG 0x2a6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x33a cbm_state_HOPELESSNESS
-    WRITE_LONG 0x3c6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x45a cbm_state_HOPELESSNESS
-    WRITE_LONG 0x4e6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x57a cbm_state_HOPELESSNESS
-    WRITE_LONG 0x606 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x69a cbm_state_HOPELESSNESS
-    WRITE_LONG 0x726 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x7ba cbm_state_HOPELESSNESS
-    WRITE_LONG 0x846 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x8da cbm_state_HOPELESSNESS
-    WRITE_LONG 0x966 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x9fa cbm_state_HOPELESSNESS
-    WRITE_LONG 0xa86 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xb1a cbm_state_HOPELESSNESS
-    WRITE_LONG 0xba6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xc3a cbm_state_HOPELESSNESS
-    WRITE_LONG 0xcc6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xd5a cbm_state_HOPELESSNESS
-    WRITE_LONG 0xde6 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xe7a cbm_state_HOPELESSNESS
-    WRITE_LONG 0xf06 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0xf9a cbm_state_HOPELESSNESS
-    WRITE_LONG 0x1026 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x10ba cbm_state_HOPELESSNESS
-    WRITE_LONG 0x1146 cbm_state_SLEEP_IMMUNITY
-    WRITE_LONG 0x11da cbm_state_HOPELESSNESS
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi411b.spl~ ~override/spwi411b.spl~
+      WRITE_LONG 0x2a6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x33a cbm_state_HOPELESSNESS
+      WRITE_LONG 0x3c6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x45a cbm_state_HOPELESSNESS
+      WRITE_LONG 0x4e6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x57a cbm_state_HOPELESSNESS
+      WRITE_LONG 0x606 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x69a cbm_state_HOPELESSNESS
+      WRITE_LONG 0x726 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x7ba cbm_state_HOPELESSNESS
+      WRITE_LONG 0x846 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x8da cbm_state_HOPELESSNESS
+      WRITE_LONG 0x966 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x9fa cbm_state_HOPELESSNESS
+      WRITE_LONG 0xa86 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xb1a cbm_state_HOPELESSNESS
+      WRITE_LONG 0xba6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xc3a cbm_state_HOPELESSNESS
+      WRITE_LONG 0xcc6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xd5a cbm_state_HOPELESSNESS
+      WRITE_LONG 0xde6 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xe7a cbm_state_HOPELESSNESS
+      WRITE_LONG 0xf06 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0xf9a cbm_state_HOPELESSNESS
+      WRITE_LONG 0x1026 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x10ba cbm_state_HOPELESSNESS
+      WRITE_LONG 0x1146 cbm_state_SLEEP_IMMUNITY
+      WRITE_LONG 0x11da cbm_state_HOPELESSNESS
+  END
   COPY ~chriz-bg-magic/res/spwi413a.spl~ ~override/spwi413a.spl~
     WRITE_LONG 0x9a2 cbm_state_OTILUKES_RESILIENT_SPHERE
   COPY ~chriz-bg-magic/res/spwi414.spl~ ~override/spwi414.spl~
     WRITE_LONG 0x50 22609
     PATCH_IF cbm_english BEGIN SAY 0x50 @70047 END
     WRITE_LONG 0x252 cbm_state_CBM_BONUS_TYPED
-  COPY ~chriz-bg-magic/res/spwi416.spl~ ~override/spwi416.spl~
-    WRITE_LONG 0x50 22322
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70182 END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi416.spl~ ~override/spwi416.spl~
+      WRITE_LONG 0x50 22322
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70182 END
+  END
   COPY ~chriz-bg-magic/res/spwi418.spl~ ~override/spwi418.spl~
     WRITE_LONG 0x50 25881
     PATCH_IF cbm_english BEGIN SAY 0x50 @70183 END
@@ -3200,14 +3375,18 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi421.spl~ ~override/spwi421.spl~
     WRITE_LONG 0x50 25894
     PATCH_IF cbm_english BEGIN SAY 0x50 @70055 END
-  COPY ~chriz-bg-magic/res/spwi495.spl~ ~override/spwi495.spl~
-    WRITE_LONG 0x8 23472
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70184 END
-    SAY 0x50 @70185
-  COPY ~chriz-bg-magic/res/spwi496.spl~ ~override/spwi496.spl~
-    WRITE_LONG 0x8 23471
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70186 END
-    SAY 0x50 @70187
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi495.spl~ ~override/spwi495.spl~
+      WRITE_LONG 0x8 23472
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70184 END
+      SAY 0x50 @70185
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi496.spl~ ~override/spwi496.spl~
+      WRITE_LONG 0x8 23471
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70186 END
+      SAY 0x50 @70187
+  END
   COPY ~chriz-bg-magic/res/spwi502.spl~ ~override/spwi502.spl~
     WRITE_LONG 0x50 12175
     PATCH_IF cbm_english BEGIN SAY 0x50 @70042 END
@@ -3221,13 +3400,15 @@ BEGIN
     WRITE_LONG 0xee cbm_state_CONFUSION_IMMUNITY
     WRITE_LONG 0x35e cbm_state_CONFUSION_IMMUNITY
     WRITE_LONG 0x5ce cbm_state_CONFUSION_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi510.spl~ ~override/spwi510.spl~
-    WRITE_LONG 0x8 25912
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-    WRITE_BYTE 0x27 cbm_DispelScreen
-    WRITE_LONG 0x50 25913
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70057 END
-    WRITE_LONG 0x162 cbm_stat_214
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi510.spl~ ~override/spwi510.spl~
+      WRITE_LONG 0x8 25912
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+      WRITE_BYTE 0x27 cbm_DispelScreen
+      WRITE_LONG 0x50 25913
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70057 END
+      WRITE_LONG 0x162 cbm_stat_214
+  END
   COPY ~chriz-bg-magic/res/spwi511.spl~ ~override/spwi511.spl~
     WRITE_LONG 0x50 7607
     PATCH_IF cbm_english BEGIN SAY 0x50 @70190 END
@@ -3335,15 +3516,19 @@ BEGIN
     WRITE_LONG 0x2522 cbm_state_TENSERS_TRANSFORMATION
     WRITE_LONG 0x2972 cbm_state_BUFF_ENHANCEMENT
     WRITE_LONG 0x29a2 cbm_state_TENSERS_TRANSFORMATION
-  COPY ~chriz-bg-magic/res/spwi605.spl~ ~override/spwi605.spl~
-    WRITE_LONG 0x50 7918
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70208 END
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/spwi608.spl~ ~override/spwi608.spl~
-    WRITE_LONG 0x50 25935
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70061 END
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: spwi608.spl stays as it is: its new rule needs EEex.~
+  ACTION_IF (cbm_ini_rework_death_spell != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi605.spl~ ~override/spwi605.spl~
+      WRITE_LONG 0x50 7918
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70208 END
+  END
+  ACTION_IF (cbm_ini_rework_pierce_magic != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/spwi608.spl~ ~override/spwi608.spl~
+      WRITE_LONG 0x50 25935
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70061 END
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: spwi608.spl stays as it is: its new rule needs EEex.~
+    END
   END
   COPY ~chriz-bg-magic/res/spwi609.spl~ ~override/spwi609.spl~
     WRITE_LONG 0x50 25936
@@ -3353,47 +3538,49 @@ BEGIN
     WRITE_LONG 0x50 7779
     PATCH_IF cbm_english BEGIN SAY 0x50 @70063 END
     WRITE_LONG 0x9e cbm_state_SILENCE_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi613.spl~ ~override/spwi613.spl~
-    WRITE_LONG 0x8 25937
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70064 END
-    WRITE_LONG 0x50 25938
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70065 END
-    WRITE_LONG 0x212 cbm_Slow
-    WRITE_LONG 0x272 cbm_Haste
-    WRITE_LONG 0x332 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x4e2 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x932 cbm_Slow
-    WRITE_LONG 0x992 cbm_Haste
-    WRITE_LONG 0xa52 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0xc02 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x1052 cbm_Slow
-    WRITE_LONG 0x10b2 cbm_Haste
-    WRITE_LONG 0x1172 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1322 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x1772 cbm_Slow
-    WRITE_LONG 0x17d2 cbm_Haste
-    WRITE_LONG 0x1892 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x1a42 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x1e92 cbm_Slow
-    WRITE_LONG 0x1ef2 cbm_Haste
-    WRITE_LONG 0x1fb2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x2162 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x25b2 cbm_Slow
-    WRITE_LONG 0x2612 cbm_Haste
-    WRITE_LONG 0x26d2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x2882 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x2cd2 cbm_Slow
-    WRITE_LONG 0x2d32 cbm_Haste
-    WRITE_LONG 0x2df2 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x2fa2 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x33f2 cbm_Slow
-    WRITE_LONG 0x3452 cbm_Haste
-    WRITE_LONG 0x3512 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x36c2 cbm_state_HASTE_IMMUNITY
-    WRITE_LONG 0x3b12 cbm_Slow
-    WRITE_LONG 0x3b72 cbm_Haste
-    WRITE_LONG 0x3c32 cbm_state_CBM_BONUS_TYPED
-    WRITE_LONG 0x3de2 cbm_state_HASTE_IMMUNITY
+  ACTION_IF (cbm_ini_rework_improved_haste != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi613.spl~ ~override/spwi613.spl~
+      WRITE_LONG 0x8 25937
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70064 END
+      WRITE_LONG 0x50 25938
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70065 END
+      WRITE_LONG 0x212 cbm_Slow
+      WRITE_LONG 0x272 cbm_Haste
+      WRITE_LONG 0x332 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x4e2 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x932 cbm_Slow
+      WRITE_LONG 0x992 cbm_Haste
+      WRITE_LONG 0xa52 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0xc02 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x1052 cbm_Slow
+      WRITE_LONG 0x10b2 cbm_Haste
+      WRITE_LONG 0x1172 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1322 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x1772 cbm_Slow
+      WRITE_LONG 0x17d2 cbm_Haste
+      WRITE_LONG 0x1892 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x1a42 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x1e92 cbm_Slow
+      WRITE_LONG 0x1ef2 cbm_Haste
+      WRITE_LONG 0x1fb2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x2162 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x25b2 cbm_Slow
+      WRITE_LONG 0x2612 cbm_Haste
+      WRITE_LONG 0x26d2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x2882 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x2cd2 cbm_Slow
+      WRITE_LONG 0x2d32 cbm_Haste
+      WRITE_LONG 0x2df2 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x2fa2 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x33f2 cbm_Slow
+      WRITE_LONG 0x3452 cbm_Haste
+      WRITE_LONG 0x3512 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x36c2 cbm_state_HASTE_IMMUNITY
+      WRITE_LONG 0x3b12 cbm_Slow
+      WRITE_LONG 0x3b72 cbm_Haste
+      WRITE_LONG 0x3c32 cbm_state_CBM_BONUS_TYPED
+      WRITE_LONG 0x3de2 cbm_state_HASTE_IMMUNITY
+  END
   COPY ~chriz-bg-magic/res/spwi614.spl~ ~override/spwi614.spl~
     WRITE_LONG 0x50 7622
     PATCH_IF cbm_english BEGIN SAY 0x50 @70066 END
@@ -3413,9 +3600,11 @@ BEGIN
   COPY ~chriz-bg-magic/res/spwi622.spl~ ~override/spwi622.spl~
     WRITE_LONG 0x50 24842
     PATCH_IF cbm_english BEGIN SAY 0x50 @70070 END
-  COPY ~chriz-bg-magic/res/spwi707.spl~ ~override/spwi707.spl~
-    WRITE_LONG 0x50 17348
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70073 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi707.spl~ ~override/spwi707.spl~
+      WRITE_LONG 0x50 17348
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70073 END
+  END
   COPY ~chriz-bg-magic/res/spwi708.spl~ ~override/spwi708.spl~
     WRITE_LONG 0x50 7613
     PATCH_IF cbm_english BEGIN SAY 0x50 @70074 END
@@ -3440,12 +3629,14 @@ BEGIN
     WRITE_LONG 0xd2 cbm_prot_131_1_4
     WRITE_LONG 0xfe cbm_state_STUN_IMMUNITY
   COPY ~chriz-bg-magic/res/spwi802.spl~ ~override/spwi802.spl~
-  ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/spwi804.spl~ ~override/spwi804.spl~
-    WRITE_LONG 0x50 26235
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70210 END
-  END ELSE BEGIN
-    PRINT ~chriz-bg-magic: spwi804.spl stays as it is: its new rule needs EEex.~
+  ACTION_IF (cbm_ini_simulacrum_clone_rules != 0) BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/spwi804.spl~ ~override/spwi804.spl~
+      WRITE_LONG 0x50 26235
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70210 END
+    END ELSE BEGIN
+      PRINT ~chriz-bg-magic: spwi804.spl stays as it is: its new rule needs EEex.~
+    END
   END
   COPY ~chriz-bg-magic/res/spwi805.spl~ ~override/spwi805.spl~
     WRITE_LONG 0x50 26242
@@ -3455,9 +3646,11 @@ BEGIN
     WRITE_LONG 0x502 cbm_DispelScreen
     WRITE_LONG 0x652 cbm_DispelScreen
     WRITE_LONG 0x7a2 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/spwi807.spl~ ~override/spwi807.spl~
-    WRITE_LONG 0x50 17361
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70086 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi807.spl~ ~override/spwi807.spl~
+      WRITE_LONG 0x50 17361
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70086 END
+  END
   COPY ~chriz-bg-magic/res/spwi808.spl~ ~override/spwi808.spl~
     WRITE_LONG 0x50 7618
     PATCH_IF cbm_english BEGIN SAY 0x50 @70087 END
@@ -3498,9 +3691,11 @@ BEGIN
     WRITE_LONG 0x50 26315
     PATCH_IF cbm_english BEGIN SAY 0x50 @70092 END
     WRITE_LONG 0x162 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/spwi905.spl~ ~override/spwi905.spl~
-    WRITE_LONG 0x50 17352
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70093 END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi905.spl~ ~override/spwi905.spl~
+      WRITE_LONG 0x50 17352
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70093 END
+  END
   COPY ~chriz-bg-magic/res/spwi907.spl~ ~override/spwi907.spl~
     WRITE_LONG 0x50 7620
     PATCH_IF cbm_english BEGIN SAY 0x50 @70094 END
@@ -3513,19 +3708,25 @@ BEGIN
     WRITE_LONG 0x50 18140
     PATCH_IF cbm_english BEGIN SAY 0x50 @70096 END
     WRITE_LONG 0x9e cbm_state_DEATH_IMMUNITY
-  COPY ~chriz-bg-magic/res/spwi916.spl~ ~override/spwi916.spl~
-    WRITE_LONG 0x50 26362
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70212 END
-  COPY ~chriz-bg-magic/res/spwi923.spl~ ~override/spwi923.spl~
-    WRITE_LONG 0x50 63232
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70213 END
-    WRITE_LONG 0x54 63232
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70213 END
-  COPY ~chriz-bg-magic/res/spwi924.spl~ ~override/spwi924.spl~
-    WRITE_LONG 0x50 63237
-    PATCH_IF cbm_english BEGIN SAY 0x50 @70214 END
-    WRITE_LONG 0x54 63237
-    PATCH_IF cbm_english BEGIN SAY 0x54 @70214 END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi916.spl~ ~override/spwi916.spl~
+      WRITE_LONG 0x50 26362
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70212 END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi923.spl~ ~override/spwi923.spl~
+      WRITE_LONG 0x50 63232
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70213 END
+      WRITE_LONG 0x54 63232
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70213 END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi924.spl~ ~override/spwi924.spl~
+      WRITE_LONG 0x50 63237
+      PATCH_IF cbm_english BEGIN SAY 0x50 @70214 END
+      WRITE_LONG 0x54 63237
+      PATCH_IF cbm_english BEGIN SAY 0x54 @70214 END
+  END
   COPY ~chriz-bg-magic/res/spwi954.spl~ ~override/spwi954.spl~
     WRITE_LONG 0xa2 cbm_state_MAJOR_GLOBE
     WRITE_LONG 0xd2 cbm_state_MINOR_GLOBE
@@ -3631,9 +3832,11 @@ BEGIN
     WRITE_LONG 0xa2 cbm_Slow
     WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
   COPY ~chriz-bg-magic/res/wolfgr.itm~ ~override/wolfgr.itm~
-  ACTION_IF NOT FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
-  COPY ~chriz-bg-magic/res/without-eeex/sppr312a.spl~ ~override/sppr312a.spl~
-    WRITE_LONG 0x162 cbm_state_BUFF_ENHANCEMENT
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    COPY ~chriz-bg-magic/res/without-eeex/sppr312a.spl~ ~override/sppr312a.spl~
+      WRITE_LONG 0x162 cbm_state_BUFF_ENHANCEMENT
+    END
   END
 END
 
@@ -3657,17 +3860,31 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~cbmsma~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~cbmsmat~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~cbmwater~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spcl923~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spcl935~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin152~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin153~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin154~ END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spcl923~ END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spcl935~ END
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin152~ END
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin153~ END
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spin154~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr101~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr102~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr103~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr103~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr105~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr106~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr113~ END
+  ACTION_IF (cbm_ini_rework_doom != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr113~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr201~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr202~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr206~ END
@@ -3676,38 +3893,64 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr303~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr304~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr309~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr312~ END
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr312~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr314~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr315~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr315~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr319~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr401~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr401~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr403~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr404~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr406~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr409~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr412~ END
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr412~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr413~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr414~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr417~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr502~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr414~ END
+  END
+  ACTION_IF (cbm_ini_lesser_restoration_no_fatigue != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr417~ END
+  END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr502~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr503~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr505~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr506~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr507~ END
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr507~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr509~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr510~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr510~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr512~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr513~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr514~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr514~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr517~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr603~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr605~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr606~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr607~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr608~ END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr607~ END
+  END
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr608~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr612~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr702~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr703~ END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr703~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr704~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr706~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr708~ END
@@ -3718,24 +3961,42 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr718~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr719~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr725~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr726~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr727~ END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr726~ END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr727~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr730~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi101~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi105~ END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi105~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi106~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi116~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi118~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi120~ END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi116~ END
+  END
+  ACTION_IF (cbm_ini_rework_chromatic_orb != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi118~ END
+  END
+  ACTION_IF (cbm_ini_rework_mirror_image != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi120~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi125~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi201~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi206~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi209~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi212~ END
+  ACTION_IF (cbm_ini_rework_mirror_image != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi212~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi213~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi214~ END
+  ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi214~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi215~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi220~ END
+  ACTION_IF (cbm_ini_rework_wake_on_damage != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi220~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi301~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi302~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi304~ END
@@ -3743,23 +4004,33 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi307~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi308~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi312~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi313~ END
+  ACTION_IF (cbm_ini_rework_skull_trap != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi313~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi315~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi318~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi326~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi401~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi403~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi414~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi416~ END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi416~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi418~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi420~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi421~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi495~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi496~ END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi495~ END
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi496~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi502~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi503~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi508~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi510~ END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi510~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi511~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi513~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi514~ END
@@ -3768,27 +4039,39 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi520~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi521~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi603~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi605~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi608~ END
+  ACTION_IF (cbm_ini_rework_death_spell != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi605~ END
+  END
+  ACTION_IF (cbm_ini_rework_pierce_magic != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi608~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi609~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi612~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi613~ END
+  ACTION_IF (cbm_ini_rework_improved_haste != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi613~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi614~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi616~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi617~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi620~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi621~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi622~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi707~ END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi707~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi708~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi710~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi711~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi712~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi713~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi715~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi804~ END
+  ACTION_IF (cbm_ini_simulacrum_clone_rules != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi804~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi805~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi807~ END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi807~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi808~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi809~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi810~ END
@@ -3798,11 +4081,19 @@ BEGIN
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi816~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi817~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi903~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi905~ END
+  ACTION_IF (cbm_ini_rework_gate_fiends != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi905~ END
+  END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi907~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi908~ END
   LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi912~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi916~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi923~ END
-  LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi924~ END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi916~ END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi923~ END
+  END
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi924~ END
+  END
 END

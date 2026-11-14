@@ -1,9 +1,11 @@
 BACKUP ~weidu_external/backup/chriz-bg-magic~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-bg-magic)~
-VERSION ~v0.1.1~
+VERSION ~v0.2.0~
 
 ALWAYS
   INCLUDE ~chriz-bg-magic/lib/cbmagic_shared.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_ini_defs.tpa~
+  INCLUDE ~chriz-bg-magic/lib/cbmagic_ini.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_spells.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_healing.tpa~
   INCLUDE ~chriz-bg-magic/lib/cbmagic_fixes.tpa~
@@ -28,16 +30,30 @@ BEGIN @100 DESIGNATED 0
 LABEL ~chriz-bg-magic-main~
 REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @9000
 LAF cbmagic_check_spell_revisions END
+LAM cbmagic_load_ini
 LAF cbmagic_write_resources END
 LAF cbmagic_elemental_names END
 LAF cbmagic_nishruu_hakeashar END
 LAM cbmagic_index_scrolls
-LAF cbmagic_find_familiar END
+ACTION_IF (cbm_ini_rework_find_familiar != 0) BEGIN
+  LAF cbmagic_find_familiar END
+END
 LAF cbmagic_scroll_texts END
 LAF cbmagic_iwd_spells END
-LAF cbmagic_lesser_restoration END
-LAF cbmagic_simulacrum END
-LAF cbmagic_strength_floor END
-LAF cbmagic_main_character END
-LAF cbmagic_record_live END
+ACTION_IF (cbm_ini_lesser_restoration_no_fatigue != 0) BEGIN
+  LAF cbmagic_lesser_restoration END
+END
+ACTION_IF (cbm_ini_simulacrum_clone_rules != 0) BEGIN
+  LAF cbmagic_simulacrum END
+END
+ACTION_IF (cbm_ini_strength_floors != 0) BEGIN
+  LAF cbmagic_strength_floor END
+END
+ACTION_IF (cbm_ini_player1_protection != 0) BEGIN
+  LAF cbmagic_main_character END
+END
+ACTION_IF (cbm_ini_live_record_icons != 0) BEGIN
+  LAF cbmagic_record_live END
+END
 LAF cbmagic_bonus END
+LAF cbmagic_apply_ini_tuning END

@@ -224,7 +224,7 @@ def the_build_is_in_sync_with_defs(work, weidu):
     check(built.keys() == shipped.keys(), f"res/ differs in files: {sorted(built.keys() ^ shipped.keys())[:10]}")
     wrong = [name for name in built if built[name] != shipped[name]]
     check(not wrong, f"res/ is out of date: {wrong[:10]}")
-    for rel in ("lib/cbmagic_resources.tpa", "languages/english/resources.tra"):
+    for rel in ("chriz-bg-magic.ini", "lib/cbmagic_ini_defs.tpa", "lib/cbmagic_resources.tpa", "languages/english/resources.tra"):
         check((work / "built" / rel).read_bytes() == (fg.MOD / rel).read_bytes(), f"{rel} is out of date")
 
 

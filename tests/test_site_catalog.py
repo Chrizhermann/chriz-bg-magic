@@ -222,6 +222,80 @@ def test_site_catalog(work, _weidu=None):
     cleaned = clean_ie_text("Gives <PRO_HISHER> ally ^0xFF00FF00bonus^-.\r\n\r\n\r\nDone")
     check("<PRO_" not in cleaned and "^0x" not in cleaned and "^-" not in cleaned, f"Token not cleaned: {cleaned!r}")
 
+    import json as _json
+    import subprocess as _subprocess
+    import sys as _sys
+    import tempfile as _tempfile
+
+    ini_schema = _json.loads((REPO_ROOT / "docs" / "ini-schema.json").read_text(encoding="utf-8"))
+    tables = _json.loads((REPO_ROOT / "defs" / "tables.json").read_text(encoding="utf-8"))
+    check(ini_schema.get("schemaVersion") == 1, "Bad ini-schema schemaVersion")
+    check(ini_schema.get("fileName") == "chriz-bg-magic.ini", "Bad ini-schema fileName")
+    check(bool(str(ini_schema.get("tier1Note", "")).strip()), "Missing ini-schema tier1Note")
+
+    seen_keys = {}
+    owned_files = {}
+    for section in ini_schema.get("sections", []):
+        for setting in section.get("settings", []):
+            key = setting.get("key")
+            check(bool(key) and key not in seen_keys, f"Duplicate or empty ini key: {key!r}")
+            seen_keys[key] = setting
+            kind = setting.get("type")
+            check(kind in {"bool", "int"}, f"Invalid type on ini key {key}: {kind!r}")
+            if kind == "bool":
+                check(setting.get("default") in (0, 1), f"Invalid bool default on {key}")
+            else:
+                lo, hi, default = setting.get("min"), setting.get("max"), setting.get("default")
+                check(isinstance(lo, int) and isinstance(hi, int) and isinstance(default, int) and lo <= default <= hi,
+                      f"Invalid int bounds/default on {key}")
+            for owned in setting.get("ownedFiles", []):
+                check(owned not in owned_files, f"Overlapping ownedFiles {owned!r} ({owned_files.get(owned)} vs {key})")
+                owned_files[owned] = key
+                defs_file = REPO_ROOT / "defs" / f"{owned}.json"
+                alt_file = REPO_ROOT / "defs" / "without-eeex" / f"{owned}.json"
+                check(defs_file.is_file() or alt_file.is_file(), f"Missing defs file for {key}: {owned}.json")
+            sym = setting.get("addSpellSymbol")
+            if sym is not None:
+                check(sym in tables.get("spells", {}), f"Unknown addSpellSymbol {sym!r} on {key}")
+            slugs = setting.get("spellSlugs", [])
+            check(isinstance(slugs, list), f"Invalid spellSlugs on {key}")
+            if section.get("id") != "systems":
+                check(len(slugs) > 0, f"Missing spellSlugs on {key}")
+            for sp_slug in slugs:
+                check(sp_slug in seen_slugs, f"Unknown spellSlug {sp_slug!r} on ini key {key}")
+
+    for key, setting in seen_keys.items():
+        dep = setting.get("dependsOn")
+        if dep is not None:
+            check(dep in seen_keys and seen_keys[dep]["type"] == "bool", f"Invalid dependsOn {dep!r} on {key}")
+
+    check(
+        seen_keys["pierce_magic_mr_min"]["default"] <= seen_keys["pierce_magic_mr_max"]["default"],
+        "pierce_magic_mr_min default exceeds pierce_magic_mr_max default",
+    )
+
+    with _tempfile.TemporaryDirectory() as tmp:
+        out_json = Path(tmp) / "magic-catalog.json"
+        out_icons = Path(tmp) / "icons"
+        proc = _subprocess.run(
+            [_sys.executable, str(TOOLS_DIR / "export_site_catalog.py"),
+             "--out-json", str(out_json), "--out-icons-dir", str(out_icons)],
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+        )
+        check(proc.returncode == 0, f"export_site_catalog failed: {proc.stderr or proc.stdout}")
+        exported = _json.loads(out_json.read_text(encoding="utf-8"))
+        exp_schema = exported.get("iniSchema")
+        check(isinstance(exp_schema, dict) and exp_schema.get("schemaVersion") == 1, "Missing exported iniSchema")
+        exp_keys = []
+        for sec in exp_schema.get("sections", []):
+            for st in sec.get("settings", []):
+                exp_keys.append(st["key"])
+                check("ownedFiles" not in st and "addSpellSymbol" not in st,
+                      f"Installer-only field leaked in exported iniSchema for {st['key']}")
+        check(len(exp_keys) == len(seen_keys), f"Exported iniSchema key count mismatch: {len(exp_keys)} vs {len(seen_keys)}")
+
 
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as tmp:

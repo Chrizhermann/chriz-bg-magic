@@ -175,13 +175,29 @@ END
 
 DEFINE_ACTION_FUNCTION cbmagic_iwd_spells
 BEGIN
-  LAF cbmagic_healing_cure_moderate END
-  LAF cbmagic_healing_cause_iwd END
-  LAF cbmagic_fix_wake_on_damage END
-  LAF cbmagic_iwd_hopelessness END
-  LAF cbmagic_more_righteous_wrath END
-  LAF cbmagic_iwd_recitation END
-  LAF cbmagic_iwd_icelance END
+  OUTER_SET _heal = (VARIABLE_IS_SET cbm_ini_rework_divine_healing) ? cbm_ini_rework_divine_healing : 1
+  OUTER_SET _wake = (VARIABLE_IS_SET cbm_ini_rework_wake_on_damage) ? cbm_ini_rework_wake_on_damage : 1
+  OUTER_SET _apr = (VARIABLE_IS_SET cbm_ini_extra_attack_cap) ? cbm_ini_extra_attack_cap : 1
+  OUTER_SET _typed = (VARIABLE_IS_SET cbm_ini_typed_bonuses) ? cbm_ini_typed_bonuses : 1
+  OUTER_SET _ice = (VARIABLE_IS_SET cbm_ini_new_icelance) ? cbm_ini_new_icelance : 1
+
+  ACTION_IF (_heal != 0) BEGIN
+    LAF cbmagic_healing_cure_moderate END
+    LAF cbmagic_healing_cause_iwd END
+  END
+  ACTION_IF (_wake != 0) BEGIN
+    LAF cbmagic_fix_wake_on_damage END
+    LAF cbmagic_iwd_hopelessness END
+  END
+  ACTION_IF (_apr != 0) BEGIN
+    LAF cbmagic_more_righteous_wrath END
+  END
+  ACTION_IF (_typed != 0) BEGIN
+    LAF cbmagic_iwd_recitation END
+  END
+  ACTION_IF (_ice != 0) BEGIN
+    LAF cbmagic_iwd_icelance END
+  END
   LAF cbmagic_iwd_take_over STR_VAR symbol = ~WIZARD_CONJURE_WATER_ELEMENTAL~ template = ~cbmwater~ END
   LAF cbmagic_iwd_take_over STR_VAR symbol = ~WIZARD_CONJURE_LESSER_WATER_ELEMENTAL~ template = ~cbmlwat~ END
 END

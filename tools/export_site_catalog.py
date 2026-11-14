@@ -434,6 +434,46 @@ def export_catalog(
     fix_count = sum(1 for s in exported_spells if s["changeType"] == "fix")
     iwd_count = sum(1 for s in exported_spells if s["origin"] == "iwd-optional")
 
+    known_slugs = {s["slug"] for s in exported_spells}
+    ini_schema_raw = json.loads((Path(__file__).resolve().parent.parent / "docs" / "ini-schema.json").read_text(encoding="utf-8"))
+    toggle_keys = set()
+    all_keys = set()
+    exported_sections = []
+    for sec in ini_schema_raw["sections"]:
+        sec_settings = []
+        for entry in sec["settings"]:
+            key = entry["key"]
+            if key in all_keys:
+                raise ValueError(f"Duplicate INI key {key!r}")
+            all_keys.add(key)
+            if entry["type"] == "bool":
+                toggle_keys.add(key)
+            for slug in entry.get("spellSlugs", []):
+                if slug not in known_slugs:
+                    raise ValueError(f"INI setting {key!r} references unknown spellSlug {slug!r}")
+            public_entry = {
+                k: v for k, v in entry.items()
+                if k not in ("ownedFiles", "addSpellSymbol")
+            }
+            sec_settings.append(public_entry)
+        exported_sections.append({
+            "id": sec["id"],
+            "title": sec["title"],
+            "description": sec["description"],
+            "settings": sec_settings,
+        })
+    for sec in exported_sections:
+        for entry in sec["settings"]:
+            dep = entry.get("dependsOn")
+            if dep and dep not in toggle_keys:
+                raise ValueError(f"INI setting {entry['key']!r} dependsOn unknown toggle {dep!r}")
+    ini_schema = {
+        "schemaVersion": ini_schema_raw["schemaVersion"],
+        "fileName": ini_schema_raw["fileName"],
+        "tier1Note": ini_schema_raw["tier1Note"],
+        "sections": exported_sections,
+    }
+
     catalog = {
         "mod": source["mod"],
         "stats": {
@@ -454,6 +494,7 @@ def export_catalog(
         "exclusiveFamilies": source["exclusiveFamilies"],
         "highlights": source["highlights"],
         "systemRules": source["systemRules"],
+        "iniSchema": ini_schema,
         "spells": exported_spells,
     }
 

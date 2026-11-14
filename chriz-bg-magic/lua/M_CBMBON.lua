@@ -16,6 +16,11 @@ end
 
 local PASS_STATE = %CBM_BONUS_PASS_STATE%
 local TYPED_STATE = %CBM_BONUS_TYPED_STATE%
+local TYPED_ENABLED = (%cbm_ini_typed_bonuses% ~= 0)
+local APR_CAP_ENABLED = (%cbm_ini_extra_attack_cap% ~= 0)
+local PIERCE_MIN = %cbm_ini_pierce_magic_mr_min%
+local PIERCE_MAX = %cbm_ini_pierce_magic_mr_max%
+local PIERCE_DURATION = %cbm_ini_pierce_magic_rounds% * 6
 local PASS_WORD, PASS_MASK = math.floor(PASS_STATE / 32), EEex_LShift(1, PASS_STATE % 32)
 local TYPED_WORD, TYPED_MASK = math.floor(TYPED_STATE / 32), EEex_LShift(1, TYPED_STATE % 32)
 
@@ -159,7 +164,7 @@ local function correct(sprite)
     local attacks = { best = 0 }
     EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
         if pending(effect) then return end
-        noteAttack(attacks, effect)
+        if APR_CAP_ENABLED then noteAttack(attacks, effect) end
         local timing = EEex_BAnd(effect.m_durationType, 0xFF)
         if effect.m_effectId == 177 then
             -- BG2:EE 2.7.3.0 sets parameter 5 before applying a decoded child;
@@ -168,9 +173,9 @@ local function correct(sprite)
             if effect.m_done ~= 0 or not effect.m_effectAmount4
                     or effect.m_effectAmount4 == 0 then return end
         end
-        visit(effect, timing, {}, 0)
+        if TYPED_ENABLED then visit(effect, timing, {}, 0) end
     end)
-    if attacks.tagged then settleAttacks(sprite, stats, attacks) end
+    if APR_CAP_ENABLED and attacks.tagged then settleAttacks(sprite, stats, attacks) end
 
     local corrections = {}
     for _, group in pairs(groups) do
@@ -213,12 +218,12 @@ end
 
 local function pierceMagic(effect, targetSprite)
     -- The engine's MR value is integral. Round the halved reduction down before
-    -- clamping it to 10..40 percentage points, for five rounds (30 seconds).
+    -- clamping it to the configured minimum/maximum percentage points and duration.
     local resistance = EEex_Sprite_GetStat(targetSprite, 18)
-    local reduction = math.max(10, math.min(40, math.floor(resistance / 2)))
+    local reduction = math.max(PIERCE_MIN, math.min(PIERCE_MAX, math.floor(resistance / 2)))
     EEex_GameObject_ApplyEffect(targetSprite, {
         effectID = 166, effectAmount = -reduction, dwFlags = 0,
-        durationType = 0, duration = 30, targetType = 2,
+        durationType = 0, duration = PIERCE_DURATION, targetType = 2,
         spellLevel = effect.m_spellLevel, m_flags = effect.m_flags,
         sourceID = effect.m_sourceId, sourceTarget = effect.m_sourceTarget,
         m_sourceRes = resref(effect.m_sourceRes), m_sourceType = effect.m_sourceType,

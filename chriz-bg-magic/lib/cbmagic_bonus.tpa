@@ -168,20 +168,24 @@ DEFINE_PATCH_FUNCTION cbmagic_bonus_tag
   RET tag
 BEGIN
   SPRINT tag ~~
+  SET _cbm_typed = (VARIABLE_IS_SET cbm_ini_typed_bonuses) ? cbm_ini_typed_bonuses : 1
+  SET _cbm_apr = (VARIABLE_IS_SET cbm_ini_extra_attack_cap) ? cbm_ini_extra_attack_cap : 1
   SET saves = (op >= 33 && op <= 37) || op = 325
-  PATCH_IF ((~%kind%~ STRING_EQUAL ~MORALE~ || ~%kind%~ STRING_EQUAL ~WRATH~) && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
   // Extra attacks are a family of their own: the runtime lets only one of them count.
-  PATCH_IF ((~%kind%~ STRING_EQUAL ~WRATH~ || ~%kind%~ STRING_EQUAL ~APR~) && op = 1) BEGIN SPRINT tag ~CBTAPR~ END
-  PATCH_IF (~%kind%~ STRING_EQUAL ~FAVOR~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTFAVOR~ END
-  PATCH_IF (~%kind%~ STRING_EQUAL ~CHANT~) BEGIN
-    PATCH_IF saves BEGIN SPRINT tag ~CBTFAVOR~ END
-    PATCH_IF (op = 22) BEGIN SPRINT tag ~CBTLUCK~ END
+  PATCH_IF (_cbm_apr != 0) && ((~%kind%~ STRING_EQUAL ~WRATH~ || ~%kind%~ STRING_EQUAL ~APR~) && op = 1) BEGIN SPRINT tag ~CBTAPR~ END
+  PATCH_IF (_cbm_typed != 0) BEGIN
+    PATCH_IF ((~%kind%~ STRING_EQUAL ~MORALE~ || ~%kind%~ STRING_EQUAL ~WRATH~) && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTMORAL~ END
+    PATCH_IF (~%kind%~ STRING_EQUAL ~FAVOR~ && (saves || op = 54 || op = 73)) BEGIN SPRINT tag ~CBTFAVOR~ END
+    PATCH_IF (~%kind%~ STRING_EQUAL ~CHANT~) BEGIN
+      PATCH_IF saves BEGIN SPRINT tag ~CBTFAVOR~ END
+      PATCH_IF (op = 22) BEGIN SPRINT tag ~CBTLUCK~ END
+    END
+    PATCH_IF (~%kind%~ STRING_EQUAL ~LUCK~ && (saves || op = 22)) BEGIN SPRINT tag ~CBTLUCK~ END
+    PATCH_IF (~%kind%~ STRING_EQUAL ~DODGE~ && (saves || (op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDODGE~ END
+    PATCH_IF ((~%kind%~ STRING_EQUAL ~DEFLECTION~ || ~%kind%~ STRING_EQUAL ~SAVES~) &&
+      (saves || (~%kind%~ STRING_EQUAL ~DEFLECTION~ && op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDEFLE~ END
+    PATCH_IF (~%kind%~ STRING_EQUAL ~CURSE~ && p1 < 0 && (saves || op = 54 || op = 73 || op = 22)) BEGIN SPRINT tag ~CBTCURSE~ END
   END
-  PATCH_IF (~%kind%~ STRING_EQUAL ~LUCK~ && (saves || op = 22)) BEGIN SPRINT tag ~CBTLUCK~ END
-  PATCH_IF (~%kind%~ STRING_EQUAL ~DODGE~ && (saves || (op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDODGE~ END
-  PATCH_IF ((~%kind%~ STRING_EQUAL ~DEFLECTION~ || ~%kind%~ STRING_EQUAL ~SAVES~) &&
-    (saves || (~%kind%~ STRING_EQUAL ~DEFLECTION~ && op = 0 && p2 = 0 && p1 > 0))) BEGIN SPRINT tag ~CBTDEFLE~ END
-  PATCH_IF (~%kind%~ STRING_EQUAL ~CURSE~ && p1 < 0 && (saves || op = 54 || op = 73 || op = 22)) BEGIN SPRINT tag ~CBTCURSE~ END
   // Only an added value can be counted by type. Any other mode keeps working, without a type.
   PATCH_IF !(~%tag%~ STRING_EQUAL ~~) && p2 != 0 BEGIN
     PATCH_PRINT ~chriz-bg-magic: bonus types: %SOURCE_FILE%: opcode %op% does not add a value (mode %p2%); this effect stays without a type.~
@@ -423,6 +427,7 @@ BEGIN
             END
           END
           PATCH_IF has_pierce_callback BEGIN
+            SET _pm_dur = (VARIABLE_IS_SET cbm_ini_pierce_magic_rounds) ? (cbm_ini_pierce_magic_rounds * 6) : 30
             FOR (i = 0; i < pn; ++i) BEGIN
               SET at = fo + (pf + i) * 0x30
               READ_SHORT at op
@@ -430,9 +435,9 @@ BEGIN
               READ_BYTE (at + 0x0c) timing
               READ_LONG (at + 0x0e) duration
               PATCH_IF (op = 142) AND (p2 = 106) BEGIN
-                PATCH_IF (timing != 0) OR (duration != 30) BEGIN
+                PATCH_IF (timing != 0) OR (duration != _pm_dur) BEGIN
                   WRITE_BYTE (at + 0x0c) 0
-                  WRITE_LONG (at + 0x0e) 30
+                  WRITE_LONG (at + 0x0e) _pm_dur
                   SET touched = 1
                 END
               END
@@ -784,7 +789,14 @@ BEGIN
 END
 
 DEFINE_ACTION_FUNCTION cbmagic_bonus_runtime
-  INT_VAR CBM_BONUS_PASS_STATE = 0 CBM_BONUS_TYPED_STATE = 0
+  INT_VAR
+    CBM_BONUS_PASS_STATE = 0
+    CBM_BONUS_TYPED_STATE = 0
+    cbm_ini_typed_bonuses = 1
+    cbm_ini_extra_attack_cap = 1
+    cbm_ini_pierce_magic_mr_min = 10
+    cbm_ini_pierce_magic_mr_max = 40
+    cbm_ini_pierce_magic_rounds = 5
 BEGIN
   COPY ~chriz-bg-magic/lua/M_CBMBON.lua~ ~override/M_CBMBON.lua~
     EVALUATE_BUFFER
@@ -908,44 +920,76 @@ END
 
 DEFINE_ACTION_FUNCTION cbmagic_bonus
 BEGIN
-  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
-  LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
-  ACTION_IF (CBM_BONUS_PASS_STATE < 0) OR (CBM_BONUS_TYPED_STATE < 0) BEGIN
-    PRINT ~chriz-bg-magic: bonus types left out: this game has no free spell state for them. Spells stack as before.~
-  END ELSE BEGIN
-    LAF cbmagic_bonus_runtime INT_VAR CBM_BONUS_PASS_STATE CBM_BONUS_TYPED_STATE END
-    ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
-      WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
-      CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => WRATH CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
-      WIZARD_IMPROVED_HASTE => APR
-      CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
-      WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
-      CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION
-      WIZARD_SPIRIT_ARMOR => SAVES CLERIC_BARKSKIN => SAVES
-      CLERIC_DOOM => CURSE CLERIC_CURSE => CURSE CLERIC_UNHOLY_BLIGHT => CURSE
-    END
-    ACTION_PHP_EACH typed_spells AS symbol => kind BEGIN
-      LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
-      ACTION_IF !found BEGIN
-        PRINT ~chriz-bg-magic: bonus types: %symbol% absent; skipped.~
-      END ELSE BEGIN
-        LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind RET output touched END
-        ACTION_IF touched BEGIN
-          LAF cbmagic_bonus_text STR_VAR spell END
+  OUTER_SET _typed = (VARIABLE_IS_SET cbm_ini_typed_bonuses) ? cbm_ini_typed_bonuses : 1
+  OUTER_SET _apr = (VARIABLE_IS_SET cbm_ini_extra_attack_cap) ? cbm_ini_extra_attack_cap : 1
+  OUTER_SET _families = (VARIABLE_IS_SET cbm_ini_exclusive_families) ? cbm_ini_exclusive_families : 1
+  OUTER_SET _pierce = (VARIABLE_IS_SET cbm_ini_rework_pierce_magic) ? cbm_ini_rework_pierce_magic : 1
+  OUTER_SET _pm_min = (VARIABLE_IS_SET cbm_ini_pierce_magic_mr_min) ? cbm_ini_pierce_magic_mr_min : 10
+  OUTER_SET _pm_max = (VARIABLE_IS_SET cbm_ini_pierce_magic_mr_max) ? cbm_ini_pierce_magic_mr_max : 40
+  OUTER_SET _pm_rounds = (VARIABLE_IS_SET cbm_ini_pierce_magic_rounds) ? cbm_ini_pierce_magic_rounds : 5
+
+  ACTION_IF (_typed != 0) OR (_apr != 0) BEGIN
+    LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_PASS~ RET CBM_BONUS_PASS_STATE = state END
+    LAF cbmagic_bonus_state STR_VAR symbol = ~CBM_BONUS_TYPED~ RET CBM_BONUS_TYPED_STATE = state END
+    ACTION_IF (CBM_BONUS_PASS_STATE < 0) OR (CBM_BONUS_TYPED_STATE < 0) BEGIN
+      PRINT ~chriz-bg-magic: bonus types left out: this game has no free spell state for them. Spells stack as before.~
+    END ELSE BEGIN
+      LAF cbmagic_bonus_runtime
+        INT_VAR
+          CBM_BONUS_PASS_STATE
+          CBM_BONUS_TYPED_STATE
+          cbm_ini_typed_bonuses = _typed
+          cbm_ini_extra_attack_cap = _apr
+          cbm_ini_pierce_magic_mr_min = _pm_min
+          cbm_ini_pierce_magic_mr_max = _pm_max
+          cbm_ini_pierce_magic_rounds = _pm_rounds
+      END
+      ACTION_DEFINE_ASSOCIATIVE_ARRAY typed_spells BEGIN
+        WIZARD_EMOTION_COURAGE => MORALE WIZARD_EMOTION_HOPE => MORALE
+        CLERIC_RIGHTEOUS_WRATH_OF_THE_FAITHFUL => WRATH CLERIC_BLOOD_RAGE => MORALE CLERIC_ANIMAL_RAGE => MORALE
+        WIZARD_IMPROVED_HASTE => APR
+        CLERIC_BLESS => FAVOR CLERIC_PRAYER => FAVOR CLERIC_RECITATION => FAVOR CLERIC_CHANT => CHANT
+        WIZARD_LUCK => LUCK WIZARD_BLUR => DODGE CLERIC_DEFENSIVE_HARMONY => DODGE
+        CLERIC_ENTROPY_SHIELD => DEFLECTION CLERIC_AURA_OF_FLAMING_DEATH => DEFLECTION
+        WIZARD_SPIRIT_ARMOR => SAVES CLERIC_BARKSKIN => SAVES
+        CLERIC_DOOM => CURSE CLERIC_CURSE => CURSE CLERIC_UNHOLY_BLIGHT => CURSE
+      END
+      ACTION_PHP_EACH typed_spells AS symbol => kind BEGIN
+        LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+        ACTION_IF !found BEGIN
+          PRINT ~chriz-bg-magic: bonus types: %symbol% absent; skipped.~
         END ELSE BEGIN
-          PRINT ~chriz-bg-magic: bonus types: %symbol% (%spell%) has no eligible typed values; unchanged.~
+          LAF cbmagic_bonus_visit STR_VAR root = EVAL ~%spell%~ source = EVAL ~%spell%~ kind RET output touched END
+          ACTION_IF touched BEGIN
+            LAF cbmagic_bonus_text STR_VAR spell END
+          END ELSE BEGIN
+            PRINT ~chriz-bg-magic: bonus types: %symbol% (%spell%) has no eligible typed values; unchanged.~
+          END
         END
       END
     END
+  END ELSE ACTION_IF (_pierce != 0) AND FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    LAF cbmagic_bonus_runtime
+      INT_VAR
+        CBM_BONUS_PASS_STATE = 0
+        CBM_BONUS_TYPED_STATE = 0
+        cbm_ini_typed_bonuses = 0
+        cbm_ini_extra_attack_cap = 0
+        cbm_ini_pierce_magic_mr_min = _pm_min
+        cbm_ini_pierce_magic_mr_max = _pm_max
+        cbm_ini_pierce_magic_rounds = _pm_rounds
+    END
   END
-  LAF cbmagic_family STR_VAR label = ~Transformation~
-    symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
-  // Draw Upon Divine Might stands beside the other transformations; only these two exclude each other.
-  LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_DRAW_UPON_HOLY_MIGHT~ RET found END
-  ACTION_IF found BEGIN
-    LAF cbmagic_family STR_VAR label = ~Champion's Strength and Draw Upon Divine Might~
-      symbols = ~CLERIC_DRAW_UPON_HOLY_MIGHT CLERIC_CHAMPIONS_STRENGTH~ END
+  ACTION_IF (_families != 0) BEGIN
+    LAF cbmagic_family STR_VAR label = ~Transformation~
+      symbols = ~WIZARD_TENSERS_TRANSFORMATION CLERIC_HOLY_POWER CLERIC_RIGHTEOUS_MAGIC CLERIC_CHAMPIONS_STRENGTH CLERIC_BLOOD_RAGE CLERIC_ANIMAL_RAGE~ END
+    // Draw Upon Divine Might stands beside the other transformations; only these two exclude each other.
+    LAF cbmagic_spell_resref STR_VAR symbol = ~CLERIC_DRAW_UPON_HOLY_MIGHT~ RET found END
+    ACTION_IF found BEGIN
+      LAF cbmagic_family STR_VAR label = ~Champion's Strength and Draw Upon Divine Might~
+        symbols = ~CLERIC_DRAW_UPON_HOLY_MIGHT CLERIC_CHAMPIONS_STRENGTH~ END
+    END
+    LAF cbmagic_family STR_VAR label = ~Regeneration~
+      symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
   END
-  LAF cbmagic_family STR_VAR label = ~Regeneration~
-    symbols = ~CLERIC_REGENERATE CLERIC_CBMAGIC_MASS_REGENERATE CLERIC_MASS_REGENERATE WIZARD_TROLLISH_FORTITUDE~ END
 END

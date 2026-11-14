@@ -1,8 +1,9 @@
 -- Standalone runtime regression suite. Return a function accepting the Lua
 -- template text; the Python harness runs it with Lua 5.3 and LuaJIT 2.1.
 -- Every engine object below is a mock; this never opens or controls a game.
-return function(template)
+return function(template, opts)
     local checks = 0
+    local cfg = opts or {}
     local function equal(actual, expected, label)
         checks = checks + 1
         assert(actual == expected, (label or "value") .. ": expected " .. tostring(expected)
@@ -21,6 +22,11 @@ return function(template)
     local pass, typed = 223, 224 -- Exercise bit 31 and a distinct state word.
     local source = template:gsub("%%CBM_BONUS_PASS_STATE%%", tostring(pass))
         :gsub("%%CBM_BONUS_TYPED_STATE%%", tostring(typed))
+        :gsub("%%cbm_ini_typed_bonuses%%", tostring(cfg.typed_bonuses or 1))
+        :gsub("%%cbm_ini_extra_attack_cap%%", tostring(cfg.extra_attack_cap or 1))
+        :gsub("%%cbm_ini_pierce_magic_mr_min%%", tostring(cfg.pierce_min or 10))
+        :gsub("%%cbm_ini_pierce_magic_mr_max%%", tostring(cfg.pierce_max or 40))
+        :gsub("%%cbm_ini_pierce_magic_rounds%%", tostring(cfg.pierce_rounds or 5))
 
     local function loadIn(env)
         local chunk

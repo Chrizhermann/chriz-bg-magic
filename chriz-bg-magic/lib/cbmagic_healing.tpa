@@ -790,20 +790,65 @@ BEGIN
   END
 END
 
+DEFINE_PATCH_FUNCTION cbmagic_healing_iwd_text
+  INT_VAR new_ct = 0 default_ct = 0 new_range = 10 update_range = 0
+BEGIN
+  READ_SLONG 0x50 ref
+  PATCH_IF (ref >= 0) BEGIN
+    GET_STRREF ref old
+    INNER_PATCH_SAVE new ~%old%~ BEGIN
+      PATCH_IF (new_ct != default_ct) BEGIN
+        REPLACE_TEXTUALLY ~^\(Casting Time:[ %TAB%]+\)%default_ct%~ ~\1%new_ct%~
+      END
+      PATCH_IF update_range AND (new_range != 10) BEGIN
+        REPLACE_TEXTUALLY ~^\(Range:[ %TAB%]+\)10[ %TAB%]*ft\.?~ ~\1%new_range% ft.~
+      END
+    END
+    PATCH_IF !(~%old%~ STRING_EQUAL ~%new%~) BEGIN
+      SET new_ref = RESOLVE_STR_REF (~%new%~)
+      WRITE_LONG 0x50 new_ref
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_healing_iwd_sync
+  INT_VAR new_ct = 0 default_ct = 0 new_range = 10 update_range = 0
+  STR_VAR symbol = ~~
+BEGIN
+  ACTION_IF (new_ct != default_ct) OR (update_range AND new_range != 10) BEGIN
+    LAF cbmagic_game_language RET lang END
+    ACTION_IF (~%lang%~ STRING_EQUAL ~en_us~) BEGIN
+      LAF cbmagic_spell_resref STR_VAR symbol RET spell = resref found END
+      ACTION_IF found BEGIN
+        COPY_EXISTING ~%spell%.spl~ ~override~
+          LPF cbmagic_healing_iwd_text INT_VAR new_ct default_ct new_range update_range END
+        BUT_ONLY
+        LAF cbmagic_text_to_scrolls STR_VAR spell END
+      END
+    END
+  END
+END
+
 // Sync range across any game or mod-added scrolls casting the base Cure spells.
 DEFINE_ACTION_FUNCTION cbmagic_healing_cure_scrolls
+  INT_VAR target_range = 10
 BEGIN
+  OUTER_SET _rng = (target_range = 10) AND (VARIABLE_IS_SET cbm_ini_cure_range_feet) ? cbm_ini_cure_range_feet : target_range
   ACTION_FOR_EACH spell IN ~sppr103~ ~sppr315~ ~sppr401~ ~sppr502~ BEGIN
-    LAF cbmagic_healing_scroll_range INT_VAR target_range = 10 STR_VAR spell END
+    LAF cbmagic_healing_scroll_range INT_VAR target_range = _rng STR_VAR spell END
   END
 END
 
 // IWDification's symbols simply log and skip when they are absent from SPELL.IDS.
 DEFINE_ACTION_FUNCTION cbmagic_healing_cure_moderate
 BEGIN
-  LAF cbmagic_healing_cure_scrolls END
-  LAF cbmagic_healing_apply_cure INT_VAR target_ct = 2 target_range = 10 bonus = 4 dice = 2 sides = 8 text_tra = 60100
+  OUTER_SET _rng = (VARIABLE_IS_SET cbm_ini_cure_range_feet) ? cbm_ini_cure_range_feet : 10
+  OUTER_SET _ct = (VARIABLE_IS_SET cbm_ini_cure_moderate_ct) ? cbm_ini_cure_moderate_ct : 2
+  LAF cbmagic_healing_cure_scrolls INT_VAR target_range = _rng END
+  LAF cbmagic_healing_apply_cure INT_VAR target_ct = _ct target_range = _rng bonus = 4 dice = 2 sides = 8 text_tra = 60100
     STR_VAR symbol = ~CLERIC_CURE_MODERATE_WOUNDS~ label = ~Cure Moderate Wounds~ END
+  LAF cbmagic_healing_iwd_sync INT_VAR new_ct = _ct default_ct = 2 new_range = _rng update_range = 1
+    STR_VAR symbol = ~CLERIC_CURE_MODERATE_WOUNDS~ END
 END
 
 // The Cause Wounds spells of IWDification; the base game's ship with the mod.
@@ -811,12 +856,20 @@ END
 // private files named after them (CBHT40, CBHI500, CBHI700, ...).
 DEFINE_ACTION_FUNCTION cbmagic_healing_cause_iwd
 BEGIN
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 2 touch_ct = 2 bonus = 4 dice = 2 sides = 8 text_tra = 60101
+  OUTER_SET _cmod = (VARIABLE_IS_SET cbm_ini_cause_moderate_ct) ? cbm_ini_cause_moderate_ct : 2
+  OUTER_SET _cmed = (VARIABLE_IS_SET cbm_ini_cause_medium_ct) ? cbm_ini_cause_medium_ct : 3
+  OUTER_SET _cser = (VARIABLE_IS_SET cbm_ini_cause_serious_ct) ? cbm_ini_cause_serious_ct : 4
+  OUTER_SET _ccri = (VARIABLE_IS_SET cbm_ini_cause_critical_ct) ? cbm_ini_cause_critical_ct : 5
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = _cmod touch_ct = _cmod bonus = 4 dice = 2 sides = 8 text_tra = 60101
     STR_VAR symbol = ~CLERIC_CAUSE_MODERATE_WOUNDS~ label = ~Cause Moderate Wounds~ tag = ~2~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 3 touch_ct = 3 bonus = 7 dice = 2 sides = 8 text_tra = 60102
+  LAF cbmagic_healing_iwd_sync INT_VAR new_ct = _cmod default_ct = 2 STR_VAR symbol = ~CLERIC_CAUSE_MODERATE_WOUNDS~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = _cmed touch_ct = _cmed bonus = 7 dice = 2 sides = 8 text_tra = 60102
     STR_VAR symbol = ~CLERIC_CAUSE_MEDIUM_WOUNDS~ label = ~Cause Medium Wounds~ tag = ~3~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 4 touch_ct = 4 bonus = 7 dice = 3 sides = 8 text_tra = 60103
+  LAF cbmagic_healing_iwd_sync INT_VAR new_ct = _cmed default_ct = 3 STR_VAR symbol = ~CLERIC_CAUSE_MEDIUM_WOUNDS~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = _cser touch_ct = _cser bonus = 7 dice = 3 sides = 8 text_tra = 60103
     STR_VAR symbol = ~CLERIC_CAUSE_SERIOUS_WOUNDS_IWD~ label = ~Cause Serious Wounds~ tag = ~9~ END
-  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = 5 touch_ct = 5 bonus = 12 dice = 4 sides = 8 text_tra = 60104
+  LAF cbmagic_healing_iwd_sync INT_VAR new_ct = _cser default_ct = 4 STR_VAR symbol = ~CLERIC_CAUSE_SERIOUS_WOUNDS_IWD~ END
+  LAF cbmagic_healing_apply_cause INT_VAR direct_ct = _ccri touch_ct = _ccri bonus = 12 dice = 4 sides = 8 text_tra = 60104
     STR_VAR symbol = ~CLERIC_CAUSE_CRITICAL_WOUNDS_IWD~ label = ~Cause Critical Wounds~ tag = ~8~ END
+  LAF cbmagic_healing_iwd_sync INT_VAR new_ct = _ccri default_ct = 5 STR_VAR symbol = ~CLERIC_CAUSE_CRITICAL_WOUNDS_IWD~ END
 END

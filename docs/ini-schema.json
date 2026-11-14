@@ -1,0 +1,907 @@
+{
+  "schemaVersion": 1,
+  "fileName": "chriz-bg-magic.ini",
+  "tier1Note": "Pure bug fixes, saving-throw alignment, monster immunity normalization, spellbook consistency, and scroll synchronization are always installed (Tier 1). Only opt-out system rules, added spells, balance reworks, and numeric knobs appear below.",
+  "sections": [
+    {
+      "id": "systems",
+      "title": "Core Systems",
+      "description": "Mod-wide stacking, summon, clone, and UI rules. Set any option to 0 to disable it.",
+      "settings": [
+        {
+          "key": "typed_bonuses",
+          "label": "Typed Spell Bonuses",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Enforce non-stacking bonus types (Morale, Favor, Luck, Dodge, Deflection, Curse); highest bonus per type applies.",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-bless",
+            "divine-chant",
+            "divine-prayer",
+            "divine-recitation",
+            "wizard-blur",
+            "divine-defensive-harmony",
+            "wizard-luck",
+            "wizard-emotion-courage",
+            "wizard-emotion-hope",
+            "divine-doom",
+            "divine-curse",
+            "divine-unholy-blight",
+            "wizard-spirit-armor",
+            "divine-barkskin",
+            "divine-entropy-shield",
+            "divine-aura-of-flaming-death"
+          ]
+        },
+        {
+          "key": "extra_attack_cap",
+          "label": "+1 Extra Attack Cap",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Cap magic extra-attack buffs (Haste, Improved Haste, Righteous Wrath of the Faithful) to at most +1 attack per round total.",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "wizard-haste",
+            "wizard-improved-haste",
+            "divine-righteous-wrath-of-the-faithful"
+          ]
+        },
+        {
+          "key": "exclusive_families",
+          "label": "Exclusive Transformation & Regeneration Families",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Prevent self-transformations from stacking, pair Champion's Strength with Draw Upon Holy Might, and keep Regeneration mutually exclusive.",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "wizard-tensers-transformation",
+            "divine-divine-power",
+            "divine-righteous-magic",
+            "divine-champions-strength",
+            "divine-draw-upon-holy-might",
+            "divine-blood-rage",
+            "divine-animal-rage",
+            "divine-regeneration",
+            "divine-mass-regenerate",
+            "wizard-trollish-fortitude"
+          ]
+        },
+        {
+          "key": "strength_floors",
+          "label": "Strength Floors (Never Lower Strength)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Turn Strength (18/50), Strength of One (18/75), Divine Power (18/00), and Champion's Strength (21) into minimum floors (with EEex; fallback without EEex).",
+          "ownedFiles": [
+            "spwi214.spl",
+            "scrl98.itm",
+            "sppr312.spl",
+            "sppr312a.spl",
+            "sppr412.spl",
+            "sppr507.spl"
+          ],
+          "spellSlugs": [
+            "wizard-strength",
+            "divine-strength-of-one",
+            "divine-divine-power",
+            "divine-champions-strength"
+          ]
+        },
+        {
+          "key": "lesser_restoration_no_fatigue",
+          "label": "Lesser Restoration Without Fatigue",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Lesser Restoration removes level drain and feeblemind without applying fatigue.",
+          "ownedFiles": [
+            "sppr417.spl"
+          ],
+          "spellSlugs": [
+            "divine-lesser-restoration"
+          ]
+        },
+        {
+          "key": "simulacrum_clone_rules",
+          "label": "Simulacrum & Project Image Clone Rules",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Normalize Simulacrum and Project Image clones (60% HP/level scaling, no nested clones, contingencies, Wish, or duplicate quick items).",
+          "ownedFiles": [
+            "spwi804.spl",
+            "simulacr.spl",
+            "projimag.spl"
+          ],
+          "spellSlugs": [
+            "wizard-simulacrum",
+            "wizard-project-image"
+          ]
+        },
+        {
+          "key": "player1_protection",
+          "label": "Main Character Statue & Imprisonment Continuation",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Let companions keep fighting when Player 1 is Petrified or Imprisoned, ending in defeat only when no party member can rescue them.",
+          "ownedFiles": [],
+          "spellSlugs": []
+        },
+        {
+          "key": "live_record_icons",
+          "label": "Live Character Record Status Icons",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Show live active status icons in the Character Record panel while paused or playing.",
+          "ownedFiles": [],
+          "spellSlugs": []
+        }
+      ]
+    },
+    {
+      "id": "new_spells",
+      "title": "New Divine Spells",
+      "description": "Six Icewind Dale and classic D&D divine spells added to cleric/druid spellbooks. Set any entry to 0 to omit it.",
+      "settings": [
+        {
+          "key": "new_faerie_fire",
+          "label": "Faerie Fire (Level 1 Druid)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 1st-level druid spell Faerie Fire (-2 AC, reveals invisibility, blocks stealth).",
+          "addSpellSymbol": "CLERIC_CBMAGIC_FAERIE_FIRE",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-faerie-fire"
+          ]
+        },
+        {
+          "key": "new_icelance",
+          "label": "Icelance (Level 3 Druid)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 3rd-level druid/cleric cold bolt Icelance (or normalize existing IWD Icelance).",
+          "addSpellSymbol": "CLERIC_CBMAGIC_ICELANCE",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-icelance"
+          ]
+        },
+        {
+          "key": "new_protection_from_cold",
+          "label": "Protection from Cold (Level 3 Divine)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 3rd-level divine Protection from Cold (100% cold resistance for 1 turn/level).",
+          "addSpellSymbol": "CLERIC_CBMAGIC_PROTECTION_FROM_COLD",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-protection-from-cold"
+          ]
+        },
+        {
+          "key": "new_protection_from_acid",
+          "label": "Protection from Acid (Level 4 Divine)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 4th-level divine Protection from Acid (100% acid resistance for 1 turn/level).",
+          "addSpellSymbol": "CLERIC_CBMAGIC_PROTECTION_FROM_ACID",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-protection-from-acid"
+          ]
+        },
+        {
+          "key": "new_mass_regenerate",
+          "label": "Mass Regenerate (Level 5 Divine)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 5th-level divine Mass Regenerate (party-wide 2 HP/second for 1 round/level).",
+          "addSpellSymbol": "CLERIC_CBMAGIC_MASS_REGENERATE",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-mass-regenerate"
+          ]
+        },
+        {
+          "key": "new_conjure_air_elemental",
+          "label": "Conjure Air Elemental (Level 6 Druid)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Add 6th-level druid Conjure Air Elemental with three caster-level scaling tiers.",
+          "addSpellSymbol": "CLERIC_CBMAGIC_CONJURE_AIR_ELEMENTAL",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-conjure-air-elemental"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reworks",
+      "title": "Spell Balance Reworks",
+      "description": "Individual spell and spell-group balance reworks. Set any toggle to 0 to keep that spell group vanilla.",
+      "settings": [
+        {
+          "key": "rework_divine_healing",
+          "label": "Faster Divine Healing & Cause Wounds",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Give Cure spells 10 ft. reach, speed up Cure/Cause casting times (Cure Light 1 through Heal/Harm 6), and unify Mass Cure/Heal delivery.",
+          "ownedFiles": [
+            "sppr103.spl",
+            "sppr315.spl",
+            "sppr401.spl",
+            "scrl56.itm",
+            "sppr502.spl",
+            "scrl61.itm",
+            "sppr514.spl",
+            "sppr607.spl",
+            "sppr414.spl",
+            "sppr510.spl",
+            "critical.itm",
+            "sppr608.spl"
+          ],
+          "spellSlugs": [
+            "divine-cure-light-wounds",
+            "divine-cure-moderate-wounds",
+            "divine-cure-medium-wounds",
+            "divine-cure-serious-wounds",
+            "divine-cure-critical-wounds",
+            "divine-mass-cure",
+            "divine-heal",
+            "divine-cause-moderate-wounds",
+            "divine-cause-medium-wounds",
+            "divine-cause-serious-wounds",
+            "divine-cause-critical-wounds",
+            "divine-harm"
+          ]
+        },
+        {
+          "key": "rework_doom",
+          "label": "Fast Doom (Casting Time 1, Curse Penalties)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Lower Doom's casting time from 9 to 1 and focus its debuff on THAC0, damage, and saves as a Curse.",
+          "ownedFiles": [
+            "sppr113.spl"
+          ],
+          "spellSlugs": [
+            "divine-doom"
+          ]
+        },
+        {
+          "key": "rework_improved_haste",
+          "label": "Party Improved Haste",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Rework Improved Haste from single-target doubled attacks into a 15-ft. party buff lasting 3 rounds + 1 round/level.",
+          "ownedFiles": [
+            "spwi613.spl",
+            "scrl7q.itm"
+          ],
+          "spellSlugs": [
+            "wizard-improved-haste"
+          ]
+        },
+        {
+          "key": "rework_dispelling_screen",
+          "label": "Dispelling Screen (Breach -> AoE Dispel Protection)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Convert Breach into party-wide 15-ft. Dispelling Screen that intercepts one Remove/Dispel Magic.",
+          "ownedFiles": [
+            "spwi510.spl",
+            "scrl6s.itm"
+          ],
+          "spellSlugs": [
+            "wizard-dispelling-screen"
+          ]
+        },
+        {
+          "key": "rework_pierce_magic",
+          "label": "Halving Pierce Magic (10%-40% MR Reduction)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": true,
+          "summary": "Halve the target's current Magic Resistance (clamped to 10%-40% for 5 rounds) alongside dispelling one spell protection.",
+          "ownedFiles": [
+            "spwi608.spl",
+            "scrl7l.itm"
+          ],
+          "spellSlugs": [
+            "wizard-pierce-magic"
+          ]
+        },
+        {
+          "key": "rework_skull_trap",
+          "label": "Skull Trap Damage Cap (12d6)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Cap Skull Trap scaling at 12d6 maximum damage.",
+          "ownedFiles": [
+            "spwi313.spl",
+            "scrl1p.itm"
+          ],
+          "spellSlugs": [
+            "wizard-skull-trap"
+          ]
+        },
+        {
+          "key": "rework_chromatic_orb",
+          "label": "Scaling Chromatic Orb",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Remove Conjurer school lock and rebalance Chromatic Orb's level-scaled damage and secondary effects (no instant-kill orb).",
+          "ownedFiles": [
+            "spwi118.spl",
+            "scrl83.itm"
+          ],
+          "spellSlugs": [
+            "wizard-chromatic-orb"
+          ]
+        },
+        {
+          "key": "rework_death_spell",
+          "label": "Death Spell vs. Insect Swarms & Summons",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Allow Death Spell to disperse Summon Insects, Insect Plague, Creeping Doom, and Vampire Cloud of Bats while sparing immune celestials.",
+          "ownedFiles": [
+            "spwi605.spl",
+            "cbmg605a.spl",
+            "cbmg605b.spl"
+          ],
+          "spellSlugs": [
+            "wizard-death-spell"
+          ]
+        },
+        {
+          "key": "rework_find_familiar",
+          "label": "Scaling Find Familiar",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Scale familiar HP smoothly by caster level, match familiar-granting scrolls, and prevent extreme familiar HP outliers.",
+          "ownedFiles": [
+            "scrl6d.itm"
+          ],
+          "spellSlugs": [
+            "wizard-find-familiar"
+          ]
+        },
+        {
+          "key": "rework_mirror_image",
+          "label": "Honest Mirror & Reflected Image",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Mirror Image no longer blocks area-of-effect spells; Reflected Image grants a single non-stacking decoy image.",
+          "ownedFiles": [
+            "spwi212.spl",
+            "spwi120.spl",
+            "spwi298.spl"
+          ],
+          "spellSlugs": [
+            "wizard-mirror-image",
+            "wizard-reflected-image"
+          ]
+        },
+        {
+          "key": "rework_wake_on_damage",
+          "label": "Wake on Damage (Sleep, Color Spray, PW: Sleep, Hopelessness)",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Damage immediately wakes targets of Sleep, Color Spray, Power Word Sleep, and Emotion/Symbol Hopelessness.",
+          "ownedFiles": [
+            "spwi116.spl",
+            "spwi105.spl",
+            "spwi220.spl",
+            "scrl6e.itm",
+            "spwi411b.spl"
+          ],
+          "spellSlugs": [
+            "wizard-sleep",
+            "wizard-color-spray",
+            "wizard-power-word-sleep",
+            "wizard-emotion-hopelessness",
+            "divine-symbol-hopelessness"
+          ]
+        },
+        {
+          "key": "rework_polymorph_shapechange",
+          "label": "Rebuilt Polymorph Self & Shapechange Forms",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Deliver 7 rebuilt forms each with explicit stats, weapons, abilities, and clean reversion without bogus stat overrides.",
+          "ownedFiles": [
+            "spwi416.spl",
+            "spwi495.spl",
+            "spwi496.spl",
+            "spwi916.spl",
+            "spin152.spl",
+            "spin153.spl",
+            "spin154.spl",
+            "cdgoliro.itm",
+            "cdmindfl.itm"
+          ],
+          "spellSlugs": [
+            "wizard-polymorph-self",
+            "wizard-shapechange"
+          ]
+        },
+        {
+          "key": "rework_gate_fiends",
+          "label": "Reworked Cacofiend, Summon Fiend & Gate",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Fix fiend AI/allegiance scripts and balance Nabassu, Glabrezu, Cornugon, and Balor summons across arcane and divine Gate.",
+          "ownedFiles": [
+            "spwi707.spl",
+            "scrl8i.itm",
+            "spwi807.spl",
+            "scrl9b.itm",
+            "spwi905.spl",
+            "scrl9n.itm",
+            "sppr703.spl",
+            "cbmgcaco.eff",
+            "cbmgfien.eff",
+            "cbmggate.eff"
+          ],
+          "spellSlugs": [
+            "wizard-cacofiend",
+            "wizard-summon-fiend",
+            "wizard-gate",
+            "divine-gate"
+          ]
+        },
+        {
+          "key": "rework_celestials",
+          "label": "Reworked Devas & Planetars",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "summary": "Rebalance Devas (3 turns, 14 HD) and Planetars (2 turns, 18 HD, no permanent Haste) with full spellbook control and death-magic immunity.",
+          "ownedFiles": [
+            "spwi923.spl",
+            "spwi924.spl",
+            "sppr726.spl",
+            "sppr727.spl",
+            "spcl923.spl",
+            "spcl935.spl",
+            "spdeva.eff",
+            "spdeva2.eff",
+            "spplan.eff",
+            "spplan2.eff",
+            "devaheal.spl",
+            "cbmdevag.cre",
+            "cbmdevae.cre",
+            "cbmplang.cre",
+            "cbmplane.cre"
+          ],
+          "spellSlugs": [
+            "divine-summon-deva",
+            "divine-summon-fallen-deva",
+            "wizard-summon-planetar",
+            "wizard-summon-dark-planetar"
+          ]
+        },
+        {
+          "key": "celestial_party_cap",
+          "label": "1 Deva + 1 Planetar Party Cap",
+          "type": "bool",
+          "default": 1,
+          "requiresEeex": false,
+          "dependsOn": "rework_celestials",
+          "summary": "Limit party-side celestial summons to at most one (Fallen) Deva and one (Dark) Planetar at a time.",
+          "ownedFiles": [],
+          "spellSlugs": [
+            "divine-summon-deva",
+            "divine-summon-fallen-deva",
+            "wizard-summon-planetar",
+            "wizard-summon-dark-planetar"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tuning",
+      "title": "Numeric Balance Tuning",
+      "description": "Direct integer parameters applied during installation (Tier 3). Out-of-range values clamp to safe bounds.",
+      "settings": [
+        {
+          "key": "cure_range_feet",
+          "label": "Cure Spells Range",
+          "type": "int",
+          "default": 10,
+          "min": 2,
+          "max": 30,
+          "unit": "ft.",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Range in feet for single-target Cure Wounds spells (Light through Critical, plus their scrolls).",
+          "spellSlugs": [
+            "divine-cure-light-wounds",
+            "divine-cure-moderate-wounds",
+            "divine-cure-medium-wounds",
+            "divine-cure-serious-wounds",
+            "divine-cure-critical-wounds"
+          ]
+        },
+        {
+          "key": "cure_light_ct",
+          "label": "Cure Light Wounds Casting Time",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cure Light Wounds.",
+          "spellSlugs": [
+            "divine-cure-light-wounds"
+          ]
+        },
+        {
+          "key": "cure_moderate_ct",
+          "label": "Cure Moderate Wounds Casting Time",
+          "type": "int",
+          "default": 2,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for IWD Cure Moderate Wounds when present.",
+          "spellSlugs": [
+            "divine-cure-moderate-wounds"
+          ]
+        },
+        {
+          "key": "cure_medium_ct",
+          "label": "Cure Medium Wounds Casting Time",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cure Medium Wounds.",
+          "spellSlugs": [
+            "divine-cure-medium-wounds"
+          ]
+        },
+        {
+          "key": "cure_serious_ct",
+          "label": "Cure Serious Wounds Casting Time",
+          "type": "int",
+          "default": 4,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cure Serious Wounds.",
+          "spellSlugs": [
+            "divine-cure-serious-wounds"
+          ]
+        },
+        {
+          "key": "cure_critical_ct",
+          "label": "Cure Critical Wounds Casting Time",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cure Critical Wounds.",
+          "spellSlugs": [
+            "divine-cure-critical-wounds"
+          ]
+        },
+        {
+          "key": "mass_cure_ct",
+          "label": "Mass Cure Casting Time",
+          "type": "int",
+          "default": 4,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Mass Cure.",
+          "spellSlugs": [
+            "divine-mass-cure"
+          ]
+        },
+        {
+          "key": "heal_ct",
+          "label": "Heal Casting Time",
+          "type": "int",
+          "default": 6,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Heal.",
+          "spellSlugs": [
+            "divine-heal"
+          ]
+        },
+        {
+          "key": "cause_moderate_ct",
+          "label": "Cause Moderate Wounds Casting Time",
+          "type": "int",
+          "default": 2,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for IWD Cause Moderate Wounds when present.",
+          "spellSlugs": [
+            "divine-cause-moderate-wounds"
+          ]
+        },
+        {
+          "key": "cause_medium_ct",
+          "label": "Cause Medium Wounds Casting Time",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for IWD Cause Medium Wounds when present.",
+          "spellSlugs": [
+            "divine-cause-medium-wounds"
+          ]
+        },
+        {
+          "key": "cause_serious_ct",
+          "label": "Cause Serious Wounds Casting Time",
+          "type": "int",
+          "default": 4,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cause Serious Wounds (plus IWD variant).",
+          "spellSlugs": [
+            "divine-cause-serious-wounds"
+          ]
+        },
+        {
+          "key": "cause_critical_ct",
+          "label": "Cause Critical Wounds Casting Time",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Cause Critical Wounds (plus IWD variant).",
+          "spellSlugs": [
+            "divine-cause-critical-wounds"
+          ]
+        },
+        {
+          "key": "harm_ct",
+          "label": "Harm Casting Time",
+          "type": "int",
+          "default": 6,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_divine_healing",
+          "summary": "Casting time (1-9) for Harm.",
+          "spellSlugs": [
+            "divine-harm"
+          ]
+        },
+        {
+          "key": "doom_ct",
+          "label": "Doom Casting Time",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_doom",
+          "summary": "Casting time (1-9) for Doom.",
+          "spellSlugs": [
+            "divine-doom"
+          ]
+        },
+        {
+          "key": "improved_haste_ct",
+          "label": "Improved Haste Casting Time",
+          "type": "int",
+          "default": 6,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_improved_haste",
+          "summary": "Casting time (1-9) for Party Improved Haste.",
+          "spellSlugs": [
+            "wizard-improved-haste"
+          ]
+        },
+        {
+          "key": "improved_haste_base_rounds",
+          "label": "Improved Haste Base Rounds (+1 round/level)",
+          "type": "int",
+          "default": 3,
+          "min": 0,
+          "max": 20,
+          "unit": "rounds",
+          "requiresEeex": false,
+          "dependsOn": "rework_improved_haste",
+          "summary": "Base duration rounds before adding 1 round per caster level (set 0 for pure 1 round/level).",
+          "spellSlugs": [
+            "wizard-improved-haste"
+          ]
+        },
+        {
+          "key": "dispelling_screen_turns",
+          "label": "Dispelling Screen Duration",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 20,
+          "unit": "turns",
+          "requiresEeex": false,
+          "dependsOn": "rework_dispelling_screen",
+          "summary": "Protection duration in turns (1 turn = 10 rounds / 60 seconds).",
+          "spellSlugs": [
+            "wizard-dispelling-screen"
+          ]
+        },
+        {
+          "key": "pierce_magic_mr_min",
+          "label": "Pierce Magic Minimum MR Reduction",
+          "type": "int",
+          "default": 10,
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "requiresEeex": true,
+          "dependsOn": "rework_pierce_magic",
+          "summary": "Minimum percentage points removed when halving target Magic Resistance.",
+          "spellSlugs": [
+            "wizard-pierce-magic"
+          ]
+        },
+        {
+          "key": "pierce_magic_mr_max",
+          "label": "Pierce Magic Maximum MR Reduction",
+          "type": "int",
+          "default": 40,
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "requiresEeex": true,
+          "dependsOn": "rework_pierce_magic",
+          "summary": "Maximum percentage points removed when halving target Magic Resistance (at least pierce_magic_mr_min).",
+          "spellSlugs": [
+            "wizard-pierce-magic"
+          ]
+        },
+        {
+          "key": "pierce_magic_rounds",
+          "label": "Pierce Magic MR Reduction Duration",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 20,
+          "unit": "rounds",
+          "requiresEeex": true,
+          "dependsOn": "rework_pierce_magic",
+          "summary": "Duration of the Magic Resistance penalty in rounds.",
+          "spellSlugs": [
+            "wizard-pierce-magic"
+          ]
+        },
+        {
+          "key": "skull_trap_max_dice",
+          "label": "Skull Trap Max Scaling Dice",
+          "type": "int",
+          "default": 12,
+          "min": 5,
+          "max": 30,
+          "unit": "d6",
+          "requiresEeex": false,
+          "dependsOn": "rework_skull_trap",
+          "summary": "Maximum caster-level scaling dice (Nd6) for Skull Trap.",
+          "spellSlugs": [
+            "wizard-skull-trap"
+          ]
+        },
+        {
+          "key": "celestial_ct",
+          "label": "Deva & Planetar Casting Time",
+          "type": "int",
+          "default": 9,
+          "min": 1,
+          "max": 9,
+          "unit": "speed",
+          "requiresEeex": false,
+          "dependsOn": "rework_celestials",
+          "summary": "Casting time (1-9) across all Summon (Fallen) Deva and Summon (Dark) Planetar spells.",
+          "spellSlugs": [
+            "divine-summon-deva",
+            "divine-summon-fallen-deva",
+            "wizard-summon-planetar",
+            "wizard-summon-dark-planetar"
+          ]
+        },
+        {
+          "key": "deva_duration_turns",
+          "label": "Deva Summon Duration",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 20,
+          "unit": "turns",
+          "requiresEeex": false,
+          "dependsOn": "rework_celestials",
+          "summary": "Summon duration in turns for Summon Deva and Summon Fallen Deva (including HLAs).",
+          "spellSlugs": [
+            "divine-summon-deva",
+            "divine-summon-fallen-deva"
+          ]
+        },
+        {
+          "key": "planetar_duration_turns",
+          "label": "Planetar Summon Duration",
+          "type": "int",
+          "default": 2,
+          "min": 1,
+          "max": 20,
+          "unit": "turns",
+          "requiresEeex": false,
+          "dependsOn": "rework_celestials",
+          "summary": "Summon duration in turns for Summon Planetar and Summon Dark Planetar.",
+          "spellSlugs": [
+            "wizard-summon-planetar",
+            "wizard-summon-dark-planetar"
+          ]
+        }
+      ]
+    }
+  ]
+}

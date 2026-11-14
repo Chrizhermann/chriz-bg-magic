@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 - 2026-11-15
+
+- **Configuration (`chriz-bg-magic.ini` & Web Configurator):**
+  - Added 3-tier INI customization defined canonically in `docs/ini-schema.json`: Tier 1 fixes stay active automatically; Tier 2 `[systems]`, `[new_spells]`, and `[reworks]` toggles default to `1`; Tier 3 `[tuning]` integers tune casting times, Cure reach, Improved Haste duration, Dispelling Screen turns, Pierce Magic bounds/duration, Skull Trap max dice, and Celestial CT/durations.
+  - Game-root `chriz-bg-magic.ini` takes precedence over `chriz-bg-magic/chriz-bg-magic.ini` so upgrades preserve player configuration; parser runs in-memory (`COPY -`) and tolerates comments, boolean aliases, unknown keys, and out-of-range values gracefully.
+  - Exported validated `iniSchema` in `magic-catalog.json` via `tools/export_site_catalog.py` to drive the interactive configurator on `https://bg.chrizfader.org/magic`.
+
 ## 0.1.1 - 2026-11-14
 
 - Improved Haste (`SPWI613`, `SCRL7Q`): duration changed from fixed 1 turn to `3 rounds + 1 round/level` (`90s` up to `138s` at level 20).

@@ -5,7 +5,7 @@ Christopher Hermann's own spell mod for **Baldur's Gate II: Enhanced Edition** a
 are made, everything else stays as in the base game, and real bugs and logic errors get
 fixed.
 
-**Status:** `v0.1.1` — public test release for BG2:EE and EET (`2.7.3.0`, EEex `v1.3.1` recommended). Interactive spell catalog and overhaul overview: <https://bg.chrizfader.org/magic>.
+**Status:** `v0.2.0` — public test release for BG2:EE and EET (`2.7.3.0`, EEex `v1.3.1` recommended). Interactive spell catalog and INI configurator: <https://bg.chrizfader.org/magic>.
 
 - Target: BG2:EE and EET 2.7.3.0. Where a change needs EEex, it asks for EEex v1.3.1.
 - What each change does, in plain terms: [docs/components.md](docs/components.md).
@@ -13,7 +13,7 @@ fixed.
 
 ## Install
 
-Download `chriz-bg-magic-v0.1.1.zip` from [GitHub Releases](https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.1.1), extract it into your game folder, and run `setup-chriz-bg-magic.exe` (or `weidu setup-chriz-bg-magic.tp2`).
+Download `chriz-bg-magic-v0.2.0.zip` from [GitHub Releases](https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.2.0), extract it into your game folder, and run `setup-chriz-bg-magic.exe` (or `weidu setup-chriz-bg-magic.tp2`).
 
 **Do not install Chriz BG Magic together with Spell Revisions.** It replaces Spell
 Revisions, the two are not compatible, and the installer warns if it finds Spell
@@ -38,6 +38,16 @@ creature; with EEex only one extra attack counts.
 The mod overwrites what it changes: its spells and items replace what stands in the game,
 whatever another mod or a player did to them. Install it after anything whose version of these
 spells you do not want to keep.
+
+## Configuration (`chriz-bg-magic.ini`)
+
+A 3-tier INI file lets you toggle optional systems, added divine spells, and individual spell reworks, or tune numeric knobs before running `setup-chriz-bg-magic`:
+
+- **Tier 1 (always active):** Pure bug fixes, saving-throw alignment, monster immunities, spellbook consistency, and scroll synchronization.
+- **Tier 2 (`[systems]`, `[new_spells]`, `[reworks]`):** `0/1` switches (all `1` by default).
+- **Tier 3 (`[tuning]`):** Direct integers (Cure reach/casting times, Cause/Harm casting times, Doom CT, Improved Haste CT & base rounds, Dispelling Screen duration, Pierce Magic min/max/% and duration, Skull Trap max dice, Celestial CT & Deva/Planetar durations).
+
+Copy `chriz-bg-magic/chriz-bg-magic.ini` into your game folder (next to `chitin.key`) so future updates keep your settings, or edit `chriz-bg-magic/chriz-bg-magic.ini` directly. You can also configure everything interactively and download a ready-to-use `chriz-bg-magic.ini` at [bg.chrizfader.org/magic](https://bg.chrizfader.org/magic).
 
 ## Tests
 

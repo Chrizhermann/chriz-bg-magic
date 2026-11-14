@@ -1,0 +1,585 @@
+// User configuration loader and Tier 2 / Tier 3 installer adjustments.
+// Defaults and array metadata live in lib/cbmagic_ini_defs.tpa (generated from docs/ini-schema.json).
+
+DEFINE_ACTION_MACRO cbmagic_load_ini
+BEGIN
+  LAM cbmagic_ini_defaults
+
+  OUTER_SPRINT cbm_ini_path ~~
+  ACTION_IF FILE_EXISTS ~chriz-bg-magic.ini~ BEGIN
+    OUTER_SPRINT cbm_ini_path ~chriz-bg-magic.ini~
+  END ELSE ACTION_IF FILE_EXISTS ~chriz-bg-magic/chriz-bg-magic.ini~ BEGIN
+    OUTER_SPRINT cbm_ini_path ~chriz-bg-magic/chriz-bg-magic.ini~
+  END
+
+  ACTION_IF (~%cbm_ini_path%~ STRING_EQUAL ~~) BEGIN
+    PRINT ~chriz-bg-magic: no chriz-bg-magic.ini found; using built-in defaults.~
+  END ELSE BEGIN
+    PRINT ~chriz-bg-magic: reading configuration from %cbm_ini_path%.~
+    ACTION_CLEAR_ARRAY cbm_ini_parsed
+    COPY - ~%cbm_ini_path%~ ~.../cbmagic_ini_buffer~
+      SET cbm_start = 0
+      PATCH_IF (BUFFER_LENGTH >= 3)
+        AND (BYTE_AT 0 = 0xef) AND (BYTE_AT 1 = 0xbb) AND (BYTE_AT 2 = 0xbf) BEGIN
+        SET cbm_start = 3
+      END
+      READ_ASCII cbm_start cbm_ini_raw (BUFFER_LENGTH - cbm_start)
+      INNER_PATCH_SAVE cbm_ini_lines ~%cbm_ini_raw%%LNL%~ BEGIN
+        REPLACE_TEXTUALLY ~%WNL%~ ~%LNL%~
+        REPLACE_TEXTUALLY ~%MNL%~ ~%LNL%~
+        REPLACE_EVALUATE ~^\([^%LNL%]*\)%LNL%~ BEGIN
+          INNER_PATCH_SAVE line ~%MATCH1%~ BEGIN
+            REPLACE_TEXTUALLY ~[;#].*$~ ~~
+            REPLACE_TEXTUALLY ~^[ %TAB%]+~ ~~
+            REPLACE_TEXTUALLY ~[ %TAB%]+$~ ~~
+          END
+          SET line_len = STRING_LENGTH ~%line%~
+          PATCH_IF (line_len > 0) AND (~%line%~ STRING_MATCHES_REGEXP ~^\[.*\]$~ != 0) BEGIN
+            SET matched_kv = 0
+            INNER_PATCH ~%line%~ BEGIN
+              REPLACE_EVALUATE ~^\([^= %TAB%]+\)[ %TAB%]*=[ %TAB%]*\(.*\)$~ BEGIN
+                SET matched_kv = 1
+                SPRINT raw_key ~%MATCH1%~
+                TO_LOWER raw_key
+                INNER_PATCH_SAVE raw_val ~%MATCH2%~ BEGIN
+                  REPLACE_TEXTUALLY ~[ %TAB%]+$~ ~~
+                END
+                TO_LOWER raw_val
+                PATCH_IF !(VARIABLE_IS_SET $cbm_ini_type(~%raw_key%~)) BEGIN
+                  PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: ignoring unknown option '%raw_key%'.~
+                END ELSE BEGIN
+                  SPRINT kind $cbm_ini_type(~%raw_key%~)
+                  PATCH_IF (~%kind%~ STRING_EQUAL ~bool~) BEGIN
+                    PATCH_IF (~%raw_val%~ STRING_EQUAL ~1~)
+                      OR (~%raw_val%~ STRING_EQUAL ~true~)
+                      OR (~%raw_val%~ STRING_EQUAL ~yes~)
+                      OR (~%raw_val%~ STRING_EQUAL ~on~) BEGIN
+                      SET $cbm_ini_parsed(~%raw_key%~) = 1
+                    END ELSE PATCH_IF (~%raw_val%~ STRING_EQUAL ~0~)
+                      OR (~%raw_val%~ STRING_EQUAL ~false~)
+                      OR (~%raw_val%~ STRING_EQUAL ~no~)
+                      OR (~%raw_val%~ STRING_EQUAL ~off~) BEGIN
+                      SET $cbm_ini_parsed(~%raw_key%~) = 0
+                    END ELSE BEGIN
+                      PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: invalid boolean '%raw_val%' for '%raw_key%'; keeping default.~
+                    END
+                  END ELSE BEGIN
+                    PATCH_IF (IS_AN_INT ~%raw_val%~) BEGIN
+                      SET val = raw_val
+                      SET lo = $cbm_ini_min(~%raw_key%~)
+                      SET hi = $cbm_ini_max(~%raw_key%~)
+                      PATCH_IF (val < lo) BEGIN
+                        PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: clamping '%raw_key%' from %val% to %lo%.~
+                        SET val = lo
+                      END ELSE PATCH_IF (val > hi) BEGIN
+                        PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: clamping '%raw_key%' from %val% to %hi%.~
+                        SET val = hi
+                      END
+                      SET $cbm_ini_parsed(~%raw_key%~) = val
+                    END ELSE BEGIN
+                      PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: invalid integer '%raw_val%' for '%raw_key%'; keeping default.~
+                    END
+                  END
+                END
+              END ~~
+            END
+            PATCH_IF (matched_kv = 0) BEGIN
+              PATCH_PRINT ~chriz-bg-magic: %cbm_ini_path%: ignoring malformed line '%line%'.~
+            END
+          END
+        END ~~
+      END
+    ACTION_PHP_EACH cbm_ini_parsed AS k => v BEGIN
+      OUTER_SET EVAL ~cbm_ini_%k%~ = v
+    END
+  END
+
+  ACTION_IF (cbm_ini_pierce_magic_mr_min > cbm_ini_pierce_magic_mr_max) BEGIN
+    PRINT ~chriz-bg-magic: pierce_magic_mr_min (%cbm_ini_pierce_magic_mr_min%) > pierce_magic_mr_max (%cbm_ini_pierce_magic_mr_max%); raising max to %cbm_ini_pierce_magic_mr_min%.~
+    OUTER_SET cbm_ini_pierce_magic_mr_max = cbm_ini_pierce_magic_mr_min
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_ini_set_ct
+  INT_VAR ct = 1
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_count
+  FOR (g = 0; g < ab_count; ++g) BEGIN
+    WRITE_SHORT (ab_off + g * 0x28 + 0x12) ct
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_ini_set_range
+  INT_VAR range = 10
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_count
+  FOR (g = 0; g < ab_count; ++g) BEGIN
+    WRITE_SHORT (ab_off + g * 0x28 + 0x0e) range
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_ini_replace_duration
+  INT_VAR old_duration = 0 new_duration = 0
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_count
+  READ_LONG 0x6a fx_off
+  FOR (g = (0 - 1); g < ab_count; ++g) BEGIN
+    PATCH_IF (g < 0) BEGIN
+      READ_SHORT 0x6e first READ_SHORT 0x70 count
+    END ELSE BEGIN
+      READ_SHORT (ab_off + g * 0x28 + 0x20) first READ_SHORT (ab_off + g * 0x28 + 0x1e) count
+    END
+    FOR (i = 0; i < count; ++i) BEGIN
+      SET at = fx_off + (first + i) * 0x30
+      READ_BYTE (at + 0x0c) timing
+      READ_LONG (at + 0x0e) dur
+      PATCH_IF ((timing = 0) OR (timing = 4) OR (timing = 10)) AND (dur = old_duration) BEGIN
+        WRITE_LONG (at + 0x0e) new_duration
+      END
+    END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_ini_replace_desc
+  STR_VAR pattern = ~~ replacement = ~~
+BEGIN
+  READ_SLONG 0x50 ref
+  PATCH_IF (ref >= 0) BEGIN
+    GET_STRREF ref old
+    INNER_PATCH_SAVE new ~%old%~ BEGIN
+      REPLACE_TEXTUALLY ~%pattern%~ ~%replacement%~
+    END
+    PATCH_IF !(~%old%~ STRING_EQUAL ~%new%~) BEGIN
+      SET new_ref = RESOLVE_STR_REF (~%new%~)
+      WRITE_LONG 0x50 new_ref
+    END
+  END
+END
+
+DEFINE_PATCH_FUNCTION cbmagic_ini_scale_skull_trap
+  INT_VAR max_dice = 12
+BEGIN
+  READ_LONG 0x64 ab_off
+  READ_SHORT 0x68 ab_count
+  READ_LONG 0x6a fx_off
+  FOR (g = 0; g < ab_count; ++g) BEGIN
+    READ_SHORT (ab_off + g * 0x28 + 0x10) min_lvl
+    READ_SHORT (ab_off + g * 0x28 + 0x1e) fn
+    READ_SHORT (ab_off + g * 0x28 + 0x20) ff
+    SET eff_lvl = (min_lvl <= 1) ? 5 : min_lvl
+    SET target_dice = (eff_lvl < max_dice) ? eff_lvl : max_dice
+    FOR (i = 0; i < fn; ++i) BEGIN
+      SET at = fx_off + (ff + i) * 0x30
+      READ_SHORT at op
+      PATCH_IF (op = 12) BEGIN
+        WRITE_LONG (at + 0x1c) target_dice
+      END
+    END
+  END
+  PATCH_IF (max_dice > 20) AND (ab_count > 0) BEGIN
+    SET last = ab_count - 1
+    READ_ASCII (ab_off + last * 0x28) template_ab (0x28)
+    READ_SHORT (ab_off + last * 0x28 + 0x1e) last_fn
+    READ_SHORT (ab_off + last * 0x28 + 0x20) last_ff
+    READ_ASCII (fx_off + last_ff * 0x30) template_fx (last_fn * 0x30)
+    FOR (lvl = 21; lvl <= max_dice; ++lvl) BEGIN
+      READ_LONG 0x64 ab_off
+      READ_SHORT 0x68 ab_count
+      READ_LONG 0x6a fx_off
+      SET total_fx = (BUFFER_LENGTH - fx_off) / 0x30
+      SET ab_ins = ab_off + ab_count * 0x28
+      INSERT_BYTES ab_ins 0x28
+      WRITE_ASCIIE ab_ins ~%template_ab%~ (0x28)
+      WRITE_SHORT (ab_ins + 0x10) lvl
+      WRITE_SHORT (ab_ins + 0x20) total_fx
+      SET fx_off += 0x28
+      WRITE_LONG 0x6a fx_off
+      WRITE_SHORT 0x68 (ab_count + 1)
+      SET fx_ins = fx_off + total_fx * 0x30
+      INSERT_BYTES fx_ins (last_fn * 0x30)
+      WRITE_ASCIIE fx_ins ~%template_fx%~ (last_fn * 0x30)
+      FOR (i = 0; i < last_fn; ++i) BEGIN
+        SET at = fx_ins + i * 0x30
+        READ_SHORT at op
+        PATCH_IF (op = 12) BEGIN
+          WRITE_LONG (at + 0x1c) lvl
+        END
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_ini_patch_single_cure
+  INT_VAR ct = 1 range = 10 default_ct = 1 update_range = 1 english = 0
+  STR_VAR spell = ~~
+BEGIN
+  ACTION_IF ((ct != default_ct) OR (update_range AND range != 10)) AND (FILE_EXISTS_IN_GAME ~%spell%.spl~) BEGIN
+    COPY_EXISTING ~%spell%.spl~ ~override~
+      PATCH_IF (ct != default_ct) BEGIN LPF cbmagic_ini_set_ct INT_VAR ct END END
+      PATCH_IF (update_range AND range != 10) BEGIN LPF cbmagic_ini_set_range INT_VAR range END END
+      PATCH_IF english BEGIN
+        PATCH_IF (ct != default_ct) BEGIN
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = EVAL ~^\(Casting Time:[ %TAB%]+\)%default_ct%~ replacement = EVAL ~\1%ct%~ END
+        END
+        PATCH_IF (update_range AND range != 10) BEGIN
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~^\(Range:[ %TAB%]+\)10[ %TAB%]*ft\.?~ replacement = EVAL ~\1%range% ft.~ END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF (update_range AND range != 10) BEGIN
+      LAF cbmagic_healing_scroll_range INT_VAR target_range = range STR_VAR spell END
+    END
+    ACTION_IF english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION cbmagic_apply_ini_tuning
+BEGIN
+  LAF cbmagic_game_language RET lang END
+  OUTER_SET cbm_english = (~%lang%~ STRING_EQUAL ~en_us~) ? 1 : 0
+
+  // Strip baked-in typed-bonus summary lines when typed_bonuses is disabled.
+  ACTION_IF (cbm_ini_typed_bonuses = 0) AND cbm_english BEGIN
+    ACTION_FOR_EACH spell IN ~sppr101~ ~sppr113~ ~sppr202~ ~sppr314~ ~sppr406~ ~sppr730~ ~spwi201~ ~spwi209~ ~spwi414~ BEGIN
+      ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+        COPY_EXISTING ~%spell%.spl~ ~override~
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~[%LNL%%MNL%]*Typed spell effects: [^%LNL%%MNL%]*~ replacement = ~~ END
+        BUT_ONLY
+        LAF cbmagic_text_to_scrolls STR_VAR spell END
+      END
+    END
+  END
+
+  // Strip baked cross-spell family exclusions when exclusive_families is disabled.
+  ACTION_IF (cbm_ini_exclusive_families = 0) BEGIN
+    ACTION_FOR_EACH spell IN ~spwi603~ ~sppr412~ ~sppr513~ ~sppr507~ BEGIN
+      ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+        COPY_EXISTING ~%spell%.spl~ ~override~
+          READ_SHORT 0x68 groups
+          FOR (g = (0 - 1); g < groups; ++g) BEGIN
+            READ_LONG 0x64 ao
+            PATCH_IF (g < 0) BEGIN READ_SHORT 0x70 n END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x1e) n END
+            FOR (i = n - 1; i >= 0; --i) BEGIN
+              READ_LONG 0x64 ao READ_LONG 0x6a fo
+              PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x20) f END
+              SET at = fo + (f + i) * 0x30
+              READ_SHORT at op READ_ASCII (at + 0x14) res (8) NULL
+              PATCH_IF ((op = 206) OR (op = 321))
+                AND !(~%res%~ STRING_EQUAL_CASE ~%spell%~)
+                AND ((~%res%~ STRING_EQUAL_CASE ~SPWI603~)
+                  OR (~%res%~ STRING_EQUAL_CASE ~SPPR412~)
+                  OR (~%res%~ STRING_EQUAL_CASE ~SPPR513~)
+                  OR (~%res%~ STRING_EQUAL_CASE ~SPPR507~)) BEGIN
+                LPF cbmagic_delete_effect INT_VAR index = f + i END
+              END
+            END
+          END
+        BUT_ONLY
+      END
+    END
+    ACTION_IF (VARIABLE_IS_SET cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE)
+      AND !(~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~ STRING_EQUAL_CASE ~CBMNONE~)
+      AND (FILE_EXISTS_IN_GAME ~sppr711.spl~) BEGIN
+      COPY_EXISTING ~sppr711.spl~ ~override~
+        READ_SHORT 0x68 groups
+        FOR (g = (0 - 1); g < groups; ++g) BEGIN
+          READ_LONG 0x64 ao
+          PATCH_IF (g < 0) BEGIN READ_SHORT 0x70 n END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x1e) n END
+          FOR (i = n - 1; i >= 0; --i) BEGIN
+            READ_LONG 0x64 ao READ_LONG 0x6a fo
+            PATCH_IF (g < 0) BEGIN READ_SHORT 0x6e f END ELSE BEGIN READ_SHORT (ao + g * 0x28 + 0x20) f END
+            SET at = fo + (f + i) * 0x30
+            READ_SHORT at op READ_ASCII (at + 0x14) res (8) NULL
+            PATCH_IF ((op = 206) OR (op = 321))
+              AND (~%res%~ STRING_EQUAL_CASE ~%cbm_res_CLERIC_CBMAGIC_MASS_REGENERATE%~) BEGIN
+              LPF cbmagic_delete_effect INT_VAR index = f + i END
+            END
+          END
+        END
+      BUT_ONLY
+    END
+  END
+
+  // Tier 2: Celestial party cap disable without basename collision on cbmdevac/cbmplanc.bcs.
+  ACTION_IF (cbm_ini_rework_celestials != 0) AND (cbm_ini_celestial_party_cap = 0) BEGIN
+    <<<<<<<< .../cbm-inlined/cbmdevau.baf
+IF
+  Global("CBMARRIVE","LOCALS",0)
+  !Allegiance(Myself,GOODCUTOFF)
+  Alignment(Myself,MASK_GOOD)
+THEN
+  RESPONSE #100
+    ChangeAIScript("DEVAGOOD",CLASS)
+    SetGlobal("CBMARRIVE","LOCALS",3)
+    Continue()
+END
+
+IF
+  Global("CBMARRIVE","LOCALS",0)
+  !Allegiance(Myself,GOODCUTOFF)
+  !Alignment(Myself,MASK_GOOD)
+THEN
+  RESPONSE #100
+    ChangeAIScript("DEVAEVIL",CLASS)
+    SetGlobal("CBMARRIVE","LOCALS",3)
+    Continue()
+END
+>>>>>>>>
+    <<<<<<<< .../cbm-inlined/cbmplanu.baf
+IF
+  Global("CBMARRIVE","LOCALS",0)
+  !Allegiance(Myself,GOODCUTOFF)
+THEN
+  RESPONSE #100
+    ChangeAIScript("PLANGOOD",CLASS)
+    SetGlobal("CBMARRIVE","LOCALS",3)
+    Continue()
+END
+>>>>>>>>
+    COMPILE ~.../cbm-inlined/cbmdevau.baf~
+    COMPILE ~.../cbm-inlined/cbmplanu.baf~
+    ACTION_FOR_EACH cre IN ~cbmdevag~ ~cbmdevae~ BEGIN
+      COPY_EXISTING ~%cre%.cre~ ~override~
+        WRITE_ASCII 0x248 ~CBMDEVAU~ #8
+      BUT_ONLY
+    END
+    ACTION_FOR_EACH cre IN ~cbmplang~ ~cbmplane~ BEGIN
+      COPY_EXISTING ~%cre%.cre~ ~override~
+        WRITE_ASCII 0x248 ~CBMPLANU~ #8
+      BUT_ONLY
+    END
+  END
+
+  // Tier 3: Divine Healing & Cause Wounds tuning.
+  ACTION_IF (cbm_ini_rework_divine_healing != 0) BEGIN
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cure_light_ct range = cbm_ini_cure_range_feet default_ct = 1 update_range = 1 english = cbm_english STR_VAR spell = ~sppr103~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cure_medium_ct range = cbm_ini_cure_range_feet default_ct = 3 update_range = 1 english = cbm_english STR_VAR spell = ~sppr315~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cure_serious_ct range = cbm_ini_cure_range_feet default_ct = 4 update_range = 1 english = cbm_english STR_VAR spell = ~sppr401~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cure_critical_ct range = cbm_ini_cure_range_feet default_ct = 5 update_range = 1 english = cbm_english STR_VAR spell = ~sppr502~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_mass_cure_ct range = 0 default_ct = 4 update_range = 0 english = cbm_english STR_VAR spell = ~sppr514~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_heal_ct range = 0 default_ct = 6 update_range = 0 english = cbm_english STR_VAR spell = ~sppr607~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cause_serious_ct range = 0 default_ct = 4 update_range = 0 english = cbm_english STR_VAR spell = ~sppr414~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_cause_critical_ct range = 0 default_ct = 5 update_range = 0 english = cbm_english STR_VAR spell = ~sppr510~ END
+    LAF cbmagic_ini_patch_single_cure INT_VAR ct = cbm_ini_harm_ct range = 0 default_ct = 6 update_range = 0 english = cbm_english STR_VAR spell = ~sppr608~ END
+  END
+
+  // Tier 3: Doom casting time.
+  ACTION_IF (cbm_ini_rework_doom != 0) AND (cbm_ini_doom_ct != 1) AND (FILE_EXISTS_IN_GAME ~sppr113.spl~) BEGIN
+    COPY_EXISTING ~sppr113.spl~ ~override~
+      LPF cbmagic_ini_set_ct INT_VAR ct = cbm_ini_doom_ct END
+      PATCH_IF cbm_english BEGIN
+        LPF cbmagic_ini_replace_desc
+          STR_VAR pattern = ~^\(Casting Time:[ %TAB%]+\)1~ replacement = EVAL ~\1%cbm_ini_doom_ct%~ END
+      END
+    BUT_ONLY
+    ACTION_IF cbm_english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell = ~sppr113~ END
+    END
+  END
+
+  // Tier 3: Improved Haste casting time and base rounds.
+  ACTION_IF (cbm_ini_rework_improved_haste != 0)
+    AND ((cbm_ini_improved_haste_ct != 6) OR (cbm_ini_improved_haste_base_rounds != 3))
+    AND (FILE_EXISTS_IN_GAME ~spwi613.spl~) BEGIN
+    COPY_EXISTING ~spwi613.spl~ ~override~
+      PATCH_IF (cbm_ini_improved_haste_ct != 6) BEGIN
+        LPF cbmagic_ini_set_ct INT_VAR ct = cbm_ini_improved_haste_ct END
+      END
+      PATCH_IF (cbm_ini_improved_haste_base_rounds != 3) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_count
+        READ_LONG 0x6a fx_off
+        FOR (g = 0; g < ab_count; ++g) BEGIN
+          READ_SHORT (ab_off + g * 0x28 + 0x10) min_lvl
+          READ_SHORT (ab_off + g * 0x28 + 0x1e) fn
+          READ_SHORT (ab_off + g * 0x28 + 0x20) ff
+          SET eff_lvl = (min_lvl <= 1) ? 12 : min_lvl
+          SET old_dur = (3 + eff_lvl) * 6
+          SET new_dur = (cbm_ini_improved_haste_base_rounds + eff_lvl) * 6
+          FOR (i = 0; i < fn; ++i) BEGIN
+            SET at = fx_off + (ff + i) * 0x30
+            READ_BYTE (at + 0x0c) timing
+            READ_LONG (at + 0x0e) dur
+            PATCH_IF ((timing = 0) OR (timing = 4) OR (timing = 10)) AND (dur = old_dur) BEGIN
+              WRITE_LONG (at + 0x0e) new_dur
+            END
+          END
+        END
+      END
+      PATCH_IF cbm_english BEGIN
+        PATCH_IF (cbm_ini_improved_haste_ct != 6) BEGIN
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~^\(Casting Time:[ %TAB%]+\)6~ replacement = EVAL ~\1%cbm_ini_improved_haste_ct%~ END
+        END
+        PATCH_IF (cbm_ini_improved_haste_base_rounds != 3) BEGIN
+          PATCH_IF (cbm_ini_improved_haste_base_rounds = 0) BEGIN
+            SPRINT dur_hdr ~1 round/level~
+            SPRINT dur_body ~for 1 round per level~
+          END ELSE PATCH_IF (cbm_ini_improved_haste_base_rounds = 1) BEGIN
+            SPRINT dur_hdr ~1 round + 1 round/level~
+            SPRINT dur_body ~for 1 round plus 1 round per level~
+          END ELSE BEGIN
+            SPRINT dur_hdr ~%cbm_ini_improved_haste_base_rounds% rounds + 1 round/level~
+            SPRINT dur_body ~for %cbm_ini_improved_haste_base_rounds% rounds plus 1 round per level~
+          END
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~^\(Duration:[ %TAB%]+\)3 rounds \+ 1 round/level~ replacement = EVAL ~\1%dur_hdr%~ END
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~for 3 rounds plus 1 round per level~ replacement = EVAL ~%dur_body%~ END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF cbm_english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi613~ END
+    END
+  END
+
+  // Tier 3: Dispelling Screen duration.
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) AND (cbm_ini_dispelling_screen_turns != 5) AND (FILE_EXISTS_IN_GAME ~spwi510.spl~) BEGIN
+    OUTER_SET cbm_ds_dur = cbm_ini_dispelling_screen_turns * 60
+    COPY_EXISTING ~spwi510.spl~ ~override~
+      LPF cbmagic_ini_replace_duration INT_VAR old_duration = 300 new_duration = cbm_ds_dur END
+      PATCH_IF cbm_english BEGIN
+        SPRINT ds_unit ~turns~
+        PATCH_IF (cbm_ini_dispelling_screen_turns = 1) BEGIN SPRINT ds_unit ~turn~ END
+        LPF cbmagic_ini_replace_desc
+          STR_VAR pattern = ~^\(Duration:[ %TAB%]+\)5 turns~ replacement = EVAL ~\1%cbm_ini_dispelling_screen_turns% %ds_unit%~ END
+        LPF cbmagic_ini_replace_desc
+          STR_VAR pattern = ~for 5 turns~ replacement = EVAL ~for %cbm_ini_dispelling_screen_turns% %ds_unit%~ END
+      END
+    BUT_ONLY
+    ACTION_IF cbm_english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi510~ END
+    END
+  END
+
+  // Tier 3: Pierce Magic bounds and rounds (requires EEex).
+  ACTION_IF (cbm_ini_rework_pierce_magic != 0)
+    AND FILE_EXISTS_IN_GAME ~M___EEex.lua~
+    AND ((cbm_ini_pierce_magic_mr_min != 10) OR (cbm_ini_pierce_magic_mr_max != 40) OR (cbm_ini_pierce_magic_rounds != 5))
+    AND (FILE_EXISTS_IN_GAME ~spwi608.spl~) BEGIN
+    OUTER_SET cbm_pm_dur = cbm_ini_pierce_magic_rounds * 6
+    COPY_EXISTING ~spwi608.spl~ ~override~
+      PATCH_IF (cbm_ini_pierce_magic_rounds != 5) BEGIN
+        READ_LONG 0x64 ab_off
+        READ_SHORT 0x68 ab_count
+        READ_LONG 0x6a fx_off
+        FOR (g = 0; g < ab_count; ++g) BEGIN
+          READ_SHORT (ab_off + g * 0x28 + 0x1e) fn
+          READ_SHORT (ab_off + g * 0x28 + 0x20) ff
+          FOR (i = 0; i < fn; ++i) BEGIN
+            SET at = fx_off + (ff + i) * 0x30
+            READ_SHORT at op
+            READ_LONG (at + 0x08) p2
+            PATCH_IF (op = 142) AND (p2 = 106) BEGIN
+              WRITE_BYTE (at + 0x0c) 0
+              WRITE_LONG (at + 0x0e) cbm_pm_dur
+            END
+          END
+        END
+      END
+      PATCH_IF cbm_english BEGIN
+        PATCH_IF (cbm_ini_pierce_magic_mr_min != 10) OR (cbm_ini_pierce_magic_mr_max != 40) BEGIN
+          LPF cbmagic_ini_replace_desc
+            STR_VAR
+              pattern = ~with a minimum reduction of 10 and a maximum of 40 percentage points~
+              replacement = EVAL ~with a minimum reduction of %cbm_ini_pierce_magic_mr_min% and a maximum of %cbm_ini_pierce_magic_mr_max% percentage points~ END
+        END
+        PATCH_IF (cbm_ini_pierce_magic_rounds != 5) BEGIN
+          SPRINT pm_unit ~rounds~
+          PATCH_IF (cbm_ini_pierce_magic_rounds = 1) BEGIN SPRINT pm_unit ~round~ END
+          LPF cbmagic_ini_replace_desc
+            STR_VAR
+              pattern = ~Magic Resistance remains lowered for 5 rounds~
+              replacement = EVAL ~Magic Resistance remains lowered for %cbm_ini_pierce_magic_rounds% %pm_unit%~ END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF cbm_english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi608~ END
+    END
+  END
+
+  // Tier 3: Skull Trap max scaling dice.
+  ACTION_IF (cbm_ini_rework_skull_trap != 0) AND (cbm_ini_skull_trap_max_dice != 12) AND (FILE_EXISTS_IN_GAME ~spwi313.spl~) BEGIN
+    COPY_EXISTING ~spwi313.spl~ ~override~
+      LPF cbmagic_ini_scale_skull_trap INT_VAR max_dice = cbm_ini_skull_trap_max_dice END
+      PATCH_IF cbm_english BEGIN
+        LPF cbmagic_ini_replace_desc
+          STR_VAR pattern = ~maximum of 12d6~ replacement = EVAL ~maximum of %cbm_ini_skull_trap_max_dice%d6~ END
+      END
+    BUT_ONLY
+    ACTION_IF cbm_english BEGIN
+      LAF cbmagic_text_to_scrolls STR_VAR spell = ~spwi313~ END
+    END
+  END
+
+  // Tier 3: Celestials (Devas & Planetars) casting time and durations.
+  ACTION_IF (cbm_ini_rework_celestials != 0) BEGIN
+    ACTION_IF (cbm_ini_celestial_ct != 9) OR (cbm_ini_deva_duration_turns != 3) BEGIN
+      OUTER_SET cbm_deva_dur = cbm_ini_deva_duration_turns * 60
+      ACTION_FOR_EACH spell IN ~sppr726~ ~sppr727~ ~spcl923~ ~spcl935~ BEGIN
+        ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+          COPY_EXISTING ~%spell%.spl~ ~override~
+            PATCH_IF (cbm_ini_celestial_ct != 9) BEGIN LPF cbmagic_ini_set_ct INT_VAR ct = cbm_ini_celestial_ct END END
+            PATCH_IF (cbm_ini_deva_duration_turns != 3) BEGIN
+              LPF cbmagic_ini_replace_duration INT_VAR old_duration = 180 new_duration = cbm_deva_dur END
+            END
+            PATCH_IF cbm_english BEGIN
+              PATCH_IF (cbm_ini_celestial_ct != 9) BEGIN
+                LPF cbmagic_ini_replace_desc
+                  STR_VAR pattern = ~^\(Casting Time:[ %TAB%]+\)9~ replacement = EVAL ~\1%cbm_ini_celestial_ct%~ END
+              END
+              PATCH_IF (cbm_ini_deva_duration_turns != 3) BEGIN
+                SPRINT d_unit ~turns~
+                PATCH_IF (cbm_ini_deva_duration_turns = 1) BEGIN SPRINT d_unit ~turn~ END
+                LPF cbmagic_ini_replace_desc
+                  STR_VAR pattern = ~^\(Duration:[ %TAB%]+\)3 turns~ replacement = EVAL ~\1%cbm_ini_deva_duration_turns% %d_unit%~ END
+              END
+            END
+          BUT_ONLY
+          ACTION_IF cbm_english BEGIN
+            LAF cbmagic_text_to_scrolls STR_VAR spell END
+          END
+        END
+      END
+    END
+
+    ACTION_IF (cbm_ini_celestial_ct != 9) OR (cbm_ini_planetar_duration_turns != 2) BEGIN
+      OUTER_SET cbm_plan_dur = cbm_ini_planetar_duration_turns * 60
+      ACTION_FOR_EACH spell IN ~spwi923~ ~spwi924~ BEGIN
+        ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+          COPY_EXISTING ~%spell%.spl~ ~override~
+            PATCH_IF (cbm_ini_celestial_ct != 9) BEGIN LPF cbmagic_ini_set_ct INT_VAR ct = cbm_ini_celestial_ct END END
+            PATCH_IF (cbm_ini_planetar_duration_turns != 2) BEGIN
+              LPF cbmagic_ini_replace_duration INT_VAR old_duration = 120 new_duration = cbm_plan_dur END
+            END
+            PATCH_IF cbm_english BEGIN
+              PATCH_IF (cbm_ini_celestial_ct != 9) BEGIN
+                LPF cbmagic_ini_replace_desc
+                  STR_VAR pattern = ~^\(Casting Time:[ %TAB%]+\)9~ replacement = EVAL ~\1%cbm_ini_celestial_ct%~ END
+              END
+              PATCH_IF (cbm_ini_planetar_duration_turns != 2) BEGIN
+                SPRINT p_unit ~turns~
+                PATCH_IF (cbm_ini_planetar_duration_turns = 1) BEGIN SPRINT p_unit ~turn~ END
+                LPF cbmagic_ini_replace_desc
+                  STR_VAR pattern = ~^\(Duration:[ %TAB%]+\)2 turns~ replacement = EVAL ~\1%cbm_ini_planetar_duration_turns% %p_unit%~ END
+              END
+            END
+          BUT_ONLY
+          ACTION_IF cbm_english BEGIN
+            LAF cbmagic_text_to_scrolls STR_VAR spell END
+          END
+        END
+      END
+    END
+  END
+END
