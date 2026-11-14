@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
-        run: python -m pip install pillow
+        run: python -m pip install pillow lupa
 
       - name: Download WeiDU 249.00
         shell: pwsh
@@ -34,6 +34,11 @@ jobs:
           $exe = Get-ChildItem -Path "$env:RUNNER_TEMP\weidu" -Filter "weidu.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
           if (-not $exe) { throw "weidu.exe not found in archive" }
           "WEIDU_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Exclude workspace and temp from Windows Defender
+        shell: pwsh
+        run: |
+          Add-MpPreference -ExclusionPath $env:GITHUB_WORKSPACE, $env:RUNNER_TEMP, $env:TEMP -ExclusionProcess "$env:WEIDU_EXE" -ErrorAction SilentlyContinue
 
       - name: Rebuild and verify resources
         run: python tools/build_resources.py
