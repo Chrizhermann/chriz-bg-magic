@@ -1043,29 +1043,43 @@ BEGIN
     WRITE_LONG 0x5ba cbm_stat_228
   COPY ~chriz-bg-magic/res/planetar.itm~ ~override/planetar.itm~
     WRITE_LONG 0x3e2 cbm_DispelScreen
-  COPY ~chriz-bg-magic/res/plyjello.itm~ ~override/plyjello.itm~
-    WRITE_LONG 0x28e cbm_state_SLOW_IMMUNITY
-    WRITE_LONG 0x2f2 cbm_Haste
-  COPY ~chriz-bg-magic/res/plyjello.spl~ ~override/plyjello.spl~
-    WRITE_BYTE 0x27 cbm_Slow
-    WRITE_LONG 0xa2 cbm_Slow
-    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
-  COPY ~chriz-bg-magic/res/plyjelly.itm~ ~override/plyjelly.itm~
-    SAY 0xafe @70035
-    SAY 0xb2e @70035
-    SAY 0xb5e @70035
-    WRITE_LONG 0xbc2 cbm_Haste
-  COPY ~chriz-bg-magic/res/plyjelly.spl~ ~override/plyjelly.spl~
-    WRITE_BYTE 0x27 cbm_Slow
-    WRITE_LONG 0xa2 cbm_Slow
-    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
-  COPY ~chriz-bg-magic/res/plyspid.itm~ ~override/plyspid.itm~
-  COPY ~chriz-bg-magic/res/polyjell.itm~ ~override/polyjell.itm~
-    WRITE_LONG 0x922 cbm_Haste
-  COPY ~chriz-bg-magic/res/polyjell.spl~ ~override/polyjell.spl~
-    WRITE_BYTE 0x27 cbm_Slow
-    WRITE_LONG 0xa2 cbm_Slow
-    WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/plyjello.itm~ ~override/plyjello.itm~
+      WRITE_LONG 0x28e cbm_state_SLOW_IMMUNITY
+      WRITE_LONG 0x2f2 cbm_Haste
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/plyjello.spl~ ~override/plyjello.spl~
+      WRITE_BYTE 0x27 cbm_Slow
+      WRITE_LONG 0xa2 cbm_Slow
+      WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/plyjelly.itm~ ~override/plyjelly.itm~
+      SAY 0xafe @70035
+      SAY 0xb2e @70035
+      SAY 0xb5e @70035
+      WRITE_LONG 0xbc2 cbm_Haste
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/plyjelly.spl~ ~override/plyjelly.spl~
+      WRITE_BYTE 0x27 cbm_Slow
+      WRITE_LONG 0xa2 cbm_Slow
+      WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/plyspid.itm~ ~override/plyspid.itm~
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/polyjell.itm~ ~override/polyjell.itm~
+      WRITE_LONG 0x922 cbm_Haste
+  END
+  ACTION_IF (cbm_ini_rework_polymorph_shapechange != 0) BEGIN
+    COPY ~chriz-bg-magic/res/polyjell.spl~ ~override/polyjell.spl~
+      WRITE_BYTE 0x27 cbm_Slow
+      WRITE_LONG 0xa2 cbm_Slow
+      WRITE_LONG 0x12e cbm_state_HASTE_IMMUNITY
+  END
   COPY ~chriz-bg-magic/res/potn14.itm~ ~override/potn14.itm~
     WRITE_LONG 0xae cbm_state_HASTE_IMMUNITY
     WRITE_LONG 0x112 cbm_Slow
@@ -3471,30 +3485,46 @@ BEGIN
     WRITE_LONG 0x50 24797
     PATCH_IF cbm_english BEGIN SAY 0x50 @70206 END
   COPY ~chriz-bg-magic/res/spwi523d.spl~ ~override/spwi523d.spl~
-  COPY ~chriz-bg-magic/res/spwi590.spl~ ~override/spwi590.spl~
-    WRITE_LONG 0x8 31671
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi591.spl~ ~override/spwi591.spl~
-    WRITE_LONG 0x8 31673
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi592.spl~ ~override/spwi592.spl~
-    WRITE_LONG 0x8 31677
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi593.spl~ ~override/spwi593.spl~
-    WRITE_LONG 0x8 31678
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi594.spl~ ~override/spwi594.spl~
-    WRITE_LONG 0x8 31675
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi595.spl~ ~override/spwi595.spl~
-    WRITE_LONG 0x8 31676
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi596.spl~ ~override/spwi596.spl~
-    WRITE_LONG 0x8 31672
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
-  COPY ~chriz-bg-magic/res/spwi597.spl~ ~override/spwi597.spl~
-    WRITE_LONG 0x8 31674
-    PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi590.spl~ ~override/spwi590.spl~
+      WRITE_LONG 0x8 31671
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi591.spl~ ~override/spwi591.spl~
+      WRITE_LONG 0x8 31673
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi592.spl~ ~override/spwi592.spl~
+      WRITE_LONG 0x8 31677
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi593.spl~ ~override/spwi593.spl~
+      WRITE_LONG 0x8 31678
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi594.spl~ ~override/spwi594.spl~
+      WRITE_LONG 0x8 31675
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi595.spl~ ~override/spwi595.spl~
+      WRITE_LONG 0x8 31676
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi596.spl~ ~override/spwi596.spl~
+      WRITE_LONG 0x8 31672
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
+  ACTION_IF (cbm_ini_rework_dispelling_screen != 0) BEGIN
+    COPY ~chriz-bg-magic/res/spwi597.spl~ ~override/spwi597.spl~
+      WRITE_LONG 0x8 31674
+      PATCH_IF cbm_english BEGIN SAY 0x8 @70056 END
+  END
   COPY ~chriz-bg-magic/res/spwi603.spl~ ~override/spwi603.spl~
     WRITE_LONG 0x50 7808
     PATCH_IF cbm_english BEGIN SAY 0x50 @70207 END

@@ -303,6 +303,7 @@ def ini_tier2_toggles_isolate_owned_systems_and_reworks(work, weidu):
         "[reworks]",
         "rework_dispelling_screen = 0",
         "rework_mirror_image = 0",
+        "rework_polymorph_shapechange = 0",
         "celestial_party_cap = 0",
         "",
     ]), encoding="utf-8")
@@ -324,6 +325,30 @@ def ini_tier2_toggles_isolate_owned_systems_and_reworks(work, weidu):
 
     check(not (g.root / "override" / "spwi510.2da").exists(), "spwi510.2da copied despite rework_dispelling_screen=0")
     check(not (g.root / "override" / "spwi510.spl").exists(), "spwi510.spl written despite rework_dispelling_screen=0")
+    for sub_idx in range(590, 598):
+        check(
+            not (g.root / "override" / f"spwi{sub_idx}.spl").exists(),
+            f"spwi{sub_idx}.spl written despite rework_dispelling_screen=0",
+        )
+    for related_res in ("SPWI513", "SPPR303", "SPWI302", "SPWI326", "SPWI805", "SPWI903"):
+        related_desc = g.tlk(g.spl(related_res)["desc"])
+        check(
+            "Dispelling Screen" not in related_desc,
+            f"{related_res} kept Dispelling Screen mention despite rework_dispelling_screen=0: {related_desc!r}",
+        )
+    for poly_res in (
+        "spwi416.spl",
+        "spwi916.spl",
+        "plyjello.itm",
+        "plyjelly.itm",
+        "plyspid.itm",
+        "polyjell.itm",
+        "polyjell.spl",
+    ):
+        check(
+            not (g.root / "override" / poly_res).exists(),
+            f"{poly_res} written despite rework_polymorph_shapechange=0",
+        )
     check(ie.Game(g.root).get("SPWI212", "SPL") == sentinel_mirror, "SPWI212 modified despite rework_mirror_image=0")
     check(ie.Game(g.root).get("SPWI120", "SPL") == sentinel_reflected, "SPWI120 modified despite rework_mirror_image=0")
     check(not (g.root / "override" / "spwi298.spl").exists(), "SPWI298 written despite rework_mirror_image=0")

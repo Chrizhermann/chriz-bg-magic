@@ -258,6 +258,35 @@ BEGIN
     END
   END
 
+  // Strip Dispelling Screen references from related spells/scrolls when rework_dispelling_screen is disabled.
+  ACTION_IF (cbm_ini_rework_dispelling_screen = 0) AND cbm_english BEGIN
+    ACTION_FOR_EACH spell IN ~spwi805~ ~spwi903~ BEGIN
+      ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+        COPY_EXISTING ~%spell%.spl~ ~override~
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~, Dispelling Screen,~ replacement = ~,~ END
+        BUT_ONLY
+        LAF cbmagic_text_to_scrolls STR_VAR spell END
+      END
+    END
+    ACTION_FOR_EACH spell IN ~sppr303~ ~spwi302~ ~spwi326~ BEGIN
+      ACTION_IF FILE_EXISTS_IN_GAME ~%spell%.spl~ BEGIN
+        COPY_EXISTING ~%spell%.spl~ ~override~
+          LPF cbmagic_ini_replace_desc
+            STR_VAR pattern = ~ A Dispelling Screen absorbs the spell: the screen dissipates, and the creature it protected keeps its other magical effects\.~ replacement = ~~ END
+        BUT_ONLY
+        LAF cbmagic_text_to_scrolls STR_VAR spell END
+      END
+    END
+    ACTION_IF FILE_EXISTS_IN_GAME ~spwi513.spl~ BEGIN
+      COPY_EXISTING ~spwi513.spl~ ~override~
+        LPF cbmagic_ini_replace_desc
+          STR_VAR pattern = ~ A Dispelling Screen on the target absorbs the Breach: the screen dissipates, and the target keeps its other protections\.~ replacement = ~~ END
+      BUT_ONLY
+      LAF cbmagic_text_to_scrolls STR_VAR spell END
+    END
+  END
+
   // Strip baked cross-spell family exclusions when exclusive_families is disabled.
   ACTION_IF (cbm_ini_exclusive_families = 0) BEGIN
     ACTION_FOR_EACH spell IN ~spwi603~ ~sppr412~ ~sppr513~ ~sppr507~ BEGIN

@@ -302,14 +302,22 @@
         },
         {
           "key": "rework_dispelling_screen",
-          "label": "Dispelling Screen (Breach -> AoE Dispel Protection)",
+          "label": "Dispelling Screen (Spell Immunity -> Party Dispel Ward)",
           "type": "bool",
           "default": 1,
           "requiresEeex": false,
-          "summary": "Convert Breach into party-wide 15-ft. Dispelling Screen that intercepts one Remove/Dispel Magic.",
+          "summary": "Replace Spell Immunity with a 15-ft. party ward that absorbs one Breach, Remove Magic, or Dispel Magic.",
           "ownedFiles": [
             "spwi510.spl",
-            "scrl6s.itm"
+            "scrl6s.itm",
+            "spwi590.spl",
+            "spwi591.spl",
+            "spwi592.spl",
+            "spwi593.spl",
+            "spwi594.spl",
+            "spwi595.spl",
+            "spwi596.spl",
+            "spwi597.spl"
           ],
           "spellSlugs": [
             "wizard-dispelling-screen"
@@ -378,11 +386,11 @@
         },
         {
           "key": "rework_find_familiar",
-          "label": "Scaling Find Familiar",
+          "label": "Universal & Fixed-HP Find Familiar",
           "type": "bool",
           "default": 1,
           "requiresEeex": false,
-          "summary": "Scale familiar HP smoothly by caster level, match familiar-granting scrolls, and prevent extreme familiar HP outliers.",
+          "summary": "Open Find Familiar to all specialist mages, match familiar scrolls, and set fixed familiar HP by campaign (12/9 in BG1 & SoD, 24/18 in SoA, 48 in ToB).",
           "ownedFiles": [
             "scrl6d.itm"
           ],
@@ -435,7 +443,7 @@
           "type": "bool",
           "default": 1,
           "requiresEeex": false,
-          "summary": "Deliver 7 rebuilt forms each with explicit stats, weapons, abilities, and clean reversion without bogus stat overrides.",
+          "summary": "Deliver 6 rebuilt creature forms each (plus Natural Form) with explicit stats, weapons, abilities, and reversion without bogus stat overrides.",
           "ownedFiles": [
             "spwi416.spl",
             "spwi495.spl",
@@ -445,7 +453,14 @@
             "spin153.spl",
             "spin154.spl",
             "cdgoliro.itm",
-            "cdmindfl.itm"
+            "cdmindfl.itm",
+            "plyjello.itm",
+            "plyjello.spl",
+            "plyjelly.itm",
+            "plyjelly.spl",
+            "plyspid.itm",
+            "polyjell.itm",
+            "polyjell.spl"
           ],
           "spellSlugs": [
             "wizard-polymorph-self",

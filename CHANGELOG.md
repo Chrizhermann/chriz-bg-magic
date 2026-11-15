@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1] - 2026-11-15
+
+- **INI Toggle Isolation & Configurator Accuracy:**
+  - `rework_dispelling_screen = 0` now leaves Spell Immunity's 8 school subspells (`spwi590`–`spwi597`) untouched in vanilla state alongside `spwi510.spl` / `scrl6s.itm`, and strips `"Dispelling Screen"` wording from related spell/scroll descriptions (`Dispel Magic`, `Remove Magic`, `Breach`, `Pierce Shield`, `Spellstrike`).
+  - `rework_polymorph_shapechange = 0` now isolates the vanilla polymorph helper items and subspells (`plyjello.*`, `plyjelly.*`, `plyspid.itm`, `polyjell.*`) alongside the main forms.
+  - Corrected `docs/ini-schema.json` labels and summaries for `rework_dispelling_screen` (Spell Immunity -> Dispelling Screen, not Breach), `rework_find_familiar` (campaign fixed HP + specialist unlock), and `rework_polymorph_shapechange` (6 creature forms + Natural Form).
+
 ## 0.2.0 - 2026-11-15
 
 - **Configuration (`chriz-bg-magic.ini` & Web Configurator):**

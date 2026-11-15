@@ -1,10 +1,10 @@
 {
   "mod": {
     "name": "Chriz BG Magic",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "targetGames": "BG2:EE & EET 2.7.3.0 (EEex v1.3.1 recommended)",
     "repoUrl": "https://github.com/Chrizhermann/chriz-bg-magic",
-    "releaseUrl": "https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.2.0"
+    "releaseUrl": "https://github.com/Chrizhermann/chriz-bg-magic/releases/tag/v0.2.1"
   },
   "bonusTypes": [
     {
